@@ -120,12 +120,12 @@ const RequestTaskModal = ({
           <RadioInput
             checked={changeType === ChangeRequestType.COPY_UPDATE}
             label="Copy update"
-            onClick={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
+            onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
           />
           <RadioInput
             checked={changeType === ChangeRequestType.PAGE_REFRESH}
             label="Page refresh"
-            onClick={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
+            onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
           />
         </>
       )}

@@ -43,6 +43,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
         selectedProject.templates.children.map((page) => (
           <NavigationElement
             activePageName={activePageName}
+            key={page.id}
             onSelect={handleSelectPage}
             page={page}
             project={selectedProject.name}
