@@ -117,16 +117,51 @@ const RequestTaskModal = ({
     >
       {[ChangeRequestType.COPY_UPDATE, ChangeRequestType.PAGE_REFRESH].indexOf(changeType) >= 0 && (
         <>
-          <RadioInput
-            checked={changeType === ChangeRequestType.COPY_UPDATE}
-            label="Copy update"
-            onClick={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
-          />
-          <RadioInput
-            checked={changeType === ChangeRequestType.PAGE_REFRESH}
-            label="Page refresh"
-            onClick={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
-          />
+          <div className="flex items-baseline gap-small">
+            <RadioInput
+              checked={changeType === ChangeRequestType.COPY_UPDATE}
+              label="Copy update"
+              onClick={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
+            />
+            <div aria-describedby="default-tooltip" className="p-tooltip">
+              <i className="p-icon--information" />
+              <div className="p-tooltip__message" id="default-tooltip" role="tooltip">
+                <ul className="u-no-margin--bottom">
+                  <li>Textual changes in existing sections of a webpage</li>
+                  <li>
+                    Adding a new section in an existing layout,
+                    <br />
+                    identical to an existing section in terms of design,
+                    <br />
+                    but with different textual content. Or removing a section entirely.
+                  </li>
+                  <li>Replacing existing logos and images</li>
+                  <li>removing an image or a logo</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-baseline gap-small">
+            <RadioInput
+              checked={changeType === ChangeRequestType.PAGE_REFRESH}
+              label="Page refresh"
+              onClick={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
+            />
+            <div aria-describedby="default-tooltip" className="p-tooltip">
+              <i className="p-icon--information" />
+              <div className="p-tooltip__message" id="default-tooltip" role="tooltip">
+                <ul className="u-no-margin--bottom">
+                  <li>
+                    Changing or adding to the existing layout,
+                    <br />
+                    this can be the whole page or just one section
+                  </li>
+                  <li>The new modification changes the existing layout</li>
+                  <li>Requires a UI and UX review</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </>
       )}
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
