@@ -1,6 +1,6 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 
-import { Button, Input, Modal, RadioInput, Spinner, Textarea } from "@canonical/react-components";
+import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
@@ -117,50 +117,65 @@ const RequestTaskModal = ({
     >
       {[ChangeRequestType.COPY_UPDATE, ChangeRequestType.PAGE_REFRESH].indexOf(changeType) >= 0 && (
         <>
-          <div className="flex items-baseline gap-small">
+          <div className="u-sv2">
             <RadioInput
               checked={changeType === ChangeRequestType.COPY_UPDATE}
-              label="Copy update"
+              inline
+              label={
+                <>
+                  Copy update&nbsp;
+                  <Tooltip
+                    message={
+                      <ul className="u-no-margin">
+                        <li>Textual changes in existing sections of a webpage</li>
+                        <li>
+                          Adding a new section in an existing layout,
+                          <br />
+                          identical to an existing section in terms of design,
+                          <br />
+                          but with different textual content. <br />
+                          Or removing a section entirely.
+                        </li>
+                        <li>Replacing existing logos and images</li>
+                        <li>Removing an image or a logo</li>
+                      </ul>
+                    }
+                    zIndex={999}
+                  >
+                    <i className="p-icon--information" />
+                  </Tooltip>
+                </>
+              }
               onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
             />
-            <div aria-describedby="default-tooltip" className="p-tooltip">
-              <i className="p-icon--information" />
-              <div className="p-tooltip__message" id="default-tooltip" role="tooltip">
-                <ul className="u-no-margin--bottom">
-                  <li>Textual changes in existing sections of a webpage</li>
-                  <li>
-                    Adding a new section in an existing layout,
-                    <br />
-                    identical to an existing section in terms of design,
-                    <br />
-                    but with different textual content. Or removing a section entirely.
-                  </li>
-                  <li>Replacing existing logos and images</li>
-                  <li>removing an image or a logo</li>
-                </ul>
-              </div>
-            </div>
           </div>
-          <div className="flex items-baseline gap-small">
+          <div className="u-sv2">
             <RadioInput
               checked={changeType === ChangeRequestType.PAGE_REFRESH}
-              label="Page refresh"
+              inline
+              label={
+                <>
+                  Page refresh&nbsp;
+                  <Tooltip
+                    message={
+                      <ul className="u-no-margin">
+                        <li>
+                          Changing or adding to the existing layout,
+                          <br />
+                          this can be the whole page or just one section
+                        </li>
+                        <li>The new modification changes the existing layout</li>
+                        <li>Requires a UI and UX review</li>
+                      </ul>
+                    }
+                    zIndex={999}
+                  >
+                    <i className="p-icon--information" />
+                  </Tooltip>
+                </>
+              }
               onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
             />
-            <div aria-describedby="default-tooltip" className="p-tooltip">
-              <i className="p-icon--information" />
-              <div className="p-tooltip__message" id="default-tooltip" role="tooltip">
-                <ul className="u-no-margin--bottom">
-                  <li>
-                    Changing or adding to the existing layout,
-                    <br />
-                    this can be the whole page or just one section
-                  </li>
-                  <li>The new modification changes the existing layout</li>
-                  <li>Requires a UI and UX review</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </>
       )}

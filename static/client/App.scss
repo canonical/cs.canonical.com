@@ -55,16 +55,3 @@
 .p-search-and-filter__search-container {
   height: auto !important;
 }
-
-// basic spacing/aligning utilities for flexbox
-.flex{
-  display: flex;
-}
-
-.items-baseline {
-  align-items: baseline;   
-}
-
-.gap-small {
-  gap: 0.3rem;
-}
