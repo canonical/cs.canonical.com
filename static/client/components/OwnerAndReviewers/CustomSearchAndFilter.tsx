@@ -62,7 +62,7 @@ const CustomSearchAndFilter = ({
         {selectedOptions?.map(
           (option) =>
             option && (
-              <span className="p-chip">
+              <span className="p-chip" key={option.id}>
                 <span className="p-chip__value">{option.name}</span>
                 <button className="p-chip__dismiss" onClick={onRemove(option)}>
                   Dismiss
