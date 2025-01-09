@@ -129,13 +129,11 @@ const RequestTaskModal = ({
                       <ul className="u-no-margin">
                         <li>Textual changes in existing sections of a webpage</li>
                         <li>
-                          Adding a new section in an existing layout,
+                          Adding a new section which reuses an existing
                           <br />
-                          identical to an existing section in terms of design,
-                          <br />
-                          but with different textual content. <br />
-                          Or removing a section entirely.
+                          layout on the page but with different textual content
                         </li>
+                        <li>Removing a section entirely</li>
                         <li>Replacing existing logos and images</li>
                         <li>Removing an image or a logo</li>
                       </ul>
@@ -165,7 +163,6 @@ const RequestTaskModal = ({
                           this can be the whole page or just one section
                         </li>
                         <li>The new modification changes the existing layout</li>
-                        <li>Requires a UI and UX review</li>
                       </ul>
                     }
                     zIndex={999}
