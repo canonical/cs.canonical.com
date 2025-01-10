@@ -28,8 +28,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
     (option: IUser) => {
       if (page?.id) {
         PagesServices.setOwner(option, page.id).then(() => {
-          // reload the page for the new owner to appear in the pages tree
-          window.location.reload();
+          page.owner = option;
         });
       }
       setOptions([]);
