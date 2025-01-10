@@ -23,7 +23,7 @@ activate() {
     fi
 
     # Run new migrations if needed
-    flask --webapp webapp.app db upgrade
+    flask --app webapp.app db upgrade
 
     ${RUN_COMMAND}
 }
