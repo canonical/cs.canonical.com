@@ -147,3 +147,6 @@ demo:
       secretKeyRef:
         key: google-private-key-id
         name: cs-canonical-com
+    
+    - name: FLASK_DEBUG
+      value: "1"
