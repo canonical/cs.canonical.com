@@ -1,6 +1,6 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 
-import { Button, Input, Modal, RadioInput, Spinner, Textarea } from "@canonical/react-components";
+import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
@@ -117,16 +117,63 @@ const RequestTaskModal = ({
     >
       {[ChangeRequestType.COPY_UPDATE, ChangeRequestType.PAGE_REFRESH].indexOf(changeType) >= 0 && (
         <>
-          <RadioInput
-            checked={changeType === ChangeRequestType.COPY_UPDATE}
-            label="Copy update"
-            onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
-          />
-          <RadioInput
-            checked={changeType === ChangeRequestType.PAGE_REFRESH}
-            label="Page refresh"
-            onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
-          />
+          <div className="u-sv2">
+            <RadioInput
+              checked={changeType === ChangeRequestType.COPY_UPDATE}
+              inline
+              label={
+                <>
+                  Copy update&nbsp;
+                  <Tooltip
+                    message={
+                      <ul className="u-no-margin">
+                        <li>Textual changes in existing sections of a webpage</li>
+                        <li>
+                          Adding a new section which reuses an existing
+                          <br />
+                          layout on the page but with different textual content
+                        </li>
+                        <li>Removing a section entirely</li>
+                        <li>Replacing existing logos and images</li>
+                        <li>Removing an image or a logo</li>
+                      </ul>
+                    }
+                    zIndex={999}
+                  >
+                    <i className="p-icon--information" />
+                  </Tooltip>
+                </>
+              }
+              onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
+            />
+          </div>
+          <div className="u-sv2">
+            <RadioInput
+              checked={changeType === ChangeRequestType.PAGE_REFRESH}
+              inline
+              label={
+                <>
+                  Page refresh&nbsp;
+                  <Tooltip
+                    message={
+                      <ul className="u-no-margin">
+                        <li>
+                          Changing or adding to the existing layout,
+                          <br />
+                          this can be the whole page or just one section
+                        </li>
+                        <li>The new modification changes the existing layout</li>
+                      </ul>
+                    }
+                    zIndex={999}
+                  >
+                    <i className="p-icon--information" />
+                  </Tooltip>
+                </>
+              }
+              onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
+            />
+          </div>
         </>
       )}
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
