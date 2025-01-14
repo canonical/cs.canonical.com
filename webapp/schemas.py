@@ -57,3 +57,8 @@ class CreatePageModel(BaseModel):
     owner: UserModel
     reviewers: Optional[List[UserModel]]
     parent: str
+
+
+class SetProductsModel(BaseModel):
+    webpage_id: int
+    product_ids: List[int]
