@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint, current_app
+from flask import jsonify, Blueprint, current_app
 from flask_pydantic import validate
 
 from webapp.site_repository import SiteRepository

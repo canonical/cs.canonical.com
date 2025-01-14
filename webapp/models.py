@@ -89,7 +89,9 @@ class Webpage(db.Model, DateTimeMixin):
     owner = relationship("User", back_populates="webpages")
     reviewers = relationship("Reviewer", back_populates="webpages")
     jira_tasks = relationship("JiraTask", back_populates="webpages")
-    webpage_products = relationship("WebpageProduct", back_populates="webpages")
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="webpages"
+    )
 
 
 class User(db.Model, DateTimeMixin):
@@ -151,7 +153,9 @@ class Product(db.Model, DateTimeMixin):
     slug: str = Column(String, unique=True)
     name: str = Column(String)
 
-    webpage_products = relationship("WebpageProduct", back_populates="products")
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="products"
+    )
 
 
 class WebpageProduct(db.Model, DateTimeMixin):
