@@ -1,4 +1,5 @@
 import enum
+import yaml
 from datetime import datetime, timezone
 
 from flask import Flask
@@ -7,7 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship
 from sqlalchemy.orm.session import Session
+from sqlalchemy.exc import IntegrityError
 
+
+with open("konf/data.yaml") as file:
+    data = yaml.load(file, Loader=yaml.FullLoader)
 
 class Base(DeclarativeBase):
     pass
@@ -84,6 +89,9 @@ class Webpage(db.Model, DateTimeMixin):
     owner = relationship("User", back_populates="webpages")
     reviewers = relationship("Reviewer", back_populates="webpages")
     jira_tasks = relationship("JiraTask", back_populates="webpages")
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="webpages"
+    )
 
 
 class User(db.Model, DateTimeMixin):
@@ -138,6 +146,29 @@ class JiraTask(db.Model, DateTimeMixin):
     user = relationship("User", back_populates="jira_tasks")
 
 
+class Product(db.Model, DateTimeMixin):
+    __tablename__ = "products"
+
+    id: int = Column(Integer, primary_key=True)
+    slug: str = Column(String, unique=True)
+    name: str = Column(String)
+
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="products"
+    )
+
+
+class WebpageProduct(db.Model, DateTimeMixin):
+    __tablename__ = "webpage_products"
+
+    id: int = Column(Integer, primary_key=True)
+    webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
+    product_id: int = Column(Integer, ForeignKey("products.id"))
+    
+    webpages = relationship("Webpage", back_populates="webpage_products")
+    products = relationship("Product", back_populates="webpage_products")
+
+
 def init_db(app: Flask):
     Migrate(app, db)
     db.init_app(app)
@@ -148,3 +179,18 @@ def init_db(app: Flask):
         app.before_request_funcs[None].remove(create_default_project)
         get_or_create(db.session, Project, name="Default")
         get_or_create(db.session, User, name="Default")
+
+    # Pre-populate product data from YAML
+    @app.before_request
+    def create_products():
+        app.before_request_funcs[None].remove(create_products)
+        try:
+            for product in data["products"]:
+                get_or_create(
+                    db.session,
+                    Product,
+                    slug=product["slug"],
+                    name=product["name"]
+                )
+        except IntegrityError:
+            pass
