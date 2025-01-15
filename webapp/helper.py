@@ -1,5 +1,8 @@
+from os import environ
 from webapp.models import JiraTask, User, Project, Webpage, db, get_or_create
 from enum import Enum
+
+import requests
 
 
 class RequestType(Enum):
@@ -205,3 +208,34 @@ def get_tree_struct(session, webpages):
         return tree
 
     return None
+
+
+def get_user_from_directory_by_key(key, value):
+    query = f"""
+    query($value: String!) {{
+        employees(filter: {{ contains: {{ {key}: $value }} }}) {{
+            id
+            name
+            email
+            team
+            department
+            jobTitle
+        }}
+    }}
+    """
+
+    headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
+
+    # Currently directory-api only supports strict comparison of field values,
+    # so we have to send two requests instead of one for first and last names
+    response = requests.post(
+        "https://directory.wpe.internal/graphql/",
+        json={
+            "query": query,
+            "variables": {"value": value.strip()},
+        },
+        headers=headers,
+        verify=False,
+    )
+
+    return response
