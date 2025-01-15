@@ -12,6 +12,7 @@ from webapp.schemas import SetProductsModel
 product_blueprint = Blueprint("product", __name__, url_prefix="/api")
 
 
+# Returns all products
 @product_blueprint.route("/get-products", methods=["GET"])
 @login_required
 def get_products():
@@ -25,6 +26,7 @@ def get_products():
     return jsonify(product_list)
 
 
+# Sets a product(s) on a specific webpage
 @product_blueprint.route("/set-product", methods=["POST"])
 @validate()
 @login_required
@@ -34,7 +36,7 @@ def set_product(body: SetProductsModel):
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
 
-    if webpage and product_ids and len(product_ids):
+    if webpage:
         # Remove previous products that were set for the webpage
         existing_products = WebpageProduct.query.filter_by(
             webpage_id=webpage_id
