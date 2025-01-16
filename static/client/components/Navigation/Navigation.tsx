@@ -16,7 +16,7 @@ const Navigation = (): JSX.Element => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const setUser = useStore((state) => state.setUser);
-  const { user } = useAuth();
+  const { data: user } = useAuth();
 
   const logout = useCallback(() => {
     setUser(null);
