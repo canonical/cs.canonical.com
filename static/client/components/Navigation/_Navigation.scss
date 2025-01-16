@@ -79,7 +79,7 @@
     }
 
     .p-panel__content {
-      height: calc(100vh - 340px);
+      height: calc(100vh - 440px);
       overflow: auto;
 
       @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {

@@ -9,14 +9,19 @@ import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
+import { useAuth } from "@/services/api/hooks/auth";
+import { useStore } from "@/store";
 
 const Navigation = (): JSX.Element => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const setUser = useStore((state) => state.setUser);
+  const { user } = useAuth();
 
   const logout = useCallback(() => {
+    setUser(null);
     window.open("/logout", "_self");
-  }, []);
+  }, [setUser]);
 
   const handleNewPageClick = useCallback(() => {
     navigate("/app/new-webpage");
@@ -55,6 +60,13 @@ const Navigation = (): JSX.Element => {
               <NavigationItems />
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
+              <div className="u-no-margin u-truncate">
+                <span>{user?.name}</span>
+              </div>
+              <div className="p-text--small u-text--muted u-truncate">
+                <span>{user?.email}</span>
+              </div>
+              <hr className="p-rule" />
               <Button appearance="base" className="p-side-navigation__link" onClick={logout}>
                 <i className="p-icon--logout is-light p-side-navigation__icon" />
                 <span className="p-side-navigation__label">Log out</span>
