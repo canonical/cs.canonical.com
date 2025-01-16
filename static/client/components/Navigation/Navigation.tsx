@@ -60,10 +60,10 @@ const Navigation = (): JSX.Element => {
               <NavigationItems />
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
-              <div className="u-no-margin u-truncate">
+              <div className="u-no-margin u-truncate p-side-navigation__label">
                 <span>{user?.name}</span>
               </div>
-              <div className="p-text--small u-text--muted u-truncate">
+              <div className="p-text--small u-text--muted u-truncate p-side-navigation__label">
                 <span>{user?.email}</span>
               </div>
               <hr className="p-rule" />
