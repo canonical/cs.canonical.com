@@ -38,6 +38,7 @@ def create_jira_task(app, body):
 
     # Get the webpage
     webpage_id = body["webpage_id"]
+    reporter_id = get_or_create_user_id(body.get("reporter_struct"))
     webpage = Webpage.query.filter_by(id=webpage_id).first()
     if not webpage:
         raise Exception(f"Webpage with ID {webpage_id} not found")
@@ -57,7 +58,7 @@ def create_jira_task(app, body):
     jira = app.config["JIRA"]
     issue = jira.create_issue(
         due_date=body["due_date"],
-        reporter_id=body["reporter_id"],
+        reporter_id=reporter_id,
         request_type=body["type"],
         description=body["description"],
         summary=summary,
@@ -69,7 +70,7 @@ def create_jira_task(app, body):
         JiraTask,
         jira_id=issue["key"],
         webpage_id=body["webpage_id"],
-        user_id=body["reporter_id"],
+        user_id=reporter_id,
         summary=summary,
     )
 
@@ -162,7 +163,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     else:
         jira_tasks_list = []
 
-     # Serialize product fields
+    # Serialize product fields
     if webpage_products:
         webpage_products_list = []
         for product in webpage_products:
