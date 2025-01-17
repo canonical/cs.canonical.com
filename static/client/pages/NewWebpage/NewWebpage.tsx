@@ -86,7 +86,7 @@ const NewWebpage = (): JSX.Element => {
         if (isNewPageExist) {
           // TODO: there is a max depth React error on this line, needs more investigation
           setSelectedProject(project);
-          window.location.href = `/webpage/${project.name}${location}/${titleValue}`;
+          window.location.href = `/app/webpage/${project.name}${location}/${titleValue}`;
         }
       }
     }
