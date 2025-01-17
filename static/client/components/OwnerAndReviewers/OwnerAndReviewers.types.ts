@@ -24,3 +24,8 @@ export interface IUseUsersRequest {
   setOptions: Dispatch<SetStateAction<IUser[]>>;
   handleChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
+
+export interface IReporterProps {
+  reporter: IUser | null;
+  setReporter: React.Dispatch<React.SetStateAction<IUser>>;
+}

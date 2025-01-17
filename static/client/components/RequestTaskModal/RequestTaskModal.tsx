@@ -82,7 +82,7 @@ const RequestTaskModal = ({
         });
       }
     }
-  }, [changeType, dueDate, summary, descr, webpage, onClose]);
+  }, [dueDate, webpage.id, webpage.status, webpage.copy_doc_link, changeType, reporter, descr, onClose, summary]);
 
   const title = useMemo(() => {
     switch (changeType) {

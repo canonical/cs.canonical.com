@@ -2,11 +2,12 @@ import { useCallback } from "react";
 
 import CustomSearchAndFilter from "./CustomSearchAndFilter";
 import { useUsersRequest } from "./OwnerAndReviewers.hooks";
+import type { IReporterProps } from "./OwnerAndReviewers.types";
 
 import { type IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 
-const Reporter = ({ reporter, setReporter }: { reporter: IUser | null; setReporter: Function }): JSX.Element => {
+const Reporter = ({ reporter, setReporter }: IReporterProps): JSX.Element => {
   const user = useStore((state) => state.user);
   const { options, setOptions, handleChange } = useUsersRequest();
 
