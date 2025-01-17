@@ -7,6 +7,7 @@ export const ENDPOINTS = {
   createNewPage: "/api/create-page",
   requestChanges: "/api/request-changes",
   requestRemoval: "/api/remove-webpage",
+  currentUser: "/api/current-user",
 };
 
 export const REST_TYPES = {
