@@ -11,14 +11,14 @@ const Breadcrumbs = () => {
   useEffect(() => {
     const pageIndex = location.pathname.indexOf("app/webpage/");
     if (pageIndex > 0) {
-      const parts = location.pathname.substring(pageIndex + 8).split("/");
+      const parts = location.pathname.split("app/webpage/")[1].split("/");
       if (parts.length) {
         let accumulatedPath = "";
         const paths = parts?.map((part) => {
           accumulatedPath = `${accumulatedPath}/${part}`;
           return {
             name: part,
-            link: `app/webpage${accumulatedPath}`,
+            link: `/app/webpage${accumulatedPath}`,
           };
         });
         setBreadcrumbs(paths);
