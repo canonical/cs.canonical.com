@@ -4,10 +4,12 @@ import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@c
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
+import Reporter from "@/components/OwnerAndReviewers/Reporter";
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
+import { useStore } from "@/store";
 
 const RequestTaskModal = ({
   changeType,
@@ -21,6 +23,8 @@ const RequestTaskModal = ({
   const [summary, setSummary] = useState<string>();
   const [descr, setDescr] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const user = useStore((state) => state.user);
+  const [reporter, setReporter] = useState(user);
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -52,7 +56,7 @@ const RequestTaskModal = ({
         PagesServices.requestRemoval({
           due_date: dueDate,
           webpage_id: webpage.id,
-          reporter_id: webpage.owner.id,
+          reporter_struct: reporter,
           description: descr,
         }).then(() => {
           setIsLoading(false);
@@ -67,7 +71,7 @@ const RequestTaskModal = ({
         PagesServices.requestChanges({
           due_date: dueDate,
           webpage_id: webpage.id,
-          reporter_id: webpage.owner.id,
+          reporter_struct: reporter,
           type: changeType,
           summary,
           description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
@@ -176,6 +180,9 @@ const RequestTaskModal = ({
           </div>
         </>
       )}
+      <div className="u-sv3">
+        <Reporter reporter={reporter} setReporter={setReporter} />
+      </div>
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />

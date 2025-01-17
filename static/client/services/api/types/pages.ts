@@ -57,7 +57,7 @@ export const ChangeRequestType = {
 
 export interface IRequestChanges {
   due_date: string;
-  reporter_id: number;
+  reporter_struct: IUser;
   webpage_id: number;
   type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
   summary?: string;
@@ -66,7 +66,7 @@ export interface IRequestChanges {
 
 export interface IRequestRemoval {
   due_date: string;
-  reporter_id: number;
+  reporter_struct: IUser;
   webpage_id: number;
   description: string;
 }

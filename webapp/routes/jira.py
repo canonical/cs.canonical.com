@@ -78,7 +78,7 @@ def get_jira_tasks(webpage_id: int):
         return jsonify({"error": "Failed to fetch Jira tasks"}), 500
 
 
-@jira_blueprint.route("/remove-webpage", methods=["POST"])
+@jira_blueprint.route("/request-removal", methods=["POST"])
 @validate()
 @login_required
 def remove_webpage(body: RemoveWebpageModel):
@@ -110,6 +110,9 @@ def remove_webpage(body: RemoveWebpageModel):
     webpage = Webpage.query.filter(Webpage.id == webpage_id).one_or_none()
     if webpage is None:
         return jsonify({"error": "webpage not found"}), 404
+
+    reporter_id = get_or_create_user_id(body.reporter_struct)
+
     if webpage.status == WebpageStatus.NEW:
         try:
             jira_tasks = JiraTask.query.filter_by(webpage_id=webpage_id).all()
@@ -151,8 +154,7 @@ def remove_webpage(body: RemoveWebpageModel):
 
     if webpage.status == WebpageStatus.AVAILABLE:
         if not (
-            body.reporter_id
-            and User.query.filter_by(id=body.reporter_id).one_or_none()
+            reporter_id and User.query.filter_by(id=reporter_id).one_or_none()
         ):
             return (
                 jsonify({"error": "provided parameters are incorrect"}),
@@ -161,7 +163,7 @@ def remove_webpage(body: RemoveWebpageModel):
         task_details = {
             "webpage_id": webpage_id,
             "due_date": body.due_date,
-            "reporter_id": body.reporter_id,
+            "reporter_struct": body.reporter_struct,
             "description": body.description,
             "type": None,
             "summary": f"Remove {webpage.name} webpage from code repository",
