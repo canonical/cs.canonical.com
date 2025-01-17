@@ -9,14 +9,12 @@ import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
-import { useAuth } from "@/services/api/hooks/auth";
 import { useStore } from "@/store";
 
 const Navigation = (): JSX.Element => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const setUser = useStore((state) => state.setUser);
-  const { data: user } = useAuth();
+  const [user, setUser] = useStore((state) => [state.user, state.setUser]);
 
   const logout = useCallback(() => {
     setUser(null);

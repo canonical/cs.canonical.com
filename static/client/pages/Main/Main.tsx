@@ -1,10 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "@/components/MainLayout";
+import { useAuth } from "@/services/api/hooks/auth";
 import { usePages } from "@/services/api/hooks/pages";
 import { RoutesServices } from "@/services/routes";
 
 const Main = (): React.ReactNode => {
+  useAuth();
   const { data } = usePages();
 
   return (
