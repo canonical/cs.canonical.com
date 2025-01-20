@@ -36,22 +36,18 @@ def init_sso(app: flask.Flask):
 
         # find the user in database
         user = User.query.filter_by(email=resp.email).first()
-        user_id = None
-        if user:
-            user_id = user.id
-        else:
+        if not user:
             # fetch user record from directory
             response = get_user_from_directory_by_key("email", resp.email)
 
             if response.status_code == 200:
                 user = response.json().get("data", {}).get("employees", [])[0]
                 # save user in users table
-                user_id = get_or_create_user_id(user)
+                get_or_create_user_id(user)
 
         flask.session["openid"] = {
             "identity_url": resp.identity_url,
             "email": resp.email,
-            "user_id": user_id,
         }
 
         return flask.redirect(open_id.get_next_url())
