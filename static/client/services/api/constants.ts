@@ -8,6 +8,8 @@ export const ENDPOINTS = {
   requestChanges: "/api/request-changes",
   requestRemoval: "/api/request-removal",
   currentUser: "/api/current-user",
+  getProducts: "/api/get-products",
+  setProducts: "/api/set-product",
 };
 
 export const REST_TYPES = {

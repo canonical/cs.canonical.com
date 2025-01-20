@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
+import type { MultiSelectItem } from "@canonical/react-components";
 import { Button, Input, Spinner } from "@canonical/react-components";
 
 import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import Products from "@/components/OwnerAndReviewers/Products";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
@@ -23,6 +25,7 @@ const NewWebpage = (): JSX.Element => {
   const [copyDoc, setCopyDoc] = useState<string>();
   const [owner, setOwner] = useState<IUser | null>();
   const [reviewers, setReviewers] = useState<IUser[]>([]);
+  const [products, setProducts] = useState<number[]>([]);
   const [location, setLocation] = useState<string>();
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [reloading, setReloading] = useState<(typeof LoadingState)[keyof typeof LoadingState]>(LoadingState.INITIAL);
@@ -56,6 +59,10 @@ const NewWebpage = (): JSX.Element => {
     setLocation(path);
   }, []);
 
+  const handleSelectProducts = useCallback((products: MultiSelectItem[]) => {
+    setProducts(products.map((p) => Number(p.value)));
+  }, []);
+
   const handleSubmit = useCallback(() => {
     if (titleValue && owner && selectedProject && location) {
       setReloading(LoadingState.LOADING);
@@ -66,6 +73,7 @@ const NewWebpage = (): JSX.Element => {
         reviewers,
         project: selectedProject.name,
         parent: location,
+        product_ids: products,
       };
       PagesServices.createPage(newPage).then(() => {
         // refetch the tree from the backend after a new webpage is added to the database
@@ -75,7 +83,7 @@ const NewWebpage = (): JSX.Element => {
           });
       });
     }
-  }, [titleValue, location, copyDoc, owner, reviewers, selectedProject, refetch]);
+  }, [titleValue, owner, selectedProject, location, copyDoc, reviewers, products, refetch]);
 
   // update navigation after new page is added to the tree on the backend
   useEffect(() => {
@@ -124,6 +132,8 @@ const NewWebpage = (): JSX.Element => {
         />
       </div>
       <OwnerAndReviewers onSelectOwner={handleSelectOwner} onSelectReviewers={handleSelectReviewers} />
+      <div className="u-sv3" />
+      <Products onSelectProducts={handleSelectProducts} />
       <Button appearance="positive" className="l-new-webpage--submit" disabled={buttonDisabled} onClick={handleSubmit}>
         {reloading === LoadingState.LOADING ? <Spinner /> : `Save${copyDoc ? "" : " and generate copy doc"}`}
       </Button>

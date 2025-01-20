@@ -6,6 +6,7 @@ import { type IWebpageProps } from "./Webpage.types";
 
 import JiraTasks from "@/components/JiraTasks";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import Products from "@/components/OwnerAndReviewers/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
@@ -115,6 +116,8 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
         )}
         <div className={isNew ? "col-12" : "col-5"}>
           <OwnerAndReviewers page={page} />
+          <div className="u-sv3" />
+          <Products page={page} />
         </div>
       </div>
       {page.jira_tasks?.length ? (
