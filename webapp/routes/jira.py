@@ -18,6 +18,7 @@ from webapp.models import (
     Reviewer,
     User,
     Webpage,
+    WebpageProduct,
     WebpageStatus,
     db,
     get_or_create,
@@ -196,6 +197,7 @@ def create_page(body: CreatePageModel):
     data = body.model_dump()
 
     owner_id = get_or_create_user_id(data["owner"])
+    product_ids = data["product_ids"]
 
     # Create new webpage
     project_id = get_project_id(data["project"])
@@ -226,5 +228,14 @@ def create_page(body: CreatePageModel):
         copy_doc = create_copy_doc(current_app, new_webpage[0])
         new_webpage[0].copy_doc_link = copy_doc
         db.session.commit()
+
+    # Set products for the webpage
+    for product_id in product_ids:
+        get_or_create(
+            db.session,
+            WebpageProduct,
+            webpage_id=new_webpage[0].id,
+            product_id=product_id
+        )
 
     return jsonify({"copy_doc": copy_doc}), 201
