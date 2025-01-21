@@ -1,8 +1,7 @@
 // the existing SearchAndFilter component provided by react-components did not provide ability to have dynamic options
 import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import type { ICustomSearchAndFilterProps } from "./OwnerAndReviewers.types";
-
+import type { ICustomSearchAndFilterProps } from "@/components/OwnerAndReviewers/OwnerAndReviewers.types";
 import type { IUser } from "@/services/api/types/users";
 
 const CustomSearchAndFilter = ({

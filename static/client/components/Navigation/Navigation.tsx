@@ -9,6 +9,7 @@ import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
+import type { IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 
 const Navigation = (): JSX.Element => {
@@ -17,7 +18,7 @@ const Navigation = (): JSX.Element => {
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
 
   const logout = useCallback(() => {
-    setUser(null);
+    setUser({} as IUser);
     window.open("/logout", "_self");
   }, [setUser]);
 

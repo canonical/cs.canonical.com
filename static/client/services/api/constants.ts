@@ -6,8 +6,10 @@ export const ENDPOINTS = {
   setReviewers: "/api/set-reviewers",
   createNewPage: "/api/create-page",
   requestChanges: "/api/request-changes",
-  requestRemoval: "/api/remove-webpage",
+  requestRemoval: "/api/request-removal",
   currentUser: "/api/current-user",
+  getProducts: "/api/get-products",
+  setProducts: "/api/set-product",
 };
 
 export const REST_TYPES = {

@@ -10,7 +10,7 @@ export interface IApiBasicError {
 }
 
 interface IUseQueryHookBase<T extends unknown> {
-  isLoading: boolean;
+  isLoading?: boolean;
   data: T | undefined;
   refetch?: () => Promise<QueryObserverResult<IPagesResponse, IApiBasicError>[]>;
   isFetching?: boolean;

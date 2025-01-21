@@ -21,7 +21,7 @@ def validate_input(model):
 
 class ChangesRequestModel(BaseModel):
     due_date: str
-    reporter_id: int
+    reporter_struct: object
     webpage_id: int
     type: int
     description: str
@@ -31,7 +31,7 @@ class ChangesRequestModel(BaseModel):
 class RemoveWebpageModel(BaseModel):
     webpage_id: int
     due_date: str = ""
-    reporter_id: int = None
+    reporter_struct: object = {}
     description: str = ""
 
     @field_validator("due_date")
@@ -60,6 +60,7 @@ class CreatePageModel(BaseModel):
     owner: UserModel
     reviewers: Optional[List[UserModel]]
     parent: str
+    product_ids: List[int]
 
 
 class SetProductsModel(BaseModel):
