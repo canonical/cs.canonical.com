@@ -4,7 +4,7 @@ import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@c
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
-import Reporter from "@/components/OwnerAndReviewers/Reporter";
+import Reporter from "@/components/Reporter";
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
