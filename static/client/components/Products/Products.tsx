@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { MultiSelectItem } from "@canonical/react-components";
 import { MultiSelect } from "@canonical/react-components";
 
-import type { IProductsProps } from "@/components/OwnerAndReviewers/OwnerAndReviewers.types";
+import type { IProductsProps } from "./Products.types";
+
 import { useProducts } from "@/services/api/hooks/products";
 import { PagesServices } from "@/services/api/services/pages";
 import type { ISetProducts } from "@/services/api/types/pages";

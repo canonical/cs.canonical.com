@@ -1,7 +1,5 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
-import type { MultiSelectItem } from "@canonical/react-components";
-
 import type { IPage } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
@@ -25,14 +23,4 @@ export interface IUseUsersRequest {
   options: IUser[];
   setOptions: Dispatch<SetStateAction<IUser[]>>;
   handleChange: (event: ChangeEvent<HTMLInputElement>) => void;
-}
-
-export interface IReporterProps {
-  reporter: IUser | null;
-  setReporter: React.Dispatch<React.SetStateAction<IUser>>;
-}
-
-export interface IProductsProps {
-  page?: IPage;
-  onSelectProducts?: (products: MultiSelectItem[]) => void;
 }
