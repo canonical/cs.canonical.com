@@ -8,6 +8,7 @@ import type { IProductsProps } from "./OwnerAndReviewers.types";
 import { useProducts } from "@/services/api/hooks/products";
 import { PagesServices } from "@/services/api/services/pages";
 import type { ISetProducts } from "@/services/api/types/pages";
+import { IProduct } from "@/services/api/types/products";
 
 const Products = ({ page, onSelectProducts }: IProductsProps): JSX.Element => {
   const [products, setProducts] = useState<MultiSelectItem[]>([]);
@@ -35,6 +36,7 @@ const Products = ({ page, onSelectProducts }: IProductsProps): JSX.Element => {
     (items: MultiSelectItem[]) => {
       setSelectedProducts(items);
       if (page?.id) {
+        page.products = items.map((p) => ({ name: p.label, id: p.value }) as IProduct);
         PagesServices.setProducts({
           webpage_id: page?.id,
           product_ids: items.map((p) => p.value),
