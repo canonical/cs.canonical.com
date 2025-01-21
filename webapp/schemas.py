@@ -37,7 +37,10 @@ class RemoveWebpageModel(BaseModel):
     @field_validator("due_date")
     @classmethod
     def date_validation(cls, value: str) -> str:
-        assert datetime.strptime(value, "%Y-%m-%d") >= datetime.now()
+        assert (
+            datetime.strptime(value, "%Y-%m-%d").date()
+            >= datetime.now().date()
+        )
         return value
 
 
