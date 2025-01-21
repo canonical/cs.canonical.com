@@ -10,10 +10,8 @@ export function useProducts(): IUseQueryHookRest<IProductsResponse> {
     queryFn: ProductsServices.getProducts,
   });
 
-  const isLoading = result.isLoading;
-  const isFetching = result.isFetching;
   const error = result.error;
   const data = result.data;
 
-  return { isLoading, data, error, isFetching };
+  return { data, error };
 }
