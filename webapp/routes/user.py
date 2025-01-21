@@ -91,10 +91,7 @@ def set_owner():
 @user_blueprint.route("/current-user", methods=["GET"])
 @login_required
 def current_user():
-    user_id = session["openid"]["user_id"]
-    if not user_id:
-        return jsonify({"error": "Currently logged in user not found"}), 404
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(email=session["openid"]["email"]).first()
     if not user:
         return jsonify({"error": "Currently logged in user not found"}), 404
     return (
