@@ -6,7 +6,7 @@ import { type IWebpageProps } from "./Webpage.types";
 
 import JiraTasks from "@/components/JiraTasks";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
-import Products from "@/components/OwnerAndReviewers/Products";
+import Products from "@/components/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";

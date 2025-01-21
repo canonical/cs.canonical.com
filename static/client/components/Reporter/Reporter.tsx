@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 
-import CustomSearchAndFilter from "./CustomSearchAndFilter";
-import { useUsersRequest } from "./OwnerAndReviewers.hooks";
-import type { IReporterProps } from "./OwnerAndReviewers.types";
-
+import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import { useUsersRequest } from "@/components/OwnerAndReviewers/OwnerAndReviewers.hooks";
+import type { IReporterProps } from "@/components/OwnerAndReviewers/OwnerAndReviewers.types";
 import { type IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 

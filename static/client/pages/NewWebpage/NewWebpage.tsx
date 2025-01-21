@@ -5,7 +5,7 @@ import { Button, Input, Spinner } from "@canonical/react-components";
 
 import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
-import Products from "@/components/OwnerAndReviewers/Products";
+import Products from "@/components/Products";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-import CustomSearchAndFilter from "./CustomSearchAndFilter";
 import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 
+import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 

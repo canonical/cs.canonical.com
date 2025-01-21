@@ -3,12 +3,11 @@ import { useCallback, useEffect, useState } from "react";
 import type { MultiSelectItem } from "@canonical/react-components";
 import { MultiSelect } from "@canonical/react-components";
 
-import type { IProductsProps } from "./OwnerAndReviewers.types";
-
+import type { IProductsProps } from "@/components/OwnerAndReviewers/OwnerAndReviewers.types";
 import { useProducts } from "@/services/api/hooks/products";
 import { PagesServices } from "@/services/api/services/pages";
 import type { ISetProducts } from "@/services/api/types/pages";
-import { IProduct } from "@/services/api/types/products";
+import type { IProduct } from "@/services/api/types/products";
 
 const Products = ({ page, onSelectProducts }: IProductsProps): JSX.Element => {
   const [products, setProducts] = useState<MultiSelectItem[]>([]);
@@ -44,7 +43,7 @@ const Products = ({ page, onSelectProducts }: IProductsProps): JSX.Element => {
       }
       if (onSelectProducts) onSelectProducts(items);
     },
-    [onSelectProducts, page?.id],
+    [onSelectProducts, page],
   );
 
   return products.length ? (
