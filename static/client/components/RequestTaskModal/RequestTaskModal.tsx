@@ -126,25 +126,23 @@ const RequestTaskModal = ({
               checked={changeType === ChangeRequestType.COPY_UPDATE}
               inline
               label={
-                <>
+                <Tooltip
+                  message={
+                    <>
+                      <span>Copy updates include:</span>
+                      <ul className="u-no-margin">
+                        <li>Text changes to existing sections</li>
+                        <li>Adding a section that is a copy of an existing section, with different text</li>
+                        <li>Removing a section</li>
+                        <li>Replacing or removing logos or images</li>
+                      </ul>
+                    </>
+                  }
+                  zIndex={999}
+                >
                   Copy update&nbsp;
-                  <Tooltip
-                    message={
-                      <>
-                        <span>Copy updates include:</span>
-                        <ul className="u-no-margin">
-                          <li>Text changes to existing sections</li>
-                          <li>Adding a section that is a copy of an existing section, with different text</li>
-                          <li>Removing a section</li>
-                          <li>Replacing or removing logos or images</li>
-                        </ul>
-                      </>
-                    }
-                    zIndex={999}
-                  >
-                    <i className="p-icon--information" />
-                  </Tooltip>
-                </>
+                  <i className="p-icon--information" />
+                </Tooltip>
               }
               onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
             />
@@ -154,23 +152,21 @@ const RequestTaskModal = ({
               checked={changeType === ChangeRequestType.PAGE_REFRESH}
               inline
               label={
-                <>
+                <Tooltip
+                  message={
+                    <>
+                      <span>Page refreshes include:</span>
+                      <ul className="u-no-margin">
+                        <li>Changing or adding to the page layout</li>
+                        <li>Modifications that change the layout</li>
+                      </ul>
+                    </>
+                  }
+                  zIndex={999}
+                >
                   Page refresh&nbsp;
-                  <Tooltip
-                    message={
-                      <>
-                        <span>Page refreshes include:</span>
-                        <ul className="u-no-margin">
-                          <li>Changing or adding to the page layout</li>
-                          <li>Modifications that change the layout</li>
-                        </ul>
-                      </>
-                    }
-                    zIndex={999}
-                  >
-                    <i className="p-icon--information" />
-                  </Tooltip>
-                </>
+                  <i className="p-icon--information" />
+                </Tooltip>
               }
               onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
             />
