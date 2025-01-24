@@ -10,6 +10,8 @@ Before starting, update the environment variables if needed. The default values 
 
 You will also require a credentials file for google drive. Please store it as credentials.json in the `credentials` directory.
 
+#### Sample Env
+
 ```env
 PORT=8104
 FLASK_DEBUG=true
@@ -47,14 +49,14 @@ If you need to add a new environment variable, or modify an existing one(either 
 
 #### Adding new environment variable on production
 
-If the value for this variable is not super secret, you can add it directly to the `konf/site.yaml` like so:
+If the value for this variable is not confidential, you can add it directly to the `konf/site.yaml` like so:
 
 ```
   - name: JIRA_LABELS
     value: "sites_BAU"
 ```
 
-Else if the value is super secret, you need to first create a secret on the kubernetes cluster, and then specify it in the `konf/site.yaml`. Make sure you have the valid kubeconfig file for the cluster.
+Else if the value is confidential, you need to first create a secret on the kubernetes cluster, and then specify it in the `konf/site.yaml`. Make sure you have the valid kubeconfig file for the cluster.
 
 1. Create the secret
 
@@ -82,6 +84,8 @@ $ kubectl describe secret secret-name -n production
       name: secret-name
 ```
 
+Make sure to replace `<env variable name>` with the name of env variables that your application is expecting. For example, `JIRA_TOKEN` or `COPYDOC_TEMPLATE_ID`
+
 #### Update existing environment variable on production
 
 To update an existing environment variable, either name or value
@@ -89,8 +93,10 @@ To update an existing environment variable, either name or value
 1. Export the secret into a yaml file
 
 ```bash
-$ kubectl get secret secret-name -n production -o yaml > secret.yaml
+$ kubectl get secret <secret-name> -n production -o yaml > secret.yaml
 ```
+
+Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 2. Open the `secret.yaml` file and make your changes in the `key:value` pairs within the `data` section.
 
