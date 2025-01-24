@@ -61,14 +61,16 @@ Else if the value is confidential, you need to first create a secret on the kube
 1. Create the secret
 
 ```bash
-$ kubectl create secret generic secret-name -n production with key1=supersecret and key2=supsecret
+$ kubectl create secret generic <secret-name> -n production with key1=supersecret and key2=supsecret
 ```
+Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 2. Verify the newly created secret
 
 ```bash
-$ kubectl describe secret secret-name -n production
+$ kubectl describe secret <secret-name> -n production
 ```
+Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 3. Add the secret ref to `konf/site.yaml` file.
 
@@ -76,15 +78,17 @@ $ kubectl describe secret secret-name -n production
   - name: <env variable name>
     secretKeyRef:
       key: key1
-      name: secret-name
+      name: <secret-name>
 
   - name: <env variable name>
     secretKeyRef:
       key: key2
-      name: secret-name
+      name: <secret-name>
 ```
 
 Make sure to replace `<env variable name>` with the name of env variables that your application is expecting. For example, `JIRA_TOKEN` or `COPYDOC_TEMPLATE_ID`
+
+Also, Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 #### Update existing environment variable on production
 
