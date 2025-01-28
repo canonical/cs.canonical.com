@@ -1,5 +1,5 @@
 sites:
- - ubuntu.com
- - canonical.com
- - cn.ubuntu.com
- - jp.ubuntu.com
+  - ubuntu.com
+  - canonical.com
+  - cn.ubuntu.com
+  - jp.ubuntu.com
