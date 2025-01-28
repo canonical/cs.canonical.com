@@ -52,7 +52,6 @@ class SiteRepository:
         repository_uri: str,
         app: Flask,
         branch="main",
-        task_locks: dict = None,
         db: SQLAlchemy = None,
     ):
         base_dir = app.config["BASE_DIR"]
@@ -69,9 +68,6 @@ class SiteRepository:
         if db:
             self.db = db
 
-        # If a locks dictionary is provided, use it
-        if task_locks:
-            self.LOCKS = task_locks
 
     def __str__(self) -> str:
         return f"SiteRepository({self.repository_uri}, {self.branch})"

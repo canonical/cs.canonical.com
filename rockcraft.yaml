@@ -26,3 +26,10 @@ parts:
       - flask/app/static/build
       - flask/app/repositories
       - flask/app/tree-cache
+services:
+  celery-worker:
+    override: replace
+    command: celery -A webapp.app.celery_app worker -B  --loglevel=INFO
+    startup: enabled
+    user: _daemon_
+    working-dir: /flask/app

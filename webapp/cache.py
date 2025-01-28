@@ -16,7 +16,7 @@ def init_cache(app: Flask):
     except redis_exceptions.ConnectionError as e:
         cache = FileCache(app)
         app.logger.info(
-            f"Error: {e} \Redis cache is not available."
+            f"Error: {e} Redis cache is not available."
             " Using FileCache instead."
         )
     app.config["CACHE"] = cache
@@ -49,8 +49,6 @@ class Cache(ABC):
 class RedisCache(Cache):
     """Cache interface"""
 
-    """Cache interface"""
-
     CACHE_PREFIX = "WEBSITES-CONTENT-SYSTEM"
 
     def __init__(self, app: Flask):
@@ -62,7 +60,7 @@ class RedisCache(Cache):
         Return an instance of the redis cache. If not available, throw a
         ConnectionError.
         """
-        self.logger.info(f"Connecting to Redis cache.")
+        self.logger.info("Connecting to Redis cache.")
         if url := os.environ.get("REDIS_DB_CONNECT_STRING"):
             r = redis.from_url(url)
         else:
