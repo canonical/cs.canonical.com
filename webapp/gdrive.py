@@ -30,11 +30,11 @@ class GoogleDriveClient:
         Returns:
             googleapiclient.discovery.Resource: A google drive service object.
         """
-        credentials = service_account.Credentials.from_service_account_info(
+        credentials_object = service_account.Credentials.from_service_account_info(
             credentials,
             scopes=self.SCOPES,
         )
-        return build("drive", "v3", credentials=credentials)
+        return build("drive", "v3", credentials=credentials_object)
 
     def _item_exists(
         self,

@@ -22,7 +22,12 @@ def create_app():
         template_folder="../templates",
         static_folder="../static",
     )
-    app.config.from_pyfile("settings.py")
+    # If secret key is prefixed with FLASK_, load prefixed env vars
+    if os.getenv("FLASK_SECRET_KEY"):
+        app.config.from_prefixed_env()
+    else:
+        app.config.from_pyfile(filename="settings.py")
+
     app.context_processor(base_context)
 
     # Add CORS headers
@@ -237,8 +242,6 @@ class FlaskBase(flask.Flask):
         super().__init__(name, *args, **kwargs)
 
         self.service = service
-
-        self.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 
         self.url_map.strict_slashes = False
         self.url_map.converters["regex"] = RegexConverter

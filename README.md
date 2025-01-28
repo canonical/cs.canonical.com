@@ -1,6 +1,12 @@
-# Template parser backend
+# Websites Content System
 
-Backend service for the CMS template parser
+This is a portal tailored to managing content on our websites. It's useful for:
+- Making change requests on specific pages, and automating the related JIRA overhead
+- Assigning owners to individual pages
+- Collecting all relevant links for a page in one place:
+  - copydoc link
+  - link to github code
+  - product category
 
 ## Getting it running
 
@@ -17,8 +23,8 @@ PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
-VALKEY_HOST=valkey
-VALKEY_PORT=6379
+REDIS_HOST=valkey
+REDIS_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
 REPO_ORG=https://github.com/canonical
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
@@ -208,8 +214,8 @@ Then modify the .env file, and change the following to match your valkey and pos
 
 ```
 # .env
-VALKEY_HOST=localhost
-VALKEY_PORT=6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 ```
 

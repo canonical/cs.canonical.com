@@ -1,0 +1,142 @@
+application: cs-canonical-com
+application-config:
+  juju-application-path:
+    default: /
+    description: the relative http path used to access an application
+    source: default
+    type: string
+    value: /
+  juju-external-hostname:
+    description: the external hostname of an exposed application
+    source: unset
+    type: string
+  kubernetes-ingress-allow-http:
+    default: false
+    description: whether to allow HTTP traffic to the ingress controller
+    source: default
+    type: bool
+    value: false
+  kubernetes-ingress-class:
+    default: nginx
+    description: the class of the ingress controller to be used by the ingress resource
+    source: default
+    type: string
+    value: nginx
+  kubernetes-ingress-ssl-passthrough:
+    default: false
+    description: whether to passthrough SSL traffic to the ingress controller
+    source: default
+    type: bool
+    value: false
+  kubernetes-ingress-ssl-redirect:
+    default: false
+    description: whether to redirect SSL traffic to the ingress controller
+    source: default
+    type: bool
+    value: false
+  kubernetes-service-annotations:
+    description: a space separated set of annotations to add to the service
+    source: unset
+    type: attrs
+  kubernetes-service-external-ips:
+    description: list of IP addresses for which nodes in the cluster will also accept
+      traffic
+    source: unset
+    type: string
+  kubernetes-service-externalname:
+    description: external reference that kubedns or equivalent will return as a CNAME
+      record
+    source: unset
+    type: string
+  kubernetes-service-loadbalancer-ip:
+    description: LoadBalancer will get created with the IP specified in this field
+    source: unset
+    type: string
+  kubernetes-service-loadbalancer-sourceranges:
+    description: traffic through the load-balancer will be restricted to the specified
+      client IPs
+    source: unset
+    type: string
+  kubernetes-service-target-port:
+    description: name or number of the port to access on the pods targeted by the
+      service
+    source: unset
+    type: string
+  kubernetes-service-type:
+    description: determines how the Service is exposed
+    source: unset
+    type: string
+  trust:
+    default: false
+    description: Does this application have access to trusted credentials
+    source: default
+    type: bool
+    value: false
+charm: cs-canonical-com
+settings:
+  flask-application-root:
+    description: Path in which the application / web server is mounted. This configuration
+      will set the FLASK_APPLICATION_ROOT environment variable. Run `app.config.from_prefixed_env()`
+      in your Flask application in order to receive this configuration.
+    source: unset
+    type: string
+  flask-debug:
+    description: Whether Flask debug mode is enabled.
+    source: unset
+    type: boolean
+  flask-env:
+    description: What environment the Flask app is running in, by default it's 'production'.
+    source: unset
+    type: string
+  flask-permanent-session-lifetime:
+    description: Time in seconds for the cookie to expire in the Flask application
+      permanent sessions. This configuration will set the FLASK_PERMANENT_SESSION_LIFETIME
+      environment variable. Run `app.config.from_prefixed_env()` in your Flask application
+      in order to receive this configuration.
+    source: unset
+    type: int
+  flask-preferred-url-scheme:
+    default: HTTPS
+    description: Scheme for generating external URLs when not in a request context
+      in the Flask application. By default, it's "HTTPS". This configuration will
+      set the FLASK_PREFERRED_URL_SCHEME environment variable. Run `app.config.from_prefixed_env()`
+      in your Flask application in order to receive this configuration.
+    source: default
+    type: string
+    value: HTTPS
+  flask-secret-key:
+    description: The secret key used for securely signing the session cookie and for
+      any other security related needs by your Flask application. This configuration
+      will set the FLASK_SECRET_KEY environment variable. Run `app.config.from_prefixed_env()`
+      in your Flask application in order to receive this configuration.
+    source: user
+    type: string
+    value: somesecret
+  flask-session-cookie-secure:
+    description: Set the secure attribute in the Flask application cookies. This configuration
+      will set the FLASK_SESSION_COOKIE_SECURE environment variable. Run `app.config.from_prefixed_env()`
+      in your Flask application in order to receive this configuration.
+    source: unset
+    type: boolean
+  webserver-keepalive:
+    description: Time in seconds for webserver to wait for requests on a Keep-Alive
+      connection.
+    source: unset
+    type: int
+  webserver-threads:
+    description: Run each webserver worker with the specified number of threads.
+    source: unset
+    type: int
+  webserver-timeout:
+    description: Time in seconds to kill and restart silent webserver workers.
+    source: unset
+    type: int
+  webserver-worker-class:
+    description: The webserver worker process class for handling requests. Can be
+      either 'gevent' or 'sync'.
+    source: unset
+    type: string
+  webserver-workers:
+    description: The number of webserver worker processes for handling requests.
+    source: unset
+    type: int

@@ -1,17 +1,17 @@
 import enum
-import yaml
+import os
 from datetime import datetime, timezone
 
+import yaml
 from flask import Flask
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship
 from sqlalchemy.orm.session import Session
-from sqlalchemy.exc import IntegrityError
 
-
-with open("konf/data.yaml") as file:
+with open("data/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
 
@@ -182,8 +182,16 @@ class WebpageProduct(db.Model, DateTimeMixin):
 
 
 def init_db(app: Flask):
+    # Set up the database connection for juju relations
+    if os.environ.get("POSTGRESQL_DB_CONNECT_STRING"):
+        app.config["SQLALCHEMY_DATABASE_URI"] = os.environ[
+            "POSTGRESQL_DB_CONNECT_STRING"
+        ]
     Migrate(app, db)
     db.init_app(app)
+    # Automatically upgrade to head revision
+    with app.app_context():
+        upgrade()
 
     # Create default project and user
     @app.before_request
