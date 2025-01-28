@@ -58,7 +58,7 @@ def add_site_locks(locks: dict):
     multiple threads from trying to update the same repository
     at the same time.
     """
-    with open("sites.yaml") as f:
+    with open("data/sites.yaml") as f:
         data = yaml.safe_load(f)
         for site in data["sites"]:
             locks[site] = Lock()

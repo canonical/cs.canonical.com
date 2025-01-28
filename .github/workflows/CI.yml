@@ -121,8 +121,8 @@ jobs:
           GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: secret_key
-          VALKEY_HOST: localhost
-          VALKEY_PORT: 6379
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
           GH_TOKEN: token
           REPO_ORG: https://github.com/canonical
           JIRA_EMAIL: example@canonical.com
@@ -170,8 +170,8 @@ jobs:
           docker run \
           -p 8104:8104 \
           -e SECRET_KEY=secret_key \
-          -e VALKEY_HOST=localhost \
-          -e VALKEY_PORT=6379 \
+          -e REDIS_HOST=localhost \
+          -e REDIS_PORT=6379 \
           -e GH_TOKEN=token \
           -e REPO_ORG=https://github.com/canonical \
           -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \

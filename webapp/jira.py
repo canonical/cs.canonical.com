@@ -7,9 +7,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from flask import Flask
 
-from webapp.models import User, JiraTask, Webpage, Project, db
 from webapp.helper import RequestType
-from webapp.site_repository import SiteRepository
+from webapp.models import User, db
 
 
 class Jira:
@@ -296,10 +295,13 @@ class Jira:
 
 
 def init_jira(app):
-    app.config["JIRA"] = Jira(
-        url=app.config["JIRA_URL"],
-        email=app.config["JIRA_EMAIL"],
-        token=app.config["JIRA_TOKEN"],
-        labels=app.config["JIRA_LABELS"].split(","),
-        copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
-    )
+    try:
+        app.config["JIRA"] = Jira(
+            url=app.config["JIRA_URL"],
+            email=app.config["JIRA_EMAIL"],
+            token=app.config["JIRA_TOKEN"],
+            labels=app.config["JIRA_LABELS"].split(","),
+            copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
+        )
+    except Exception as error:
+        app.logger.info(f"Unable to initialize jira: {error}")
