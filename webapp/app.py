@@ -8,8 +8,12 @@ from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
 from webapp.sso import login_required
+from webapp.tasks import init_celery
 
 app = create_app()
+
+# Tasks
+celery_app = init_celery(app)
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

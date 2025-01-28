@@ -1,121 +1,62 @@
-import functools
 import os
-import time
-from multiprocessing import Lock, Process, Queue
 
 import yaml
+from celery import Celery, Task, shared_task
+from celery.schedules import crontab
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from webapp.models import db
 from webapp.site_repository import SiteRepository
 
-# Crate the task queue
-TASK_QUEUE = Queue()
-# Create the locks for the site trees
-LOCKS = {}
-# Default delay between runs for updating the tree
-TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
-# Default delay between runs for updating Jira task statuses
-UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", 5))
+app = Celery()
 
 
-def init_tasks(app: Flask):
-    """
-    Start background tasks.
-    """
-
-    @app.before_request
-    def start_tasks():
-        # Only run once
-        app.before_request_funcs[None].remove(start_tasks)
-
-        # Create locks for the preset site trees
-        add_site_locks(LOCKS)
-
-        # Start the event loop
-        Process(
-            target=execute_tasks_in_queue,
-            args=(TASK_QUEUE,),
-        ).start()
-
-        # Load site trees
-        Process(
-            target=load_site_trees,
-            args=(app, db, TASK_QUEUE, LOCKS),
-        ).start()
-
-        # Update Jira task statuses
-        Process(
-            target=update_jira_statuses,
-            args=(app, TASK_QUEUE, LOCKS),
-        ).start()
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls load_site_trees() every 10 minutes.
+    sender.add_periodic_task(
+        crontab(minute=10),
+        load_site_trees_cron.s(app, db),
+        name="add every 10",
+    )
 
 
-def add_site_locks(locks: dict):
-    """
-    Create locks for the site trees. These are used to prevent
-    multiple threads from trying to update the same repository
-    at the same time.
-    """
-    with open("data/sites.yaml") as f:
-        data = yaml.safe_load(f)
-        for site in data["sites"]:
-            locks[site] = Lock()
-    return locks
-
-
-def scheduled_task(delay=30):
-    """
-    Wrapper for long running tasks, with an optional delay between runs.
-    """
-
-    def outerwrapper(func, delay=delay):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            while True:
-                func(*args, **kwargs)
-                time.sleep(delay * 60)
-
-        return wrapper
-
-    return outerwrapper
-
-
-@scheduled_task(delay=1)
-def execute_tasks_in_queue(queue: Queue):
-    """
-    Start the event loop.
-    """
-    queue.get()
-
-
-@scheduled_task(delay=TASK_DELAY)
-def load_site_trees(
-    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
-):
+@shared_task
+def load_site_trees_cron(app: Flask, database: SQLAlchemy):
     """
     Load the site trees from the queue.
     """
     app.logger.info("Running scheduled task: load_site_trees")
-    with open(app.config["BASE_DIR"] + "/" + "sites.yaml") as f:
+    with open(app.config["BASE_DIR"] + "/data/sites.yaml") as f:
         data = yaml.safe_load(f)
         for site in data["sites"]:
             # Enqueue the sites for setup
-            site_repository = SiteRepository(
-                site, app, db=database, task_locks=task_locks
-            )
+            site_repository = SiteRepository(site, app, db=database)
             # build the tree from GH source without using cache
-            queue.put(site_repository.get_tree(True))
+            site_repository.get_tree(no_cache=True)
 
 
-@scheduled_task(delay=UPDATE_STATUS_DELAY)
-def update_jira_statuses(
-    app: Flask, queue: Queue, task_locks: dict
-):
-    """
-    Update the Jira tasks statuses.
-    """
-    app.logger.info("Running scheduled task: update_jira_statuses")
-    queue.put(app.config["JIRA"].update_tasks_statuses(app, task_locks))
+def init_celery(app: Flask) -> Celery:
+    class FlaskTask(Task):
+        def __call__(self, *args: object, **kwargs: object) -> object:
+            with app.app_context():
+                return self.run(*args, **kwargs)
 
+    celery_app = Celery(app.name, task_cls=FlaskTask)
+    # Use redis if available
+    if redis_url := os.environ.get("REDIS_DB_CONNECT_STRING"):
+        broker_url = redis_url
+    else:
+        broker_url = "sqla" + os.environ.get("SQLALCHEMY_DATABASE_URI", "")
+
+    app.config.from_mapping(
+        CELERY=dict(
+            broker_url=broker_url,
+            result_backend=broker_url,
+            task_ignore_result=True,
+        ),
+    )
+    celery_app.set_default()
+    app.extensions["celery"] = celery_app
+    return celery_app

@@ -12,7 +12,6 @@ from webapp.gdrive import init_gdrive
 from webapp.jira import init_jira
 from webapp.models import init_db
 from webapp.sso import init_sso
-from webapp.tasks import init_tasks
 
 
 def create_app():
@@ -22,16 +21,23 @@ def create_app():
         template_folder="../templates",
         static_folder="../static",
     )
-    # If secret key is prefixed with FLASK_, load prefixed env vars
+    # Handle secrets for juju environment
     if os.getenv("FLASK_SECRET_KEY"):
         app.config.from_prefixed_env()
+        app.config["BASE_DIR"] = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
     else:
         app.config.from_pyfile(filename="settings.py")
 
+    # Allow CORS in development mode
+    if os.getenv("FLASK_DEBUG"):
+        CORS(app, origins=["*"])
+    else:
+        CORS(app, origins=["login.ubuntu.com"])
+
     app.context_processor(base_context)
 
-    # Add CORS headers
-    CORS(app, origins=["login.ubuntu.com"])
 
     # Initialize database
     init_db(app)
@@ -43,7 +49,7 @@ def create_app():
     init_cache(app)
 
     # Initialize tasks
-    init_tasks(app)
+    # init_tasks(app)
 
     # Initialize JIRA
     init_jira(app)
