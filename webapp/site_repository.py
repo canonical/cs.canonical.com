@@ -2,7 +2,6 @@ import os
 import re
 import subprocess
 from contextlib import contextmanager
-from multiprocessing import Lock
 from pathlib import Path
 from typing import Callable, TypedDict
 
@@ -44,7 +43,6 @@ class SiteRepository:
     # Directory to clone repositories
     CACHE_KEY_PREFIX = "SITE_REPOSITORY"
 
-    LOCKS: dict = {}
     db: SQLAlchemy = db
 
     def __init__(
@@ -89,6 +87,10 @@ class SiteRepository:
         # Increase the buffer size for large files
         self.__run__(
             "git config --global http.postBuffer 1040M",
+            "Error configuring git",
+        )
+        self.__run__(
+            "git config --global safe.directory '*'",
             "Error configuring git",
         )
 
@@ -351,24 +353,25 @@ class SiteRepository:
         # Save the tree metadata to the database and return an updated tree
         # that has all fields
         tree = self.create_webpages_for_tree(self.db, base_tree)
-
         self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
 
     def get_tree_from_db(self):
-        webpages = self.db.session.execute(
-            select(Webpage).where(
-                Webpage.project_id == get_project_id(self.repository_uri)
+        webpages = (
+            self.db.session.execute(
+                select(Webpage).where(
+                    Webpage.project_id == get_project_id(self.repository_uri)
+                )
             )
-        ).scalars()
+            .scalars()
+            .all()
+        )
         # build tree from repository in case DB table is empty
         if not webpages:
             self.get_new_tree()
 
         tree = get_tree_struct(db.session, webpages)
-
         self.logger.info(f"Tree fetched for {self.repository_uri}")
-
         return tree
 
     def get_tree(self, no_cache: bool = False):
@@ -488,16 +491,16 @@ class SiteRepository:
 
     def get_tree_sync(self, no_cache: bool = False):
         """
-        Try to get the tree from the cache, or create a new task to load it.
+        Try to get the tree from the cache, database or repository.
         """
         # First try to get the tree from the cache
         if not no_cache:
             if tree := self.get_tree_from_cache():
                 return tree
-        else:
-            self.invalidate_cache()
 
         self.logger.info(f"Loading {self.repository_uri} from database")
+        self.invalidate_cache()
+
         # Load the tree from database
         try:
             tree = self.get_tree_from_db()
@@ -515,16 +518,6 @@ class SiteRepository:
             "copy_doc_link": "",
             "children": [],
         }
-
-    def get_task_lock(self):
-        """
-        Get the lock for the current repository.
-        """
-        if lock := self.LOCKS.get(self.repository_uri):
-            return lock
-        # If a lock doesn't exist, create one
-        self.LOCKS[self.repository_uri] = Lock()
-        return self.LOCKS[self.repository_uri]
 
     def add_pages_to_list(self, tree, page_list: list):
         # Append root node name
