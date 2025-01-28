@@ -1,10 +1,7 @@
-from flask import jsonify, Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 from flask_pydantic import validate
 
-from webapp.sso import login_required
 from webapp.enums import JiraStatusTransitionCodes
-from webapp.site_repository import SiteRepository
-from webapp.tasks import LOCKS
 from webapp.helper import (
     create_copy_doc,
     create_jira_task,
@@ -30,6 +27,8 @@ from webapp.schemas import (
     CreatePageModel,
     RemoveWebpageModel,
 )
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
 
 jira_blueprint = Blueprint("jira", __name__, url_prefix="/api")
 
