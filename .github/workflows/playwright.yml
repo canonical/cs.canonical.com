@@ -27,8 +27,8 @@ jobs:
     env: 
       DISABLE_SSO: True
       SECRET_KEY: secret_key 
-      VALKEY_HOST: localhost 
-      VALKEY_PORT: 6379 
+      REDIS_HOST: localhost 
+      REDIS_PORT: 6379 
       GH_TOKEN: token 
       REPO_ORG: https://github.com/canonical 
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres 

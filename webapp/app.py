@@ -1,14 +1,19 @@
 from os import environ
+
 from flask import render_template
 
 from webapp import create_app
-from webapp.sso import login_required
-from webapp.routes.tree import tree_blueprint
-from webapp.routes.user import user_blueprint
 from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
+from webapp.routes.tree import tree_blueprint
+from webapp.routes.user import user_blueprint
+from webapp.sso import login_required
+from webapp.tasks import init_celery
 
 app = create_app()
+
+# Tasks
+celery_app = init_celery(app)
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

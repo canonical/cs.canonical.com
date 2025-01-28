@@ -1,8 +1,5 @@
-from flask import jsonify, request, Blueprint, current_app, session
+from flask import Blueprint, current_app, jsonify, request, session
 
-from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
-from webapp.tasks import LOCKS
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import (
     Project,
@@ -12,6 +9,8 @@ from webapp.models import (
     db,
     get_or_create,
 )
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
@@ -54,9 +53,7 @@ def set_reviewers():
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(
-        project.name, current_app, task_locks=LOCKS
-    )
+    site_repository = SiteRepository(project.name, current_app)
     # clean the cache for a the new reviewers to appear in the tree
     site_repository.invalidate_cache()
 
@@ -79,9 +76,7 @@ def set_owner():
         db.session.commit()
 
         project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(
-            project.name, current_app, task_locks=LOCKS
-        )
+        site_repository = SiteRepository(project.name, current_app)
         # clean the cache for a new owner to appear in the tree
         site_repository.invalidate_cache()
 

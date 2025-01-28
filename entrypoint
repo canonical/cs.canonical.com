@@ -18,12 +18,7 @@ activate() {
 
     if [ -z ${FLASK_DEBUG+x} ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
-    else
-        RUN_COMMAND="${RUN_COMMAND} -w 2"
     fi
-
-    # Run new migrations if needed
-    flask db upgrade
 
     ${RUN_COMMAND}
 }

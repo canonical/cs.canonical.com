@@ -9,14 +9,16 @@ if private_key := environ.get("GOOGLE_PRIVATE_KEY"):
     with contextlib.suppress(Error):
         private_key = base64.b64decode(private_key).replace(b"\\n", b"\n")
 
-
-VALKEY_HOST = environ.get("VALKEY_HOST", "localhost")
-VALKEY_PORT = environ.get("VALKEY_PORT", 6379)
+REDIS_HOST = environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = environ.get("REDIS_PORT", 6379)
 REPO_ORG = environ.get("REPO_ORG", "https://github.com/canonical")
 GH_TOKEN = environ.get("GH_TOKEN", "")
 SECRET_KEY = environ.get("SECRET_KEY")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "sqlite:///project.db")
+SQLALCHEMY_DATABASE_URI = environ.get(
+    "POSTGRESQL_DB_CONNECT_STRING",
+    environ.get("DATABASE_URL", "sqlite:///project.db"),
+)
 JIRA_EMAIL = environ.get("JIRA_EMAIL")
 JIRA_TOKEN = environ.get("JIRA_TOKEN")
 JIRA_URL = environ.get("JIRA_URL")
@@ -37,4 +39,4 @@ GOOGLE_CREDENTIALS = {
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/websites-copy-docs-627%40web-engineering-436014.iam.gserviceaccount.com",  # noqa: E501
     "universe_domain": "googleapis.com",
 }
-DEVELOPMENT_MODE = environ.get("DEVEL", True)
+FLASK_DEBUG = environ.get("FLASK_DEBUG", False)

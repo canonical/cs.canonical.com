@@ -1,10 +1,7 @@
-from flask import jsonify, Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 from flask_pydantic import validate
 
-from webapp.sso import login_required
 from webapp.enums import JiraStatusTransitionCodes
-from webapp.site_repository import SiteRepository
-from webapp.tasks import LOCKS
 from webapp.helper import (
     create_copy_doc,
     create_jira_task,
@@ -28,6 +25,8 @@ from webapp.schemas import (
     CreatePageModel,
     RemoveWebpageModel,
 )
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
 
 jira_blueprint = Blueprint("jira", __name__, url_prefix="/api")
 
@@ -43,9 +42,7 @@ def request_changes(body: ChangesRequestModel):
 
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
         project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(
-            project.name, current_app, task_locks=LOCKS
-        )
+        site_repository = SiteRepository(project.name, current_app)
         # clean the cache for a new Jira task to appear in the tree
         site_repository.invalidate_cache()
     except Exception as e:
@@ -176,9 +173,7 @@ def remove_webpage(body: RemoveWebpageModel):
         db.session.commit()
 
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(
-        project.name, current_app, task_locks=LOCKS
-    )
+    site_repository = SiteRepository(project.name, current_app)
     # clean the cache for a page to be removed from the tree
     site_repository.invalidate_cache()
 
