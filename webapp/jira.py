@@ -6,8 +6,8 @@ from datetime import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 
-from webapp.models import User, db
 from webapp.helper import RequestType
+from webapp.models import User, db
 
 
 class Jira:
@@ -257,10 +257,13 @@ class Jira:
 
 
 def init_jira(app):
-    app.config["JIRA"] = Jira(
-        url=app.config["JIRA_URL"],
-        email=app.config["JIRA_EMAIL"],
-        token=app.config["JIRA_TOKEN"],
-        labels=app.config["JIRA_LABELS"].split(","),
-        copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
-    )
+    try:
+        app.config["JIRA"] = Jira(
+            url=app.config["JIRA_URL"],
+            email=app.config["JIRA_EMAIL"],
+            token=app.config["JIRA_TOKEN"],
+            labels=app.config["JIRA_LABELS"].split(","),
+            copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
+        )
+    except Exception as error:
+        app.logger.info(f"Unable to initialize jira: {error}")

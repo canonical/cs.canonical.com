@@ -1,4 +1,4 @@
-from flask import jsonify, Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
@@ -33,7 +33,7 @@ def get_tree(uri: str, branch: str = "main", no_cache: bool = False):
     # Disable caching for this response
     response.cache_control.no_store = True
     # Allow CORS in development mode
-    if current_app.config["DEVELOPMENT_MODE"]:
+    if current_app.config["FLASK_DEBUG"]:
         response.headers.add("Access-Control-Allow-Origin", "*")
 
     return response

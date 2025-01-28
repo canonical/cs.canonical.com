@@ -5,17 +5,18 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-import valkey
+import redis
 from flask import Flask
+from redis import exceptions as redis_exceptions
 
 
 def init_cache(app: Flask):
     try:
-        cache = ValkeyCache(app)
-    except ConnectionError as e:
+        cache = RedisCache(app)
+    except redis_exceptions.ConnectionError as e:
         cache = FileCache(app)
         app.logger.info(
-            f"Error: {e} \nValkey cache is not available."
+            f"Error: {e} \Redis cache is not available."
             " Using FileCache instead."
         )
     app.config["CACHE"] = cache
@@ -45,35 +46,31 @@ class Cache(ABC):
         """Check if the cache is available"""
         pass
 
+class RedisCache(Cache):
+    """Cache interface"""
 
-class ValkeyCache(Cache):
     """Cache interface"""
 
     CACHE_PREFIX = "WEBSITES-CONTENT-SYSTEM"
 
     def __init__(self, app: Flask):
-        self.host = app.config["VALKEY_HOST"]
-        self.port = app.config["VALKEY_PORT"]
         self.logger = app.logger
-        self.instance = self.connect()
+        self.instance = self.connect(app)
 
-    def connect(self):
+    def connect(self, app):
         """
-        Return an instance of the valkey cache. If not available, throw a
+        Return an instance of the redis cache. If not available, throw a
         ConnectionError.
         """
-        self.logger.info(
-            f"Connecting to Valkey cache at {self.host}:{self.port}"
-        )
-        try:
-            r = valkey.Valkey(host=self.host, port=self.port, db=0)
-            r.ping()
-            return r
-        except (
-            valkey.exceptions.ConnectionError,
-            valkey.exceptions.TimeoutError,
-        ):
-            raise ConnectionError("Valkey cache is not available")
+        self.logger.info(f"Connecting to Redis cache.")
+        if url := os.environ.get("REDIS_DB_CONNECT_STRING"):
+            r = redis.from_url(url)
+        else:
+            host = app.config["REDIS_HOST"]
+            port = app.config["REDIS_PORT"]
+            r = redis.Redis(host=host, port=port, db=0)
+        r.ping()
+        return r
 
     def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
@@ -104,7 +101,7 @@ class ValkeyCache(Cache):
         try:
             self.instance.ping()
             return True
-        except valkey.exceptions.ConnectionError:
+        except redis_exceptions.ConnectionError:
             return False
         except Exception as e:
             raise e

@@ -1,0 +1,78 @@
+# This file configures Charmcraft.
+# See https://juju.is/docs/sdk/charmcraft-config for guidance.
+name: cs-canonical-com
+type: charm
+bases:
+  - build-on:
+      - name: ubuntu
+        channel: "22.04"
+    run-on:
+      - name: ubuntu
+        channel: "22.04"
+summary: This is a portal tailored to managing content on our websites
+description: |
+  It's useful for:
+  - Making change requests on specific pages, and automating the related JIRA overhead
+  - Assigning owners to individual pages
+  - Collecting all relevant links for a page in one place:
+  - copydoc link
+  - link to github code
+  - product category
+extensions:
+  - flask-framework
+config:
+  options:
+    directory-api-token:
+      type: string
+      description: "Token to access the directory API"
+      default: "token"
+    jira-labels:
+      type: string
+      description: "Comma-separated list of JIRA labels to apply to new JIRA issues"
+      default: "sites_BAU"
+    jira-email:
+      type: string
+      description: "Email address to use for JIRA API authentication"
+      default: ""
+    jira-token:
+      type: string
+      description: "JIRA API token"
+      default: ""
+    jira-url:
+      type: string
+      description: "JIRA API URL"
+      default: ""
+    jira-copy-updates-epic:
+      type: string
+      description: "JIRA epic to use for copy updates"
+      default: ""
+    google-drive-folder-id:
+      type: string
+      description: "Google Drive folder ID for storing copy updates"
+      default: ""
+    google-private-key:
+      type: string
+      description: "Google service account private key"
+      default: ""
+    google-private-key-id:
+      type: string
+      description: "Google service account private key ID"
+      default: ""
+    gh-token:
+      type: string
+      description: "GitHub token for accessing the GitHub API"
+      default: ""
+    repo-org:
+      type: string
+      description: "GitHub organization to use for repositories"
+      default: "https://github.com/canonical"
+
+requires:
+  postgresql:
+    interface: postgresql_client
+    optional: false
+    limit: 1
+  redis:
+    interface: redis
+    optional: false
+    limit: 1
