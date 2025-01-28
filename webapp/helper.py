@@ -1,8 +1,10 @@
-from os import environ
-from webapp.models import JiraTask, User, Project, Webpage, db, get_or_create
 from enum import Enum
+from os import environ
 
 import requests
+from requests.models import Response
+
+from webapp.models import JiraTask, Project, User, Webpage, db, get_or_create
 
 
 class RequestType(Enum):
@@ -248,14 +250,21 @@ def get_user_from_directory_by_key(key, value):
 
     # Currently directory-api only supports strict comparison of field values,
     # so we have to send two requests instead of one for first and last names
-    response = requests.post(
-        "https://directory.wpe.internal/graphql/",
-        json={
-            "query": query,
-            "variables": {"value": value.strip()},
-        },
-        headers=headers,
-        verify=False,
-    )
+    try:
+        response = requests.post(
+            "https://directory.wpe.internal/graphql/",
+            json={
+                "query": query,
+                "variables": {"value": value.strip()},
+            },
+            headers=headers,
+            verify=False,
+        )
+    except requests.exceptions.ConnectionError:
+        response = Response()
+        response.code = "service unavailable"
+        response.error_type = "service unavailable"
+        response.status_code = 503
+        response._content = b'{ "key" : "a" }'
 
     return response
