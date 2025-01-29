@@ -7,7 +7,7 @@ import yaml
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from webapp.models import db
+from webapp.models import db, JiraTask
 from webapp.site_repository import SiteRepository
 
 # Crate the task queue
@@ -41,6 +41,12 @@ def init_tasks(app: Flask):
         Process(
             target=load_site_trees,
             args=(app, db, TASK_QUEUE, LOCKS),
+        ).start()
+
+        # Update Jira task statuses
+        Process(
+            target=update_jira_statuses,
+            args=(app, TASK_QUEUE),
         ).start()
 
 
@@ -99,3 +105,18 @@ def load_site_trees(
             )
             # build the tree from GH source without using cache
             queue.put(site_repository.get_tree(True))
+
+
+@scheduled_task(delay=TASK_DELAY)
+def update_jira_statuses(
+    app: Flask, queue: Queue
+):
+    """
+    Update the Jira task statuses.
+    """
+    app.logger.info("Running scheduled task: update_jira_statuses")
+    jira_tasks = JiraTask.query.all()
+    if jira_tasks:
+        for task in jira_tasks:
+            queue.put(app.config["JIRA"].update_task_status(task))
+

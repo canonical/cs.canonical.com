@@ -126,8 +126,8 @@ class JIRATaskStatus:
     TRIAGED = "TRIAGED"
     UNTRIAGED = "UNTRIAGED"
     BLOCKED = "BLOCKED"
-    IN_PROGRESS = "IN_PROGRESS"
-    TO_BE_DEPLOYED = "TO_BE_DEPLOYED"
+    IN_PROGRESS = "IN PROGRESS"
+    TO_BE_DEPLOYED = "TO BE DEPLOYED"
     DONE = "DONE"
     REJECTED = "REJECTED"
 
@@ -139,7 +139,7 @@ class JiraTask(db.Model, DateTimeMixin):
     jira_id: str = Column(String)
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     user_id: int = Column(Integer, ForeignKey("users.id"))
-    status: str = Column(String, default=JIRATaskStatus.TRIAGED)
+    status: str = Column(String, default=JIRATaskStatus.UNTRIAGED)
     summary: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="jira_tasks")

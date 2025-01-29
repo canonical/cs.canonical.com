@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 
-from webapp.models import User, db
+from webapp.models import User, JiraTask, db
 from webapp.helper import RequestType
 
 
@@ -254,6 +254,21 @@ class Jira:
             url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
             data=payload,
         )
+    
+    def update_task_status(self, task: JiraTask):
+        """
+        Get the status of a Jira task and update it if it changed.
+
+        Args:
+            task (JiraTask): The Jira task instance.
+        """
+        response = self.__request__(
+            method="GET",
+            url=f"{self.url}/rest/api/3/issue/{task.jira_id}?fields=status",
+        )
+        if task.status != response["fields"]["status"]["name"].upper():
+            task.status = response["fields"]["status"]["name"].upper()
+            db.session.commit()
 
 
 def init_jira(app):
