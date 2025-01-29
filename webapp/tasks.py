@@ -14,8 +14,10 @@ from webapp.site_repository import SiteRepository
 TASK_QUEUE = Queue()
 # Create the locks for the site trees
 LOCKS = {}
-# Default delay between runs for scheduled tasks
+# Default delay between runs for updating the tree
 TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
+# Default delay between runs for updating Jira task statuses
+UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", 5))
 
 
 def init_tasks(app: Flask):
@@ -107,7 +109,7 @@ def load_site_trees(
             queue.put(site_repository.get_tree(True))
 
 
-@scheduled_task(delay=TASK_DELAY)
+@scheduled_task(delay=UPDATE_STATUS_DELAY)
 def update_jira_statuses(
     app: Flask, queue: Queue
 ):
