@@ -7,7 +7,7 @@ import yaml
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from webapp.models import db, JiraTask
+from webapp.models import db
 from webapp.site_repository import SiteRepository
 
 # Crate the task queue
@@ -48,7 +48,7 @@ def init_tasks(app: Flask):
         # Update Jira task statuses
         Process(
             target=update_jira_statuses,
-            args=(app, TASK_QUEUE),
+            args=(app, TASK_QUEUE, LOCKS),
         ).start()
 
 
@@ -111,14 +111,11 @@ def load_site_trees(
 
 @scheduled_task(delay=UPDATE_STATUS_DELAY)
 def update_jira_statuses(
-    app: Flask, queue: Queue
+    app: Flask, queue: Queue, task_locks: dict
 ):
     """
-    Update the Jira task statuses.
+    Update the Jira tasks statuses.
     """
     app.logger.info("Running scheduled task: update_jira_statuses")
-    jira_tasks = JiraTask.query.all()
-    if jira_tasks:
-        for task in jira_tasks:
-            queue.put(app.config["JIRA"].update_task_status(task))
+    queue.put(app.config["JIRA"].update_tasks_statuses(app, task_locks))
 
