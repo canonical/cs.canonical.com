@@ -13,8 +13,8 @@ class RequestType(Enum):
 
 def get_or_create_user_id(user):
     # If user does not exist, create a new user in the "users" table
-    user_hrc_id = user.get("id")
-    user_exists = User.query.filter_by(hrc_id=user_hrc_id).first()
+    user_email = user.get("email")
+    user_exists = User.query.filter_by(email=user_email).first()
     if not user_exists:
         user_exists, _ = get_or_create(
             db.session,
@@ -24,7 +24,7 @@ def get_or_create_user_id(user):
             team=user.get("team"),
             department=user.get("department"),
             job_title=user.get("jobTitle"),
-            hrc_id=user_hrc_id,
+            hrc_id=user.get("id"),
         )
 
     return user_exists.id
