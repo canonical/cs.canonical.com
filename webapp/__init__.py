@@ -2,6 +2,7 @@ import hashlib
 import os
 
 import flask
+from flask_cors import CORS
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -23,6 +24,9 @@ def create_app():
     )
     app.config.from_pyfile("settings.py")
     app.context_processor(base_context)
+
+    # Add CORS headers
+    CORS(app, origins=["login.ubuntu.com"])
 
     # Initialize database
     init_db(app)
@@ -75,9 +79,15 @@ def set_cache_control_headers(response):
     Default caching rules that should work for most pages
     """
 
-    if flask.request.path.startswith("/_status"):
+    if (
+        flask.request.path.startswith("/_status")
+        or flask.request.path == "/app"
+    ):
         # Our status endpoints need to be uncached
-        # to report accurate information at all times
+        # to report accurate information at all times.
+        # The base path is also uncached to ensure that we don't cache the base
+        # state after logging in. We can do this as we serve a single page app
+        # from a unique url.
         response.cache_control.no_store = True
 
     elif (

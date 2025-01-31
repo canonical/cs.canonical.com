@@ -7,6 +7,7 @@ import type {
   IPagesResponse,
   IRequestChanges,
   IRequestRemoval,
+  ISetProducts,
 } from "@/services/api/types/pages";
 import { type IUser } from "@/services/api/types/users";
 
@@ -39,5 +40,9 @@ export class PagesApiClass extends BasicApiClass {
 
   public requestRemoval(body: IRequestRemoval): Promise<void> {
     return this.callApi(ENDPOINTS.requestRemoval, REST_TYPES.POST, body);
+  }
+
+  public setProducts(body: ISetProducts) {
+    return this.callApi(ENDPOINTS.setProducts, REST_TYPES.POST, body);
   }
 }

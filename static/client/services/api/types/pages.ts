@@ -1,3 +1,4 @@
+import type { IProduct } from "./products";
 import type { IUser } from "./users";
 
 export const PageStatus = {
@@ -26,6 +27,7 @@ export interface IPage {
   status: (typeof PageStatus)[keyof typeof PageStatus];
   jira_tasks: IJiraTask[];
   children: IPage[];
+  products: IProduct[];
 }
 
 export interface IPagesResponse {
@@ -57,7 +59,7 @@ export const ChangeRequestType = {
 
 export interface IRequestChanges {
   due_date: string;
-  reporter_id: number;
+  reporter_struct: IUser;
   webpage_id: number;
   type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
   summary?: string;
@@ -66,7 +68,12 @@ export interface IRequestChanges {
 
 export interface IRequestRemoval {
   due_date: string;
-  reporter_id: number;
+  reporter_struct: IUser;
   webpage_id: number;
   description: string;
+}
+
+export interface ISetProducts {
+  webpage_id: number;
+  product_ids: number[];
 }
