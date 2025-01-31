@@ -14,6 +14,7 @@ from sqlalchemy.exc import IntegrityError
 with open("konf/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -88,7 +89,11 @@ class Webpage(db.Model, DateTimeMixin):
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
     reviewers = relationship("Reviewer", back_populates="webpages")
-    jira_tasks = relationship("JiraTask", back_populates="webpages")
+    jira_tasks = relationship(
+        "JiraTask",
+        back_populates="webpages",
+        order_by="desc(JiraTask.created_at)",
+    )
     webpage_products = relationship(
         "WebpageProduct", back_populates="webpages"
     )
@@ -164,7 +169,7 @@ class WebpageProduct(db.Model, DateTimeMixin):
     id: int = Column(Integer, primary_key=True)
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     product_id: int = Column(Integer, ForeignKey("products.id"))
-    
+
     webpages = relationship("Webpage", back_populates="webpage_products")
     products = relationship("Product", back_populates="webpage_products")
 
@@ -190,7 +195,7 @@ def init_db(app: Flask):
                     db.session,
                     Product,
                     slug=product["slug"],
-                    name=product["name"]
+                    name=product["name"],
                 )
         except IntegrityError:
             pass
