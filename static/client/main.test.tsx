@@ -11,8 +11,13 @@ describe("main", () => {
   });
 
   it("renders the app in the root element", async () => {
-    await act(() => import("./main"));
+    await act(() => dynamicImport("./main"));
     const container = document.getElementById("root") as HTMLElement;
     await waitFor(() => expect(container.querySelector(".l-application")).toBeInTheDocument());
   });
 });
+
+// Helper function to dynamically import a module
+async function dynamicImport(modulePath: string) {
+  return import(modulePath);
+}
