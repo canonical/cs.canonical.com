@@ -30,7 +30,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
   useEffect(() => {
     const parts = location.pathname.split("/");
     if (parts.length > 4 && parts[2] === "webpage") {
-      const path = `/${parts.slice(3).join("/")}`;
+      const path = `/${parts.slice(4).join("/")}`;
       setActivePageName(path);
     } else {
       setActivePageName(null);
