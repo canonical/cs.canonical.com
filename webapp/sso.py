@@ -1,9 +1,10 @@
 import functools
 import os
-
 import flask
 from django_openid_auth.teams import TeamsRequest, TeamsResponse
 from flask_openid import OpenID
+from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
+from webapp.models import User
 
 SSO_LOGIN_URL = "https://login.ubuntu.com"
 SSO_TEAM = "canonical-webmonkeys"
@@ -33,6 +34,17 @@ def init_sso(app: flask.Flask):
         if SSO_TEAM not in resp.extensions["lp"].is_member:
             flask.abort(403)
 
+        # find the user in database
+        user = User.query.filter_by(email=resp.email).first()
+        if not user:
+            # fetch user record from directory
+            response = get_user_from_directory_by_key("email", resp.email)
+
+            if response.status_code == 200:
+                user = response.json().get("data", {}).get("employees", [])[0]
+                # save user in users table
+                get_or_create_user_id(user)
+
         flask.session["openid"] = {
             "identity_url": resp.identity_url,
             "email": resp.email,
@@ -47,9 +59,13 @@ def init_sso(app: flask.Flask):
 
         return flask.redirect("/login_page")
 
+    @app.route("/")
     @app.route("/login_page")
     def login_page():
-        return flask.render_template("login.html")
+        next = flask.request.args.get("next", "/app")
+        if "openid" in flask.session:
+            return flask.redirect(next)
+        return flask.render_template("login.html", next=next)
 
 
 def login_required(func):
@@ -71,6 +87,6 @@ def login_required(func):
         if "openid" in flask.session:
             return func(*args, **kwargs)
 
-        return flask.redirect("/login_page" + flask.request.path)
+        return flask.redirect("/login_page?next=" + flask.request.path)
 
     return is_user_logged_in

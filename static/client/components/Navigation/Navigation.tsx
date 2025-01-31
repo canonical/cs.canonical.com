@@ -9,17 +9,21 @@ import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
+import type { IUser } from "@/services/api/types/users";
+import { useStore } from "@/store";
 
 const Navigation = (): JSX.Element => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [user, setUser] = useStore((state) => [state.user, state.setUser]);
 
   const logout = useCallback(() => {
+    setUser({} as IUser);
     window.open("/logout", "_self");
-  }, []);
+  }, [setUser]);
 
   const handleNewPageClick = useCallback(() => {
-    navigate("/new-webpage");
+    navigate("/app/new-webpage");
   }, [navigate]);
 
   return (
@@ -55,6 +59,13 @@ const Navigation = (): JSX.Element => {
               <NavigationItems />
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
+              <div className="u-no-margin u-truncate p-side-navigation__label">
+                <span>{user?.name}</span>
+              </div>
+              <div className="p-text--small u-text--muted u-truncate p-side-navigation__label">
+                <span>{user?.email}</span>
+              </div>
+              <hr className="p-rule" />
               <Button appearance="base" className="p-side-navigation__link" onClick={logout}>
                 <i className="p-icon--logout is-light p-side-navigation__icon" />
                 <span className="p-side-navigation__label">Log out</span>

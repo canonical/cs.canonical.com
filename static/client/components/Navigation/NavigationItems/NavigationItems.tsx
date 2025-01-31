@@ -20,7 +20,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
       if (onSelectPage) {
         onSelectPage(path);
       } else {
-        if (selectedProject) navigate(`/webpage/${selectedProject.name}${path}`);
+        if (selectedProject) navigate(`/app/webpage/${selectedProject.name}${path}`);
       }
     },
     [selectedProject, onSelectPage, navigate],
@@ -29,7 +29,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
   // set active page whenever the location changes
   useEffect(() => {
     const parts = location.pathname.split("/");
-    if (parts.length > 3 && parts[1] === "webpage") {
+    if (parts.length > 4 && parts[2] === "webpage") {
       const path = `/${parts.slice(3).join("/")}`;
       setActivePageName(path);
     } else {
@@ -43,6 +43,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
         selectedProject.templates.children.map((page) => (
           <NavigationElement
             activePageName={activePageName}
+            key={page.id}
             onSelect={handleSelectPage}
             page={page}
             project={selectedProject.name}

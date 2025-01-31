@@ -12,7 +12,8 @@
     "serve": "./entrypoint 0.0.0.0:${PORT}",
     "start": "yarn run build && concurrently --raw 'yarn run watch' 'yarn run serve'",
     "test": "vitest",
-    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'"
+    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'",
+    "dev": "vite"
   },
   "dependencies": {
     "@canonical/react-components": "0.60.0",
@@ -40,7 +41,7 @@
     "@vitest/coverage-c8": "0.33.0",
     "autoprefixer": "10.4.20",
     "concurrently": "8.2.2",
-    "dotenv": "16.4.5",
+    "dotenv": "16.4.7",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-config-react-app": "7.0.1",

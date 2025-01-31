@@ -1,13 +1,15 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 
-import { Button, Input, Modal, RadioInput, Spinner, Textarea } from "@canonical/react-components";
+import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
+import Reporter from "@/components/Reporter";
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
+import { useStore } from "@/store";
 
 const RequestTaskModal = ({
   changeType,
@@ -21,6 +23,8 @@ const RequestTaskModal = ({
   const [summary, setSummary] = useState<string>();
   const [descr, setDescr] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const user = useStore((state) => state.user);
+  const [reporter, setReporter] = useState(user);
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -52,7 +56,7 @@ const RequestTaskModal = ({
         PagesServices.requestRemoval({
           due_date: dueDate,
           webpage_id: webpage.id,
-          reporter_id: webpage.owner.id,
+          reporter_struct: reporter,
           description: descr,
         }).then(() => {
           setIsLoading(false);
@@ -67,7 +71,7 @@ const RequestTaskModal = ({
         PagesServices.requestChanges({
           due_date: dueDate,
           webpage_id: webpage.id,
-          reporter_id: webpage.owner.id,
+          reporter_struct: reporter,
           type: changeType,
           summary,
           description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
@@ -78,7 +82,7 @@ const RequestTaskModal = ({
         });
       }
     }
-  }, [changeType, dueDate, summary, descr, webpage, onClose]);
+  }, [dueDate, webpage.id, webpage.status, webpage.copy_doc_link, changeType, reporter, descr, onClose, summary]);
 
   const title = useMemo(() => {
     switch (changeType) {
@@ -117,18 +121,61 @@ const RequestTaskModal = ({
     >
       {[ChangeRequestType.COPY_UPDATE, ChangeRequestType.PAGE_REFRESH].indexOf(changeType) >= 0 && (
         <>
-          <RadioInput
-            checked={changeType === ChangeRequestType.COPY_UPDATE}
-            label="Copy update"
-            onClick={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
-          />
-          <RadioInput
-            checked={changeType === ChangeRequestType.PAGE_REFRESH}
-            label="Page refresh"
-            onClick={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
-          />
+          <div className="u-sv2">
+            <RadioInput
+              checked={changeType === ChangeRequestType.COPY_UPDATE}
+              inline
+              label={
+                <Tooltip
+                  message={
+                    <>
+                      <span>Copy updates include:</span>
+                      <ul className="u-no-margin">
+                        <li>Text changes to existing sections</li>
+                        <li>Adding a section that is a copy of an existing section, with different text</li>
+                        <li>Removing a section</li>
+                        <li>Replacing or removing logos or images</li>
+                      </ul>
+                    </>
+                  }
+                  zIndex={999}
+                >
+                  Copy update&nbsp;
+                  <i className="p-icon--information" />
+                </Tooltip>
+              }
+              onChange={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
+            />
+          </div>
+          <div className="u-sv2">
+            <RadioInput
+              checked={changeType === ChangeRequestType.PAGE_REFRESH}
+              inline
+              label={
+                <Tooltip
+                  message={
+                    <>
+                      <span>Page refreshes include:</span>
+                      <ul className="u-no-margin">
+                        <li>Changing or adding to the page layout</li>
+                        <li>Modifications that change the layout</li>
+                      </ul>
+                    </>
+                  }
+                  zIndex={999}
+                >
+                  Page refresh&nbsp;
+                  <i className="p-icon--information" />
+                </Tooltip>
+              }
+              onChange={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
+            />
+          </div>
         </>
       )}
+      <div className="u-sv3">
+        <Reporter reporter={reporter} setReporter={setReporter} />
+      </div>
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />

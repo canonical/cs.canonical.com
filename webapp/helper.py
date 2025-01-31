@@ -1,5 +1,8 @@
+from os import environ
 from webapp.models import JiraTask, User, Project, Webpage, db, get_or_create
 from enum import Enum
+
+import requests
 
 
 class RequestType(Enum):
@@ -10,8 +13,8 @@ class RequestType(Enum):
 
 def get_or_create_user_id(user):
     # If user does not exist, create a new user in the "users" table
-    user_hrc_id = user.get("id")
-    user_exists = User.query.filter_by(hrc_id=user_hrc_id).first()
+    user_email = user.get("email")
+    user_exists = User.query.filter_by(email=user_email).first()
     if not user_exists:
         user_exists, _ = get_or_create(
             db.session,
@@ -21,7 +24,7 @@ def get_or_create_user_id(user):
             team=user.get("team"),
             department=user.get("department"),
             job_title=user.get("jobTitle"),
-            hrc_id=user_hrc_id,
+            hrc_id=user.get("id"),
         )
 
     return user_exists.id
@@ -35,6 +38,7 @@ def create_jira_task(app, body):
 
     # Get the webpage
     webpage_id = body["webpage_id"]
+    reporter_id = get_or_create_user_id(body.get("reporter_struct"))
     webpage = Webpage.query.filter_by(id=webpage_id).first()
     if not webpage:
         raise Exception(f"Webpage with ID {webpage_id} not found")
@@ -54,7 +58,7 @@ def create_jira_task(app, body):
     jira = app.config["JIRA"]
     issue = jira.create_issue(
         due_date=body["due_date"],
-        reporter_id=body["reporter_id"],
+        reporter_id=reporter_id,
         request_type=body["type"],
         description=body["description"],
         summary=summary,
@@ -66,7 +70,7 @@ def create_jira_task(app, body):
         JiraTask,
         jira_id=issue["key"],
         webpage_id=body["webpage_id"],
-        user_id=body["reporter_id"],
+        user_id=reporter_id,
         summary=summary,
     )
 
@@ -87,6 +91,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     webpage.jira_tasks
     webpage.owner
     webpage.project
+    webpage.webpage_products
 
     webpage_dict = webpage.__dict__.copy()
 
@@ -98,6 +103,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     project = webpage_dict.pop("project", None)
     reviewers = webpage_dict.pop("reviewers", None)
     jira_tasks = webpage_dict.pop("jira_tasks", None)
+    webpage_products = webpage_dict.pop("webpage_products", None)
 
     # Serialize owner fields
     if owner:
@@ -157,6 +163,21 @@ def convert_webpage_to_dict(webpage, owner, project):
     else:
         jira_tasks_list = []
 
+    # Serialize product fields
+    if webpage_products:
+        webpage_products_list = []
+        for product in webpage_products:
+            product_dict = product.products.__dict__.copy()
+            product_dict.pop("created_at")
+            product_dict.pop("updated_at")
+            if product_dict["_sa_instance_state"]:
+                product_dict.pop("_sa_instance_state", None)
+            product_dict["created_at"] = product.created_at.isoformat()
+            product_dict["updated_at"] = product.updated_at.isoformat()
+            webpage_products_list.append(product_dict)
+    else:
+        webpage_products_list = []
+
     # Serialize object fields
     webpage_dict["status"] = webpage.status.value
     webpage_dict["created_at"] = webpage.created_at.isoformat()
@@ -165,6 +186,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     webpage_dict["project"] = project_dict
     webpage_dict["reviewers"] = reviewers_list
     webpage_dict["jira_tasks"] = jira_tasks_list
+    webpage_dict["products"] = webpage_products_list
 
     return webpage_dict
 
@@ -205,3 +227,34 @@ def get_tree_struct(session, webpages):
         return tree
 
     return None
+
+
+def get_user_from_directory_by_key(key, value):
+    query = f"""
+    query($value: String!) {{
+        employees(filter: {{ contains: {{ {key}: $value }} }}) {{
+            id
+            name
+            email
+            team
+            department
+            jobTitle
+        }}
+    }}
+    """
+
+    headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
+
+    # Currently directory-api only supports strict comparison of field values,
+    # so we have to send two requests instead of one for first and last names
+    response = requests.post(
+        "https://directory.wpe.internal/graphql/",
+        json={
+            "query": query,
+            "variables": {"value": value.strip()},
+        },
+        headers=headers,
+        verify=False,
+    )
+
+    return response
