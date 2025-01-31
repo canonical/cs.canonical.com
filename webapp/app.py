@@ -6,6 +6,7 @@ from webapp.sso import login_required
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
 from webapp.routes.jira import jira_blueprint
+from webapp.routes.product import product_blueprint
 
 app = create_app()
 
@@ -13,11 +14,12 @@ app = create_app()
 app.register_blueprint(tree_blueprint)
 app.register_blueprint(user_blueprint)
 app.register_blueprint(jira_blueprint)
+app.register_blueprint(product_blueprint)
 
 
 # Client-side routes
-@app.route("/")
-@app.route("/new-webpage")
+@app.route("/app")
+@app.route("/app/new-webpage")
 @login_required
 def index():
     return render_template(
@@ -25,7 +27,7 @@ def index():
     )
 
 
-@app.route("/webpage/<path:path>")
+@app.route("/app/webpage/<path:path>")
 @login_required
 def webpage(path):
     return render_template(

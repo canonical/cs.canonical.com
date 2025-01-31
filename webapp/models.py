@@ -1,4 +1,5 @@
 import enum
+import yaml
 from datetime import datetime, timezone
 
 from flask import Flask
@@ -7,6 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship
 from sqlalchemy.orm.session import Session
+from sqlalchemy.exc import IntegrityError
+
+
+with open("konf/data.yaml") as file:
+    data = yaml.load(file, Loader=yaml.FullLoader)
 
 
 class Base(DeclarativeBase):
@@ -83,7 +89,14 @@ class Webpage(db.Model, DateTimeMixin):
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
     reviewers = relationship("Reviewer", back_populates="webpages")
-    jira_tasks = relationship("JiraTask", back_populates="webpages")
+    jira_tasks = relationship(
+        "JiraTask",
+        back_populates="webpages",
+        order_by="desc(JiraTask.created_at)",
+    )
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="webpages"
+    )
 
 
 class User(db.Model, DateTimeMixin):
@@ -118,8 +131,8 @@ class JIRATaskStatus:
     TRIAGED = "TRIAGED"
     UNTRIAGED = "UNTRIAGED"
     BLOCKED = "BLOCKED"
-    IN_PROGRESS = "IN_PROGRESS"
-    TO_BE_DEPLOYED = "TO_BE_DEPLOYED"
+    IN_PROGRESS = "IN PROGRESS"
+    TO_BE_DEPLOYED = "TO BE DEPLOYED"
     DONE = "DONE"
     REJECTED = "REJECTED"
 
@@ -131,11 +144,34 @@ class JiraTask(db.Model, DateTimeMixin):
     jira_id: str = Column(String)
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     user_id: int = Column(Integer, ForeignKey("users.id"))
-    status: str = Column(String, default=JIRATaskStatus.TRIAGED)
+    status: str = Column(String, default=JIRATaskStatus.UNTRIAGED)
     summary: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")
+
+
+class Product(db.Model, DateTimeMixin):
+    __tablename__ = "products"
+
+    id: int = Column(Integer, primary_key=True)
+    slug: str = Column(String, unique=True)
+    name: str = Column(String)
+
+    webpage_products = relationship(
+        "WebpageProduct", back_populates="products"
+    )
+
+
+class WebpageProduct(db.Model, DateTimeMixin):
+    __tablename__ = "webpage_products"
+
+    id: int = Column(Integer, primary_key=True)
+    webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
+    product_id: int = Column(Integer, ForeignKey("products.id"))
+
+    webpages = relationship("Webpage", back_populates="webpage_products")
+    products = relationship("Product", back_populates="webpage_products")
 
 
 def init_db(app: Flask):
@@ -148,3 +184,18 @@ def init_db(app: Flask):
         app.before_request_funcs[None].remove(create_default_project)
         get_or_create(db.session, Project, name="Default")
         get_or_create(db.session, User, name="Default")
+
+    # Pre-populate product data from YAML
+    @app.before_request
+    def create_products():
+        app.before_request_funcs[None].remove(create_products)
+        try:
+            for product in data["products"]:
+                get_or_create(
+                    db.session,
+                    Product,
+                    slug=product["slug"],
+                    name=product["name"],
+                )
+        except IntegrityError:
+            pass

@@ -1,15 +1,13 @@
-from os import environ
-
-import requests
-from flask import jsonify, request, Blueprint, current_app
+from flask import jsonify, request, Blueprint, current_app, session
 
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 from webapp.tasks import LOCKS
-from webapp.helper import get_or_create_user_id
+from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import (
     Project,
     Reviewer,
+    User,
     Webpage,
     db,
     get_or_create,
@@ -21,32 +19,7 @@ user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 @user_blueprint.route("/get-users/<username>", methods=["GET"])
 @login_required
 def get_users(username: str):
-    query = """
-    query($name: String!) {
-        employees(filter: { contains: { name: $name }}) {
-            id
-            name
-            email
-            team
-            department
-            jobTitle
-        }
-    }
-    """
-
-    headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
-
-    # Currently directory-api only supports strict comparison of field values,
-    # so we have to send two requests instead of one for first and last names
-    response = requests.post(
-        "https://directory.wpe.internal/graphql/",
-        json={
-            "query": query,
-            "variables": {"name": username.strip()},
-        },
-        headers=headers,
-        verify=False,
-    )
+    response = get_user_from_directory_by_key("name", username)
 
     if response.status_code == 200:
         users = response.json().get("data", {}).get("employees", [])
@@ -113,3 +86,24 @@ def set_owner():
         site_repository.invalidate_cache()
 
     return jsonify({"message": "Successfully set owner"}), 200
+
+
+@user_blueprint.route("/current-user", methods=["GET"])
+@login_required
+def current_user():
+    user = User.query.filter_by(email=session["openid"]["email"]).first()
+    if not user:
+        return jsonify({"error": "Currently logged in user not found"}), 404
+    return (
+        jsonify(
+            {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "team": user.team,
+                "department": user.department,
+                "jobTitle": user.job_title,
+            }
+        ),
+        200,
+    )
