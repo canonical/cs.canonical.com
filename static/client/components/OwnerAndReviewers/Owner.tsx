@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-import CustomSearchAndFilter from "./CustomSearchAndFilter";
 import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 
+import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
@@ -28,8 +28,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
     (option: IUser) => {
       if (page?.id) {
         PagesServices.setOwner(option, page.id).then(() => {
-          // reload the page for the new owner to appear in the pages tree
-          window.location.reload();
+          page.owner = option;
         });
       }
       setOptions([]);

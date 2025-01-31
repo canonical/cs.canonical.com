@@ -21,7 +21,7 @@ def validate_input(model):
 
 class ChangesRequestModel(BaseModel):
     due_date: str
-    reporter_id: int
+    reporter_struct: object
     webpage_id: int
     type: int
     description: str
@@ -31,13 +31,16 @@ class ChangesRequestModel(BaseModel):
 class RemoveWebpageModel(BaseModel):
     webpage_id: int
     due_date: str = ""
-    reporter_id: int = None
+    reporter_struct: object = {}
     description: str = ""
 
     @field_validator("due_date")
     @classmethod
     def date_validation(cls, value: str) -> str:
-        assert datetime.strptime(value, "%Y-%m-%d") >= datetime.now()
+        assert (
+            datetime.strptime(value, "%Y-%m-%d").date()
+            >= datetime.now().date()
+        )
         return value
 
 
@@ -57,3 +60,9 @@ class CreatePageModel(BaseModel):
     owner: UserModel
     reviewers: Optional[List[UserModel]]
     parent: str
+    product_ids: List[int]
+
+
+class SetProductsModel(BaseModel):
+    webpage_id: int
+    product_ids: List[int]

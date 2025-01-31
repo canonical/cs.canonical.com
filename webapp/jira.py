@@ -5,9 +5,11 @@ from datetime import datetime
 
 import requests
 from requests.auth import HTTPBasicAuth
+from flask import Flask
 
-from webapp.models import User, db
+from webapp.models import User, JiraTask, Webpage, Project, db
 from webapp.helper import RequestType
+from webapp.site_repository import SiteRepository
 
 
 class Jira:
@@ -254,6 +256,43 @@ class Jira:
             url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
             data=payload,
         )
+
+    def update_tasks_statuses(self, app: Flask, task_locks: dict):
+        """
+        Get the status of a Jira task and update it if it changed.
+
+        Args:
+            app (Flask): The Flask application instance.
+            task_locks (dict): The locks for the project trees.
+        """
+        jira_tasks = JiraTask.query.all()
+        if jira_tasks:
+            project_ids = []
+            for task in jira_tasks:
+                response = self.__request__(
+                    method="GET",
+                    url=f"{self.url}/rest/api/3/issue/{task.jira_id}?fields=status",
+                )
+                if task.status != response["fields"]["status"]["name"].upper():
+                    task.status = response["fields"]["status"]["name"].upper()
+                    # get the project id from the webpage that corresponds to
+                    # the Jira task (will be needed to invalidate the cache)
+                    webpage = Webpage.query.filter_by(
+                        id=task.webpage_id
+                    ).first()
+                    if webpage.project_id not in project_ids:
+                        project_ids.append(webpage.project_id)
+            db.session.commit()
+
+            # invalidate the cache for all the project trees where Jira tasks
+            # have changed status
+            for project_id in project_ids:
+                project = Project.query.filter_by(id=project_id).first()
+                site_repository = SiteRepository(
+                    project.name, app, task_locks=task_locks
+                )
+                # clean the cache for a new Jira task to appear in the tree
+                site_repository.invalidate_cache()
 
 
 def init_jira(app):

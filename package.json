@@ -12,7 +12,8 @@
     "serve": "./entrypoint 0.0.0.0:${PORT}",
     "start": "yarn run build && concurrently --raw 'yarn run watch' 'yarn run serve'",
     "test": "vitest",
-    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'"
+    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'",
+    "dev": "vite"
   },
   "dependencies": {
     "@canonical/react-components": "0.60.0",
@@ -32,15 +33,15 @@
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
-    "@types/react": "18.3.4",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "@typescript-eslint/eslint-plugin": "5.57.1",
     "@typescript-eslint/parser": "5.57.1",
-    "@vitejs/plugin-react": "4.3.1",
+    "@vitejs/plugin-react": "4.3.4",
     "@vitest/coverage-c8": "0.33.0",
     "autoprefixer": "10.4.20",
     "concurrently": "8.2.2",
-    "dotenv": "16.4.5",
+    "dotenv": "16.4.7",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-config-react-app": "7.0.1",
@@ -66,7 +67,7 @@
     "ts-loader": "9.5.1",
     "typescript": "5.7.2",
     "unplugin-auto-import": "0.17.6",
-    "vite": "5.3.6",
+    "vite": "5.4.12",
     "vitest": "1.6.0",
     "watch-cli": "0.2.3"
   },

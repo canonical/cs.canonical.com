@@ -1,6 +1,14 @@
 import base64
+import contextlib
 import os
+from binascii import Error
 from os import environ
+
+# Try to decode the private key from base64 before using it
+if private_key := environ.get("GOOGLE_PRIVATE_KEY"):
+    with contextlib.suppress(Error):
+        private_key = base64.b64decode(private_key).replace(b"\\n", b"\n")
+
 
 VALKEY_HOST = environ.get("VALKEY_HOST", "localhost")
 VALKEY_PORT = environ.get("VALKEY_PORT", 6379)
@@ -15,14 +23,12 @@ JIRA_URL = environ.get("JIRA_URL")
 JIRA_LABELS = environ.get("JIRA_LABELS")
 JIRA_COPY_UPDATES_EPIC = environ.get("JIRA_COPY_UPDATES_EPIC")
 GOOGLE_DRIVE_FOLDER_ID = environ.get("GOOGLE_DRIVE_FOLDER_ID")
-COPYD0C_TEMPLATE_ID = environ.get("COPYD0C_TEMPLATE_ID")
+COPYDOC_TEMPLATE_ID = environ.get("COPYDOC_TEMPLATE_ID")
 GOOGLE_CREDENTIALS = {
     "type": "service_account",
     "project_id": "web-engineering-436014",
     "private_key_id": environ.get("GOOGLE_PRIVATE_KEY_ID"),
-    "private_key": base64.b64decode(environ.get("GOOGLE_PRIVATE_KEY")).replace(
-        b"\\n", b"\n"
-    ),
+    "private_key": private_key,
     "client_email": "websites-copy-docs-627@web-engineering-436014.iam.gserviceaccount.com",  # noqa: E501
     "client_id": "116847960229506342511",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",

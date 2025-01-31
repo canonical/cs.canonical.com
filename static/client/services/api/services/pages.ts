@@ -5,6 +5,7 @@ import type {
   IPagesResponse,
   IRequestChanges,
   IRequestRemoval,
+  ISetProducts,
 } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
@@ -30,6 +31,10 @@ export const requestChanges = async (body: IRequestChanges): Promise<void> => {
 
 export const requestRemoval = async (body: IRequestRemoval): Promise<void> => {
   return api.pages.requestRemoval(body);
+};
+
+export const setProducts = async (body: ISetProducts) => {
+  return api.pages.setProducts(body);
 };
 
 export * as PagesServices from "./pages";
