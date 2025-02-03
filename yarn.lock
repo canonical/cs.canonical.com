@@ -1815,10 +1815,10 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.31.0.tgz#c6b048f1e25f3fea5b4bd246232f4d07a159c5a0"
   integrity sha512-zSoHl356vKnNxwOWnLd60ixHNPRBglxpv2g7q0Cd3Pmr561gf0HiAcUBRL3S1vPqRC17Zo2CX/9cPkqTIiai1g==
 
-"@rollup/rollup-linux-x64-gnu@4.32.1":
-  version "4.32.1"
-  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.32.1.tgz#5c009c264a7ce0e19b40890ca9945440bb420691"
-  integrity sha512-WQFLZ9c42ECqEjwg/GHHsouij3pzLXkFdz0UxHa/0OM12LzvX7DzedlY0SIEly2v18YZLRhCRoHZDxbBSWoGYg==
+"@rollup/rollup-linux-x64-gnu@4.34.1":
+  version "4.34.1"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.34.1.tgz#f5fba18eda523cbe04f82cbf3e0685e461e71613"
+  integrity sha512-hzpleiKtq14GWjz3ahWvJXgU1DQC9DteiwcsY4HgqUJUGxZThlL66MotdUEK9zEo0PK/2ADeZGM9LIondE302A==
 
 "@rollup/rollup-linux-x64-musl@4.31.0":
   version "4.31.0"
