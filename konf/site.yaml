@@ -64,7 +64,8 @@ env:
 
 # Overrides for production
 production:
-  replicas: 1
+  replicas: 3
+  memoryLimit: 512Mi
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
@@ -76,7 +77,8 @@ production:
 
 # Overrides for staging
 staging:
-  replicas: 1
+  replicas: 3
+  memoryLimit: 512Mi
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
