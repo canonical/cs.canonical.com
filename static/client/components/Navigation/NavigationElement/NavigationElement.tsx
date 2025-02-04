@@ -50,6 +50,12 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
     }
   }, [page?.children]);
 
+  useEffect(() => {
+    if (activePageName === page.name) {
+      document.querySelector('li[aria-selected="true"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activePageName, page.name]);
+
   return (
     <li
       aria-selected={page.name === activePageName}
