@@ -24,7 +24,7 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.29.0",
-    "vanilla-framework": "4.16.0",
+    "vanilla-framework": "4.21.0",
     "zustand": "4.5.6"
   },
   "devDependencies": {
