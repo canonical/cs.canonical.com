@@ -71,6 +71,7 @@ export interface IRequestRemoval {
   reporter_struct: IUser;
   webpage_id: number;
   description: string;
+  redirect_url: string;
 }
 
 export interface ISetProducts {

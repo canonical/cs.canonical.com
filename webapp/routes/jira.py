@@ -169,6 +169,8 @@ def remove_webpage(body: RemoveWebpageModel):
             "type": None,
             "summary": f"Remove {webpage.name} webpage from code repository",
         }
+        if body.redirect_url:
+            task_details["summary"] += f" and redirect to {body.redirect_url}"
         task = create_jira_task(current_app, task_details)
         Webpage.query.filter_by(id=webpage_id).update(
             {"status": WebpageStatus.TO_DELETE.value}

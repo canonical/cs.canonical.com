@@ -1,4 +1,5 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
+import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
 
@@ -25,6 +26,7 @@ const RequestTaskModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const user = useStore((state) => state.user);
   const [reporter, setReporter] = useState(user);
+  const [redirectUrl, setRedirectUrl] = useState("");
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -40,6 +42,10 @@ const RequestTaskModal = ({
 
   const handleDescrChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
+  }, []);
+
+  const handleChangeRedirectUrl = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setRedirectUrl(e.target.value);
   }, []);
 
   const handleTypeChange = useCallback(
@@ -58,6 +64,7 @@ const RequestTaskModal = ({
           webpage_id: webpage.id,
           reporter_struct: reporter,
           description: descr,
+          redirect_url: redirectUrl,
         }).then(() => {
           setIsLoading(false);
           onClose();
@@ -82,7 +89,18 @@ const RequestTaskModal = ({
         });
       }
     }
-  }, [dueDate, webpage.id, webpage.status, webpage.copy_doc_link, changeType, reporter, descr, onClose, summary]);
+  }, [
+    dueDate,
+    webpage.id,
+    webpage.status,
+    webpage.copy_doc_link,
+    changeType,
+    reporter,
+    descr,
+    redirectUrl,
+    onClose,
+    summary,
+  ]);
 
   const title = useMemo(() => {
     switch (changeType) {
@@ -176,6 +194,9 @@ const RequestTaskModal = ({
       <div className="u-sv3">
         <Reporter reporter={reporter} setReporter={setReporter} />
       </div>
+      {changeType === ChangeRequestType.PAGE_REMOVAL && (
+        <Input label="Redirect to" onChange={handleChangeRedirectUrl} type="text" />
+      )}
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
