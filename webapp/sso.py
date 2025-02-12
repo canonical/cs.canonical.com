@@ -7,7 +7,9 @@ from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import User
 
 SSO_LOGIN_URL = "https://login.ubuntu.com"
-SSO_TEAM = "canonical-webmonkeys"
+SSO_TEAM = (
+    "canonical-webmonkeys" if os.environ.get("FLASK_DEBUG") else "canonical"
+)
 DISABLE_SSO = os.environ.get("DISABLE_SSO")
 
 
