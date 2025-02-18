@@ -48,9 +48,6 @@ def create_app():
     # Initialize cache
     init_cache(app)
 
-    # Initialize tasks
-    # init_tasks(app)
-
     # Initialize JIRA
     init_jira(app)
 

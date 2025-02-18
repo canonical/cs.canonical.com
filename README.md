@@ -263,6 +263,40 @@ To ensure hot module reloading, make sure to do the following changes.
 - Comment out <code>"process.env.NODE_ENV": '"production"'</code> in vite.config.ts file.
 - Run the vite dev server locally, using <code>yarn run dev</code>.
 
+### Background tasks
+
+### Creating tasks
+
+You can create a background task for Celery in your Flask application by following these steps:
+
+1. Create a task by decorating a function with `@celery.task`:
+
+```python
+from webapp.celery_config import celery
+
+@shared_task
+def my_background_task():
+  # Task logic here
+  pass
+```
+
+2. Call the task from your Flask route:
+
+```python
+@app.route('/call-task')
+def some_route():
+  my_background_task.delay()  # async
+  # or
+  my_background_task.apply_async(countdown=60)  # run after 60s
+  return 'Task started'
+```
+
+Both periodic and regular tasks can then be run with:
+
+```bash
+celery -A webapp.app.celery_app worker -B  --loglevel=INFO
+```
+
 ### API Requests
 
 #### Getting the website page structure as a JSON tree

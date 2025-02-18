@@ -267,6 +267,6 @@ def get_user_from_directory_by_key(key, value):
         response.code = "service unavailable"
         response.error_type = "service unavailable"
         response.status_code = 503
-        response._content = b'{ "key" : "a" }'
+        response._content = b'{ "error" : "service unavailable" }'
 
     return response
