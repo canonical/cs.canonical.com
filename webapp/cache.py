@@ -13,7 +13,7 @@ from redis import exceptions as redis_exceptions
 def init_cache(app: Flask):
     try:
         cache = RedisCache(app)
-    except redis_exceptions.ConnectionError as e:
+    except Exception as e:
         cache = FileCache(app)
         app.logger.info(
             f"Error: {e} Redis cache is not available."
