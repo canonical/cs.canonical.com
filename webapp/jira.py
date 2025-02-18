@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 
 import requests
-from requests.auth import HTTPBasicAuth
 from flask import Flask
+from requests.auth import HTTPBasicAuth
 
 from webapp.helper import RequestType
 from webapp.models import User, db
