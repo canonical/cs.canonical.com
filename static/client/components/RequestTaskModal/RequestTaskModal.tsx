@@ -69,7 +69,7 @@ const RequestTaskModal = ({
           setIsLoading(false);
           onClose();
           if (webpage.status === PageStatus.NEW) {
-            window.location.href = "/";
+            window.location.href = "/app";
           } else {
             window.location.reload();
           }
