@@ -118,8 +118,9 @@ const RequestTaskModal = ({
   }, [changeType]);
 
   const submitButtonEnabled = useMemo(
-    () => dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked),
-    [dueDate, changeType, checked],
+    () =>
+      webpage.status !== PageStatus.NEW ? dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked) : true,
+    [webpage.status, dueDate, changeType, checked],
   );
 
   return (
@@ -194,10 +195,12 @@ const RequestTaskModal = ({
       <div className="u-sv3">
         <Reporter reporter={reporter} setReporter={setReporter} />
       </div>
-      {changeType === ChangeRequestType.PAGE_REMOVAL && (
+      {changeType === ChangeRequestType.PAGE_REMOVAL && webpage.status !== PageStatus.NEW && (
         <Input label="Redirect to" onChange={handleChangeRedirectUrl} type="text" />
       )}
-      <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
+      {webpage.status !== PageStatus.NEW && (
+        <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
+      )}
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
       {changeType !== ChangeRequestType.PAGE_REMOVAL && (
