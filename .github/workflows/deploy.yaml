@@ -48,6 +48,11 @@ jobs:
       - name: Setup LXD
         uses: canonical/setup-lxd@main
 
+      - name: Create repositories directory
+        run: |
+            mkdir -p repositories
+            mkdir -p tree-cache
+
       - name: Setup Rockcraft
         run: sudo snap install rockcraft --classic --channel=latest/edge
 
