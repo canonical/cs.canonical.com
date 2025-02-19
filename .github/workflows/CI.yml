@@ -94,10 +94,10 @@ jobs:
     name: Run Python
     runs-on: ubuntu-latest
     services:
-      valkey:
-        image: valkey/valkey
+      redis:
+        image: redis
         options: >-
-          --health-cmd "valkey-cli ping"
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -105,6 +105,8 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.12
@@ -141,10 +143,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:
-      valkey:
-        image: valkey/valkey
+      redis:
+        image: redis
         options: >-
-          --health-cmd "valkey-cli ping"
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
