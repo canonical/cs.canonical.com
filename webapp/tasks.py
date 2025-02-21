@@ -1,14 +1,18 @@
 import os
+from pathlib import Path
 
+import requests
 import yaml
 from celery import Celery, Task, shared_task
 from celery.schedules import crontab
+from celery.utils.log import get_task_logger
 from flask import Flask
 
 from webapp import app
 from webapp.models import JiraTask, Project, Webpage, db
 from webapp.site_repository import SiteRepository
 
+logger = get_task_logger(__name__)
 c_app = Celery()
 
 # Default delay between runs for updating the tree
@@ -82,6 +86,32 @@ def update_jira_statuses():
             site_repository.invalidate_cache()
 
 
+@shared_task
+def save_github_file(
+    repository: str, path: str, base_repository_path: str = "repositories"
+):
+    """
+    Save a file from a GitHub repository to the local filesystem.
+    """
+    file_path = Path(base_repository_path) / repository / path
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    token = os.environ.get("GH_TOKEN")
+    headers = {
+        "Accept": "application/vnd.github.raw+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    response = requests.request(
+        "GET",
+        f"https://api.github.com/repos/canonical/{repository}/contents/{path}",
+        headers=headers,
+    )
+    if response.status_code == 200:
+        with open(file_path, "wb") as file:
+            file.write(response.content)
+
+
 def init_celery(app: Flask) -> Celery:
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:
@@ -98,10 +128,10 @@ def init_celery(app: Flask) -> Celery:
     app.config.from_mapping(
         CELERY=dict(
             broker_url=broker_url,
-            result_backend="db+" + os.environ.get("DATABASE_URL", ""),
-            task_ignore_result=True,
+            ignore_result=True,
         ),
     )
+    celery_app.config_from_object(app.config["CELERY"])
     celery_app.set_default()
     celery_app.on_after_configure.connect(setup_periodic_tasks)
     app.extensions["celery"] = celery_app

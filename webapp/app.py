@@ -3,6 +3,7 @@ from os import environ
 from flask import render_template
 
 from webapp import create_app
+from webapp.github import init_github
 from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
@@ -14,6 +15,7 @@ app = create_app()
 
 # Tasks
 celery_app = init_celery(app)
+init_github(app)
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

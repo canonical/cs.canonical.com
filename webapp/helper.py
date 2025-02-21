@@ -261,8 +261,9 @@ def get_user_from_directory_by_key(key, value):
             },
             headers=headers,
             verify=False,
+            timeout=5,
         )
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         response = Response()
         response.code = "service unavailable"
         response.error_type = "service unavailable"

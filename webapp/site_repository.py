@@ -1,8 +1,6 @@
 import os
 import re
 import subprocess
-from contextlib import contextmanager
-from pathlib import Path
 from typing import Callable, TypedDict
 
 from flask import Flask
@@ -66,7 +64,6 @@ class SiteRepository:
         if db:
             self.db = db
 
-
     def __str__(self) -> str:
         return f"SiteRepository({self.repository_uri}, {self.branch})"
 
@@ -79,42 +76,6 @@ class SiteRepository:
             + "/"
             + (repository_uri.strip("/").split("/")[-1].removesuffix(".git"))
         )
-
-    def __configure_git__(self):
-        """
-        Update git configuration.
-        """
-        # Increase the buffer size for large files
-        self.__run__(
-            "git config --global http.postBuffer 1040M",
-            "Error configuring git",
-        )
-        self.__run__(
-            "git config --global safe.directory '*'",
-            "Error configuring git",
-        )
-
-    @contextmanager
-    def __masked_parent_git__(self):
-        """
-        When cloning repositories using sparse-checkout, we temporarily move
-        the parent git folder to *.git-bak.
-        This is to prevent an issue where the sparse checkout also checks
-        out other git repositories in the tree.
-        """
-        parent_path = f"{self.app.config['BASE_DIR']}/.git"
-        tmp_path = f"{self.app.config['BASE_DIR']}/.git-bak"
-        self.__run__(
-            f"mv {parent_path} {tmp_path}",
-            "Error masking parent git folder",
-        )
-        try:
-            yield
-        finally:
-            self.__run__(
-                f"mv {tmp_path} {parent_path}",
-                "Error unmasking parent git folder",
-            )
 
     def __exec__(self, command_str: str):
         """
@@ -162,36 +123,6 @@ class SiteRepository:
         command_str = self.__sanitize_command__(command_str)
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
-    def __create_git_uri__(self, uri: str):
-        """
-        Create a github url
-        """
-
-        repo_org = self.app.config["REPO_ORG"]
-        token = self.app.config["GH_TOKEN"]
-
-        uri = f"{repo_org}/{uri}.git"
-
-        # Add token to URI
-        uri = re.sub(
-            "//github",
-            f"//{token}@github",
-            uri,
-        )
-
-        if not uri.endswith(".git"):
-            raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm "
-                "that the uri ends with .git"
-            )
-        if not uri.startswith("https"):
-            raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm "
-                "that the uri uses https"
-            )
-
-        return uri
-
     def delete_local_files(self):
         """
         Delete a local folder
@@ -201,88 +132,16 @@ class SiteRepository:
             f"Error deleting folder {self.repo_path}",
         )
 
-    def fetch_remote_branch(self, branch: str):
-        """
-        Fetch all branches from remote repository
-        """
-        return self.__run__(
-            f"git fetch origin {branch}",
-            f"Error fetching branch {branch}",
-        )
-
-    def clone_repo(self, repository_uri: str):
-        """
-        Clone the repository.
-        """
-        github_url = self.__create_git_uri__(repository_uri)
-
-        with self.__masked_parent_git__():
-            # Switch to the ./repositories directory for cloned repositories
-            os.chdir(self.REPOSITORY_DIRECTORY)
-
-            # Clone the repository
-            self.__run__(
-                f"git clone --no-checkout --depth 1 {github_url}",
-                "Error cloning repository",
-            )
-
-            # Change directory to the repository
-            os.chdir(self.repo_path)
-
-            # Set sparse-checkout
-            self.__run__(
-                "git sparse-checkout set templates",
-                "Error setting sparse-checkout",
-            )
-
-            # Return directory cursor to parent directory
-            os.chdir(self.app.config["BASE_DIR"])
-
-    def checkout_branch(self, branch: str):
-        """
-        Checkout the branch
-        """
-        self.fetch_remote_branch(branch)
-        return self.__run__(
-            f"git checkout {branch}", f"Error checking out branch {branch}"
-        )
-
-    def pull_updates(self):
-        """
-        Pull updates from the repository
-        """
-        # Pull updates from the specified branch
-        self.__run__(
-            f"git pull origin {self.branch}",
-            "Error pulling updates from repository",
-        )
-
     def setup_site_repository(self):
         """
         Clone the repository to a specific directory, or checkout the latest
         updates if the repository exists.
         """
-        # Create the default repository on disk
-        Path(self.REPOSITORY_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
-        # Clone the repository, if it doesn't exist
-        if not self.repository_exists():
-            try:
-                self.__configure_git__()
-            except SiteRepositoryError as e:
-                self.logger.error(e)
-            self.clone_repo(self.repository_uri)
-
-        # Checkout updates to the repository on the specified branch
-        self.checkout_updates()
-
-    def checkout_updates(self):
-        """
-        Checkout updates to the repository on the specified branch.
-        """
-        os.chdir(self.repo_path)
-        # Checkout the branch
-        self.checkout_branch(self.branch)
+        # Download files from the repository
+        github = self.app.config["github"]
+        github.get_repository_tree(
+            repository=self.repository_uri, branch=self.branch
+        )
 
     def repository_exists(self):
         """

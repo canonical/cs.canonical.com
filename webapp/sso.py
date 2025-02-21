@@ -1,8 +1,10 @@
 import functools
 import os
+
 import flask
 from django_openid_auth.teams import TeamsRequest, TeamsResponse
 from flask_openid import OpenID
+
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import User
 
@@ -10,7 +12,9 @@ SSO_LOGIN_URL = "https://login.ubuntu.com"
 SSO_TEAM = (
     "canonical-webmonkeys" if os.environ.get("FLASK_DEBUG") else "canonical"
 )
-DISABLE_SSO = os.environ.get("DISABLE_SSO")
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
+    "FLASK_DISABLE_SSO"
+)
 
 
 def init_sso(app: flask.Flask):
@@ -78,6 +82,9 @@ def login_required(func):
 
     @functools.wraps(func)
     def is_user_logged_in(*args, **kwargs):
+        if "openid" in flask.session:
+            return func(*args, **kwargs)
+
         # Return if the sso is explicitly disabled.
         # Useful for non interactive testing.
         if DISABLE_SSO:
@@ -86,8 +93,6 @@ def login_required(func):
             )
             return func(*args, **kwargs)
 
-        if "openid" in flask.session:
-            return func(*args, **kwargs)
 
         return flask.redirect("/login_page?next=" + flask.request.path)
 

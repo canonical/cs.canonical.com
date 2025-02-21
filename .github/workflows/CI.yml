@@ -125,7 +125,7 @@ jobs:
           SECRET_KEY: secret_key
           REDIS_HOST: localhost
           REDIS_PORT: 6379
-          GH_TOKEN: token
+          GH_TOKEN: ${{ github.token }}
           REPO_ORG: https://github.com/canonical
           JIRA_EMAIL: example@canonical.com
           JIRA_TOKEN: jiratoken
@@ -174,7 +174,7 @@ jobs:
           -e SECRET_KEY=secret_key \
           -e REDIS_HOST=localhost \
           -e REDIS_PORT=6379 \
-          -e GH_TOKEN=token \
+          -e GH_TOKEN=${{ github.token }} \
           -e REPO_ORG=https://github.com/canonical \
           -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
           -e JIRA_EMAIL=example@canonical.com \
