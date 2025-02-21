@@ -56,38 +56,37 @@ const RequestTaskModal = ({
   );
 
   const handleSubmit = useCallback(() => {
-    if (dueDate && webpage?.id) {
-      setIsLoading(true);
-      if (changeType === ChangeRequestType.PAGE_REMOVAL) {
-        PagesServices.requestRemoval({
-          due_date: dueDate,
-          webpage_id: webpage.id,
-          reporter_struct: reporter,
-          description: descr,
-          redirect_url: redirectUrl,
-        }).then(() => {
-          setIsLoading(false);
-          onClose();
-          if (webpage.status === PageStatus.NEW) {
-            window.location.href = "/app";
-          } else {
-            window.location.reload();
-          }
-        });
-      } else {
-        PagesServices.requestChanges({
-          due_date: dueDate,
-          webpage_id: webpage.id,
-          reporter_struct: reporter,
-          type: changeType,
-          summary,
-          description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
-        }).then(() => {
-          setIsLoading(false);
-          onClose();
+    if (!webpage?.id) return;
+    setIsLoading(true);
+    if (changeType === ChangeRequestType.PAGE_REMOVAL) {
+      PagesServices.requestRemoval({
+        due_date: dueDate,
+        webpage_id: webpage.id,
+        reporter_struct: reporter,
+        description: descr,
+        redirect_url: redirectUrl,
+      }).then(() => {
+        setIsLoading(false);
+        onClose();
+        if (webpage.status === PageStatus.NEW) {
+          window.location.href = "/";
+        } else {
           window.location.reload();
-        });
-      }
+        }
+      });
+    } else {
+      PagesServices.requestChanges({
+        due_date: dueDate as string,
+        webpage_id: webpage.id,
+        reporter_struct: reporter,
+        type: changeType,
+        summary,
+        description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
+      }).then(() => {
+        setIsLoading(false);
+        onClose();
+        window.location.reload();
+      });
     }
   }, [
     dueDate,
