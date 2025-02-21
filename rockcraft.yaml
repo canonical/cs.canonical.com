@@ -26,9 +26,6 @@ parts:
       - flask/app/static/build
       - flask/app/repositories
       - flask/app/tree-cache
-  flask-framework/dependencies:
-    stage-packages:
-      - git
 services:
   celery-worker:
     override: replace

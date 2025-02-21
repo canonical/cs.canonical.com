@@ -38,7 +38,6 @@ def create_app():
 
     app.context_processor(base_context)
 
-
     # Initialize database
     init_db(app)
 

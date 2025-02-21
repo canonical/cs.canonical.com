@@ -96,7 +96,7 @@ jobs:
           sudo snap install vault --classic
 
       - name: Download Charm Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cs-canonical-com-charm
 
