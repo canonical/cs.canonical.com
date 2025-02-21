@@ -2,11 +2,13 @@ import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
+import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
 import Reporter from "@/components/Reporter";
 import config from "@/config";
+import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
@@ -27,6 +29,9 @@ const RequestTaskModal = ({
   const user = useStore((state) => state.user);
   const [reporter, setReporter] = useState(user);
   const [redirectUrl, setRedirectUrl] = useState("");
+  const { refetch } = usePages(true);
+  const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
+  const navigate = useNavigate();
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -69,7 +74,22 @@ const RequestTaskModal = ({
         setIsLoading(false);
         onClose();
         if (webpage.status === PageStatus.NEW) {
-          window.location.href = "/";
+          if (refetch) {
+            refetch()
+              .then((data) => {
+                if (data?.length) {
+                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                  if (project && project.data?.data) {
+                    setSelectedProject(project.data.data);
+                  }
+                }
+              })
+              .finally(() => {
+                navigate("/app", { replace: true });
+              });
+          } else {
+            navigate("/app", { replace: true });
+          }
         } else {
           window.location.reload();
         }
@@ -89,15 +109,19 @@ const RequestTaskModal = ({
       });
     }
   }, [
-    dueDate,
     webpage.id,
     webpage.status,
     webpage.copy_doc_link,
     changeType,
+    dueDate,
     reporter,
     descr,
     redirectUrl,
     onClose,
+    refetch,
+    selectedProject?.name,
+    setSelectedProject,
+    navigate,
     summary,
   ]);
 
