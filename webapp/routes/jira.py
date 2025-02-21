@@ -243,6 +243,6 @@ def invalidate_cache(webpage: Webpage):
     site_repository = SiteRepository(
         project.name, current_app, task_locks=LOCKS
     )
-    # clean the cache for a page to be removed from the tree
+    # clean the cache for a page changes to be reflected
     site_repository.invalidate_cache()
     return True
