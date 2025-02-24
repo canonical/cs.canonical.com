@@ -117,6 +117,6 @@ jobs:
 
       - name: Deploy Application
         run: |
-          export JUJU_MODEL=admin/stg-cs-canonical-com
+          export JUJU_MODEL=juju-controller-36-staging-ps6:admin/stg-cs-canonical-com
           juju refresh cs-canonical-com --path ./cs-canonical-com_ubuntu-22.04-amd64.charm --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
           juju wait-for application cs-canonical-com --query='name=="cs-canonical-com" && (status=="active" || status=="idle")'
