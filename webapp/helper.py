@@ -1,5 +1,4 @@
 from enum import Enum
-from os import environ
 
 import requests
 from flask import current_app
