@@ -41,13 +41,9 @@ def request_changes(body: ChangesRequestModel):
         params = body.model_dump()
         create_jira_task(current_app, params)
 
-        webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
-        project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(
-            project.name, current_app, task_locks=LOCKS
-        )
         # clean the cache for a new Jira task to appear in the tree
-        site_repository.invalidate_cache()
+        webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
+        invalidate_cache(webpage)
     except Exception as e:
         return jsonify(str(e)), 500
 
@@ -148,6 +144,9 @@ def remove_webpage(body: RemoveWebpageModel):
             )
             return jsonify({"error": "unable to delete the webpage"}), 500
 
+        # clean the cache for a page to be removed from the tree
+        invalidate_cache(webpage)
+
         return (
             jsonify({"message": "Webpage has been removed successfully"}),
             200,
@@ -169,18 +168,16 @@ def remove_webpage(body: RemoveWebpageModel):
             "type": None,
             "summary": f"Remove {webpage.name} webpage from code repository",
         }
+        if body.redirect_url:
+            task_details["summary"] += f" and redirect to {body.redirect_url}"
         task = create_jira_task(current_app, task_details)
         Webpage.query.filter_by(id=webpage_id).update(
             {"status": WebpageStatus.TO_DELETE.value}
         )
         db.session.commit()
 
-    project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(
-        project.name, current_app, task_locks=LOCKS
-    )
     # clean the cache for a page to be removed from the tree
-    site_repository.invalidate_cache()
+    invalidate_cache(webpage)
 
     return (
         jsonify(
@@ -235,7 +232,17 @@ def create_page(body: CreatePageModel):
             db.session,
             WebpageProduct,
             webpage_id=new_webpage[0].id,
-            product_id=product_id
+            product_id=product_id,
         )
 
     return jsonify({"copy_doc": copy_doc}), 201
+
+
+def invalidate_cache(webpage: Webpage):
+    project = Project.query.filter_by(id=webpage.project_id).first()
+    site_repository = SiteRepository(
+        project.name, current_app, task_locks=LOCKS
+    )
+    # clean the cache for a page changes to be reflected
+    site_repository.invalidate_cache()
+    return True

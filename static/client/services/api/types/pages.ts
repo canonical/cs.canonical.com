@@ -67,10 +67,11 @@ export interface IRequestChanges {
 }
 
 export interface IRequestRemoval {
-  due_date: string;
+  due_date?: string;
   reporter_struct: IUser;
   webpage_id: number;
   description: string;
+  redirect_url: string;
 }
 
 export interface ISetProducts {

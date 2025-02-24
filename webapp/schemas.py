@@ -33,6 +33,7 @@ class RemoveWebpageModel(BaseModel):
     due_date: str = ""
     reporter_struct: object = {}
     description: str = ""
+    redirect_url: str = ""
 
     @field_validator("due_date")
     @classmethod

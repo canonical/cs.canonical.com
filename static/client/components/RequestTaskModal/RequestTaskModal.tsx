@@ -1,11 +1,14 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
+import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
+import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
 import Reporter from "@/components/Reporter";
 import config from "@/config";
+import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
@@ -25,6 +28,10 @@ const RequestTaskModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const user = useStore((state) => state.user);
   const [reporter, setReporter] = useState(user);
+  const [redirectUrl, setRedirectUrl] = useState("");
+  const { refetch } = usePages(true);
+  const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
+  const navigate = useNavigate();
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -42,6 +49,10 @@ const RequestTaskModal = ({
     setDescr(e.target.value);
   }, []);
 
+  const handleChangeRedirectUrl = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setRedirectUrl(e.target.value);
+  }, []);
+
   const handleTypeChange = useCallback(
     (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => () => {
       onTypeChange(type);
@@ -50,39 +61,69 @@ const RequestTaskModal = ({
   );
 
   const handleSubmit = useCallback(() => {
-    if (dueDate && webpage?.id) {
-      setIsLoading(true);
-      if (changeType === ChangeRequestType.PAGE_REMOVAL) {
-        PagesServices.requestRemoval({
-          due_date: dueDate,
-          webpage_id: webpage.id,
-          reporter_struct: reporter,
-          description: descr,
-        }).then(() => {
-          setIsLoading(false);
-          onClose();
-          if (webpage.status === PageStatus.NEW) {
-            window.location.href = "/app";
+    if (!webpage?.id) return;
+    setIsLoading(true);
+    if (changeType === ChangeRequestType.PAGE_REMOVAL) {
+      PagesServices.requestRemoval({
+        due_date: dueDate,
+        webpage_id: webpage.id,
+        reporter_struct: reporter,
+        description: descr,
+        redirect_url: redirectUrl,
+      }).then(() => {
+        setIsLoading(false);
+        onClose();
+        if (webpage.status === PageStatus.NEW) {
+          if (refetch) {
+            refetch()
+              .then((data) => {
+                if (data?.length) {
+                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                  if (project && project.data?.data) {
+                    setSelectedProject(project.data.data);
+                  }
+                }
+              })
+              .finally(() => {
+                navigate("/app", { replace: true });
+              });
           } else {
-            window.location.reload();
+            navigate("/app", { replace: true });
           }
-        });
-      } else {
-        PagesServices.requestChanges({
-          due_date: dueDate,
-          webpage_id: webpage.id,
-          reporter_struct: reporter,
-          type: changeType,
-          summary,
-          description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
-        }).then(() => {
-          setIsLoading(false);
-          onClose();
+        } else {
           window.location.reload();
-        });
-      }
+        }
+      });
+    } else {
+      PagesServices.requestChanges({
+        due_date: dueDate as string,
+        webpage_id: webpage.id,
+        reporter_struct: reporter,
+        type: changeType,
+        summary,
+        description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
+      }).then(() => {
+        setIsLoading(false);
+        onClose();
+        window.location.reload();
+      });
     }
-  }, [dueDate, webpage.id, webpage.status, webpage.copy_doc_link, changeType, reporter, descr, onClose, summary]);
+  }, [
+    webpage.id,
+    webpage.status,
+    webpage.copy_doc_link,
+    changeType,
+    dueDate,
+    reporter,
+    descr,
+    redirectUrl,
+    onClose,
+    refetch,
+    selectedProject?.name,
+    setSelectedProject,
+    navigate,
+    summary,
+  ]);
 
   const title = useMemo(() => {
     switch (changeType) {
@@ -100,8 +141,9 @@ const RequestTaskModal = ({
   }, [changeType]);
 
   const submitButtonEnabled = useMemo(
-    () => dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked),
-    [dueDate, changeType, checked],
+    () =>
+      webpage.status !== PageStatus.NEW ? dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked) : true,
+    [webpage.status, dueDate, changeType, checked],
   );
 
   return (
@@ -176,7 +218,13 @@ const RequestTaskModal = ({
       <div className="u-sv3">
         <Reporter reporter={reporter} setReporter={setReporter} />
       </div>
-      <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
+      {changeType === ChangeRequestType.PAGE_REMOVAL && webpage.status !== PageStatus.NEW && (
+        <Input label="Redirect to" onChange={handleChangeRedirectUrl} type="text" />
+      )}
+      {((webpage.status !== PageStatus.NEW && changeType === ChangeRequestType.PAGE_REMOVAL) ||
+        changeType !== ChangeRequestType.PAGE_REMOVAL) && (
+        <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
+      )}
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
       {changeType !== ChangeRequestType.PAGE_REMOVAL && (
