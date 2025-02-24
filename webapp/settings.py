@@ -9,6 +9,7 @@ if private_key := environ.get("GOOGLE_PRIVATE_KEY"):
     with contextlib.suppress(Error):
         private_key = base64.b64decode(private_key).replace(b"\\n", b"\n")
 
+DIRECTORY_API_TOKEN = environ.get("DIRECTORY_API_TOKEN")
 REDIS_HOST = environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = environ.get("REDIS_PORT", 6379)
 REPO_ORG = environ.get("REPO_ORG", "https://github.com/canonical")

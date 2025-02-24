@@ -24,7 +24,9 @@ def get_users(username: str):
         users = response.json().get("data", {}).get("employees", [])
         return jsonify(list(users))
     else:
-        return jsonify({"error": "Failed to fetch users"}), 500
+        return jsonify(
+            {"error": f"Failed to fetch users\n {response.content}"}
+        ), response.status_code
 
 
 @user_blueprint.route("/set-reviewers", methods=["POST"])

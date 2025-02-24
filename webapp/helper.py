@@ -2,6 +2,7 @@ from enum import Enum
 from os import environ
 
 import requests
+from flask import current_app
 from requests.models import Response
 
 from webapp.models import JiraTask, Project, User, Webpage, db, get_or_create
@@ -245,10 +246,8 @@ def get_user_from_directory_by_key(key, value):
         }}
     }}
     """
-
-    headers = {
-        "Authorization": "token " + environ.get("DIRECTORY_API_TOKEN", "")
-    }
+    token = current_app.config["DIRECTORY_API_TOKEN"]
+    headers = {"Authorization": "token " + token}
 
     # Currently directory-api only supports strict comparison of field values,
     # so we have to send two requests instead of one for first and last names
@@ -263,11 +262,11 @@ def get_user_from_directory_by_key(key, value):
             verify=False,
             timeout=5,
         )
-    except requests.exceptions.RequestException:
+    except Exception as e:
         response = Response()
         response.code = "service unavailable"
         response.error_type = "service unavailable"
         response.status_code = 503
-        response._content = b'{ "error" : "service unavailable" }'
+        response._content = str(e)
 
     return response

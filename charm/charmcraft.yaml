@@ -22,6 +22,10 @@ extensions:
   - flask-framework
 config:
   options:
+    copydoc-template-id:
+      type: string
+      description: "ID of the copydoc template to use"
+      default: ""
     directory-api-token:
       type: string
       description: "Token to access the directory API"
