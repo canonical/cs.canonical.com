@@ -1,5 +1,4 @@
 import enum
-import os
 from datetime import datetime, timezone
 
 import yaml
@@ -207,7 +206,7 @@ def init_db(app: Flask):
 
     @app.before_request
     def before_request():
-        Session = scoped_session(session_factory)
+        scoped_session(session_factory)
 
     @app.teardown_request
     def teardown_request(exception):
