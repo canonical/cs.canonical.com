@@ -19,6 +19,20 @@ class GoogleDriveClient:
         self.service = self._build_service(credentials)
         self.GOOGLE_DRIVE_FOLDER_ID = drive_folder_id
         self.COPYDOC_TEMPLATE_ID = copydoc_template_id
+        self._connect()
+
+    def _connect(self) -> None:
+        """
+        Try connecting to the Google Drive API, by checking if the canonical.com
+        folder exists.
+
+        Raises:
+            ValueError: If an error occurs while connecting to the Google Drive API.
+        """
+        if not self._item_exists("canonical.com"):
+            raise ValueError(
+                f"An error occurred while connecting to the Google Drive API"
+            )
 
     def _build_service(self, credentials: dict) -> Any:
         """
@@ -108,22 +122,23 @@ class GoogleDriveClient:
         Raises:
             ValueError: If an error occurs while creating the folder.
         """
-        try:
-            folder_metadata = {
-                "name": name,
-                "mimeType": "application/vnd.google-apps.folder",
-                "parents": [parent],
-            }
-            folder = (
-                self.service.files()
-                .create(body=folder_metadata, fields="id")
-                .execute()
-            )
-            return folder.get("id")
-        except HttpError as error:
-            raise ValueError(
-                f"An error occurred when creating a new folder: {error}"
-            )
+        return "0"
+        # try:
+        #     folder_metadata = {
+        #         "name": name,
+        #         "mimeType": "application/vnd.google-apps.folder",
+        #         "parents": [parent],
+        #     }
+        #     folder = (
+        #         self.service.files()
+        #         .create(body=folder_metadata, fields="id")
+        #         .execute()
+        #     )
+        #     return folder.get("id")
+        # except HttpError as error:
+        #     raise ValueError(
+        #         f"An error occurred when creating a new folder: {error}"
+        #     )
 
     def build_webpage_folder(self, webpage) -> str:
         """
