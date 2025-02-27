@@ -193,6 +193,12 @@ def init_db(app: Flask):
     with app.app_context():
         upgrade()
 
+    @app.teardown_request
+    def teardown_request(exception):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     # Create default project and user
     @app.before_request
     def create_default_project():
