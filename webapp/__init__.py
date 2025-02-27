@@ -11,7 +11,11 @@ from webapp.context import RegexConverter, base_context, clear_trailing_slash
 from webapp.gdrive import init_gdrive
 from webapp.jira import init_jira
 from webapp.models import init_db
-from webapp.settings import BASE_DIR, GOOGLE_CREDENTIALS
+from webapp.settings import (
+    BASE_DIR,
+    GOOGLE_CREDENTIALS,
+    SQLALCHEMY_DATABASE_URI,
+)
 from webapp.sso import init_sso
 
 
@@ -27,6 +31,7 @@ def create_app():
         app.config.from_prefixed_env()
         app.config["BASE_DIR"] = BASE_DIR
         app.config["GOOGLE_CREDENTIALS"] = GOOGLE_CREDENTIALS
+        app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     else:
         app.config.from_pyfile(filename="settings.py")
 

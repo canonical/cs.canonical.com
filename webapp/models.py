@@ -6,9 +6,23 @@ import yaml
 from flask import Flask
 from flask_migrate import Migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    create_engine,
+)
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import DeclarativeBase, Mapped, relationship
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    relationship,
+    scoped_session,
+    sessionmaker,
+)
 from sqlalchemy.orm.session import Session
 
 with open("data/data.yaml") as file:
@@ -182,16 +196,18 @@ class WebpageProduct(db.Model, DateTimeMixin):
 
 
 def init_db(app: Flask):
-    # Set up the database connection for juju relations
-    if os.environ.get("POSTGRESQL_DB_CONNECT_STRING"):
-        app.config["SQLALCHEMY_DATABASE_URI"] = os.environ[
-            "POSTGRESQL_DB_CONNECT_STRING"
-        ]
+    engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+    session_factory = sessionmaker(bind=engine)
+
     Migrate(app, db)
     db.init_app(app)
     # Automatically upgrade to head revision
     with app.app_context():
         upgrade()
+
+    @app.before_request
+    def before_request():
+        Session = scoped_session(session_factory)
 
     @app.teardown_request
     def teardown_request(exception):
