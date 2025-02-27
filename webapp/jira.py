@@ -10,6 +10,10 @@ from webapp.helper import RequestType
 from webapp.models import User, db
 
 
+class JiraError(Exception):
+    pass
+
+
 class Jira:
     headers = {
         "Accept": "application/json",
@@ -40,15 +44,16 @@ class Jira:
         self.auth = HTTPBasicAuth(email, token)
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
+        self._connect()
 
     def __request__(
-        self, method: str, url: str, data: dict = {}, params: dict = {}
+        self, method: str, path: str, data: dict = {}, params: dict = {}
     ):
         if data:
             data = json.dumps(data)
         response = requests.request(
             method,
-            url,
+            f"{self.url}/rest/api/3/{path}",
             data=data,
             headers=self.headers,
             auth=self.auth,
@@ -65,9 +70,17 @@ class Jira:
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
-            f" {url} {method} {data} {params}"
+            f" {path} {method} {data} {params}"
             f" {response.status_code}. Response: {response.text}"
         )
+
+    def _connect(self):
+        """
+        Test the connection to the Jira API.
+        """
+        meta = self.__request__(method="GET", path="issue/createmeta")
+        if not meta["projects"]:
+            raise JiraError("Authentication failed.")
 
     def get_reporter_jira_id(self, user_id):
         """
@@ -107,7 +120,7 @@ class Jira:
         """
         return self.__request__(
             method="GET",
-            url=f"{self.url}/rest/api/3/user/search",
+            path="user/search",
             params={"query": query},
         )
 
@@ -169,9 +182,7 @@ class Jira:
             },
             "update": {},
         }
-        return self.__request__(
-            method="POST", url=f"{self.url}/rest/api/3/issue", data=payload
-        )
+        return self.__request__(method="POST", path="issue", data=payload)
 
     def create_issue(
         self,
@@ -251,7 +262,7 @@ class Jira:
         }
         return self.__request__(
             method="POST",
-            url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
+            path="transitions",
             data=payload,
         )
 
@@ -263,7 +274,7 @@ class Jira:
         """
         return self.__request__(
             method="GET",
-            url=f"{self.url}/rest/api/3/issue/{jira_id}?fields=status",
+            url=f"issue/{jira_id}?fields=status",
         )
 
 
