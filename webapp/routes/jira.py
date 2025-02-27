@@ -138,8 +138,6 @@ def remove_webpage(body: RemoveWebpageModel):
             db.session.commit()
 
         except Exception as e:
-            # Rollback if there's any error
-            db.session.rollback()
             current_app.logger.info(
                 e, "Error deleting webpage from the database"
             )
