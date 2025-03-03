@@ -36,6 +36,11 @@ services:
       timeout: 3s
       retries: 10
       start_period: 80s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   cache:
+    driver: local
+  postgres_data:
     driver: local
