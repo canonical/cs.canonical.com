@@ -1,7 +1,7 @@
 import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 import React from "react";
 
-import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip } from "@canonical/react-components";
+import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip, useNotify } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
@@ -32,6 +32,7 @@ const RequestTaskModal = ({
   const { refetch } = usePages(true);
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
   const navigate = useNavigate();
+  const notify = useNotify();
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
@@ -70,30 +71,41 @@ const RequestTaskModal = ({
         reporter_struct: reporter,
         description: descr,
         redirect_url: redirectUrl,
-      }).then(() => {
-        setIsLoading(false);
-        onClose();
-        if (webpage.status === PageStatus.NEW) {
-          if (refetch) {
-            refetch()
-              .then((data) => {
-                if (data?.length) {
-                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
-                  if (project && project.data?.data) {
-                    setSelectedProject(project.data.data);
+        request_type: Object.keys(ChangeRequestType).find(
+          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType,
+        ) as string,
+      })
+        .then(() => {
+          onClose();
+          if (webpage.status === PageStatus.NEW) {
+            if (refetch) {
+              refetch()
+                .then((data) => {
+                  if (data?.length) {
+                    const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                    if (project && project.data?.data) {
+                      setSelectedProject(project.data.data);
+                    }
                   }
-                }
-              })
-              .finally(() => {
-                navigate("/app", { replace: true });
-              });
+                })
+                .finally(() => {
+                  navigate("/app", { replace: true });
+                });
+            } else {
+              navigate("/app", { replace: true });
+            }
           } else {
-            navigate("/app", { replace: true });
+            window.location.reload();
           }
-        } else {
-          window.location.reload();
-        }
-      });
+        })
+        .catch((error) => {
+          if (error?.response?.data) {
+            notify.failure(error.response.data.error, null, <p>{error.response.data.description}</p>);
+          }
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     } else {
       PagesServices.requestChanges({
         due_date: dueDate as string,
@@ -102,11 +114,22 @@ const RequestTaskModal = ({
         type: changeType,
         summary,
         description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
-      }).then(() => {
-        setIsLoading(false);
-        onClose();
-        window.location.reload();
-      });
+        request_type: Object.keys(ChangeRequestType).find(
+          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType,
+        ) as string,
+      })
+        .then(() => {
+          onClose();
+          window.location.reload();
+        })
+        .catch((error) => {
+          if (error?.response?.data) {
+            notify.failure(error.response.data.error, null, <p>{error.response.data.description}</p>);
+          }
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, [
     webpage.id,
@@ -122,6 +145,7 @@ const RequestTaskModal = ({
     selectedProject?.name,
     setSelectedProject,
     navigate,
+    notify,
     summary,
   ]);
 

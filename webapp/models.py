@@ -137,6 +137,12 @@ class JIRATaskStatus:
     REJECTED = "REJECTED"
 
 
+class JiraTaskType:
+    COPY_UPDATE = "COPY_UPDATE"
+    PAGE_REFRESH = "PAGE_REFRESH"
+    PAGE_REMOVAL = "PAGE_REMOVAL"
+
+
 class JiraTask(db.Model, DateTimeMixin):
     __tablename__ = "jira_tasks"
 
@@ -146,6 +152,7 @@ class JiraTask(db.Model, DateTimeMixin):
     user_id: int = Column(Integer, ForeignKey("users.id"))
     status: str = Column(String, default=JIRATaskStatus.UNTRIAGED)
     summary: str = Column(String)
+    request_type: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")

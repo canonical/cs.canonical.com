@@ -1,3 +1,4 @@
+import { NotificationConsumer } from "@canonical/react-components";
 import { useLocation } from "react-router-dom";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -35,6 +36,9 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
             {children}
           </div>
         </main>
+        <div className="l-notification__container">
+          <NotificationConsumer />
+        </div>
       </div>
     </>
   );
