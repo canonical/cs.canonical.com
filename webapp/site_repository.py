@@ -222,6 +222,7 @@ class SiteRepository:
         """
         for webpage in webpages:
             if webpage.parent_id and not (webpage.name or webpage.title):
+                self.logger.warning(f"Page {webpage.id} is incomplete.")
                 return True
         return False
 
@@ -239,9 +240,10 @@ class SiteRepository:
         )
         # build tree from repository in case DB table is empty
         if not webpages or self._has_incomplete_pages(webpages):
-            self.get_new_tree()
-
-        tree = get_tree_struct(db.session, webpages)
+            tree = self.get_new_tree()
+        # otherwise, build tree from DB
+        else:
+            tree = get_tree_struct(db.session, webpages)
         self.logger.info(f"Tree fetched for {self.repository_uri}")
         return tree
 
