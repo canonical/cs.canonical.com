@@ -215,7 +215,19 @@ class SiteRepository:
         self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
 
+    def _has_incomplete_pages(self, webpages) -> bool:
+        """
+        At times, the tree might not be fully loaded at the point when saved to
+        the database. This function returns whether a page is invalid.
+        """
+        for webpage in webpages:
+            if webpage.parent_id and not (webpage.name or webpage.title):
+                return True
+        return False
+
     def get_tree_from_db(self):
+        # TODO: Don't allow saving incomplete trees to the database
+
         webpages = (
             self.db.session.execute(
                 select(Webpage).where(
@@ -226,7 +238,7 @@ class SiteRepository:
             .all()
         )
         # build tree from repository in case DB table is empty
-        if not webpages:
+        if not webpages or self._has_incomplete_pages(webpages):
             self.get_new_tree()
 
         tree = get_tree_struct(db.session, webpages)
