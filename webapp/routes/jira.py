@@ -158,8 +158,8 @@ def remove_webpage(body: RemoveWebpageModel):
         # check if there's already a pending removal request
         jira_task = JiraTask.query.filter_by(
             webpage_id=webpage_id, request_type=JiraTaskType.PAGE_REMOVAL
-        ).one_or_none()
-        if jira_task and jira_task.status != JIRATaskStatus.REJECTED:
+        ).filter(JiraTask.status != JIRATaskStatus.REJECTED).one_or_none()
+        if jira_task:
             return (
                 jsonify(
                     {
