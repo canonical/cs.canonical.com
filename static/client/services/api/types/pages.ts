@@ -64,6 +64,7 @@ export interface IRequestChanges {
   type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
   summary?: string;
   description: string;
+  request_type: string;
 }
 
 export interface IRequestRemoval {
@@ -72,6 +73,7 @@ export interface IRequestRemoval {
   webpage_id: number;
   description: string;
   redirect_url: string;
+  request_type: string;
 }
 
 export interface ISetProducts {

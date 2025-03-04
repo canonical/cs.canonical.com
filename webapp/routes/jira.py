@@ -13,7 +13,9 @@ from webapp.helper import (
     get_webpage_id,
 )
 from webapp.models import (
+    JIRATaskStatus,
     JiraTask,
+    JiraTaskType,
     Project,
     Reviewer,
     User,
@@ -152,7 +154,25 @@ def remove_webpage(body: RemoveWebpageModel):
             200,
         )
 
-    if webpage.status == WebpageStatus.AVAILABLE:
+    if webpage.status in [WebpageStatus.AVAILABLE, WebpageStatus.TO_DELETE]:
+        # check if there's already a pending removal request
+        jira_task = JiraTask.query.filter_by(
+            webpage_id=webpage_id, request_type=JiraTaskType.PAGE_REMOVAL
+        ).filter(JiraTask.status != JIRATaskStatus.REJECTED).one_or_none()
+        if jira_task:
+            return (
+                jsonify(
+                    {
+                        "error": "Jira task already exists",
+                        "description": (
+                            "Please reject or complete the existing task "
+                            "before creating a new one"
+                        ),
+                    }
+                ),
+                400,
+            )
+
         if not (
             reporter_id and User.query.filter_by(id=reporter_id).one_or_none()
         ):
@@ -167,6 +187,7 @@ def remove_webpage(body: RemoveWebpageModel):
             "description": body.description,
             "type": None,
             "summary": f"Remove {webpage.name} webpage from code repository",
+            "request_type": body.request_type,
         }
         if body.redirect_url:
             task_details["summary"] += f" and redirect to {body.redirect_url}"

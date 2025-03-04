@@ -1,3 +1,4 @@
+import { NotificationProvider } from "@canonical/react-components";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import "./App.scss";
@@ -13,7 +14,9 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Main />
+      <NotificationProvider>
+        <Main />
+      </NotificationProvider>
     </QueryClientProvider>
   );
 };

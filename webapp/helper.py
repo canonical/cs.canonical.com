@@ -72,6 +72,7 @@ def create_jira_task(app, body):
         webpage_id=body["webpage_id"],
         user_id=reporter_id,
         summary=summary,
+        request_type=body["request_type"],
     )
 
 

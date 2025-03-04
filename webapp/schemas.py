@@ -26,6 +26,7 @@ class ChangesRequestModel(BaseModel):
     type: int
     description: str
     summary: str = ""
+    request_type: str = ""
 
 
 class RemoveWebpageModel(BaseModel):
@@ -34,6 +35,7 @@ class RemoveWebpageModel(BaseModel):
     reporter_struct: object = {}
     description: str = ""
     redirect_url: str = ""
+    request_type: str = ""
 
     @field_validator("due_date")
     @classmethod
