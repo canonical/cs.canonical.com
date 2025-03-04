@@ -244,6 +244,12 @@ class SiteRepository:
         # otherwise, build tree from DB
         else:
             tree = get_tree_struct(db.session, webpages)
+            # If the tree is empty, load from the repository
+            if not tree.get("children") and not tree.get("parent_id"):
+                tree = self.get_new_tree()
+                self.logger.info(
+                    f"Incomplete tree root {self.repository_uri} reloaded."
+                )
         self.logger.info(f"Tree fetched for {self.repository_uri}")
         return tree
 
