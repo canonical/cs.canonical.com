@@ -78,5 +78,5 @@ requires:
     limit: 1
   redis:
     interface: redis
-    optional: false
+    optional: true
     limit: 1
