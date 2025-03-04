@@ -50,8 +50,8 @@ jobs:
 
       - name: Create repositories directory
         run: |
-            mkdir -p repositories
-            mkdir -p tree-cache
+            mkdir -m 777 repositories
+            mkdir -m 777 tree-cache
 
       - name: Setup Rockcraft
         run: sudo snap install rockcraft --classic --channel=latest/edge
