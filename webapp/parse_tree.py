@@ -7,6 +7,7 @@ BASE_TEMPLATES = [
     "templates/base.html",
     "templates/base_no_nav.html",
     "templates/one-column.html",
+    "_base/base.html",
 ]
 TEMPLATE_PREFIXES = ["base", "_base"]
 TAG_MAPPING = {
