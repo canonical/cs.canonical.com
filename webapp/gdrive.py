@@ -23,15 +23,15 @@ class GoogleDriveClient:
 
     def _connect(self) -> None:
         """
-        Try connecting to the Google Drive API, by checking if the canonical.com
-        folder exists.
+        Try connecting to the Google Drive API, by checking if the
+        canonical.com folder exists.
 
         Raises:
-            ValueError: If an error occurs while connecting to the Google Drive API.
+            ValueError: If there's an error connecting to the Google Drive API.
         """
         if not self._item_exists("canonical.com"):
             raise ValueError(
-                f"An error occurred while connecting to the Google Drive API"
+                "An error occurred while connecting to the Google Drive API"
             )
 
     def _build_service(self, credentials: dict) -> Any:

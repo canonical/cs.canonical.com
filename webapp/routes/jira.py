@@ -10,8 +10,8 @@ from webapp.helper import (
     get_webpage_id,
 )
 from webapp.models import (
-    JIRATaskStatus,
     JiraTask,
+    JIRATaskStatus,
     JiraTaskType,
     Project,
     Reviewer,
@@ -258,9 +258,7 @@ def create_page(body: CreatePageModel):
 
 def invalidate_cache(webpage: Webpage):
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(
-        project.name, current_app, task_locks=LOCKS
-    )
+    site_repository = SiteRepository(project.name, current_app)
     # clean the cache for a page changes to be reflected
     site_repository.invalidate_cache()
     return True
