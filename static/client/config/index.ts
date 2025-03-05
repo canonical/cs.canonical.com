@@ -1,7 +1,7 @@
 let staleTime = process.env.NODE_ENV === "production" ? 300000 : 30000;
 
 const config = {
-  projects: ["canonical.com", "ubuntu.com"],
+  projects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
   api: {
     path: "/",
     FETCH_OPTIONS: {
