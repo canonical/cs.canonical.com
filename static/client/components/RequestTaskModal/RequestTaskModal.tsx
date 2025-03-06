@@ -95,7 +95,22 @@ const RequestTaskModal = ({
               navigate("/app", { replace: true });
             }
           } else {
-            window.location.reload();
+            if (refetch) {
+              refetch()
+                .then((data) => {
+                  if (data?.length) {
+                    const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                    if (project && project.data?.data) {
+                      setSelectedProject(project.data.data);
+                    }
+                  }
+                })
+                .finally(() => {
+                  window.location.reload();
+                });
+            } else {
+              window.location.reload();
+            }
           }
         })
         .catch((error) => {
