@@ -1,10 +1,13 @@
 import React, { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import { Tooltip } from "@canonical/react-components";
+import { LuPencilLine } from "react-icons/lu";
+import { MdAutoDelete } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 
 import { type INavigationElementProps } from "./NavigationElement.types";
 
-import type { IPage } from "@/services/api/types/pages";
+import { IPage, PageStatus } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
 
 const NavigationElement = ({ activePageName, page, project, onSelect }: INavigationElementProps): JSX.Element => {
@@ -56,6 +59,45 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
     }
   }, [activePageName, page.name]);
 
+  let statusIcon;
+  if (page.status === PageStatus.NEW) {
+    statusIcon = (
+      <Tooltip
+        autoAdjust
+        message={
+          <>
+            <b>In drafts</b>
+            <br />
+            This page isn't live yet.
+          </>
+        }
+        position="right"
+        zIndex={1000}
+        className={"is-light"}
+      >
+        <LuPencilLine />
+      </Tooltip>
+    );
+  } else if (page.status === PageStatus.TO_DELETE) {
+    statusIcon = (
+      <Tooltip
+        autoAdjust
+        message={
+          <>
+            <b>To be deleted</b>
+            <br />
+            This page is being deleted.
+          </>
+        }
+        position="right"
+        zIndex={1000}
+        className={"is-light"}
+      >
+        <MdAutoDelete />
+      </Tooltip>
+    );
+  }
+
   return (
     <li
       aria-selected={page.name === activePageName}
@@ -73,7 +115,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
               onClick={toggleElement}
               ref={expandButtonRef}
             >
-              {NavigationServices.formatPageName(page.name)}
+              {NavigationServices.formatPageName(page.name)} {statusIcon}
             </button>
           </>
           <ul
@@ -92,7 +134,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
         </>
       ) : (
         <div className={`p-list-tree__link ${page.name === activePageName ? "is-active" : ""}`} onClick={handleSelect}>
-          {NavigationServices.formatPageName(page.name)}
+          {NavigationServices.formatPageName(page.name)} {statusIcon}
         </div>
       )}
     </li>
