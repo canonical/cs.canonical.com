@@ -1,6 +1,7 @@
 # Websites Content System
 
 This is a portal tailored to managing content on our websites. It's useful for:
+
 - Making change requests on specific pages, and automating the related JIRA overhead
 - Assigning owners to individual pages
 - Collecting all relevant links for a page in one place:
@@ -69,6 +70,7 @@ Else if the value is confidential, you need to first create a secret on the kube
 ```bash
 $ kubectl create secret generic <secret-name> -n production with key1=supersecret and key2=supsecret
 ```
+
 Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 2. Verify the newly created secret
@@ -76,6 +78,7 @@ Make sure to replace `<secret-name>` with the actual name of the secret. For exa
 ```bash
 $ kubectl describe secret <secret-name> -n production
 ```
+
 Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 3. Add the secret ref to `konf/site.yaml` file.
@@ -225,9 +228,15 @@ and load the variables into the shell environment.
 $ source .env
 ```
 
-Start the server.
+Start the server. If using rabbitmq or redis, celery will be activated, and you should start the server with the below to ensure background tasks run.
 
+```bash
+$ celery -A webapp.app.celery_app worker -B  --loglevel=DEBUG
 ```
+
+Without celery or rabbitmq, you can start with flask to use native task processing.
+
+```bash
 $ flask --app webapp/app run --debug
 ```
 
@@ -267,34 +276,25 @@ To ensure hot module reloading, make sure to do the following changes.
 
 ### Creating tasks
 
-You can create a background task for Celery in your Flask application by following these steps:
+Since we're using a hybrid of celery + native task management, tasks need to be registered before they can be called asynchronously.
 
-1. Create a task by decorating a function with `@celery.task`:
-
+1. To create a task, simply add the following to the bottom of tasks.py
 ```python
-from webapp.celery_config import celery
-
-@shared_task
-def my_background_task():
-  # Task logic here
-  pass
+some_new_task = register_task(some_new_task)
 ```
 
-2. Call the task from your Flask route:
+This will attach the correct task runner behind the scenes.
+
+
+2. Call the task from your Flask route as a normal python function:
 
 ```python
+from webapp.tasks import some_new_task
+
 @app.route('/call-task')
 def some_route():
-  my_background_task.delay()  # async
-  # or
-  my_background_task.apply_async(countdown=60)  # run after 60s
+  some_new_task.delay()  # async
   return 'Task started'
-```
-
-Both periodic and regular tasks can then be run with:
-
-```bash
-celery -A webapp.app.celery_app worker -B  --loglevel=INFO
 ```
 
 ### API Requests
