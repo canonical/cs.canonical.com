@@ -15,9 +15,15 @@ if private_key := get_flask_env("GOOGLE_PRIVATE_KEY"):
     with contextlib.suppress(Error):
         private_key = base64.b64decode(private_key).replace(b"\\n", b"\n")
 
-DIRECTORY_API_TOKEN = get_flask_env("DIRECTORY_API_TOKEN")
-REDIS_HOST = get_flask_env("REDIS_HOST", "localhost")
+REDIS_HOST = get_flask_env("REDIS_HOST")
 REDIS_PORT = get_flask_env("REDIS_PORT", 6379)
+REDIS_DB_CONNECT_STRING = (
+    f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+    if REDIS_HOST
+    else get_flask_env("REDIS_DB_CONNECT_STRING")
+)
+RABBITMQ_URI = environ.get("RABBITMQ_URI")
+DIRECTORY_API_TOKEN = get_flask_env("DIRECTORY_API_TOKEN")
 REPO_ORG = get_flask_env("REPO_ORG", "https://github.com/canonical")
 GH_TOKEN = get_flask_env("GH_TOKEN", "")
 SECRET_KEY = get_flask_env("SECRET_KEY")

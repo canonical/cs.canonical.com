@@ -1,19 +1,16 @@
+import logging
 import os
 from pathlib import Path
 
 import requests
 import yaml
-from celery import Celery, Task, shared_task
-from celery.schedules import crontab
-from celery.utils.log import get_task_logger
-from flask import Flask
+from flask.app import current_app as app
 
-from webapp import app
+from webapp.celery import celery_app, register_celery_task
 from webapp.models import JiraTask, Project, Webpage, db
+from webapp.settings import BASE_DIR, RABBITMQ_URI, REDIS_DB_CONNECT_STRING
 from webapp.site_repository import SiteRepository
-
-logger = get_task_logger(__name__)
-c_app = Celery()
+from webapp.tasklib import register_local_task
 
 # Default delay between runs for updating the tree
 TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
@@ -21,30 +18,20 @@ TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
 UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", 5))
 
 
-@c_app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    print("Setting up periodic tasks")
-    # Calls fn() every x minutes.
-    sender.add_periodic_task(
-        crontab(minute=TASK_DELAY),
-        load_site_trees_cron.s(),
-        name=f"load_site_trees every {TASK_DELAY}",
-    )
+def register_task(fn=None, delay=None):
+    if RABBITMQ_URI or REDIS_DB_CONNECT_STRING:
+        # Register the task as a Celery task
+        return register_celery_task(fn, delay)
+    else:
+        # Register the task as a local task
+        return register_local_task(fn, delay)
 
-    sender.add_periodic_task(
-        crontab(minute=UPDATE_STATUS_DELAY),
-        update_jira_statuses.s(),
-        name=f"update_jira_statuses every {UPDATE_STATUS_DELAY}",
-    )
-
-
-@shared_task
 def load_site_trees_cron():
     """
     Load the site trees from the queue.
     """
-    app.logger.info("Running scheduled task: load_site_trees")
-    with open(app.config["BASE_DIR"] + "/data/sites.yaml") as f:
+    celery_app.logger.info("Running scheduled task: load_site_trees")
+    with open(BASE_DIR + "/data/sites.yaml") as f:
         data = yaml.safe_load(f)
         for site in data["sites"]:
             # Enqueue the sites for setup
@@ -53,7 +40,6 @@ def load_site_trees_cron():
             site_repository.get_tree(no_cache=True)
 
 
-@shared_task
 def update_jira_statuses():
     """
     Get the status of a Jira task and update it if it changed.
@@ -86,7 +72,6 @@ def update_jira_statuses():
             site_repository.invalidate_cache()
 
 
-@shared_task
 def save_github_file(
     repository: str, path: str, base_repository_path: str = "repositories"
 ):
@@ -112,27 +97,10 @@ def save_github_file(
             file.write(response.content)
 
 
-def init_celery(app: Flask) -> Celery:
-    class FlaskTask(Task):
-        def __call__(self, *args: object, **kwargs: object) -> object:
-            with app.app_context():
-                return self.run(*args, **kwargs)
+# Register the tasks
 
-    celery_app = Celery(app.name, task_cls=FlaskTask)
-    # Use redis if available
-    if redis_url := os.environ.get("REDIS_DB_CONNECT_STRING"):
-        broker_url = redis_url
-    else:
-        broker_url = "amqp://guest@localhost:5672/"
-
-    app.config.from_mapping(
-        CELERY=dict(
-            broker_url=broker_url,
-            ignore_result=True,
-        ),
-    )
-    celery_app.config_from_object(app.config["CELERY"])
-    celery_app.set_default()
-    celery_app.on_after_configure.connect(setup_periodic_tasks)
-    app.extensions["celery"] = celery_app
-    return celery_app
+load_site_trees_cron = register_task(load_site_trees_cron, delay=TASK_DELAY)
+update_jira_statuses = register_task(
+    update_jira_statuses, delay=UPDATE_STATUS_DELAY
+)
+save_github_file = register_task(save_github_file)

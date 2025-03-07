@@ -1,3 +1,9 @@
+import eventlet
+
+from webapp.celery import init_celery
+
+eventlet.monkey_patch(all=False, socket=True)
+
 import hashlib
 import os
 
@@ -46,10 +52,14 @@ def create_app():
     # Initialize gdrive
     init_gdrive(app)
 
+    # Initialize celery
+    init_celery(app)
+
     return app
 
 
 # Sensible defaults, got from flask base. We do this instead of installing the
+# TODO: Update flask-base now that it's fixed.
 # package to avoid dependency conflicts with talisker on python 3.12
 # https://github.com/canonical/canonicalwebteam.flask-base/blob/main/canonicalwebteam/flask_base/app.py
 

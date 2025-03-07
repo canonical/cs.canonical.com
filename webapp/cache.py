@@ -26,6 +26,9 @@ def init_cache(app: Flask):
 class Cache(ABC):
     """Abstract Cache class"""
 
+    KIND = "Cache"
+    CACHE_PREFIX = "WEBSITES_CONTENT_SYSTEM"
+
     @abstractmethod
     def get(self, key: str):
         """Get a value from the cache"""
@@ -49,7 +52,7 @@ class Cache(ABC):
 class RedisCache(Cache):
     """Cache interface"""
 
-    CACHE_PREFIX = "WEBSITES-CONTENT-SYSTEM"
+    KIND = "RedisCache"
 
     def __init__(self, app: Flask):
         self.logger = app.logger
@@ -114,8 +117,8 @@ class FileCacheError(Exception):
 class FileCache(Cache):
     """Cache interface"""
 
+    KIND = "FileCache"
     CACHE_DIR = "tree-cache"
-    CACHE_PREFIX = "WEBSITES_CONTENT_SYSTEM"
 
     def __init__(self, app: Flask):
         self.cache_path = app.config["BASE_DIR"] + "/" + self.CACHE_DIR

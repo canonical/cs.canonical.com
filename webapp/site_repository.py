@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import time
 from typing import Callable, TypedDict
 
 from flask import Flask
@@ -181,8 +182,17 @@ class SiteRepository:
         self.setup_site_repository()
 
         templates_folder = self.repo_path + "/templates"
-        # Check if the templates folder exists
-        if not os.path.exists(templates_folder):
+        # A background task may still be running to clone the repository,
+        # so we need to wait for the templates folder to be available
+        # to keep this method synchronous.
+
+        for _ in range(10):
+            folder_exists = os.path.exists(templates_folder)
+            if folder_exists:
+                break
+            time.sleep(1)
+
+        if not folder_exists:
             raise SiteRepositoryError(
                 "Templates folder 'templates' not found for "
                 f"repository {self.repo_path}"
@@ -227,8 +237,10 @@ class SiteRepository:
         return False
 
     def get_tree_from_db(self):
-        # TODO: Don't allow saving incomplete trees to the database
-
+        """
+        Get the tree from the database. If the tree is incomplete, reload from
+        the repository.
+        """
         webpages = (
             self.db.session.execute(
                 select(Webpage).where(
@@ -246,11 +258,10 @@ class SiteRepository:
             tree = get_tree_struct(db.session, webpages)
             # If the tree is empty, load from the repository
             if not tree.get("children") and not tree.get("parent_id"):
-                tree = self.get_new_tree()
                 self.logger.info(
-                    f"Incomplete tree root {self.repository_uri} reloaded."
+                    f"Reloading incomplete tree root {self.repository_uri}."
                 )
-        self.logger.info(f"Tree fetched for {self.repository_uri}")
+                tree = self.get_new_tree()
         return tree
 
     def get_tree(self, no_cache: bool = False):
@@ -383,6 +394,7 @@ class SiteRepository:
         # Load the tree from database
         try:
             tree = self.get_tree_from_db()
+            self.logger.info(f"Tree refreshed for {self.repository_uri}")
             # Update the cache
             self.set_tree_in_cache(tree)
             return tree
