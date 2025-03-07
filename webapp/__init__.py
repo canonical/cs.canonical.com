@@ -1,9 +1,3 @@
-import eventlet
-
-from webapp.celery import init_celery
-
-eventlet.monkey_patch(all=False, socket=True)
-
 import hashlib
 import os
 
@@ -13,6 +7,7 @@ from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from webapp.cache import init_cache
+from webapp.celery import init_celery
 from webapp.context import RegexConverter, base_context, clear_trailing_slash
 from webapp.gdrive import init_gdrive
 from webapp.jira import init_jira
