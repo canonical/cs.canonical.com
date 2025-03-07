@@ -9,7 +9,6 @@ from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
 from webapp.sso import login_required
-from webapp.tasklib import async_task
 
 app = create_app()
 
