@@ -1,13 +1,12 @@
 import React, { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
 import { Tooltip } from "@canonical/react-components";
-import { LuPencilLine } from "react-icons/lu";
-import { MdAutoDelete } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 
 import { type INavigationElementProps } from "./NavigationElement.types";
 
-import { IPage, PageStatus } from "@/services/api/types/pages";
+import type { IPage } from "@/services/api/types/pages";
+import { PageStatus } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
 
 const NavigationElement = ({ activePageName, page, project, onSelect }: INavigationElementProps): JSX.Element => {
@@ -73,9 +72,8 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
         }
         position="right"
         zIndex={1000}
-        className={"is-light"}
       >
-        <LuPencilLine />
+        <i className="p-icon--edit is-dark" />
       </Tooltip>
     );
   } else if (page.status === PageStatus.TO_DELETE) {
@@ -91,9 +89,8 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
         }
         position="right"
         zIndex={1000}
-        className={"is-light"}
       >
-        <MdAutoDelete />
+        <i className="p-icon--delete is-dark" />
       </Tooltip>
     );
   }
