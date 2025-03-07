@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       valkey:
-        image: valkey/valkey
+        image: redis
         options: >-
-          --health-cmd "valkey-cli ping"
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -27,8 +27,8 @@ jobs:
     env: 
       DISABLE_SSO: True
       SECRET_KEY: secret_key 
-      VALKEY_HOST: localhost 
-      VALKEY_PORT: 6379 
+      REDIS_HOST: localhost 
+      REDIS_PORT: 6379 
       GH_TOKEN: token 
       REPO_ORG: https://github.com/canonical 
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres 

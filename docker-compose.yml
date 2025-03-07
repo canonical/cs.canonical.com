@@ -15,7 +15,7 @@ services:
     image: valkey/valkey
     restart: always
     ports:
-      - "${VALKEY_PORT}:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - cache:/data
     healthcheck:

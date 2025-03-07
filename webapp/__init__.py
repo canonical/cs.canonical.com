@@ -7,12 +7,12 @@ from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from webapp.cache import init_cache
+from webapp.celery import init_celery
 from webapp.context import RegexConverter, base_context, clear_trailing_slash
 from webapp.gdrive import init_gdrive
 from webapp.jira import init_jira
 from webapp.models import init_db
 from webapp.sso import init_sso
-from webapp.tasks import init_tasks
 
 
 def create_app():
@@ -22,11 +22,15 @@ def create_app():
         template_folder="../templates",
         static_folder="../static",
     )
-    app.config.from_pyfile("settings.py")
-    app.context_processor(base_context)
+    app.config.from_pyfile(filename="settings.py")
 
-    # Add CORS headers
-    CORS(app, origins=["login.ubuntu.com"])
+    # Allow CORS in development mode
+    if os.getenv("FLASK_DEBUG"):
+        CORS(app, origins=["*"])
+    else:
+        CORS(app, origins=["login.ubuntu.com"])
+
+    app.context_processor(base_context)
 
     # Initialize database
     init_db(app)
@@ -37,19 +41,20 @@ def create_app():
     # Initialize cache
     init_cache(app)
 
-    # Initialize tasks
-    init_tasks(app)
-
     # Initialize JIRA
     init_jira(app)
 
     # Initialize gdrive
     init_gdrive(app)
 
+    # Initialize celery
+    init_celery(app)
+
     return app
 
 
 # Sensible defaults, got from flask base. We do this instead of installing the
+# TODO: Update flask-base now that it's fixed.
 # package to avoid dependency conflicts with talisker on python 3.12
 # https://github.com/canonical/canonicalwebteam.flask-base/blob/main/canonicalwebteam/flask_base/app.py
 
@@ -237,8 +242,6 @@ class FlaskBase(flask.Flask):
         super().__init__(name, *args, **kwargs)
 
         self.service = service
-
-        self.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 
         self.url_map.strict_slashes = False
         self.url_map.converters["regex"] = RegexConverter
