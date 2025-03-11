@@ -19,6 +19,20 @@ class GoogleDriveClient:
         self.service = self._build_service(credentials)
         self.GOOGLE_DRIVE_FOLDER_ID = drive_folder_id
         self.COPYDOC_TEMPLATE_ID = copydoc_template_id
+        self._connect()
+
+    def _connect(self) -> None:
+        """
+        Try connecting to the Google Drive API, by checking if the
+        canonical.com folder exists.
+
+        Raises:
+            ValueError: If there's an error connecting to the Google Drive API.
+        """
+        if not self._item_exists("canonical.com"):
+            raise ValueError(
+                "An error occurred while connecting to the Google Drive API"
+            )
 
     def _build_service(self, credentials: dict) -> Any:
         """
@@ -30,11 +44,11 @@ class GoogleDriveClient:
         Returns:
             googleapiclient.discovery.Resource: A google drive service object.
         """
-        credentials = service_account.Credentials.from_service_account_info(
+        creds = service_account.Credentials.from_service_account_info(
             credentials,
             scopes=self.SCOPES,
         )
-        return build("drive", "v3", credentials=credentials)
+        return build("drive", "v3", credentials=creds)
 
     def _item_exists(
         self,
@@ -108,22 +122,23 @@ class GoogleDriveClient:
         Raises:
             ValueError: If an error occurs while creating the folder.
         """
-        try:
-            folder_metadata = {
-                "name": name,
-                "mimeType": "application/vnd.google-apps.folder",
-                "parents": [parent],
-            }
-            folder = (
-                self.service.files()
-                .create(body=folder_metadata, fields="id")
-                .execute()
-            )
-            return folder.get("id")
-        except HttpError as error:
-            raise ValueError(
-                f"An error occurred when creating a new folder: {error}"
-            )
+        return "0"
+        # try:
+        #     folder_metadata = {
+        #         "name": name,
+        #         "mimeType": "application/vnd.google-apps.folder",
+        #         "parents": [parent],
+        #     }
+        #     folder = (
+        #         self.service.files()
+        #         .create(body=folder_metadata, fields="id")
+        #         .execute()
+        #     )
+        #     return folder.get("id")
+        # except HttpError as error:
+        #     raise ValueError(
+        #         f"An error occurred when creating a new folder: {error}"
+        #     )
 
     def build_webpage_folder(self, webpage) -> str:
         """
