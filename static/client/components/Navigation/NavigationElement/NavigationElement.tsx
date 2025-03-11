@@ -58,42 +58,44 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
     }
   }, [activePageName, page.name]);
 
-  let statusIcon;
-  if (page.status === PageStatus.NEW) {
-    statusIcon = (
-      <Tooltip
-        autoAdjust
-        message={
-          <>
-            <b>In drafts</b>
-            <br />
-            This page isn't live yet.
-          </>
-        }
-        position="right"
-        zIndex={1000}
-      >
-        <i className="p-icon--edit is-dark" />
-      </Tooltip>
-    );
-  } else if (page.status === PageStatus.TO_DELETE) {
-    statusIcon = (
-      <Tooltip
-        autoAdjust
-        message={
-          <>
-            <b>To be deleted</b>
-            <br />
-            This page is being deleted.
-          </>
-        }
-        position="right"
-        zIndex={1000}
-      >
-        <i className="p-icon--delete is-dark" />
-      </Tooltip>
-    );
-  }
+  const statusIcon = useCallback(() => {
+    if (page.status === PageStatus.NEW)
+      return (
+        <Tooltip
+          autoAdjust
+          message={
+            <>
+              <b>In drafts</b>
+              <br />
+              This page isn't live yet.
+            </>
+          }
+          position="right"
+          zIndex={1000}
+        >
+          <i className="p-icon--edit is-dark" />
+        </Tooltip>
+      );
+    if (page.status === PageStatus.TO_DELETE)
+      return (
+        <Tooltip
+          autoAdjust
+          message={
+            <>
+              <b>To be deleted</b>
+              <br />
+              This page is being deleted.
+            </>
+          }
+          position="right"
+          zIndex={1000}
+        >
+          <i className="p-icon--archive is-dark" />
+        </Tooltip>
+      );
+
+    return <></>;
+  }, [page.status]);
 
   return (
     <li
@@ -112,7 +114,8 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
               onClick={toggleElement}
               ref={expandButtonRef}
             >
-              {NavigationServices.formatPageName(page.name)} {statusIcon}
+              {NavigationServices.formatPageName(page.name)}
+              {statusIcon()}
             </button>
           </>
           <ul
@@ -131,7 +134,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
         </>
       ) : (
         <div className={`p-list-tree__link ${page.name === activePageName ? "is-active" : ""}`} onClick={handleSelect}>
-          {NavigationServices.formatPageName(page.name)} {statusIcon}
+          {NavigationServices.formatPageName(page.name)} {statusIcon()}
         </div>
       )}
     </li>
