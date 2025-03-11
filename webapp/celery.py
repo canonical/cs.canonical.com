@@ -25,6 +25,8 @@ def register_celery_task(fn=None, delay=None):
     if delay:
         celery_app.on_after_configure.connect(_setup_periodic_tasks)
 
+    return fn
+
 
 def init_celery(app: Flask) -> Celery:
     class FlaskTask(Task):
