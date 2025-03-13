@@ -77,25 +77,26 @@ const RequestTaskModal = ({
       })
         .then(() => {
           onClose();
-          if (webpage.status === PageStatus.NEW) {
-            if (refetch) {
-              refetch()
-                .then((data) => {
-                  if (data?.length) {
-                    const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
-                    if (project && project.data?.data) {
-                      setSelectedProject(project.data.data);
-                    }
-                  }
-                })
-                .finally(() => {
-                  navigate("/app", { replace: true });
-                });
-            } else {
+          const afterRefetch = () => {
+            if (webpage.status === PageStatus.NEW) {
               navigate("/app", { replace: true });
+            } else {
+              window.location.reload();
             }
+          };
+          if (refetch) {
+            refetch()
+              .then((data) => {
+                if (data?.length) {
+                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                  if (project && project.data?.data) {
+                    setSelectedProject(project.data.data);
+                  }
+                }
+              })
+              .finally(afterRefetch);
           } else {
-            window.location.reload();
+            afterRefetch();
           }
         })
         .catch((error) => {

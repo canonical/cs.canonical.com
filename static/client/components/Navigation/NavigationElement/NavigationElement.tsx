@@ -3,6 +3,7 @@ import React, { type MouseEvent, useCallback, useEffect, useRef, useState } from
 import { useLocation } from "react-router-dom";
 
 import { type INavigationElementProps } from "./NavigationElement.types";
+import NavigationElementBadge from "./NavigationElementBadge";
 
 import type { IPage } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
@@ -74,6 +75,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
               ref={expandButtonRef}
             >
               {NavigationServices.formatPageName(page.name)}
+              <NavigationElementBadge page={page} />
             </button>
           </>
           <ul
@@ -93,6 +95,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
       ) : (
         <div className={`p-list-tree__link ${page.name === activePageName ? "is-active" : ""}`} onClick={handleSelect}>
           {NavigationServices.formatPageName(page.name)}
+          <NavigationElementBadge page={page} />
         </div>
       )}
     </li>

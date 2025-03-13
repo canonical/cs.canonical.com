@@ -6,3 +6,7 @@ export interface INavigationElementProps {
   project: string;
   onSelect: (path: string) => void;
 }
+
+export interface INavigationElementBadgeProps {
+  page: IPage;
+}
