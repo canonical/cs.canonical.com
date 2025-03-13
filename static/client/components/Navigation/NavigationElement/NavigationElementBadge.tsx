@@ -2,10 +2,11 @@ import React, { useMemo } from "react";
 
 import { Tooltip } from "@canonical/react-components";
 
-import type { IPage } from "@/services/api/types/pages";
+import type { INavigationElementBadgeProps } from "./NavigationElement.types";
+
 import { PageStatus } from "@/services/api/types/pages";
 
-const NavigationElementBadge = ({ page }: { page: IPage }): JSX.Element => {
+const NavigationElementBadge = ({ page }: INavigationElementBadgeProps): JSX.Element => {
   const getIcon = useMemo(() => {
     switch (page.status) {
       case PageStatus.NEW:
