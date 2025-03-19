@@ -110,7 +110,7 @@ class GitHub:
             if item["type"] == "blob" and item["path"].startswith("templates"):
                 save_github_file.delay(
                     repository=repository,
-                    path=item["path"],
+                    path=tree_file_path / item["path"],
                 )
 
 

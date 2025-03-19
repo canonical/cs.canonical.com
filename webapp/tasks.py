@@ -76,15 +76,15 @@ def update_jira_statuses():
 def save_github_file(
     repository: str,
     path: str,
-    headers: dict = None,
 ) -> Any:
     """
     Save a file from a GitHub repository to the local filesystem.
     """
     try:
+        # repositories/ubuntu.com/templates/legal/ubuntu-pro-service-terms/ja.html
         github = app.config["github"]
         app.logger.info(f"File path {path}")
-        response = github.get_file_content(repository, path, headers)
+        response = github.get_file_content(repository, path)
         app.logger.info(f"Response {response.text}")
         if response.status_code == 200:
             with open(path, "wb") as file:
