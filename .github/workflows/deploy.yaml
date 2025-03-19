@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - add-charm
+      - test-deploy
       - main
 
 env:
@@ -11,26 +11,6 @@ env:
   ROCKCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
 
 jobs:
-  pack-charm:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup LXD
-        uses: canonical/setup-lxd@main
-
-      - name: Setup Charmcraft
-        run: sudo snap install charmcraft --classic --channel=latest/edge
-
-      - name: Pack charm
-        run: charmcraft pack -v --project-dir ./charm
-
-      - name: Upload charm
-        uses: actions/upload-artifact@v4
-        with:
-          name: cs-canonical-com-charm
-          path: ./*.charm
 
   pack-rock:
     runs-on: ubuntu-latest
@@ -68,7 +48,8 @@ jobs:
 
   publish-image:
     runs-on: ubuntu-latest
-    needs: pack-rock
+    needs: 
+      - pack-rock
     outputs:
       image_url: ${{ steps.set_image_url.outputs.image_url }}
     steps:
@@ -86,7 +67,7 @@ jobs:
 
   deploy-staging:
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
-    needs: [pack-charm, publish-image]
+    needs: [publish-image]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -100,6 +81,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cs-canonical-com-charm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Vault and Juju
         run: |
@@ -124,7 +106,7 @@ jobs:
 
   deploy-production:
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
-    needs: [pack-charm, publish-image]
+    needs: [publish-image]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -138,6 +120,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cs-canonical-com-charm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Vault and Juju
         run: |
