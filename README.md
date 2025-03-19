@@ -5,7 +5,7 @@ This is a portal tailored to managing content on our websites. It's useful for:
 - Making change requests on specific pages, and automating the related JIRA overhead
 - Assigning owners to individual pages
 - Collecting all relevant links for a page in one place:
-  - copydoc link
+  - copydoc links
   - link to github code
   - product category
 
