@@ -86,11 +86,12 @@ class GitHub:
         Returns:
             bytes: The raw content of the file.
         """
-        return self.__request__(
+        res = self.__request__(
             "GET",
             f"repos/canonical/{repository}/contents/{path}",
             blob=True,
         )
+        return res
 
     def get_repository_tree(self, repository: str, branch: str = "main"):
         """
@@ -109,8 +110,9 @@ class GitHub:
         for item in data["tree"]:
             if item["type"] == "blob" and item["path"].startswith("templates"):
                 save_github_file.delay(
+                    tree_file_path=tree_file_path,
                     repository=repository,
-                    path=tree_file_path / item["path"],
+                    path=item["path"],
                 )
 
 

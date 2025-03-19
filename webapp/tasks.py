@@ -76,18 +76,26 @@ def update_jira_statuses():
 def save_github_file(
     repository: str,
     path: str,
+    tree_file_path: str,
 ) -> Any:
     """
     Save a file from a GitHub repository to the local filesystem.
     """
+
+    # Note that there are several different paths in use:
+    # - tree_file_path: the path to the respository directory
+    # - file_path: the absolute path to the file on the local filesystem
+    # - path: the remote path to the file in github
     try:
-        # repositories/ubuntu.com/templates/legal/ubuntu-pro-service-terms/ja.html
         github = app.config["github"]
         app.logger.info(f"File path {path}")
         content = github.get_file_content(repository, path)
         app.logger.info(f"File {path} downloaded")
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "wb") as file:
+
+        file_path = tree_file_path / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(file_path, "wb") as file:
             file.write(content)
     except Exception as e:
         app.logger.error(f"Failed to save file: {e}")
