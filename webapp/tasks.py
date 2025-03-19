@@ -85,7 +85,7 @@ def save_github_file(
         github = app.config["github"]
         app.logger.info(f"File path {path}")
         response = github.get_file_content(repository, path)
-        app.logger.info(f"Response {response.text}")
+        app.logger.info(f"Response {response.status_code}")
         if response.status_code == 200:
             with open(path, "wb") as file:
                 file.write(response.content)
