@@ -357,6 +357,7 @@ class SiteRepository:
         """
         Create webpages for each node in the tree.
         """
+        self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
             db.session, Project, name=self.repository_uri
@@ -375,6 +376,8 @@ class SiteRepository:
 
         # Remove pages that don't exist in the repository anymore
         self.__remove_webpages_to_delete__(db, tree)
+
+        self.logger.info(f"Existing dict {webpage_dict}")
 
         db.session.commit()
         return webpage_dict
