@@ -76,34 +76,18 @@ def update_jira_statuses():
 def save_github_file(
     repository: str,
     path: str,
-    base_repository_path: str = "repositories",
-    token: str = None,
     headers: dict = None,
 ) -> Any:
     """
     Save a file from a GitHub repository to the local filesystem.
     """
     try:
-        file_path = Path(base_repository_path) / repository / path
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-        app.logger.info(f"File path {file_path}")
-
-        token = os.environ.get("GH_TOKEN")
-        headers = {
-            "Accept": "application/vnd.github.raw+json",
-            "Authorization": f"Bearer {token}",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-        response = requests.request(
-            "GET",
-            f"https://api.github.com/repos/canonical/{repository}/contents/{path}",
-            headers=headers,
-        )
+        github = app.config["github"]
+        app.logger.info(f"File path {path}")
+        response = github.get_file_content(repository, path, headers)
         app.logger.info(f"Response {response.text}")
-
         if response.status_code == 200:
-            with open(file_path, "wb") as file:
+            with open(path, "wb") as file:
                 file.write(response.content)
     except Exception as e:
         app.logger.error(f"Failed to save file: {e}")
