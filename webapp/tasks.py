@@ -86,7 +86,7 @@ def save_github_file(
         app.logger.info(f"File path {path}")
         content = github.get_file_content(repository, path)
         app.logger.info(f"File {path} downloaded")
-        Path(path).mkdir(parents=True, exist_ok=True)
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
         with open(path, "wb") as file:
             file.write(content)
     except Exception as e:
