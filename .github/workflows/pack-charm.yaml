@@ -5,6 +5,8 @@ on:
     branches:
       - test-deploy
       - main
+    paths:
+      - charm/*
 
 env:
   CHARMCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
@@ -14,15 +16,6 @@ jobs:
   pack-charm:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Get changed files in the charm folder
-        id: changed-files
-        uses: tj-actions/changed-files@v43
-        with:
-          files: charm/*
-
       - name: Checkout Code
         uses: actions/checkout@v3
 
