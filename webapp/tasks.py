@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from typing import Any
 
-import requests
 import yaml
 from flask.app import current_app as app
 
@@ -92,7 +91,7 @@ def save_github_file(
         content = github.get_file_content(repository, path)
         app.logger.info(f"File {path} downloaded")
 
-        file_path = tree_file_path / path
+        file_path = Path(tree_file_path) / path
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(file_path, "wb") as file:
@@ -100,7 +99,9 @@ def save_github_file(
     except Exception as e:
         app.logger.error(f"Failed to save file: {e}")
 
+
 # Register the tasks
+
 
 load_site_trees_cron = register_task(load_site_trees_cron, delay=TASK_DELAY)
 update_jira_statuses = register_task(

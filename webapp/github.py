@@ -101,7 +101,7 @@ class GitHub:
             repository (str): The repository name.
             branch (str): The branch to get the tree from.
         """
-        tree_file_path = Path(self.REPOSITORY_PATH) / repository
+        tree_file_path = self.REPOSITORY_PATH / repository
         tree_file_path.mkdir(parents=True, exist_ok=True)
         data = self.__request__(
             "GET",
@@ -110,7 +110,7 @@ class GitHub:
         for item in data["tree"]:
             if item["type"] == "blob" and item["path"].startswith("templates"):
                 save_github_file.delay(
-                    tree_file_path=tree_file_path,
+                    tree_file_path=str(tree_file_path),
                     repository=repository,
                     path=item["path"],
                 )
