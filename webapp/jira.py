@@ -262,7 +262,7 @@ class Jira:
         }
         return self.__request__(
             method="POST",
-            path="transitions",
+            path=f"/issue/{issue_id}/transitions",
             data=payload,
         )
 
