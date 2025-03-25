@@ -122,23 +122,22 @@ class GoogleDriveClient:
         Raises:
             ValueError: If an error occurs while creating the folder.
         """
-        return "0"
-        # try:
-        #     folder_metadata = {
-        #         "name": name,
-        #         "mimeType": "application/vnd.google-apps.folder",
-        #         "parents": [parent],
-        #     }
-        #     folder = (
-        #         self.service.files()
-        #         .create(body=folder_metadata, fields="id")
-        #         .execute()
-        #     )
-        #     return folder.get("id")
-        # except HttpError as error:
-        #     raise ValueError(
-        #         f"An error occurred when creating a new folder: {error}"
-        #     )
+        try:
+            folder_metadata = {
+                "name": name,
+                "mimeType": "application/vnd.google-apps.folder",
+                "parents": [parent],
+            }
+            folder = (
+                self.service.files()
+                .create(body=folder_metadata, fields="id")
+                .execute()
+            )
+            return folder.get("id")
+        except HttpError as error:
+            raise ValueError(
+                f"An error occurred when creating a new folder: {error}"
+            )
 
     def build_webpage_folder(self, webpage) -> str:
         """
