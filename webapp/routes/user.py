@@ -13,7 +13,9 @@ from webapp.models import (
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 
-DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get("FLASK_DISABLE_SSO")
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
+    "FLASK_DISABLE_SSO"
+)
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
