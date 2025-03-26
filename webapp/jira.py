@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 
+from flask import request
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -93,6 +94,8 @@ class Jira:
             str: The Jira ID of the user who reported the issue.
         """
         # Try to get the user from the database
+        if jira_reporter_id := request.headers.get('X-JIRA-REPORTER-ID'):
+            return jira_reporter_id
         user = db.session.query(User).filter_by(id=user_id).first()
         if not user:
             raise ValueError(f"User with ID {user_id} not found")
