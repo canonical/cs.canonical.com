@@ -14,7 +14,9 @@ from webapp.models import (
     get_or_create,
 )
 
-DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get("FLASK_DISABLE_SSO")
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
+    "FLASK_DISABLE_SSO"
+)
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
