@@ -1,4 +1,5 @@
 from flask import jsonify, request, Blueprint, current_app, session
+import os
 
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
@@ -12,6 +13,8 @@ from webapp.models import (
     db,
     get_or_create,
 )
+
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get("FLASK_DISABLE_SSO")
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
@@ -91,6 +94,8 @@ def set_owner():
 @user_blueprint.route("/current-user", methods=["GET"])
 @login_required
 def current_user():
+    if DISABLE_SSO:
+        return (jsonify({}), 200)
     user = User.query.filter_by(email=session["openid"]["email"]).first()
     if not user:
         return jsonify({"error": "Currently logged in user not found"}), 404

@@ -23,7 +23,7 @@ def init_sso(app: flask.Flask):
     @app.route("/login", methods=["GET", "POST"])
     @open_id.loginhandler
     def login():
-        if "openid" in flask.session:
+        if DISABLE_SSO or "openid" in flask.session:
             return flask.redirect(open_id.get_next_url())
 
         teams_request = TeamsRequest(query_membership=[SSO_TEAM])
