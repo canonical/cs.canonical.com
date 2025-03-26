@@ -31,4 +31,23 @@ test.describe("Test project actions", () => {
     // the jira ticket will not be created if an existing one is already pending.
     expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
   });
+
+  test("request page changes", async ({ page }) => {
+    const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
+    const child = tree.locator(".p-list-tree__item").first();
+    await child.click();
+    page.getByRole("button", { name: /Request changes/i }).click();
+    const modal = page.locator(".p-modal").first();
+    await expect(modal).toBeVisible();
+    await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
+    const checkboxes = await page.locator("input[type='checkbox'][required]");
+    if (checkboxes) {
+      const checkboxCount = await checkboxes.count();
+      for (let i = 0; i < checkboxCount; i++) {
+        await checkboxes.nth(i).check();
+      }
+    }
+    await modal.getByRole("button", { name: /Submit/i }).click();
+    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  });
 });
