@@ -353,3 +353,32 @@ def some_route():
   "description": "This is a description"
 }
 ```
+
+### Testing
+
+Playwright is used to test different functionalities of the content system. Before running the tests, make sure you have the following `.env` variables set up.
+
+```
+JIRA_REPORTER_ID=<jira_repoter_id>
+LOCAL_VPN_ID=<canonical-provided-vpn>
+```
+
+**Note**:
+
+Replace `<jira_repoter_id>` with a valid reporter ID from JIra. This reporter will be used when creating Jira tasks as a result of running some tests.
+
+Replace `<canonical-provided-vpn>` with the ID of Canonical provided VPN which will be used to access Directory API for fetching users in different tests.
+
+#### Running Playwright tests
+
+To run the tests:
+
+```
+yarn playwright test
+```
+
+Or if you prefer running tests in UI mode:
+
+```
+yarn playwright test --ui
+```
