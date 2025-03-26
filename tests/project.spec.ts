@@ -53,8 +53,7 @@ test.describe("Test project actions", () => {
   });
 
   test("create new page", async ({ page }) => {
-    // TODO: remove before merge. Only for testing locally
-    await startVPN();
+    if (process.env.FLASK_DEBUG) await startVPN();
     await page.getByRole("button", { name: /Request new page/i }).click();
     await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
     await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
@@ -72,8 +71,7 @@ test.describe("Test project actions", () => {
     }
     await productsDropdown.click();
 
-    // TODO: remove before merge. Only for testing locally
-    await stopVPN();
+    if (process.env.FLASK_DEBUG) await stopVPN();
 
     await page.getByRole("button", { name: /Save and generate copy doc/i }).click();
 
@@ -95,6 +93,6 @@ test.describe("Test project actions", () => {
   });
 
   test.afterAll(() => {
-    // Todo: after all the tests are done, we can run the cleanup service that will discard jira tickets created during tests.
+    // TODO: after all the tests are done, we can run the cleanup service that will discard jira tickets created during tests.
   });
 });
