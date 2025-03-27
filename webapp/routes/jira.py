@@ -28,6 +28,7 @@ from webapp.models import (
 from webapp.schemas import (
     ChangesRequestModel,
     CreatePageModel,
+    PlaywrightCleanupReqBody,
     RemoveWebpageModel,
 )
 
@@ -41,7 +42,7 @@ def request_changes(body: ChangesRequestModel):
     # Make a request to JIRA to create a task
     try:
         params = body.model_dump()
-        create_jira_task(current_app, params)
+        task = create_jira_task(current_app, params)
 
         # clean the cache for a new Jira task to appear in the tree
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
@@ -49,7 +50,15 @@ def request_changes(body: ChangesRequestModel):
     except Exception as e:
         return jsonify(str(e)), 500
 
-    return jsonify({"message": "Task created successfully"}), 201
+    return (
+        jsonify(
+            {
+                "message": "Task created successfully",
+                "jira_task_id": task.jira_id,
+            }
+        ),
+        201,
+    )
 
 
 @jira_blueprint.route("/get-jira-tasks/<webpage_id>", methods=["GET"])
@@ -156,9 +165,13 @@ def remove_webpage(body: RemoveWebpageModel):
 
     if webpage.status in [WebpageStatus.AVAILABLE, WebpageStatus.TO_DELETE]:
         # check if there's already a pending removal request
-        jira_task = JiraTask.query.filter_by(
-            webpage_id=webpage_id, request_type=JiraTaskType.PAGE_REMOVAL
-        ).filter(JiraTask.status != JIRATaskStatus.REJECTED).one_or_none()
+        jira_task = (
+            JiraTask.query.filter_by(
+                webpage_id=webpage_id, request_type=JiraTaskType.PAGE_REMOVAL
+            )
+            .filter(JiraTask.status != JIRATaskStatus.REJECTED)
+            .one_or_none()
+        )
         if jira_task:
             return (
                 jsonify(
@@ -202,7 +215,10 @@ def remove_webpage(body: RemoveWebpageModel):
 
     return (
         jsonify(
-            {"message": f"removal of {webpage.name} processed successfully"}
+            {
+                "message": f"removal of {webpage.name} processed successfully",
+                "jira_task_id": task.jira_id,
+            }
         ),
         200,
     )
@@ -267,3 +283,35 @@ def invalidate_cache(webpage: Webpage):
     # clean the cache for a page changes to be reflected
     site_repository.invalidate_cache()
     return True
+
+
+@jira_blueprint.route("/playwright-cleanup", methods=["POST"])
+@login_required
+@validate()
+def playwright_cleanup(body: PlaywrightCleanupReqBody):
+    jira = current_app.config["JIRA"]
+    jira_tasks = body.jira_tasks
+
+    payload = {
+        "bulkTransitionInputs": [
+            {
+                "selectedIssueIdsOrKeys": jira_tasks,
+                "transitionId": JiraStatusTransitionCodes.REJECTED.value,
+            }
+        ],
+        "sendBulkNotification": False,
+    }
+
+    bulk_reject = jira.bulk_change_issue_status(payload)
+    if bulk_reject:
+        for jira_task_id in jira_tasks:
+            jira.unlink_parent_issue(jira_task_id)
+            task = JiraTask.query.filter_by(jira_id=jira_task_id).one_or_none()
+            if task:
+                JiraTask.query.filter_by(id=task.id).delete()
+                webpage = Webpage.query.filter_by(id=task.webpage_id).first()
+                if webpage:
+                    invalidate_cache(webpage)
+
+    db.session.commit()
+    return jsonify({"message": "Tasks cleaned up successfully"}), 200

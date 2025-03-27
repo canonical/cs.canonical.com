@@ -83,7 +83,7 @@ class Jira:
             str: The Jira ID of the user who reported the issue.
         """
         # Try to get the user from the database
-        if jira_reporter_id := request.headers.get('X-JIRA-REPORTER-ID'):
+        if jira_reporter_id := request.headers.get("X-JIRA-REPORTER-ID"):
             return jira_reporter_id
         user = db.session.query(User).filter_by(id=user_id).first()
         if not user:
@@ -296,6 +296,39 @@ class Jira:
                 )
                 # clean the cache for a new Jira task to appear in the tree
                 site_repository.invalidate_cache()
+
+    def bulk_change_issue_status(self, payload) -> bool:
+        """Change the status of a Jira issue.
+
+        Args:
+            payload: The payload to be sent to the Jira API.
+
+        Returns:
+            Bool: True if bulk operation was successful else False.
+        """
+        return self.__request__(
+            method="POST",
+            url=f"{self.url}/rest/api/3/bulk/issues/transition",
+            data=payload,
+        )
+
+    def unlink_parent_issue(self, issue_id: str) -> bool:
+        """Remove the parent from a Jira issue.
+
+        Args:
+            issue_id (str): The ID of the Jira issue (e.g., "JIRA-123").
+
+        Returns:
+            Bool: True if parent was removed successfully else False.
+        """
+        payload = {
+            "fields": {"parent": None},
+        }
+        return self.__request__(
+            method="PUT",
+            url=f"{self.url}/rest/api/3/issue/{issue_id}",
+            data=payload,
+        )
 
 
 def init_jira(app):
