@@ -1,8 +1,18 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, APIRequestContext } from "@playwright/test";
 import { config } from "./config";
 import { startVPN, stopVPN } from "./helpers";
+import type { IJiraTask } from "@/services/api/types/pages";
+
+const JIRA_TASKS: IJiraTask[] = [];
+let apiContext: APIRequestContext;
 
 test.describe("Test project actions", () => {
+  test.beforeAll(async ({ playwright }) => {
+    apiContext = await playwright.request.newContext({
+      baseURL: `${config.BASE_URL}`,
+    });
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.setExtraHTTPHeaders({
       "X-JIRA-REPORTER-ID": process.env.JIRA_REPORTER_ID || "",
@@ -27,9 +37,17 @@ test.describe("Test project actions", () => {
         await checkboxes.nth(i).check();
       }
     }
+    const responsePromise = page.waitForResponse((response) => response.url().includes("request-removal"));
     await modal.getByRole("button", { name: /Submit/i }).click();
-    // TODO: check that the jira ticket is created and jira tickets table has an entry.
-    // the jira ticket will not be created if an existing one is already pending.
+    const response = await responsePromise;
+
+    if (response.status() === 200) {
+      const responseBody = await response.json();
+      if (responseBody.jira_task_id) {
+        JIRA_TASKS.push(responseBody.jira_task_id);
+      }
+    }
+
     expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
   });
 
@@ -92,7 +110,13 @@ test.describe("Test project actions", () => {
     expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
   });
 
-  test.afterAll(() => {
-    // TODO: after all the tests are done, we can run the cleanup service that will discard jira tickets created during tests.
+  test.afterAll(async () => {
+    const cleanup = await apiContext.post("/api/playwright-cleanup", {
+      data: {
+        jira_tasks: JIRA_TASKS,
+      },
+    });
+    expect(cleanup.ok()).toBeTruthy();
+    await apiContext.dispose();
   });
 });
