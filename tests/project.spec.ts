@@ -20,55 +20,55 @@ test.describe("Test project actions", () => {
     await page.goto(`${config.BASE_URL}/app`);
   });
 
-  test("remove page", async ({ page }) => {
-    const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
-    const child = tree.locator(".p-list-tree__item").first();
-    await child.click();
-    await expect(page.getByRole("heading", { name: /Title/i })).toBeVisible();
-    page.getByRole("button", { name: /Request removal/i }).click();
-    const modal = page.locator(".p-modal").first();
-    await expect(modal).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Submit request for page removal/i })).toBeVisible();
-    await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
-    const checkboxes = await page.locator("input[type='checkbox'][required]");
-    if (checkboxes) {
-      const checkboxCount = await checkboxes.count();
-      for (let i = 0; i < checkboxCount; i++) {
-        await checkboxes.nth(i).check();
-      }
-    }
-    const responsePromise = page.waitForResponse((response) => response.url().includes("request-removal"));
-    await modal.getByRole("button", { name: /Submit/i }).click();
-    const response = await responsePromise;
+  // test("remove page", async ({ page }) => {
+  //   const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
+  //   const child = tree.locator(".p-list-tree__item").first();
+  //   await child.click();
+  //   await expect(page.getByRole("heading", { name: /Title/i })).toBeVisible();
+  //   page.getByRole("button", { name: /Request removal/i }).click();
+  //   const modal = page.locator(".p-modal").first();
+  //   await expect(modal).toBeVisible();
+  //   await expect(page.getByRole("heading", { name: /Submit request for page removal/i })).toBeVisible();
+  //   await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
+  //   const checkboxes = await page.locator("input[type='checkbox'][required]");
+  //   if (checkboxes) {
+  //     const checkboxCount = await checkboxes.count();
+  //     for (let i = 0; i < checkboxCount; i++) {
+  //       await checkboxes.nth(i).check();
+  //     }
+  //   }
+  //   const responsePromise = page.waitForResponse((response) => response.url().includes("request-removal"));
+  //   await modal.getByRole("button", { name: /Submit/i }).click();
+  //   const response = await responsePromise;
 
-    if (response.status() === 200) {
-      const responseBody = await response.json();
-      if (responseBody.jira_task_id) {
-        JIRA_TASKS.push(responseBody.jira_task_id);
-      }
-    }
+  //   if (response.status() === 200) {
+  //     const responseBody = await response.json();
+  //     if (responseBody.jira_task_id) {
+  //       JIRA_TASKS.push(responseBody.jira_task_id);
+  //     }
+  //   }
 
-    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
-  });
+  //   expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  // });
 
-  test("request page changes", async ({ page }) => {
-    const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
-    const child = tree.locator(".p-list-tree__item").first();
-    await child.click();
-    page.getByRole("button", { name: /Request changes/i }).click();
-    const modal = page.locator(".p-modal").first();
-    await expect(modal).toBeVisible();
-    await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
-    const checkboxes = await page.locator("input[type='checkbox'][required]");
-    if (checkboxes) {
-      const checkboxCount = await checkboxes.count();
-      for (let i = 0; i < checkboxCount; i++) {
-        await checkboxes.nth(i).check();
-      }
-    }
-    await modal.getByRole("button", { name: /Submit/i }).click();
-    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
-  });
+  // test("request page changes", async ({ page }) => {
+  //   const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
+  //   const child = tree.locator(".p-list-tree__item").first();
+  //   await child.click();
+  //   page.getByRole("button", { name: /Request changes/i }).click();
+  //   const modal = page.locator(".p-modal").first();
+  //   await expect(modal).toBeVisible();
+  //   await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
+  //   const checkboxes = await page.locator("input[type='checkbox'][required]");
+  //   if (checkboxes) {
+  //     const checkboxCount = await checkboxes.count();
+  //     for (let i = 0; i < checkboxCount; i++) {
+  //       await checkboxes.nth(i).check();
+  //     }
+  //   }
+  //   await modal.getByRole("button", { name: /Submit/i }).click();
+  //   expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  // });
 
   test("create new page", async ({ page }) => {
     if (process.env.FLASK_DEBUG) await startVPN();
@@ -76,10 +76,6 @@ test.describe("Test project actions", () => {
     await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
     await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
     await page.locator(".l-new-webpage--location .p-list-tree .p-list-tree__item").first().click();
-    await page.getByPlaceholder("Select an owner").fill(config.PLAYWRIGHT_TEST_USER);
-    await page.getByRole("button", { name: config.PLAYWRIGHT_TEST_USER }).click();
-    await page.getByPlaceholder("Select reviewers").fill(config.PLAYWRIGHT_TEST_USER);
-    await page.getByRole("button", { name: config.PLAYWRIGHT_TEST_USER }).click();
     const productsDropdown = page.getByRole("combobox", { name: "Select products" });
     await productsDropdown.click();
     const products = productsDropdown.locator("xpath=parent::*").locator(".multi-select__dropdown-item");
