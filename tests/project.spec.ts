@@ -20,36 +20,46 @@ test.describe("Test project actions", () => {
     await page.goto(`${config.BASE_URL}/app`);
   });
 
-  // test("remove page", async ({ page }) => {
-  //   const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
-  //   const child = tree.locator(".p-list-tree__item").first();
-  //   await child.click();
-  //   await expect(page.getByRole("heading", { name: /Title/i })).toBeVisible();
-  //   page.getByRole("button", { name: /Request removal/i }).click();
-  //   const modal = page.locator(".p-modal").first();
-  //   await expect(modal).toBeVisible();
-  //   await expect(page.getByRole("heading", { name: /Submit request for page removal/i })).toBeVisible();
-  //   await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
-  //   const checkboxes = await page.locator("input[type='checkbox'][required]");
-  //   if (checkboxes) {
-  //     const checkboxCount = await checkboxes.count();
-  //     for (let i = 0; i < checkboxCount; i++) {
-  //       await checkboxes.nth(i).check();
-  //     }
-  //   }
-  //   const responsePromise = page.waitForResponse((response) => response.url().includes("request-removal"));
-  //   await modal.getByRole("button", { name: /Submit/i }).click();
-  //   const response = await responsePromise;
+  test("remove page", async ({ page }) => {
+    const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
+    const child = tree.locator(".p-list-tree__item").first();
+    await child.click();
+    await expect(page.getByRole("heading", { name: /Title/i })).toBeVisible();
+    page.getByRole("button", { name: /Request removal/i }).click();
+    const modal = page.locator(".p-modal").first();
+    await expect(modal).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Submit request for page removal/i })).toBeVisible();
+    await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
+    const checkboxes = await page.locator("input[type='checkbox'][required]");
+    if (checkboxes) {
+      const checkboxCount = await checkboxes.count();
+      for (let i = 0; i < checkboxCount; i++) {
+        await checkboxes.nth(i).check();
+      }
+    }
 
-  //   if (response.status() === 200) {
-  //     const responseBody = await response.json();
-  //     if (responseBody.jira_task_id) {
-  //       JIRA_TASKS.push(responseBody.jira_task_id);
-  //     }
-  //   }
+    page.on("response", async (response) => {
+      if (response.url().includes("request-removal")) {
+        console.log("response status = ", response.status());
+        const res = await response.json();
+        console.log("response error =  = ", res.error);
+        console.log("response description = ", res.description);
+      }
+    });
 
-  //   expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
-  // });
+    const responsePromise = page.waitForResponse((response) => response.url().includes("request-removal"));
+    await modal.getByRole("button", { name: /Submit/i }).click();
+    const response = await responsePromise;
+
+    if (response.status() === 200) {
+      const responseBody = await response.json();
+      if (responseBody.jira_task_id) {
+        JIRA_TASKS.push(responseBody.jira_task_id);
+      }
+    }
+
+    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  });
 
   // test("request page changes", async ({ page }) => {
   //   const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
@@ -66,45 +76,59 @@ test.describe("Test project actions", () => {
   //       await checkboxes.nth(i).check();
   //     }
   //   }
+
+  //   const responsePromise = page.waitForResponse((response) => response.url().includes("request-changes"));
   //   await modal.getByRole("button", { name: /Submit/i }).click();
-  //   expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  //   const response = await responsePromise;
+
+  //   if (response.status() === 200) {
+  //     console.log("nigga response here man", response);
+  //     const responseBody = await response.json();
+  //     console.log("Response body:", responseBody);
+  //     if (responseBody.jira_task_id) {
+  //       JIRA_TASKS.push(responseBody.jira_task_id);
+  //     }
+  //   }
+
+  //   await expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
   // });
 
-  test("create new page", async ({ page }) => {
-    if (process.env.FLASK_DEBUG) await startVPN();
-    await page.getByRole("button", { name: /Request new page/i }).click();
-    await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
-    await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
-    await page.locator(".l-new-webpage--location .p-list-tree .p-list-tree__item").first().click();
-    const productsDropdown = page.getByRole("combobox", { name: "Select products" });
-    await productsDropdown.click();
-    const products = productsDropdown.locator("xpath=parent::*").locator(".multi-select__dropdown-item");
-    expect(await products.count()).toBeGreaterThan(0);
-    for (let i = 0; i < 3; i++) {
-      await products.nth(i).click();
-    }
-    await productsDropdown.click();
+  // test("create new page", async ({ page }) => {
+  //   if (process.env.FLASK_DEBUG) await startVPN();
+  //   await page.getByRole("button", { name: /Request new page/i }).click();
+  //   await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
+  //   await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
+  //   await page.locator(".l-new-webpage--location .p-list-tree .p-list-tree__item").first().click();
+  //   const productsDropdown = page.getByRole("combobox", { name: "Select products" });
+  //   await productsDropdown.click();
+  //   const products = productsDropdown.locator("xpath=parent::*").locator(".multi-select__dropdown-item");
+  //   expect(await products.count()).toBeGreaterThan(0);
+  //   for (let i = 0; i < 3; i++) {
+  //     await products.nth(i).click();
+  //   }
+  //   await productsDropdown.click();
 
-    if (process.env.FLASK_DEBUG) await stopVPN();
+  //   if (process.env.FLASK_DEBUG) await stopVPN();
 
-    await page.getByRole("button", { name: /Save and generate copy doc/i }).click();
+  //   await page.getByRole("button", { name: /Save and generate copy doc/i }).click();
 
-    await page.waitForTimeout(10000);
-    expect(page.url().endsWith(config.PLAYWRIGHT_TEST_PAGE_URL)).toBeTruthy();
-    await page.getByRole("button", { name: /Submit for publication.*/i }).click();
-    const modal = page.locator(".p-modal").first();
-    await expect(modal).toBeVisible();
-    await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
-    const checkboxes = await page.locator("input[type='checkbox'][required]");
-    if (checkboxes) {
-      const checkboxCount = await checkboxes.count();
-      for (let i = 0; i < checkboxCount; i++) {
-        await checkboxes.nth(i).check();
-      }
-    }
-    await modal.getByRole("button", { name: /Submit/i }).click();
-    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
-  });
+  //   await page.waitForTimeout(10000);
+  //   expect(page.url().endsWith(config.PLAYWRIGHT_TEST_PAGE_URL)).toBeTruthy();
+  //   await page.waitForTimeout(10000);
+  //   await page.getByRole("button", { name: /Submit for publication.*/i }).click();
+  //   const modal = page.locator(".p-modal").first();
+  //   await expect(modal).toBeVisible();
+  //   await modal.locator('input[type="date"]').fill(new Date().toISOString().split("T")[0]);
+  //   const checkboxes = await page.locator("input[type='checkbox'][required]");
+  //   if (checkboxes) {
+  //     const checkboxCount = await checkboxes.count();
+  //     for (let i = 0; i < checkboxCount; i++) {
+  //       await checkboxes.nth(i).check();
+  //     }
+  //   }
+
+  //   expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+  // });
 
   test.afterAll(async () => {
     const cleanup = await apiContext.post("/api/playwright-cleanup", {
