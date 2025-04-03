@@ -47,6 +47,12 @@ class Jira:
         self.copy_updates_epic = copy_updates_epic
         self._connect()
 
+    def test_integration(self):
+        return self.__request__(
+            method="GET",
+            url=f"{self.url}/rest/api/3/myself",
+        )
+
     def __request__(
         self, method: str, path: str, data: dict = {}, params: dict = {}
     ):

@@ -22,7 +22,7 @@ test.describe("Test project actions", () => {
 
   test("remove page", async ({ page }) => {
     const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
-    const child = tree.locator(".p-list-tree__item").first();
+    const child = tree.locator(".p-list-tree__item").nth(2);
     await child.click();
     await expect(page.getByRole("heading", { name: /Title/i })).toBeVisible();
     page.getByRole("button", { name: /Request removal/i }).click();
