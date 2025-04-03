@@ -10,13 +10,14 @@ env:
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
   GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
   GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
-  JIRA_EMAIL: example@canonical.com
-  JIRA_TOKEN: jiratoken
+  JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
   JIRA_URL: https://example.atlassian.net
   JIRA_LABELS: somelabel
-  JIRA_COPY_UPDATES_EPIC: WD-9999999
-  GOOGLE_DRIVE_FOLDER_ID: folderid
-  COPYDOC_TEMPLATE_ID: templateid
+  JIRA_COPY_UPDATES_EPIC: WD-12643
+  GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+  COPYDOC_TEMPLATE_ID: ${{ secrets.COPYDOC_TEMPLATE_ID }}
+  JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
 
 on:
   push:
