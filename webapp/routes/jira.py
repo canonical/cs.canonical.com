@@ -56,7 +56,7 @@ def request_changes(body: ChangesRequestModel):
                 "jira_task_id": task.jira_id,
             }
         ),
-        201,
+        200,
     )
 
 
@@ -112,113 +112,134 @@ def remove_webpage(body: RemoveWebpageModel):
         - If there is an error during deletion,
             returns a 500 error with a message.
     """
-    webpage_id = body.webpage_id
+    try:
+        webpage_id = body.webpage_id
 
-    webpage = Webpage.query.filter(Webpage.id == webpage_id).one_or_none()
-    if webpage is None:
-        return jsonify({"error": "webpage not found"}), 404
+        webpage = Webpage.query.filter(Webpage.id == webpage_id).one_or_none()
+        if webpage is None:
+            return jsonify({"error": "webpage not found"}), 404
 
-    reporter_id = get_or_create_user_id(body.reporter_struct)
+        reporter_id = get_or_create_user_id(body.reporter_struct)
 
-    if webpage.status == WebpageStatus.NEW:
-        try:
-            jira_tasks = JiraTask.query.filter_by(webpage_id=webpage_id).all()
-            if jira_tasks:
-                for task in jira_tasks:
-                    status_change = current_app.config[
-                        "JIRA"
-                    ].change_issue_status(
-                        issue_id=task.jira_id,
-                        transition_id=JiraStatusTransitionCodes.REJECTED.value,
-                    )
-                    if status_change["status_code"] != 204:
-                        return (
-                            jsonify(
-                                {
-                                    "error": f"failed to change status of Jira task {task.jira_id}"  # noqa
-                                }
-                            ),
-                            500,
+        if webpage.status == WebpageStatus.NEW:
+            try:
+                jira_tasks = JiraTask.query.filter_by(
+                    webpage_id=webpage_id
+                ).all()
+                if jira_tasks:
+                    for task in jira_tasks:
+                        status_change = current_app.config[
+                            "JIRA"
+                        ].change_issue_status(
+                            issue_id=task.jira_id,
+                            transition_id=JiraStatusTransitionCodes.REJECTED.value,
                         )
-                    JiraTask.query.filter_by(id=task.id).delete()
+                        if status_change["status_code"] != 204:
+                            return (
+                                jsonify(
+                                    {
+                                        "error": f"failed to change status of Jira task {task.jira_id}"  # noqa
+                                    }
+                                ),
+                                500,
+                            )
+                        JiraTask.query.filter_by(id=task.id).delete()
 
-            Reviewer.query.filter_by(webpage_id=webpage_id).delete()
-            db.session.delete(webpage)
-            db.session.commit()
+                Reviewer.query.filter_by(webpage_id=webpage_id).delete()
+                db.session.delete(webpage)
+                db.session.commit()
 
-        except Exception as e:
-            current_app.logger.info(
-                e, "Error deleting webpage from the database"
+            except Exception as e:
+                current_app.logger.info(
+                    e, "Error deleting webpage from the database"
+                )
+                return jsonify({"error": "unable to delete the webpage"}), 500
+
+            # clean the cache for a page to be removed from the tree
+            invalidate_cache(webpage)
+
+            return (
+                jsonify({"message": "Webpage has been removed successfully"}),
+                200,
             )
-            return jsonify({"error": "unable to delete the webpage"}), 500
+
+        if webpage.status in [
+            WebpageStatus.AVAILABLE,
+            WebpageStatus.TO_DELETE,
+        ]:
+            # check if there's already a pending removal request
+            jira_task = (
+                JiraTask.query.filter_by(
+                    webpage_id=webpage_id,
+                    request_type=JiraTaskType.PAGE_REMOVAL,
+                )
+                .filter(JiraTask.status != JIRATaskStatus.REJECTED)
+                .one_or_none()
+            )
+            if jira_task:
+                return (
+                    jsonify(
+                        {
+                            "error": "Jira task already exists",
+                            "description": (
+                                "Please reject or complete the existing task "
+                                "before creating a new one"
+                            ),
+                        }
+                    ),
+                    400,
+                )
+
+            if not (
+                reporter_id
+                and User.query.filter_by(id=reporter_id).one_or_none()
+            ):
+                return (
+                    jsonify({"error": "provided parameters are incorrect"}),
+                    400,
+                )
+            task_details = {
+                "webpage_id": webpage_id,
+                "due_date": body.due_date,
+                "reporter_struct": body.reporter_struct,
+                "description": body.description,
+                "type": None,
+                "summary": f"Remove {webpage.name} webpage from code repository",
+                "request_type": body.request_type,
+            }
+            if body.redirect_url:
+                task_details[
+                    "summary"
+                ] += f" and redirect to {body.redirect_url}"
+            task = create_jira_task(current_app, task_details)
+            Webpage.query.filter_by(id=webpage_id).update(
+                {"status": WebpageStatus.TO_DELETE.value}
+            )
+            db.session.commit()
 
         # clean the cache for a page to be removed from the tree
         invalidate_cache(webpage)
 
         return (
-            jsonify({"message": "Webpage has been removed successfully"}),
+            jsonify(
+                {
+                    "message": f"removal of {webpage.name} processed successfully",
+                    "jira_task_id": task.jira_id,
+                }
+            ),
             200,
         )
-
-    if webpage.status in [WebpageStatus.AVAILABLE, WebpageStatus.TO_DELETE]:
-        # check if there's already a pending removal request
-        jira_task = (
-            JiraTask.query.filter_by(
-                webpage_id=webpage_id, request_type=JiraTaskType.PAGE_REMOVAL
-            )
-            .filter(JiraTask.status != JIRATaskStatus.REJECTED)
-            .one_or_none()
+    except Exception as error:
+        current_app.logger.info(f"Unable to remove webpage: {error}")
+        return (
+            jsonify(
+                {
+                    "error": f"removal of {webpage.name} failed",
+                    "description": str(error),
+                }
+            ),
+            400,
         )
-        if jira_task:
-            return (
-                jsonify(
-                    {
-                        "error": "Jira task already exists",
-                        "description": (
-                            "Please reject or complete the existing task "
-                            "before creating a new one"
-                        ),
-                    }
-                ),
-                400,
-            )
-
-        if not (
-            reporter_id and User.query.filter_by(id=reporter_id).one_or_none()
-        ):
-            return (
-                jsonify({"error": "provided parameters are incorrect"}),
-                400,
-            )
-        task_details = {
-            "webpage_id": webpage_id,
-            "due_date": body.due_date,
-            "reporter_struct": body.reporter_struct,
-            "description": body.description,
-            "type": None,
-            "summary": f"Remove {webpage.name} webpage from code repository",
-            "request_type": body.request_type,
-        }
-        if body.redirect_url:
-            task_details["summary"] += f" and redirect to {body.redirect_url}"
-        task = create_jira_task(current_app, task_details)
-        Webpage.query.filter_by(id=webpage_id).update(
-            {"status": WebpageStatus.TO_DELETE.value}
-        )
-        db.session.commit()
-
-    # clean the cache for a page to be removed from the tree
-    invalidate_cache(webpage)
-
-    return (
-        jsonify(
-            {
-                "message": f"removal of {webpage.name} processed successfully",
-                "jira_task_id": task.jira_id,
-            }
-        ),
-        200,
-    )
 
 
 @jira_blueprint.route("/create-page", methods=["POST"])
