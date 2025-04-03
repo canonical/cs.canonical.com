@@ -1,24 +1,5 @@
 name: Playwright Tests
 
-env:
-  DISABLE_SSO: True
-  SECRET_KEY: secret_key
-  VALKEY_HOST: localhost
-  VALKEY_PORT: 6379
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  REPO_ORG: https://github.com/canonical
-  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-  GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-  GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
-  JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-  JIRA_URL: https://warthogs.atlassian.net
-  JIRA_LABELS: somelabel
-  JIRA_COPY_UPDATES_EPIC: WD-12643
-  GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-  COPYDOC_TEMPLATE_ID: ${{ secrets.COPYDOC_TEMPLATE_ID }}
-  JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
-
 on:
   push:
     branches: [main]
@@ -71,8 +52,43 @@ jobs:
       - name: Build assets
         run: dotrun build
       - name: Run dotrun
+        env:
+          DISABLE_SSO: True
+          SECRET_KEY: secret_key
+          VALKEY_HOST: localhost
+          VALKEY_PORT: 6379
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_ORG: https://github.com/canonical
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          JIRA_URL: https://warthogs.atlassian.net
+          JIRA_LABELS: somelabel
+          JIRA_COPY_UPDATES_EPIC: WD-12643
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+          COPYDOC_TEMPLATE_ID: ${{ secrets.COPYDOC_TEMPLATE_ID }}
+          JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
         run: |
-          dotrun -e DISABLE_SSO=True &
+          export GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY"
+          export JIRA_TOKEN="$JIRA_TOKEN"
+          dotrun -e SECRET_KEY="$SECRET_KEY" \
+          -e VALKEY_HOST="$VALKEY_HOST" \
+          -e VALKEY_PORT="$VALKEY_PORT" \
+          -e GH_TOKEN="$GH_TOKEN" \
+          -e REPO_ORG="$REPO_ORG" \
+          -e DATABASE_URL="$DATABASE_URL" \
+          -e GOOGLE_PRIVATE_KEY_ID="$GOOGLE_PRIVATE_KEY_ID" \
+          -e JIRA_EMAIL="$JIRA_EMAIL" \
+          -e JIRA_URL="$JIRA_URL" \
+          -e JIRA_LABELS="$JIRA_LABELS" \
+          -e JIRA_COPY_UPDATES_EPIC="$JIRA_COPY_UPDATES_EPIC" \
+          -e GOOGLE_DRIVE_FOLDER_ID="$GOOGLE_DRIVE_FOLDER_ID" \
+          -e COPYDOC_TEMPLATE_ID="$COPYDOC_TEMPLATE_ID" \
+          -e JIRA_REPORTER_ID="$JIRA_REPORTER_ID" \
+          -e DISABLE_SSO="$DISABLE_SSO" \
+          -e FLASK_DEBUG=True &
           curl --head --fail --retry-delay 1 --retry 50 --retry-connrefused http://localhost:8104
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
