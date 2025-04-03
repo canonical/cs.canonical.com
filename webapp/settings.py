@@ -53,3 +53,4 @@ GOOGLE_CREDENTIALS = {
     "universe_domain": "googleapis.com",
 }
 FLASK_DEBUG = get_flask_env("FLASK_DEBUG", False)
+JIRA_REPORTER_ID = get_flask_env("JIRA_REPORTER_ID")
