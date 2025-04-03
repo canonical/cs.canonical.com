@@ -9,4 +9,15 @@ export const getCurrentUser = async (): Promise<IUser> => {
   return api.users.getCurrentUser();
 };
 
+export const getDefaultUser = () => {
+  return {
+    department: "",
+    email: "",
+    id: 1,
+    jobTitle: "",
+    name: "Default",
+    team: "",
+  } as IUser;
+};
+
 export * as UsersServices from "./users";

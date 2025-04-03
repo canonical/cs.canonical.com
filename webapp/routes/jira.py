@@ -230,7 +230,10 @@ def remove_webpage(body: RemoveWebpageModel):
 def create_page(body: CreatePageModel):
     data = body.model_dump()
 
-    owner_id = get_or_create_user_id(data["owner"])
+    owner_id = (
+        get_or_create_user_id(data["owner"]) if data["owner"] else 1
+    )  # ID of default user
+
     product_ids = data["product_ids"]
 
     # Create new webpage
