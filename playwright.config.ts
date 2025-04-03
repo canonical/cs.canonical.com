@@ -53,9 +53,9 @@ export default defineConfig({
     // },
   ],
   // run the dev server before starting tests
-  webServer: {
-    command: "yarnpkg run serve",
-    url: `http://0.0.0.0:${process.env.PORT}`,
-    reuseExistingServer: !process.env.CI,
-  },
+  // webServer: {
+  //   command: "yarnpkg run serve",
+  //   url: `http://0.0.0.0:${process.env.PORT}`,
+  //   reuseExistingServer: !process.env.CI,
+  // },
 });
