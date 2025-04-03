@@ -38,6 +38,10 @@ config:
       type: string
       description: "Email address to use for JIRA API authentication"
       default: ""
+    jira-reporter-id:
+      type: string
+      description: "JIRA test reporter ID for creating issues during playwright tests"
+      default: ""
     jira-token:
       type: string
       description: "JIRA API token"
