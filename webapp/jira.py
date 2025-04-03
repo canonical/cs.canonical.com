@@ -43,6 +43,13 @@ class Jira:
         self.auth = HTTPBasicAuth(email, token)
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
+        self.test_integration
+
+    def test_integration(self):
+        return self.__request__(
+            method="GET",
+            url=f"{self.url}/rest/api/3/myself",
+        )
 
     def __request__(
         self, method: str, url: str, data: dict = {}, params: dict = {}
@@ -332,10 +339,13 @@ class Jira:
 
 
 def init_jira(app):
-    app.config["JIRA"] = Jira(
-        url=app.config["JIRA_URL"],
-        email=app.config["JIRA_EMAIL"],
-        token=app.config["JIRA_TOKEN"],
-        labels=app.config["JIRA_LABELS"].split(","),
-        copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
-    )
+    try:
+        app.config["JIRA"] = Jira(
+            url=app.config["JIRA_URL"],
+            email=app.config["JIRA_EMAIL"],
+            token=app.config["JIRA_TOKEN"],
+            labels=app.config["JIRA_LABELS"].split(","),
+            copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
+        )
+    except Exception as error:
+        app.logger.info(f"Unable to initialize jira: {error}")
