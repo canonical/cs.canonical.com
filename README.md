@@ -359,7 +359,7 @@ def some_route():
 Playwright is used to test different functionalities of the content system. Before running the tests, make sure you have the following `.env` variables set up.
 
 ```
-JIRA_REPORTER_ID=<jira_repoter_id>
+JIRA_REPORTER_ID=<jira_reporter_id>
 LOCAL_VPN_ID=<canonical-provided-vpn>
 FLASK_DEBUG=1
 ```
