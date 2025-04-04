@@ -1,14 +1,19 @@
 from os import environ
+
 from flask import render_template
 
 from webapp import create_app
-from webapp.sso import login_required
-from webapp.routes.tree import tree_blueprint
-from webapp.routes.user import user_blueprint
+from webapp.github import init_github
 from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
+from webapp.routes.tree import tree_blueprint
+from webapp.routes.user import user_blueprint
+from webapp.sso import login_required
 
 app = create_app()
+
+# Tasks
+init_github(app)
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

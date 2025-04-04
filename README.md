@@ -1,6 +1,13 @@
-# Template parser backend
+# Websites Content System
 
-Backend service for the CMS template parser
+This is a portal tailored to managing content on our websites. It's useful for:
+
+- Making change requests on specific pages, and automating the related JIRA overhead
+- Assigning owners to individual pages
+- Collecting all relevant links for a page in one place:
+  - copydoc links
+  - link to github code
+  - product category
 
 ## Getting it running
 
@@ -17,8 +24,8 @@ PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
-VALKEY_HOST=valkey
-VALKEY_PORT=6379
+REDIS_HOST=valkey
+REDIS_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
 REPO_ORG=https://github.com/canonical
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
@@ -63,6 +70,7 @@ Else if the value is confidential, you need to first create a secret on the kube
 ```bash
 $ kubectl create secret generic <secret-name> -n production with key1=supersecret and key2=supsecret
 ```
+
 Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 2. Verify the newly created secret
@@ -70,6 +78,7 @@ Make sure to replace `<secret-name>` with the actual name of the secret. For exa
 ```bash
 $ kubectl describe secret <secret-name> -n production
 ```
+
 Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
 
 3. Add the secret ref to `konf/site.yaml` file.
@@ -208,8 +217,8 @@ Then modify the .env file, and change the following to match your valkey and pos
 
 ```
 # .env
-VALKEY_HOST=localhost
-VALKEY_PORT=6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 ```
 
@@ -219,9 +228,15 @@ and load the variables into the shell environment.
 $ source .env
 ```
 
-Start the server.
+Start the server. If using rabbitmq or redis, celery will be activated, and you should start the server with the below to ensure background tasks run.
 
+```bash
+$ celery -A webapp.app.celery_app worker -B  --loglevel=DEBUG
 ```
+
+Without celery or rabbitmq, you can start with flask to use native task processing.
+
+```bash
 $ flask --app webapp/app run --debug
 ```
 
@@ -256,6 +271,31 @@ To ensure hot module reloading, make sure to do the following changes.
 - Add <code>FLASK_ENV=development</code> in .env.local file.
 - Comment out <code>"process.env.NODE_ENV": '"production"'</code> in vite.config.ts file.
 - Run the vite dev server locally, using <code>yarn run dev</code>.
+
+### Background tasks
+
+### Creating tasks
+
+Since we're using a hybrid of celery + native task management, tasks need to be registered before they can be called asynchronously.
+
+1. To create a task, simply add the following to the bottom of tasks.py
+```python
+some_new_task = register_task(some_new_task)
+```
+
+This will attach the correct task runner behind the scenes.
+
+
+2. Call the task from your Flask route as a normal python function:
+
+```python
+from webapp.tasks import some_new_task
+
+@app.route('/call-task')
+def some_route():
+  some_new_task.delay()  # async
+  return 'Task started'
+```
 
 ### API Requests
 

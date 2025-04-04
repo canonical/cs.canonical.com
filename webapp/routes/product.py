@@ -1,13 +1,17 @@
-from flask import jsonify, Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 from flask_pydantic import validate
 
-from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
-from webapp.tasks import LOCKS
 from webapp.models import (
-  Webpage, Project, Product, WebpageProduct, db, get_or_create
+    Product,
+    Project,
+    Webpage,
+    WebpageProduct,
+    db,
+    get_or_create,
 )
 from webapp.schemas import SetProductsModel
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
 
 product_blueprint = Blueprint("product", __name__, url_prefix="/api")
 
@@ -55,9 +59,7 @@ def set_product(body: SetProductsModel):
             )
 
         project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(
-            project.name, current_app, task_locks=LOCKS
-        )
+        site_repository = SiteRepository(project.name, current_app)
         # clean the cache for a new product to appear in the tree
         site_repository.invalidate_cache()
 

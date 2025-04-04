@@ -1,10 +1,7 @@
-from flask import jsonify, Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 from flask_pydantic import validate
 
-from webapp.sso import login_required
 from webapp.enums import JiraStatusTransitionCodes
-from webapp.site_repository import SiteRepository
-from webapp.tasks import LOCKS
 from webapp.helper import (
     create_copy_doc,
     create_jira_task,
@@ -13,8 +10,8 @@ from webapp.helper import (
     get_webpage_id,
 )
 from webapp.models import (
-    JIRATaskStatus,
     JiraTask,
+    JIRATaskStatus,
     JiraTaskType,
     Project,
     Reviewer,
@@ -30,6 +27,8 @@ from webapp.schemas import (
     CreatePageModel,
     RemoveWebpageModel,
 )
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
 
 jira_blueprint = Blueprint("jira", __name__, url_prefix="/api")
 
@@ -139,8 +138,6 @@ def remove_webpage(body: RemoveWebpageModel):
             db.session.commit()
 
         except Exception as e:
-            # Rollback if there's any error
-            db.session.rollback()
             current_app.logger.info(
                 e, "Error deleting webpage from the database"
             )
@@ -261,9 +258,7 @@ def create_page(body: CreatePageModel):
 
 def invalidate_cache(webpage: Webpage):
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(
-        project.name, current_app, task_locks=LOCKS
-    )
+    site_repository = SiteRepository(project.name, current_app)
     # clean the cache for a page changes to be reflected
     site_repository.invalidate_cache()
     return True

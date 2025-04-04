@@ -5,11 +5,13 @@ from datetime import datetime
 
 import requests
 from requests.auth import HTTPBasicAuth
-from flask import Flask
 
-from webapp.models import User, JiraTask, Webpage, Project, db
 from webapp.helper import RequestType
-from webapp.site_repository import SiteRepository
+from webapp.models import User, db
+
+
+class JiraError(Exception):
+    pass
 
 
 class Jira:
@@ -42,15 +44,16 @@ class Jira:
         self.auth = HTTPBasicAuth(email, token)
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
+        self._connect()
 
     def __request__(
-        self, method: str, url: str, data: dict = {}, params: dict = {}
+        self, method: str, path: str, data: dict = {}, params: dict = {}
     ):
         if data:
             data = json.dumps(data)
         response = requests.request(
             method,
-            url,
+            f"{self.url}/rest/api/3/{path}",
             data=data,
             headers=self.headers,
             auth=self.auth,
@@ -67,9 +70,17 @@ class Jira:
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
-            f" {url} {method} {data} {params}"
+            f" {path} {method} {data} {params}"
             f" {response.status_code}. Response: {response.text}"
         )
+
+    def _connect(self):
+        """
+        Test the connection to the Jira API.
+        """
+        meta = self.__request__(method="GET", path="issue/createmeta")
+        if not meta["projects"]:
+            raise JiraError("Authentication failed.")
 
     def get_reporter_jira_id(self, user_id):
         """
@@ -109,7 +120,7 @@ class Jira:
         """
         return self.__request__(
             method="GET",
-            url=f"{self.url}/rest/api/3/user/search",
+            path="user/search",
             params={"query": query},
         )
 
@@ -171,9 +182,7 @@ class Jira:
             },
             "update": {},
         }
-        return self.__request__(
-            method="POST", url=f"{self.url}/rest/api/3/issue", data=payload
-        )
+        return self.__request__(method="POST", path="issue", data=payload)
 
     def create_issue(
         self,
@@ -253,53 +262,30 @@ class Jira:
         }
         return self.__request__(
             method="POST",
-            url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
+            path=f"/issue/{issue_id}/transitions",
             data=payload,
         )
 
-    def update_tasks_statuses(self, app: Flask, task_locks: dict):
-        """
-        Get the status of a Jira task and update it if it changed.
+    def get_issue_statuses(self, jira_id: str):
+        """Get the statuses of the Jira issues.
 
-        Args:
-            app (Flask): The Flask application instance.
-            task_locks (dict): The locks for the project trees.
+        Returns:
+            dict: The statuses of the Jira issues.
         """
-        jira_tasks = JiraTask.query.all()
-        if jira_tasks:
-            project_ids = []
-            for task in jira_tasks:
-                response = self.__request__(
-                    method="GET",
-                    url=f"{self.url}/rest/api/3/issue/{task.jira_id}?fields=status",
-                )
-                if task.status != response["fields"]["status"]["name"].upper():
-                    task.status = response["fields"]["status"]["name"].upper()
-                    # get the project id from the webpage that corresponds to
-                    # the Jira task (will be needed to invalidate the cache)
-                    webpage = Webpage.query.filter_by(
-                        id=task.webpage_id
-                    ).first()
-                    if webpage.project_id not in project_ids:
-                        project_ids.append(webpage.project_id)
-            db.session.commit()
-
-            # invalidate the cache for all the project trees where Jira tasks
-            # have changed status
-            for project_id in project_ids:
-                project = Project.query.filter_by(id=project_id).first()
-                site_repository = SiteRepository(
-                    project.name, app, task_locks=task_locks
-                )
-                # clean the cache for a new Jira task to appear in the tree
-                site_repository.invalidate_cache()
+        return self.__request__(
+            method="GET",
+            url=f"issue/{jira_id}?fields=status",
+        )
 
 
 def init_jira(app):
-    app.config["JIRA"] = Jira(
-        url=app.config["JIRA_URL"],
-        email=app.config["JIRA_EMAIL"],
-        token=app.config["JIRA_TOKEN"],
-        labels=app.config["JIRA_LABELS"].split(","),
-        copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
-    )
+    try:
+        app.config["JIRA"] = Jira(
+            url=app.config["JIRA_URL"],
+            email=app.config["JIRA_EMAIL"],
+            token=app.config["JIRA_TOKEN"],
+            labels=app.config["JIRA_LABELS"].split(","),
+            copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
+        )
+    except Exception as error:
+        app.logger.info(f"Unable to initialize jira: {error}")

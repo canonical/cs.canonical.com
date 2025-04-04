@@ -3,12 +3,12 @@ domain: cs.canonical.com
 image: prod-comms.ps5.docker-registry.canonical.com/cs.canonical.com
 
 env:
-  - name: VALKEY_HOST
+  - name: REDIS_HOST
     secretKeyRef:
       key: host
       name: webteam-valkey
 
-  - name: VALKEY_PORT
+  - name: REDIS_PORT
     secretKeyRef:
       key: port
       name: webteam-valkey
@@ -91,12 +91,12 @@ staging:
 # Overrides for demos
 demo:
   env:
-    - name: VALKEY_HOST
+    - name: REDIS_HOST
       secretKeyRef:
         key: host
         name: webteam-valkey
 
-    - name: VALKEY_PORT
+    - name: REDIS_PORT
       secretKeyRef:
         key: port
         name: webteam-valkey

@@ -1,16 +1,25 @@
 import functools
 import os
+
 import flask
 from django_openid_auth.teams import TeamsRequest, TeamsResponse
 from flask_openid import OpenID
+
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import User
 
 SSO_LOGIN_URL = "https://login.ubuntu.com"
+# private teams like canonical are not returned in response atm
+# so temporarily need to add multiple subset public teams
 SSO_TEAM = (
-    "canonical-webmonkeys" if os.environ.get("FLASK_DEBUG") else "canonical"
+    "canonical",
+    "canonical-content-people",
+    "pga-admins",
+    "canonical-webmonkeys",
 )
-DISABLE_SSO = os.environ.get("DISABLE_SSO")
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
+    "FLASK_DISABLE_SSO"
+)
 
 
 def init_sso(app: flask.Flask):
@@ -26,14 +35,14 @@ def init_sso(app: flask.Flask):
         if "openid" in flask.session:
             return flask.redirect(open_id.get_next_url())
 
-        teams_request = TeamsRequest(query_membership=[SSO_TEAM])
+        teams_request = TeamsRequest(query_membership=SSO_TEAM)
         return open_id.try_login(
             SSO_LOGIN_URL, ask_for=["email"], extensions=[teams_request]
         )
 
     @open_id.after_login
     def after_login(resp):
-        if SSO_TEAM not in resp.extensions["lp"].is_member:
+        if not (set(SSO_TEAM) & set(resp.extensions["lp"].is_member)):
             flask.abort(403)
 
         # find the user in database
@@ -78,15 +87,15 @@ def login_required(func):
 
     @functools.wraps(func)
     def is_user_logged_in(*args, **kwargs):
+        if "openid" in flask.session:
+            return func(*args, **kwargs)
+
         # Return if the sso is explicitly disabled.
         # Useful for non interactive testing.
         if DISABLE_SSO:
             flask.current_app.logger.info(
                 "SSO Disabled. Session has no openid."
             )
-            return func(*args, **kwargs)
-
-        if "openid" in flask.session:
             return func(*args, **kwargs)
 
         return flask.redirect("/login_page?next=" + flask.request.path)

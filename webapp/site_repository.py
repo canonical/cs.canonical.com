@@ -1,9 +1,7 @@
 import os
 import re
 import subprocess
-from contextlib import contextmanager
-from multiprocessing import Lock
-from pathlib import Path
+import time
 from typing import Callable, TypedDict
 
 from flask import Flask
@@ -44,7 +42,6 @@ class SiteRepository:
     # Directory to clone repositories
     CACHE_KEY_PREFIX = "SITE_REPOSITORY"
 
-    LOCKS: dict = {}
     db: SQLAlchemy = db
 
     def __init__(
@@ -52,7 +49,6 @@ class SiteRepository:
         repository_uri: str,
         app: Flask,
         branch="main",
-        task_locks: dict = None,
         db: SQLAlchemy = None,
     ):
         base_dir = app.config["BASE_DIR"]
@@ -69,10 +65,6 @@ class SiteRepository:
         if db:
             self.db = db
 
-        # If a locks dictionary is provided, use it
-        if task_locks:
-            self.LOCKS = task_locks
-
     def __str__(self) -> str:
         return f"SiteRepository({self.repository_uri}, {self.branch})"
 
@@ -85,38 +77,6 @@ class SiteRepository:
             + "/"
             + (repository_uri.strip("/").split("/")[-1].removesuffix(".git"))
         )
-
-    def __configure_git__(self):
-        """
-        Update git configuration.
-        """
-        # Increase the buffer size for large files
-        self.__run__(
-            "git config --global http.postBuffer 1040M",
-            "Error configuring git",
-        )
-
-    @contextmanager
-    def __masked_parent_git__(self):
-        """
-        When cloning repositories using sparse-checkout, we temporarily move
-        the parent git folder to *.git-bak.
-        This is to prevent an issue where the sparse checkout also checks
-        out other git repositories in the tree.
-        """
-        parent_path = f"{self.app.config['BASE_DIR']}/.git"
-        tmp_path = f"{self.app.config['BASE_DIR']}/.git-bak"
-        self.__run__(
-            f"mv {parent_path} {tmp_path}",
-            "Error masking parent git folder",
-        )
-        try:
-            yield
-        finally:
-            self.__run__(
-                f"mv {tmp_path} {parent_path}",
-                "Error unmasking parent git folder",
-            )
 
     def __exec__(self, command_str: str):
         """
@@ -164,36 +124,6 @@ class SiteRepository:
         command_str = self.__sanitize_command__(command_str)
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
-    def __create_git_uri__(self, uri: str):
-        """
-        Create a github url
-        """
-
-        repo_org = self.app.config["REPO_ORG"]
-        token = self.app.config["GH_TOKEN"]
-
-        uri = f"{repo_org}/{uri}.git"
-
-        # Add token to URI
-        uri = re.sub(
-            "//github",
-            f"//{token}@github",
-            uri,
-        )
-
-        if not uri.endswith(".git"):
-            raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm "
-                "that the uri ends with .git"
-            )
-        if not uri.startswith("https"):
-            raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm "
-                "that the uri uses https"
-            )
-
-        return uri
-
     def delete_local_files(self):
         """
         Delete a local folder
@@ -203,88 +133,16 @@ class SiteRepository:
             f"Error deleting folder {self.repo_path}",
         )
 
-    def fetch_remote_branch(self, branch: str):
-        """
-        Fetch all branches from remote repository
-        """
-        return self.__run__(
-            f"git fetch origin {branch}",
-            f"Error fetching branch {branch}",
-        )
-
-    def clone_repo(self, repository_uri: str):
-        """
-        Clone the repository.
-        """
-        github_url = self.__create_git_uri__(repository_uri)
-
-        with self.__masked_parent_git__():
-            # Switch to the ./repositories directory for cloned repositories
-            os.chdir(self.REPOSITORY_DIRECTORY)
-
-            # Clone the repository
-            self.__run__(
-                f"git clone --no-checkout --depth 1 {github_url}",
-                "Error cloning repository",
-            )
-
-            # Change directory to the repository
-            os.chdir(self.repo_path)
-
-            # Set sparse-checkout
-            self.__run__(
-                "git sparse-checkout set templates",
-                "Error setting sparse-checkout",
-            )
-
-            # Return directory cursor to parent directory
-            os.chdir(self.app.config["BASE_DIR"])
-
-    def checkout_branch(self, branch: str):
-        """
-        Checkout the branch
-        """
-        self.fetch_remote_branch(branch)
-        return self.__run__(
-            f"git checkout {branch}", f"Error checking out branch {branch}"
-        )
-
-    def pull_updates(self):
-        """
-        Pull updates from the repository
-        """
-        # Pull updates from the specified branch
-        self.__run__(
-            f"git pull origin {self.branch}",
-            "Error pulling updates from repository",
-        )
-
     def setup_site_repository(self):
         """
         Clone the repository to a specific directory, or checkout the latest
         updates if the repository exists.
         """
-        # Create the default repository on disk
-        Path(self.REPOSITORY_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
-        # Clone the repository, if it doesn't exist
-        if not self.repository_exists():
-            try:
-                self.__configure_git__()
-            except SiteRepositoryError as e:
-                self.logger.error(e)
-            self.clone_repo(self.repository_uri)
-
-        # Checkout updates to the repository on the specified branch
-        self.checkout_updates()
-
-    def checkout_updates(self):
-        """
-        Checkout updates to the repository on the specified branch.
-        """
-        os.chdir(self.repo_path)
-        # Checkout the branch
-        self.checkout_branch(self.branch)
+        # Download files from the repository
+        github = self.app.config["github"]
+        github.get_repository_tree(
+            repository=self.repository_uri, branch=self.branch
+        )
 
     def repository_exists(self):
         """
@@ -324,8 +182,17 @@ class SiteRepository:
         self.setup_site_repository()
 
         templates_folder = self.repo_path + "/templates"
-        # Check if the templates folder exists
-        if not os.path.exists(templates_folder):
+        # A background task may still be running to clone the repository,
+        # so we need to wait for the templates folder to be available
+        # to keep this method synchronous.
+
+        for _ in range(10):
+            folder_exists = os.path.exists(templates_folder)
+            if folder_exists:
+                break
+            time.sleep(1)
+
+        if not folder_exists:
             raise SiteRepositoryError(
                 "Templates folder 'templates' not found for "
                 f"repository {self.repo_path}"
@@ -355,24 +222,46 @@ class SiteRepository:
         # Save the tree metadata to the database and return an updated tree
         # that has all fields
         tree = self.create_webpages_for_tree(self.db, base_tree)
-
         self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
 
+    def _has_incomplete_pages(self, webpages) -> bool:
+        """
+        At times, the tree might not be fully loaded at the point when saved to
+        the database. This function returns whether a page is invalid.
+        """
+        for webpage in webpages:
+            if webpage.parent_id and not (webpage.name or webpage.title):
+                self.logger.warning(f"Page {webpage.id} is incomplete.")
+                return True
+        return False
+
     def get_tree_from_db(self):
-        webpages = self.db.session.execute(
-            select(Webpage).where(
-                Webpage.project_id == get_project_id(self.repository_uri)
+        """
+        Get the tree from the database. If the tree is incomplete, reload from
+        the repository.
+        """
+        webpages = (
+            self.db.session.execute(
+                select(Webpage).where(
+                    Webpage.project_id == get_project_id(self.repository_uri)
+                )
             )
-        ).scalars()
+            .scalars()
+            .all()
+        )
         # build tree from repository in case DB table is empty
-        if not webpages:
-            self.get_new_tree()
-
-        tree = get_tree_struct(db.session, webpages)
-
-        self.logger.info(f"Tree fetched for {self.repository_uri}")
-
+        if not webpages or self._has_incomplete_pages(webpages):
+            tree = self.get_new_tree()
+        # otherwise, build tree from DB
+        else:
+            tree = get_tree_struct(db.session, webpages)
+            # If the tree is empty, load from the repository
+            if not tree.get("children") and not tree.get("parent_id"):
+                self.logger.info(
+                    f"Reloading incomplete tree root {self.repository_uri}."
+                )
+                tree = self.get_new_tree()
         return tree
 
     def get_tree(self, no_cache: bool = False):
@@ -468,6 +357,7 @@ class SiteRepository:
         """
         Create webpages for each node in the tree.
         """
+        self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
             db.session, Project, name=self.repository_uri
@@ -487,24 +377,27 @@ class SiteRepository:
         # Remove pages that don't exist in the repository anymore
         self.__remove_webpages_to_delete__(db, tree)
 
+        self.logger.info(f"Existing dict {webpage_dict}")
+
         db.session.commit()
         return webpage_dict
 
     def get_tree_sync(self, no_cache: bool = False):
         """
-        Try to get the tree from the cache, or create a new task to load it.
+        Try to get the tree from the cache, database or repository.
         """
         # First try to get the tree from the cache
         if not no_cache:
             if tree := self.get_tree_from_cache():
                 return tree
-        else:
-            self.invalidate_cache()
 
         self.logger.info(f"Loading {self.repository_uri} from database")
+        self.invalidate_cache()
+
         # Load the tree from database
         try:
             tree = self.get_tree_from_db()
+            self.logger.info(f"Tree refreshed for {self.repository_uri}")
             # Update the cache
             self.set_tree_in_cache(tree)
             return tree
@@ -519,16 +412,6 @@ class SiteRepository:
             "copy_doc_link": "",
             "children": [],
         }
-
-    def get_task_lock(self):
-        """
-        Get the lock for the current repository.
-        """
-        if lock := self.LOCKS.get(self.repository_uri):
-            return lock
-        # If a lock doesn't exist, create one
-        self.LOCKS[self.repository_uri] = Lock()
-        return self.LOCKS[self.repository_uri]
 
     def add_pages_to_list(self, tree, page_list: list):
         # Append root node name
