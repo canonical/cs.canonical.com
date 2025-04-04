@@ -132,7 +132,9 @@ def remove_webpage(body: RemoveWebpageModel):
                             "JIRA"
                         ].change_issue_status(
                             issue_id=task.jira_id,
-                            transition_id=JiraStatusTransitionCodes.REJECTED.value,
+                            transition_id=(
+                                JiraStatusTransitionCodes.REJECTED.value
+                            ),
                         )
                         if status_change["status_code"] != 204:
                             return (
@@ -204,7 +206,9 @@ def remove_webpage(body: RemoveWebpageModel):
                 "reporter_struct": body.reporter_struct,
                 "description": body.description,
                 "type": None,
-                "summary": f"Remove {webpage.name} webpage from code repository",
+                "summary": (
+                    f"Remove {webpage.name} webpage from code repository"
+                ),
                 "request_type": body.request_type,
             }
             if body.redirect_url:
@@ -223,7 +227,9 @@ def remove_webpage(body: RemoveWebpageModel):
         return (
             jsonify(
                 {
-                    "message": f"removal of {webpage.name} processed successfully",
+                    "message": (
+                        f"removal of {webpage.name} processed successfully"
+                    ),
                     "jira_task_id": task.jira_id,
                 }
             ),
