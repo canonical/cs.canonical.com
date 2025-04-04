@@ -37,8 +37,8 @@ jobs:
         env:
           DISABLE_SSO: True
           SECRET_KEY: secret_key
-          VALKEY_HOST: localhost
-          VALKEY_PORT: 6379
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_ORG: https://github.com/canonical
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
@@ -56,8 +56,8 @@ jobs:
           docker run -d \
           -p 8104:8104 \
           -e SECRET_KEY="$SECRET_KEY" \
-          -e VALKEY_HOST="$VALKEY_HOST" \
-          -e VALKEY_PORT="$VALKEY_PORT" \
+          -e REDIS_HOST="$REDIS_HOST" \
+          -e REDIS_PORT="$REDIS_PORT" \
           -e GH_TOKEN="$GH_TOKEN" \
           -e REPO_ORG="$REPO_ORG" \
           -e DATABASE_URL="$DATABASE_URL" \
@@ -72,7 +72,9 @@ jobs:
           -e COPYDOC_TEMPLATE_ID="$COPYDOC_TEMPLATE_ID" \
           -e JIRA_REPORTER_ID="$JIRA_REPORTER_ID" \
           -e DISABLE_SSO="$DISABLE_SSO" \
-          -e FLASK_DEBUG=True --network host websites-content-system &
+          -e FLASK_DEBUG=1 \
+          --network host \
+          websites-content-system & sleep 3
           curl --head --fail --retry-delay 1 --retry 50 --retry-connrefused http://localhost
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
