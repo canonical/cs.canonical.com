@@ -47,12 +47,6 @@ class Jira:
         self.copy_updates_epic = copy_updates_epic
         self._connect()
 
-    def test_integration(self):
-        return self.__request__(
-            method="GET",
-            url=f"{self.url}/rest/api/3/myself",
-        )
-
     def __request__(
         self, method: str, path: str, data: dict = {}, params: dict = {}
     ):
@@ -297,7 +291,7 @@ class Jira:
         """
         return self.__request__(
             method="POST",
-            url=f"{self.url}/rest/api/3/bulk/issues/transition",
+            url="bulk/issues/transition",
             data=payload,
         )
 
@@ -315,7 +309,7 @@ class Jira:
         }
         return self.__request__(
             method="PUT",
-            url=f"{self.url}/rest/api/3/issue/{issue_id}",
+            url=f"issue/{issue_id}",
             data=payload,
         )
 
