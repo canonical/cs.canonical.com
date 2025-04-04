@@ -43,7 +43,7 @@ jobs:
         env:
           DISABLE_SSO: True
           SECRET_KEY: secret_key
-          REDIS_HOST: localhost
+          REDIS_HOST: redis
           REDIS_PORT: 6379
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_ORG: https://github.com/canonical
