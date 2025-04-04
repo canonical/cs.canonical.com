@@ -372,9 +372,14 @@ Replace `<canonical-provided-vpn>` with the ID of Canonical provided VPN which w
 
 #### Running Playwright tests
 
+Install browsers
+```bash
+yarn playwright install --with-deps
+```
+
 To run the tests:
 
-```
+```bash
 yarn playwright test
 ```
 
@@ -383,3 +388,5 @@ Or if you prefer running tests in UI mode:
 ```
 yarn playwright test --ui
 ```
+
+**Note:** Please make sure the `BASE_URL` in `tests/config.ts` is correct and reflects your webserver. For example, if your project is running on localhost:8104, it should be `BASE_URL: http://localhost:8104`
