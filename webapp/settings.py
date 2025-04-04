@@ -54,3 +54,4 @@ GOOGLE_CREDENTIALS = {
 }
 FLASK_DEBUG = get_flask_env("FLASK_DEBUG", False)
 JIRA_REPORTER_ID = get_flask_env("JIRA_REPORTER_ID")
+DISABLE_SSO = get_flask_env("DISABLE_SSO", False)
