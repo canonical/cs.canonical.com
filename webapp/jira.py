@@ -277,7 +277,7 @@ class Jira:
         """
         return self.__request__(
             method="GET",
-            url=f"issue/{jira_id}?fields=status",
+            path=f"issue/{jira_id}?fields=status",
         )
 
     def bulk_change_issue_status(self, payload) -> bool:
@@ -291,7 +291,7 @@ class Jira:
         """
         return self.__request__(
             method="POST",
-            url="bulk/issues/transition",
+            path="bulk/issues/transition",
             data=payload,
         )
 
@@ -309,7 +309,7 @@ class Jira:
         }
         return self.__request__(
             method="PUT",
-            url=f"issue/{issue_id}",
+            path=f"issue/{issue_id}",
             data=payload,
         )
 
