@@ -53,7 +53,7 @@ jobs:
           COPYDOC_TEMPLATE_ID: ${{ secrets.COPYDOC_TEMPLATE_ID }}
           JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
         run: |
-          docker run -d \
+          docker run \
           -p 8104:8104 \
           -e SECRET_KEY="$SECRET_KEY" \
           -e REDIS_HOST="$REDIS_HOST" \
