@@ -49,6 +49,7 @@ class Cache(ABC):
         """Check if the cache is available"""
         pass
 
+
 class RedisCache(Cache):
     """Cache interface"""
 

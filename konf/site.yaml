@@ -152,3 +152,8 @@ demo:
 
     - name: FLASK_DEBUG
       value: "1"
+
+    - name: JIRA_TOKEN
+      secretKeyRef:
+        key: jira-token
+        name: cs-canonical-com

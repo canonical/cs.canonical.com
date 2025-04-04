@@ -67,7 +67,7 @@ def create_jira_task(app, body):
     )
 
     # Create jira task in the database
-    get_or_create(
+    task, _ = get_or_create(
         db.session,
         JiraTask,
         jira_id=issue["key"],
@@ -76,6 +76,8 @@ def create_jira_task(app, body):
         summary=summary,
         request_type=body["request_type"],
     )
+
+    return task
 
 
 def get_project_id(project_name):

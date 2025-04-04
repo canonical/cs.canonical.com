@@ -69,3 +69,7 @@ class CreatePageModel(BaseModel):
 class SetProductsModel(BaseModel):
     webpage_id: int
     product_ids: List[int]
+
+
+class PlaywrightCleanupReqBody(BaseModel):
+    jira_tasks: List[str]
