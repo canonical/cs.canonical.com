@@ -38,3 +38,4 @@ GOOGLE_CREDENTIALS = {
     "universe_domain": "googleapis.com",
 }
 DEVELOPMENT_MODE = environ.get("DEVEL", True)
+JIRA_REPORTER_ID = environ.get("JIRA_REPORTER_ID")
