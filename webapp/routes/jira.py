@@ -108,7 +108,7 @@ def remove_webpage(body: RemoveWebpageModel):
         - If the webpage is not found, returns a 404 error
             with a message.
         - If the webpage is successfully deleted or a task
-            is created,returns a 201 status with
+            is created,returns a 200 status with
             a success message.
         - If there is an error during deletion,
             returns a 500 error with a message.
