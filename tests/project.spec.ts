@@ -134,7 +134,7 @@ test.describe("Test project actions", () => {
       }
     }
 
-    expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
+    await expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
   });
 
   test.afterAll(async () => {
