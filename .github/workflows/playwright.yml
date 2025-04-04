@@ -43,8 +43,6 @@ jobs:
         env:
           DISABLE_SSO: True
           SECRET_KEY: secret_key
-          REDIS_HOST: redis
-          REDIS_PORT: 6379
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_ORG: https://github.com/canonical
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
@@ -62,8 +60,6 @@ jobs:
           docker run \
           -p 8104:8104 \
           -e SECRET_KEY="$SECRET_KEY" \
-          -e REDIS_HOST="$REDIS_HOST" \
-          -e REDIS_PORT="$REDIS_PORT" \
           -e GH_TOKEN="$GH_TOKEN" \
           -e REPO_ORG="$REPO_ORG" \
           -e DATABASE_URL="$DATABASE_URL" \
