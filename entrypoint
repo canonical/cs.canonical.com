@@ -7,8 +7,11 @@ activate() {
     # Create or activate virtualenv
     if [ ! -d ./.venv ]; then
         python3 -m venv .venv
+        . ./.venv/bin/activate
+        pip install --no-cache-dir -r requirements.txt
+    else
+        . ./.venv/bin/activate
     fi
-    . ./.venv/bin/activate
 }
 
 {
@@ -19,6 +22,9 @@ activate() {
     if [ -z ${FLASK_DEBUG+x} ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
     fi
+
+    # Run new migrations if needed
+    flask db upgrade
 
     ${RUN_COMMAND}
 }
