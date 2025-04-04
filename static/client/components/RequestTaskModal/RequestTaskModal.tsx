@@ -121,7 +121,25 @@ const RequestTaskModal = ({
       })
         .then(() => {
           onClose();
-          window.location.reload();
+          const afterRefetch = () => {
+            window.location.reload();
+          };
+          if (refetch) {
+            refetch()
+              .then((data) => {
+                if (data?.length) {
+                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+                  if (project && project.data?.data) {
+                    setSelectedProject(project.data.data);
+                  }
+                }
+              })
+              .finally(() => {
+                afterRefetch();
+              });
+          } else {
+            afterRefetch();
+          }
         })
         .catch((error) => {
           if (error?.response?.data) {
