@@ -2,6 +2,7 @@ import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip, useNotify } from "@canonical/react-components";
+import type { QueryObserverResult } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
@@ -10,7 +11,9 @@ import Reporter from "@/components/Reporter";
 import config from "@/config";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
+import type { IPagesResponse } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
+import type { IApiBasicError } from "@/services/api/types/query";
 import { DatesServices } from "@/services/dates";
 import { useStore } from "@/store";
 
@@ -61,6 +64,40 @@ const RequestTaskModal = ({
     [onTypeChange],
   );
 
+  const onSubmitSuccess = useCallback(
+    (afterRefetch: () => void) => {
+      onClose();
+      if (refetch) {
+        refetch()
+          .then((data: QueryObserverResult<IPagesResponse, IApiBasicError>[]) => {
+            if (data?.length) {
+              const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
+              if (project && project.data?.data) {
+                setSelectedProject(project.data.data);
+              }
+            }
+          })
+          .finally(afterRefetch);
+      } else {
+        afterRefetch();
+      }
+    },
+    [onClose, refetch, selectedProject?.name, setSelectedProject],
+  );
+
+  const onSubmitError = useCallback(
+    (error: any) => {
+      if (error?.response?.data) {
+        notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
+      }
+    },
+    [notify],
+  );
+
+  const onSubmitFinally = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
   const handleSubmit = useCallback(() => {
     if (!webpage?.id) return;
     setIsLoading(true);
@@ -76,7 +113,6 @@ const RequestTaskModal = ({
         ) as string,
       })
         .then(() => {
-          onClose();
           const afterRefetch = () => {
             if (webpage.status === PageStatus.NEW) {
               navigate("/app", { replace: true });
@@ -84,29 +120,10 @@ const RequestTaskModal = ({
               window.location.reload();
             }
           };
-          if (refetch) {
-            refetch()
-              .then((data) => {
-                if (data?.length) {
-                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
-                  if (project && project.data?.data) {
-                    setSelectedProject(project.data.data);
-                  }
-                }
-              })
-              .finally(afterRefetch);
-          } else {
-            afterRefetch();
-          }
+          onSubmitSuccess(afterRefetch);
         })
-        .catch((error) => {
-          if (error?.response?.data) {
-            notify.failure(error.response.data.error, null, <p>{error.response.data.description}</p>);
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+        .catch(onSubmitError)
+        .finally(onSubmitFinally);
     } else {
       PagesServices.requestChanges({
         due_date: dueDate as string,
@@ -124,31 +141,10 @@ const RequestTaskModal = ({
           const afterRefetch = () => {
             window.location.reload();
           };
-          if (refetch) {
-            refetch()
-              .then((data) => {
-                if (data?.length) {
-                  const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
-                  if (project && project.data?.data) {
-                    setSelectedProject(project.data.data);
-                  }
-                }
-              })
-              .finally(() => {
-                afterRefetch();
-              });
-          } else {
-            afterRefetch();
-          }
+          onSubmitSuccess(afterRefetch);
         })
-        .catch((error) => {
-          if (error?.response?.data) {
-            notify.failure(error.response.data.error, null, <p>{error.response.data.description}</p>);
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+        .catch(onSubmitError)
+        .finally(onSubmitFinally);
     }
   }, [
     webpage.id,
@@ -159,13 +155,12 @@ const RequestTaskModal = ({
     reporter,
     descr,
     redirectUrl,
-    onClose,
-    refetch,
-    selectedProject?.name,
-    setSelectedProject,
+    onSubmitError,
+    onSubmitFinally,
+    onSubmitSuccess,
     navigate,
-    notify,
     summary,
+    onClose,
   ]);
 
   const title = useMemo(() => {

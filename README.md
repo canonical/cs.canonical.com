@@ -367,7 +367,6 @@ Playwright is used to test different functionalities of the content system. Befo
 
 ```
 JIRA_REPORTER_ID=<jira_reporter_id>
-LOCAL_VPN_ID=<canonical-provided-vpn>
 FLASK_DEBUG=1
 ```
 
