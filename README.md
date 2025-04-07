@@ -119,13 +119,13 @@ Make sure to replace `<secret-name>` with the actual name of the secret. For exa
 $ echo -n "your-value" | base64
 ```
 
-4. Apply the updated secret back to the cluster
+4. Apply the updated secret back to the cluster.
 
 ```bash
 $ kubectl apply -f secret.yaml
 ```
 
-5. Re-deploy the deployment that uses this secret
+5. Re-deploy the deployment that uses this secret.
 
 ```bash
 $ kubectl rollout restart deployment <deployment-name> -n production
