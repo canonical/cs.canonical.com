@@ -165,6 +165,13 @@ $ kubectl get deployments -n production | grep -i <variable_name>
 
 You'll need to install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
+**Note:** Please make sure that the following env variables are properly set.
+
+```
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
+REDIS_HOST=redis
+```
+
 Once done, run:
 
 ```

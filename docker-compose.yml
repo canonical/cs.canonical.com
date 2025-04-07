@@ -1,7 +1,9 @@
 services:
   web:
     build: .
-    env_file: ".env"
+    env_file:
+      - ".env.local"
+      - ".env"
     ports:
       - "${PORT}:80"
     volumes:
@@ -12,14 +14,14 @@ services:
       postgres:
         condition: service_healthy
   valkey:
-    image: valkey/valkey
+    image: redis
     restart: always
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
       - cache:/data
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 1s
       timeout: 3s
       retries: 10
@@ -31,7 +33,7 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
       interval: 1s
       timeout: 3s
       retries: 10
