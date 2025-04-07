@@ -1,6 +1,5 @@
 import { test, expect, APIRequestContext } from "@playwright/test";
 import { config } from "./config";
-import { startVPN, stopVPN } from "./helpers";
 import type { IJiraTask } from "@/services/api/types/pages";
 
 const JIRA_TASKS: IJiraTask[] = [];
@@ -85,7 +84,6 @@ test.describe("Test project actions", () => {
   });
 
   test("create new page", async ({ page }) => {
-    if (process.env.FLASK_DEBUG) await startVPN();
     await page.getByRole("button", { name: /Request new page/i }).click();
     await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
     await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
@@ -98,8 +96,6 @@ test.describe("Test project actions", () => {
       await products.nth(i).click();
     }
     await productsDropdown.click();
-
-    if (process.env.FLASK_DEBUG) await stopVPN();
 
     var responsePromise = page.waitForResponse((response) => {
       return response.url().includes("api/create-page") && response.status() === 201;
