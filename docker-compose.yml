@@ -9,11 +9,11 @@ services:
     volumes:
       - .:/srv
     depends_on:
-      valkey:
+      redis:
         condition: service_healthy
       postgres:
         condition: service_healthy
-  valkey:
+  redis:
     image: redis
     restart: always
     ports:
