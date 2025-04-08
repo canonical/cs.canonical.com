@@ -135,7 +135,7 @@ Use the relevant deployment name, for example, cs-canonical-com.
 
 #### Additional Notes
 
-If you want to confirm if the deployment is using correct environment variables
+If you want to confirm if the deployment is using correct environment variables.
 
 - Find the deployment
 
