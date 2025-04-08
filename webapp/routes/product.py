@@ -23,10 +23,7 @@ def get_products():
     products = Product.query.all()
     product_list = []
     for product in products:
-        product_list.append({
-            "id": product.id,
-            "name": product.name
-        })
+        product_list.append({"id": product.id, "name": product.name})
     return jsonify(product_list)
 
 
@@ -55,7 +52,7 @@ def set_product(body: SetProductsModel):
                 db.session,
                 WebpageProduct,
                 webpage_id=webpage_id,
-                product_id=product_id
+                product_id=product_id,
             )
 
         project = Project.query.filter_by(id=webpage.project_id).first()

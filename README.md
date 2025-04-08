@@ -165,6 +165,13 @@ $ kubectl get deployments -n production | grep -i <variable_name>
 
 You'll need to install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
+**Note:** Please make sure that the following env variables are properly set.
+
+```
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
+REDIS_HOST=redis
+```
+
 Once done, run:
 
 ```
@@ -353,3 +360,39 @@ def some_route():
   "description": "This is a description"
 }
 ```
+
+### Testing
+
+Playwright is used to test different functionalities of the content system. Before running the tests, make sure you have the following `.env` variables set up.
+
+```
+JIRA_REPORTER_ID=<jira_reporter_id>
+FLASK_DEBUG=1
+```
+
+**Note**:
+
+Replace `<jira_repoter_id>` with a valid reporter ID from JIra. This reporter will be used when creating Jira tasks as a result of running some tests.
+
+Replace `<canonical-provided-vpn>` with the ID of Canonical provided VPN which will be used to access Directory API for fetching users in different tests.
+
+#### Running Playwright tests
+
+Install browsers
+```bash
+yarn playwright install --with-deps
+```
+
+To run the tests:
+
+```bash
+yarn playwright test
+```
+
+Or if you prefer running tests in UI mode:
+
+```
+yarn playwright test --ui
+```
+
+**Note:** Please make sure the `BASE_URL` in `tests/config.ts` is correct and reflects your webserver. For example, if your project is running on localhost:8104, it should be `BASE_URL: http://localhost:8104`

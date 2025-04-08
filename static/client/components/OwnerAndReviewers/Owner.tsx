@@ -5,6 +5,7 @@ import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import { PagesServices } from "@/services/api/services/pages";
+import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
 const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element => {
@@ -12,8 +13,10 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
   const { options, setOptions, handleChange } = useUsersRequest();
 
   useEffect(() => {
-    if (page) setCurrentOwner(page.owner);
-  }, [page]);
+    let owner = page && page.owner ? page.owner : getDefaultUser();
+    setCurrentOwner(owner);
+    if (onSelectOwner) onSelectOwner(owner);
+  }, [onSelectOwner, page]);
 
   const handleRemoveOwner = useCallback(
     () => () => {

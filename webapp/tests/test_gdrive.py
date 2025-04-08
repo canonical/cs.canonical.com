@@ -96,6 +96,7 @@ def test_build_webpage_folder(mock_gdrive, webpage):
     gdrive = app.config["gdrive"]
     assert gdrive.build_webpage_folder(webpage) == "id-data"
 
+
 def test_copy_file(mock_gdrive):
     app = create_app()
     gdrive = app.config["gdrive"]

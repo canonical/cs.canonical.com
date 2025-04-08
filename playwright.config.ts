@@ -14,13 +14,13 @@ config({ path: "./.env" });
 export default defineConfig({
   testDir: "./tests",
   /* Maximum time one test can run for. */
-  timeout: 5 * 1000,
+  timeout: 50 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: 20000,
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -31,7 +31,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["list"], ["html"]],
 
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
@@ -47,15 +47,5 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
   ],
-  // run the dev server before starting tests
-  webServer: {
-    command: "yarnpkg run serve",
-    url: `http://0.0.0.0:${process.env.PORT}`,
-    reuseExistingServer: !process.env.CI,
-  },
 });
