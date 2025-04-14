@@ -69,7 +69,7 @@ class GitHub:
         raise GithubError(
             "Failed to make a request to GitHub. Status code:"
             f" {url} {method} {data} {params}"
-            f" {response.status_code}. Response: {response.text}"
+            f" {response.status_code}. Response: {response.text}",
         )
 
     def _url_path(self, url: str):
