@@ -1,15 +1,22 @@
+from collections.abc import Callable
+
 from celery import Celery, Task
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from flask import Flask
 
 from webapp.settings import REDIS_DB_CONNECT_STRING
+from webapp.tasklib import Task as LocalTask
 
 logger = get_task_logger(__name__)
 celery_app = Celery()
 
 
-def register_celery_task(fn=None, delay=None):
+class CeleryTask(Task, LocalTask):
+    pass
+
+
+def register_celery_task(fn: Callable | None, delay: int | None) -> CeleryTask:
     """
     Register a celery task.
     """
@@ -43,7 +50,7 @@ def init_celery(app: Flask) -> Celery:
         broker_url = REDIS_DB_CONNECT_STRING
     # Otherwise, skip setup
     else:
-        return
+        return None
 
     app.config.from_mapping(
         CELERY=dict(

@@ -1,10 +1,10 @@
 import atexit
 import contextlib
-import functools
 import logging
 import os
 import signal
 import time
+from collections.abc import Callable
 from multiprocessing import Process, Queue
 
 logger = logging.getLogger(__name__)
@@ -16,11 +16,18 @@ task_queue = Queue()
 class Task:
     """Wrapper for parity with celery tasks."""
 
-    def __init__(self, fn):
+    def __init__(self, fn: Callable) -> None:
         self.delay = fn
+        self.s = fn
+        self.run = fn
 
 
-def scheduled_process(func, schedule=1, *args, **kwargs):
+def scheduled_process(
+    func: Callable,
+    schedule: int = 1,
+    *args: tuple,
+    **kwargs: dict,
+) -> None:
     """
     Wrapper for tasks that are added to the task queue.
 
@@ -32,7 +39,7 @@ def scheduled_process(func, schedule=1, *args, **kwargs):
         time.sleep(schedule)
 
 
-def local_process(func, *args, **kwargs):
+def local_process(func: Callable, *args: tuple, **kwargs: dict) -> None:
     """
     Wrapper for tasks that are added to the task queue.
 
@@ -42,38 +49,7 @@ def local_process(func, *args, **kwargs):
     func(*args, **kwargs)
 
 
-def async_task(schedule=None):
-    """
-    Decorator for an async task, with optional scheduling.
-
-    Args:
-        schedule (int): How often to run the task in seconds.
-    """
-
-    def outerwrapper(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if schedule:
-                p = Process(
-                    target=scheduled_process,
-                    args=(func, *args),
-                    kwargs={**kwargs, "schedule": schedule},
-                )
-            else:
-                p = Process(
-                    target=local_process,
-                    args=(func, *args),
-                    kwargs=kwargs,
-                )
-            task_queue.put(p.pid)
-            p.start()
-
-        return Task(fn=wrapper)
-
-    return outerwrapper
-
-
-def close_background_tasks():
+def close_background_tasks() -> None:
     """
     Close all background tasks.
     """
@@ -84,11 +60,33 @@ def close_background_tasks():
             os.kill(pid, signal.SIGTERM)
 
 
-def register_local_task(fn=None, delay=None):
+def register_local_task(
+    func: Callable | None,
+    delay: int | None,
+    args: tuple,
+    kwargs: dict,
+) -> Task:
     """
     Register a local task.
     """
-    return async_task(delay)(fn)
+
+    def _start_task() -> None:
+        if delay:
+            p = Process(
+                target=scheduled_process,
+                args=(func, *args),
+                kwargs={**kwargs},
+            )
+        else:
+            p = Process(
+                target=local_process,
+                args=(func, *args),
+                kwargs=kwargs,
+            )
+        task_queue.put(p.pid)
+        p.start()
+
+    return Task(fn=_start_task)
 
 
 atexit.register(close_background_tasks)
