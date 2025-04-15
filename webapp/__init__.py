@@ -7,7 +7,6 @@ from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from webapp.cache import init_cache
-from webapp.celery import init_celery
 from webapp.context import RegexConverter, base_context, clear_trailing_slash
 from webapp.gdrive import init_gdrive
 from webapp.github import init_github
@@ -48,9 +47,6 @@ def create_app():
 
     # Initialize gdrive
     init_gdrive(app)
-
-    # Initialize celery
-    init_celery(app)
 
     # Initialize github
     init_github(app)

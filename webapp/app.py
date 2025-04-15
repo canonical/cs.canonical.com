@@ -3,6 +3,7 @@ from os import environ
 from flask import render_template
 
 from webapp import create_app
+from webapp.celery import init_celery
 from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
@@ -11,6 +12,8 @@ from webapp.sso import login_required
 
 app = create_app()
 
+# Initialize celery
+celery_app = init_celery(app)
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

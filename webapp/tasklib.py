@@ -74,13 +74,13 @@ def register_local_task(
         if delay:
             p = Process(
                 target=scheduled_process,
-                args=(func, *args),
+                args=(func, delay, *args),
                 kwargs={**kwargs},
             )
         else:
             p = Process(
                 target=local_process,
-                args=(func, *args),
+                args=(func, delay, *args),
                 kwargs=kwargs,
             )
         task_queue.put(p.pid)

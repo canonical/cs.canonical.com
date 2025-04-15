@@ -16,17 +16,23 @@ class CeleryTask(Task, LocalTask):
     pass
 
 
-def register_celery_task(fn: Callable | None, delay: int | None) -> CeleryTask:
+def register_celery_task(
+    fn: Callable | None,
+    delay: int | None,
+    args: tuple,
+    kwargs: dict,
+) -> CeleryTask:
     """
     Register a celery task.
     """
     fn = celery_app.task(fn)
 
-    def _setup_periodic_tasks(sender, **kwargs):
+    def _setup_periodic_tasks(sender, **snkwargs):
         sender.add_periodic_task(
             crontab(minute=delay),
-            fn.s(),
+            fn.s(*args, **kwargs),
             name=f"{fn.__name__} every {delay}",
+            **snkwargs,
         )
 
     if delay:
@@ -60,6 +66,5 @@ def init_celery(app: Flask) -> Celery:
     )
     celery_app.config_from_object(app.config["CELERY"])
     celery_app.set_default()
-    # celery_app.on_after_configure.connect(setup_periodic_tasks)
     app.extensions["celery"] = celery_app
     return celery_app
