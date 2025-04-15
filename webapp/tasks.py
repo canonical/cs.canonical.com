@@ -21,12 +21,13 @@ def register_task(delay: int | None) -> Callable:
         def wrapper(*args: tuple, **kwargs: dict) -> Task:
             if RABBITMQ_URI or REDIS_DB_CONNECT_STRING:
                 # Register the task as a Celery task
-                task = register_celery_task(func, delay)
-            # Register the task as a local task
-            task = register_local_task(func, delay, args, kwargs)
-            # Start scheduled tasks
-            if delay:
-                task.delay()
+                task = register_celery_task(func, delay, args, kwargs)
+            else:
+                # Register the task as a local task
+                task = register_local_task(func, delay, args, kwargs)
+                # Start scheduled tasks
+                if delay:
+                    task.delay()
             return task
 
         return wrapper
