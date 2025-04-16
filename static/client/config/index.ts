@@ -1,7 +1,15 @@
+import type { TView } from "@/services/api/types/views";
+
 let staleTime = process.env.NODE_ENV === "production" ? 300000 : 30000;
+
+export const VIEW_OWNED = "owned";
+export const VIEW_REVIEWED = "reviewed";
+export const VIEW_TREE = "tree";
+export const VIEW_TABLE = "table";
 
 const config = {
   projects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
+  views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
   api: {
     path: "/",
     FETCH_OPTIONS: {

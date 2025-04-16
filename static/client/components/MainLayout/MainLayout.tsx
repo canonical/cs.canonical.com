@@ -1,9 +1,10 @@
 import { NotificationConsumer } from "@canonical/react-components";
-import { useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
+import TableView from "@/components/Views/TableView";
 
 interface IMainLayoutProps {
   children?: JSX.Element;
@@ -29,11 +30,12 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
           <div className="row">
             {location.pathname === "/app" && (
               <>
-                <h2>Welcome to the Content System</h2>
-                <h3 className="p-heading--4">Please select a page that you are looking for from the left sidebar</h3>
+                <h2>All pages</h2>
+                <TableView />
               </>
             )}
             {children}
+            <Outlet />
           </div>
         </main>
         <div className="l-notification__container">

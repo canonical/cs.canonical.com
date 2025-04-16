@@ -6,17 +6,17 @@ import type { INavigationElementBadgeProps } from "./NavigationElement.types";
 
 import { PageStatus } from "@/services/api/types/pages";
 
-const NavigationElementBadge = ({ page }: INavigationElementBadgeProps): JSX.Element => {
+const NavigationElementBadge = ({ page, appearance = "is-dark" }: INavigationElementBadgeProps): JSX.Element => {
   const getIcon = useMemo(() => {
     switch (page.status) {
       case PageStatus.NEW:
-        return <i className="p-icon--edit is-dark" />;
+        return <i className={`p-icon--edit ${appearance}`} />;
       case PageStatus.TO_DELETE:
-        return <i className="p-icon--archive is-dark" />;
+        return <i className={`p-icon--archive ${appearance}`} />;
       default:
         return <></>;
     }
-  }, [page.status]);
+  }, [appearance, page.status]);
 
   const getTitle = useMemo(() => {
     switch (page.status) {
