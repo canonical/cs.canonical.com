@@ -25,9 +25,9 @@ def register_task(delay: int | None) -> Callable:
             else:
                 # Register the task as a local task
                 task = register_local_task(func, delay, args, kwargs)
-                # Start scheduled tasks
-                if delay:
-                    task.delay()
+            # Start scheduled tasks
+            if delay:
+                task.delay()
             return task
 
         return wrapper
@@ -49,7 +49,6 @@ def save_github_file(
     # - tree_file_path: the path to the respository directory
     # - file_path: the absolute path to the file on the local filesystem
     # - path: the remote path to the file in github
-    raise ValueError("jaja")
     try:
         github = app.config["github"]
         app.logger.info(f"File path {path}")
