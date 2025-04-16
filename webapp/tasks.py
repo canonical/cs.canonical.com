@@ -6,7 +6,7 @@ from pathlib import Path
 from flask import current_app as app
 
 from webapp.celery import register_celery_task
-from webapp.settings import RABBITMQ_URI, REDIS_DB_CONNECT_STRING
+from webapp.settings import REDIS_DB_CONNECT_STRING
 from webapp.tasklib import Task, register_local_task
 
 # Default delay between runs for updating the tree
@@ -19,7 +19,7 @@ def register_task(delay: int | None) -> Callable:
     def outerwrapper(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args: tuple, **kwargs: dict) -> Task:
-            if RABBITMQ_URI or REDIS_DB_CONNECT_STRING:
+            if REDIS_DB_CONNECT_STRING:
                 # Register the task as a Celery task
                 task = register_celery_task(func, delay, args, kwargs)
             else:
