@@ -24,6 +24,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.orm.session import Session
 
+from webapp.context import shared_memory_lock
+
 with open("data/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -197,11 +199,12 @@ class WebpageProduct(db.Model, DateTimeMixin):
 def init_db(app: Flask):
     engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     session_factory = sessionmaker(bind=engine)
-
     Migrate(app, db)
+
     db.init_app(app)
-    # Automatically upgrade to head revision
-    with app.app_context():
+    # Use lock to prevent multiple concurrent migrations on startup
+    with shared_memory_lock(), app.app_context():
+        # Automatically upgrade to head revision
         upgrade()
 
     @app.before_request
