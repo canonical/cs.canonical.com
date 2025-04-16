@@ -1,10 +1,13 @@
-import { NotificationConsumer } from "@canonical/react-components";
-import { Outlet, useLocation } from "react-router-dom";
+import React from "react";
 
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { Button, NotificationConsumer } from "@canonical/react-components";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+
 import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
 import TableView from "@/components/Views/TableView";
+import { VIEW_TREE } from "@/config";
+import { useViewsStore } from "@/store/views";
 
 interface IMainLayoutProps {
   children?: JSX.Element;
@@ -12,6 +15,8 @@ interface IMainLayoutProps {
 
 const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const view = useViewsStore((state) => state.view);
 
   return (
     <>
@@ -20,7 +25,13 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
         <main className="l-main">
           <div className="row">
             <div className="col-7">
-              <Breadcrumbs />
+              {location.pathname.includes("/webpage") && view !== VIEW_TREE && true && (
+                <Button hasIcon onClick={() => navigate(-1)}>
+                  <React.Fragment key=".0">
+                    <i className="p-icon--chevron-left" /> <span>Back</span>
+                  </React.Fragment>
+                </Button>
+              )}
             </div>
             <div className="col-5">
               <Search />
