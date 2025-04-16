@@ -6,7 +6,6 @@ from pathlib import Path
 from flask import current_app as app
 
 from webapp.celery import register_celery_task
-from webapp.settings import REDIS_DB_CONNECT_STRING
 from webapp.tasklib import Task, register_local_task
 
 # Default delay between runs for updating the tree
@@ -19,15 +18,15 @@ def register_task(delay: int | None) -> Callable:
     def outerwrapper(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args: tuple, **kwargs: dict) -> Task:
-            if REDIS_DB_CONNECT_STRING:
+            if os.getenv("REDIS_HOST"):
                 # Register the task as a Celery task
                 task = register_celery_task(func, delay, args, kwargs)
             else:
                 # Register the task as a local task
-                task = register_local_task(func, delay, args, kwargs)
+                task = register_local_task(func, delay)
             # Start scheduled tasks
             if delay:
-                task.delay()
+                task.delay(*args, *kwargs)
             return task
 
         return wrapper

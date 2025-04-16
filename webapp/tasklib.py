@@ -63,14 +63,12 @@ def close_background_tasks() -> None:
 def register_local_task(
     func: Callable | None,
     delay: int | None,
-    args: tuple,
-    kwargs: dict,
 ) -> Task:
     """
     Register a local task.
     """
 
-    def _start_task() -> None:
+    def _start_task(*args: tuple, **kwargs: dict) -> None:
         if delay:
             p = Process(
                 target=scheduled_process,

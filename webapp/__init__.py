@@ -12,7 +12,6 @@ from webapp.gdrive import init_gdrive
 from webapp.github import init_github
 from webapp.jira import init_jira
 from webapp.models import init_db
-from webapp.scheduled_tasks import init_scheduled_tasks
 from webapp.sso import init_sso
 
 
@@ -50,9 +49,6 @@ def create_app():
 
     # Initialize github
     init_github(app)
-
-    # Initialize scheduled tasks
-    init_scheduled_tasks(app)
 
     return app
 
