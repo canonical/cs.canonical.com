@@ -3,6 +3,7 @@ import os
 from collections.abc import Callable
 from pathlib import Path
 
+from celery import current_app as celery_app
 from flask import current_app as app
 
 from webapp.celery import register_celery_task
@@ -20,7 +21,13 @@ def register_task(delay: int | None) -> Callable:
         def wrapper(*args: tuple, **kwargs: dict) -> Task:
             if os.getenv("REDIS_HOST"):
                 # Register the task as a Celery task
-                task = register_celery_task(func, delay, args, kwargs)
+                task = register_celery_task(
+                    func,
+                    delay=delay,
+                    celery_app=celery_app,
+                    args=args,
+                    kwargs=kwargs,
+                )
             else:
                 # Register the task as a local task
                 task = register_local_task(func, delay)
