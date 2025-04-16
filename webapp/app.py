@@ -8,12 +8,17 @@ from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
+from webapp.scheduled_tasks import init_scheduled_tasks
 from webapp.sso import login_required
 
 app = create_app()
 
 # Initialize celery
 celery_app = init_celery(app)
+
+# Initialize scheduled tasks
+init_scheduled_tasks()
+
 
 # Server-side routes
 app.register_blueprint(tree_blueprint)

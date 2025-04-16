@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 
-import flask
 import yaml
 
+from webapp import create_app
 from webapp.models import JiraTask, Project, Webpage, db
 from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
@@ -16,10 +16,11 @@ UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", "5"))
 
 
 @register_task(delay=TASK_DELAY)
-def load_site_trees(app: flask.Flask) -> None:
+def load_site_trees() -> None:
     """
     Load the site trees from the queue.
     """
+    app = create_app()
     app.logger.info("Running scheduled task: load_site_trees")
 
     github = app.config.get("github")
@@ -38,13 +39,14 @@ def load_site_trees(app: flask.Flask) -> None:
 
 
 @register_task(delay=UPDATE_STATUS_DELAY)
-def update_jira_statuses(app: flask.Flask) -> None:
+def update_jira_statuses() -> None:
     """
     Get the status of a Jira task and update it if it changed.
 
     Args:
         app (Flask): The Flask application instance.
     """
+    app = create_app()
     app.logger.info("Running scheduled task: update_jira_statuses")
     jira = app.config.get("JIRA")
     if not jira:
@@ -75,6 +77,6 @@ def update_jira_statuses(app: flask.Flask) -> None:
             site_repository.invalidate_cache()
 
 
-def init_scheduled_tasks(app: flask.Flask) -> None:
-    load_site_trees(app)
-    update_jira_statuses(app)
+def init_scheduled_tasks() -> None:
+    load_site_trees()
+    update_jira_statuses()
