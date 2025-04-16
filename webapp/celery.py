@@ -2,6 +2,7 @@ import os
 from collections.abc import Callable
 
 from celery import Celery, Task
+from celery.app import Proxy
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from flask import Flask
@@ -9,7 +10,6 @@ from flask import Flask
 from .tasklib import Task as LocalTask
 
 logger = get_task_logger(__name__)
-celery_app = Celery()
 
 
 class CeleryTask(Task, LocalTask):
@@ -19,6 +19,7 @@ class CeleryTask(Task, LocalTask):
 def register_celery_task(
     fn: Callable | None,
     delay: int | None,
+    celery_app: Proxy,
     args: tuple,
     kwargs: dict,
 ) -> CeleryTask:
