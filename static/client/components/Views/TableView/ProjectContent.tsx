@@ -1,6 +1,7 @@
 import TableViewRow from "./TableViewRow";
 import TableViewRowItem from "./TableViewRowItem";
 
+import { useProjects } from "@/services/api/hooks/projects";
 import type { IPagesResponse } from "@/services/api/types/pages";
 
 interface ProjectContentProps {
@@ -8,10 +9,11 @@ interface ProjectContentProps {
 }
 
 const ProjectContent: React.FC<ProjectContentProps> = ({ project }) => {
+  const { isFilterApplied } = useProjects();
   return (
     <table>
       <tbody>
-        <TableViewRow page={project.templates} />
+        {!isFilterApplied && <TableViewRow page={project.templates} />}
         {project.templates.children.map((page) => (
           <TableViewRowItem key={page.url} page={page} />
         ))}

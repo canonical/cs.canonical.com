@@ -1,15 +1,30 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-import type { TView } from "@/services/api/types/views";
+import type { IViewsStore } from "./types";
 
-export const useViewsStore = create<any>()(
+import { VIEW_TABLE } from "@/config";
+import type { IViewFilter, TView } from "@/services/api/types/views";
+
+export const useViewsStore = create<IViewsStore>()(
   devtools(
     persist(
       (set) => ({
-        view: null,
-        filters: null,
+        view: VIEW_TABLE as TView,
+        filter: {
+          owners: [],
+          reviewers: [],
+          products: [],
+          query: null,
+        } as IViewFilter,
         setView: (s: TView) => set({ view: s }),
+        setFilter: (s: Partial<IViewFilter>) =>
+          set((state: IViewsStore) => ({
+            filter: {
+              ...state.filter,
+              ...s,
+            },
+          })),
       }),
       {
         name: "viewsStore",
