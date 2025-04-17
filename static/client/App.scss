@@ -60,12 +60,17 @@
   height: auto !important;
 }
 
-.p-accordion__heading {
-  position: sticky !important;
-  top: -1.5rem;
-  z-index: 9;
-
-  & button[aria-expanded="true"]{
-    background: var(--vf-color-background-neutral-hover) !important;
+.p-accordion {
+  .p-accordion__heading {
+    position: sticky !important;
+    top: -1.5rem;
+    z-index: 9;
+  
+    & button[aria-expanded="true"]{
+      background: var(--vf-color-background-neutral-hover) !important;
+    }
+  }
+  .p-accordion__panel {
+    padding-left: 0 !important;
   }
 }

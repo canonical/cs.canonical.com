@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { Accordion, Badge, Tooltip } from "@canonical/react-components";
+
+import TableViewRow from "./TableViewRow";
 
 import TableViewRowItem from "@/components/Views/TableView/TableViewRowItem";
 import { useProjects } from "@/services/api/hooks/projects";
@@ -9,21 +11,17 @@ import type { IPage, IPagesResponse } from "@/services/api/types/pages";
 const TableView: React.FC = () => {
   const { data: projects } = useProjects();
 
-  function getAccordionSections() {
-    let sections = [];
-    if (projects?.length) {
-      for (const project of projects) {
-        sections.push({
-          title: getAccordionTitle(project),
-          content: getAccordionContent(project),
-        });
-      }
+  const getAccordionBadgeCount = useMemo(() => {
+    function countPages(page: IPage): number {
+      if (!page) return 0;
+      return 1 + page.children?.reduce((acc, child) => acc + countPages(child), 0);
     }
-    return sections;
-  }
 
-  function getAccordionTitle(project: IPagesResponse["data"]) {
-    return (
+    return (project: IPagesResponse["data"]) => countPages(project.templates);
+  }, []);
+
+  const getAccordionTitle = useMemo(() => {
+    return (project: IPagesResponse["data"]) => (
       <span style={{ display: "inline-flex", alignItems: "baseline" }}>
         <span className="p-muted-heading" style={{ margin: "0 0.5rem" }}>
           {project.name}
@@ -31,29 +29,28 @@ const TableView: React.FC = () => {
         <Badge value={getAccordionBadgeCount(project)} />
       </span>
     );
-  }
+  }, [getAccordionBadgeCount]);
 
-  function getAccordionBadgeCount(project: IPagesResponse["data"]) {
-    function countPages(page: IPage): number {
-      if (!page) return 0;
-      return 1 + page.children?.reduce((acc, child) => acc + countPages(child), 0);
-    }
-
-    return countPages(project.templates);
-  }
-
-  function getAccordionContent(project: IPagesResponse["data"]) {
-    return (
+  const getAccordionContent = useMemo(() => {
+    return (project: IPagesResponse["data"]) => (
       <table>
         <tbody>
-          <TableViewRowItem key={project.name} page={project.templates} />
+          <TableViewRow page={project.templates} />
           {project.templates.children.map((page) => (
             <TableViewRowItem key={page.url} page={page} />
           ))}
         </tbody>
       </table>
     );
-  }
+  }, []);
+
+  const getAccordionSections = useMemo(() => {
+    if (!projects?.length) return [];
+    return projects.map((project) => ({
+      title: getAccordionTitle(project),
+      content: getAccordionContent(project),
+    }));
+  }, [projects, getAccordionTitle, getAccordionContent]);
 
   return (
     <>
@@ -81,7 +78,7 @@ const TableView: React.FC = () => {
         </thead>
       </table>
 
-      <Accordion sections={getAccordionSections()} />
+      <Accordion sections={getAccordionSections} />
     </>
   );
 };
