@@ -25,6 +25,8 @@ export const useViewsStore = create<IViewsStore>()(
               ...s,
             },
           })),
+        expandedProject: "",
+        setExpandedProject: (s: string) => set({ expandedProject: s }),
       }),
       {
         name: "viewsStore",

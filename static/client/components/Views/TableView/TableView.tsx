@@ -13,11 +13,23 @@ import { useViewsStore } from "@/store/views";
 const TableView: React.FC = () => {
   const { data: projects } = useProjects();
   const [view, setView, setFilter] = useViewsStore((state) => [state.view, state.setView, state.setFilter]);
+  const [expandedProject, setExpandedProject] = useViewsStore((state) => [
+    state.expandedProject,
+    state.setExpandedProject,
+  ]);
+
+  useEffect(() => {
+    if (expandedProject) {
+      setExpandedProject(expandedProject);
+    }
+  }, [expandedProject, setExpandedProject]);
+
   const location = useLocation();
 
   const getAccordionSections = useMemo(() => {
     if (!projects?.length) return [];
     return projects.map((project) => ({
+      key: project.name,
       title: <ProjectTitle project={project} />,
       content: <ProjectContent project={project} />,
     }));
@@ -61,7 +73,7 @@ const TableView: React.FC = () => {
         </thead>
       </table>
 
-      <Accordion sections={getAccordionSections} />
+      <Accordion expanded={expandedProject} onExpandedChange={setExpandedProject} sections={getAccordionSections} />
     </>
   );
 };

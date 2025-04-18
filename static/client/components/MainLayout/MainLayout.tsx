@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
 import TableView from "@/components/Views/TableView";
 import { VIEW_TREE } from "@/config";
+import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
 
 interface IMainLayoutProps {
@@ -18,6 +19,10 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
   const navigate = useNavigate();
   const view = useViewsStore((state) => state.view);
 
+  function goPrev() {
+    return goBack(location, navigate);
+  }
+
   return (
     <>
       <div className="l-application">
@@ -26,7 +31,7 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
           <div className="row">
             <div className="col-7">
               {location.pathname.includes("/webpage") && view !== VIEW_TREE && true && (
-                <Button hasIcon onClick={() => navigate(-1)}>
+                <Button hasIcon onClick={goPrev}>
                   <React.Fragment key=".0">
                     <i className="p-icon--chevron-left" /> <span>Back</span>
                   </React.Fragment>

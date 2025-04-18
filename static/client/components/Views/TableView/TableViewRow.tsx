@@ -23,7 +23,7 @@ const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
   }
 
   return (
-    <tr data-id={page.id} data-parent-id={page.parent_id}>
+    <tr data-id={page.id} data-parent-id={page.parent_id} id={`${page?.project?.name}${page.url}`}>
       <td>
         <span className="u-has-icon">
           <NavigationElementBadge appearance="" page={page} />

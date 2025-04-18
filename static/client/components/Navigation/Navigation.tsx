@@ -21,6 +21,7 @@ const Navigation = (): JSX.Element => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView] = useViewsStore((state) => [state.view, state.setView]);
+  const setExpandedProject = useViewsStore((state) => state.setExpandedProject);
 
   const logout = useCallback(() => {
     setUser({} as IUser);
@@ -33,11 +34,12 @@ const Navigation = (): JSX.Element => {
 
   const changeView = useCallback(
     (view: TView) => {
+      setExpandedProject("");
       setView(view);
       if ([VIEW_OWNED, VIEW_REVIEWED].includes(view)) navigate(`/app/views/${view}`);
       if ([VIEW_TABLE, VIEW_TREE].includes(view)) navigate("/app");
     },
-    [navigate, setView],
+    [navigate, setExpandedProject, setView],
   );
 
   const isViewActive = useMemo(
