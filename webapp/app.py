@@ -32,7 +32,7 @@ def index():
     )
 
 
-@app.route("/app/webpage/<path:path>")
+@app.route("/app/<path:path>")
 @login_required
 def webpage(path):
     return render_template(

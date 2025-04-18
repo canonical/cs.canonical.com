@@ -79,7 +79,7 @@
     }
 
     .p-panel__content {
-      height: calc(100vh - 440px);
+      max-height: calc(100vh - 540px);
       overflow: auto;
 
       @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
@@ -100,6 +100,11 @@
           left: 1rem;
         }
       }
+    }
+
+    li.p-side-navigation__link {
+      padding: 0.8rem 1rem;
+      cursor: pointer;
     }
   }
 

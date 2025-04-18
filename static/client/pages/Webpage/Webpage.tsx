@@ -4,6 +4,7 @@ import { Button } from "@canonical/react-components";
 
 import { type IWebpageProps } from "./Webpage.types";
 
+import Breadcrumbs from "@/components/Breadcrumbs";
 import JiraTasks from "@/components/JiraTasks";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
@@ -54,15 +55,15 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
 
   return (
     <div className="l-webpage">
+      <div className="p-section--shallow">
+        <Breadcrumbs />
+      </div>
       {isNew ? (
         <h1>New page: {pageName}</h1>
       ) : (
         <>
-          <p className="p-text--small-caps" id="page-title">
-            Title
-          </p>
           <h1 aria-labelledby="page-title" className="u-no-padding--top">
-            {page.title || "-"}
+            {page.title || "No title"}
           </h1>
         </>
       )}

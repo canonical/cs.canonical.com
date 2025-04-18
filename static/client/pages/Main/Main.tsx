@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "@/components/MainLayout";
+import Owned from "@/pages/views/Owned";
+import Reviewed from "@/pages/views/Reviewed";
 import { useAuth } from "@/services/api/hooks/auth";
 import { usePages } from "@/services/api/hooks/pages";
 import { RoutesServices } from "@/services/routes";
@@ -12,7 +14,10 @@ const Main = (): React.ReactNode => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<MainLayout />} path="/app" />
+        <Route element={<MainLayout />} path="/app">
+          <Route element={<Owned />} path="views/owned" />
+          <Route element={<Reviewed />} path="views/reviewed" />
+        </Route>
         <Route element={<Navigate to="/app" />} path="/" />
         {data?.length &&
           data.map(
