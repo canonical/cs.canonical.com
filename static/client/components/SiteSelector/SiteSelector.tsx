@@ -38,8 +38,10 @@ const SiteSelector = (): JSX.Element | null => {
   if (isLoading || !projects?.length)
     return (
       <>
-        <Spinner />
-        <span>&nbsp;&nbsp;Loading...</span>
+        <span>
+          <Spinner />
+          &nbsp;&nbsp;Loading...
+        </span>
       </>
     );
 

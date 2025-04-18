@@ -11,7 +11,7 @@ import { useProjects } from "@/services/api/hooks/projects";
 import { useViewsStore } from "@/store/views";
 
 const TableView: React.FC = () => {
-  const { data: projects } = useProjects();
+  const { data: projects, isLoading } = useProjects();
   const [view, setView, setFilter] = useViewsStore((state) => [state.view, state.setView, state.setFilter]);
   const [expandedProject, setExpandedProject] = useViewsStore((state) => [
     state.expandedProject,
@@ -72,6 +72,15 @@ const TableView: React.FC = () => {
           </tr>
         </thead>
       </table>
+
+      {(isLoading || !projects.length) && (
+        <>
+          <span className="u-has-icon">
+            <i className="p-icon--spinner u-animation--spin"></i>
+            Loading projects. Please wait.
+          </span>
+        </>
+      )}
 
       <Accordion expanded={expandedProject} onExpandedChange={setExpandedProject} sections={getAccordionSections} />
     </>
