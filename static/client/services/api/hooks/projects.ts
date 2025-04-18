@@ -18,52 +18,58 @@ export function useProjects() {
   }
 
   function filterProjectsAndPages(data: IPagesResponse["data"]) {
-    function filterChildren(children: IPage[]) {
-      return children
-        .map((child) => {
-          const filteredChild: IPage = {
+    function filterChildren(children: IPage[]): IPage[] {
+      let results: IPage[] = [];
+
+      for (const child of children) {
+        const filteredChildChildren = filterChildren(child.children || []);
+
+        let condition = true;
+
+        if (filter.owners?.length) {
+          condition = condition && filter.owners.includes(child.owner?.email);
+        }
+
+        if (filter.reviewers?.length) {
+          condition =
+            condition && filter.reviewers.some((reviewer) => child.reviewers?.some((rev) => rev.email === reviewer));
+        }
+
+        if (filter.products?.length) {
+          condition =
+            condition &&
+            filter.products.some((product) =>
+              child.products?.some((prod) => prod.name.toLowerCase() === product.toLowerCase()),
+            );
+        }
+
+        if (filter.query) {
+          condition =
+            condition &&
+            (child.url?.toLowerCase()?.includes(filter.query.toLowerCase()) ||
+              child.name?.toLowerCase()?.includes(filter.query.toLowerCase()));
+        }
+
+        if (condition) {
+          // Include the node itself, along with its filtered children
+          results.push({
             ...child,
-            children: filterChildren(child.children || []) as IPage[],
-          };
+            children: filteredChildChildren,
+          });
+        } else {
+          // Parent doesn't match, but children might — so promote them
+          results.push(...filteredChildChildren);
+        }
+      }
 
-          let condition = true;
-
-          if (filter.owners?.length) {
-            condition = condition && filter.owners.includes(child.owner?.email);
-          }
-
-          if (filter.reviewers?.length) {
-            condition =
-              condition && filter.reviewers.some((reviewer) => child.reviewers?.some((rev) => rev.email === reviewer));
-          }
-
-          if (filter.products?.length) {
-            condition =
-              condition &&
-              filter.products.some((product) =>
-                child.products?.some((prod) => prod.name.toLowerCase() === product.toLowerCase()),
-              );
-          }
-
-          if (filter.query) {
-            condition =
-              condition &&
-              (child.url?.toLowerCase()?.includes(filter.query.toLocaleLowerCase()) ||
-                child.name?.toLowerCase()?.includes(filter.query.toLowerCase()));
-          }
-
-          if (condition || filteredChild.children.length > 0) return filteredChild;
-
-          return null;
-        })
-        .filter(Boolean);
+      return results;
     }
 
     return {
       ...data,
       templates: {
         ...data.templates,
-        children: filterChildren(data.templates?.children || []) as IPage[],
+        children: filterChildren(data.templates?.children || []),
       },
     };
   }

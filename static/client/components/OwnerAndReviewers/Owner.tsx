@@ -4,8 +4,9 @@ import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
+import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
-import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
 const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element => {
@@ -13,9 +14,12 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
   const { options, setOptions, handleChange } = useUsersRequest();
 
   useEffect(() => {
-    let owner = page && page.owner ? page.owner : getDefaultUser();
-    setCurrentOwner(owner);
-    if (onSelectOwner) onSelectOwner(owner);
+    if (page) {
+      let owner = page.owner as IUser | null;
+      if (page.owner.name === "Default" || !page.owner.email) owner = null;
+      setCurrentOwner(owner);
+      if (onSelectOwner) onSelectOwner(owner);
+    }
   }, [onSelectOwner, page]);
 
   const handleRemoveOwner = useCallback(
@@ -43,7 +47,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
 
   return (
     <CustomSearchAndFilter
-      label="Owner"
+      label={<IconTextWithTooltip icon="information" message={config.constants.ownerDef} text="Owner" />}
       onChange={handleChange}
       onRemove={handleRemoveOwner}
       onSelect={selectOwner}

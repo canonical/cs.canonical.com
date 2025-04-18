@@ -15,11 +15,11 @@ function countPages(page: IPage): number {
 const ProjectTitle: React.FC<ProjectTitleProps> = ({ project }) => {
   const { isFilterApplied } = useProjects();
   return (
-    <span style={{ display: "inline-flex", alignItems: "baseline" }}>
+    <span className="u-sv1">
       <span className="p-muted-heading" style={{ margin: "0 0.5rem" }}>
         {project.name}
       </span>
-      <Badge value={countPages(project.templates) - (isFilterApplied ? 1 : 0)} />
+      <Badge className="u-no-padding--top" value={countPages(project.templates) - (isFilterApplied ? 1 : 0)} />
     </span>
   );
 };

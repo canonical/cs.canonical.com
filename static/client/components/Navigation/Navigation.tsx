@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -42,8 +42,8 @@ const Navigation = (): JSX.Element => {
     [navigate, setExpandedProject, setView],
   );
 
-  const isViewActive = useMemo(
-    () => (linkView: TView) => {
+  const isViewActive = useCallback(
+    (linkView: TView) => {
       if (view === VIEW_TREE) return linkView === view;
       return linkView === view && location.pathname === `/app/views/${linkView}`;
     },

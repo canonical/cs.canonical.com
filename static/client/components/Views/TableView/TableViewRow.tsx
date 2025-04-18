@@ -32,7 +32,7 @@ const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
           </Button>
         </span>
       </td>
-      <td>{page.owner?.name}</td>
+      <td>{!(page.owner?.name === "Default" || !page.owner?.email) && page.owner?.name}</td>
       <td>
         <Reviewers page={page} />
       </td>
