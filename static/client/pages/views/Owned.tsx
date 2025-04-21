@@ -13,6 +13,9 @@ const Owned: React.FC = () => {
     setView(VIEW_OWNED);
     setFilter({
       owners: [user.email],
+      reviewers: [],
+      products: [],
+      query: "",
     });
   }, [setFilter, setView, user.email]);
 

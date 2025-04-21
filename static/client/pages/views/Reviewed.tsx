@@ -12,7 +12,10 @@ const Reviewed: React.FC = () => {
   useEffect(() => {
     setView(VIEW_REVIEWED);
     setFilter({
+      owners: [],
       reviewers: [user.email],
+      products: [],
+      query: "",
     });
   }, [setFilter, setView, user.email]);
 

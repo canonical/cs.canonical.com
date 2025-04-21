@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -42,8 +42,8 @@ const Navigation = (): JSX.Element => {
     [navigate, setExpandedProject, setView],
   );
 
-  const isViewActive = useMemo(
-    () => (linkView: TView) => {
+  const isViewActive = useCallback(
+    (linkView: TView) => {
       if (view === VIEW_TREE) return linkView === view;
       return linkView === view && location.pathname === `/app/views/${linkView}`;
     },
@@ -82,7 +82,7 @@ const Navigation = (): JSX.Element => {
             </div>
             <hr className="p-rule" />
             <div className="p-panel__content">
-              <ul className="u-no-margin u-no-padding">
+              <ul className="u-no-margin--left u-no-padding">
                 <li
                   className={`p-side-navigation__link ${location.pathname === "/app" && view !== VIEW_TREE && "is-active"}`}
                   onClick={() => changeView(VIEW_TABLE)}
@@ -95,21 +95,19 @@ const Navigation = (): JSX.Element => {
                 <li
                   className={`p-side-navigation__link ${isViewActive(VIEW_TREE) && "is-active"}`}
                   onClick={() => changeView(VIEW_TREE)}
-                  style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
                 >
                   <span className="u-has-icon">
                     <i className="p-icon--switcher-environments is-dark" />
                     Tree view
                   </span>
-
-                  {isViewActive(VIEW_TREE) && (
-                    <>
-                      <SiteSelector />
-                      <NavigationItems />
-                    </>
-                  )}
                 </li>
               </ul>
+              {isViewActive(VIEW_TREE) && (
+                <>
+                  <SiteSelector />
+                  <NavigationItems />
+                </>
+              )}
             </div>
             <div style={{ marginTop: "2rem" }}>
               <hr className="p-rule" />

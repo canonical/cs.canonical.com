@@ -4,6 +4,8 @@ import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
+import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
@@ -49,7 +51,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
 
   return (
     <CustomSearchAndFilter
-      label="Reviewers"
+      label={<IconTextWithTooltip icon="information" message={config.constants.reviewerDef} text="Reviewers" />}
       onChange={handleChange}
       onRemove={handleRemoveReviewer}
       onSelect={selectReviewer}

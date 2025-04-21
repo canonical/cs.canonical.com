@@ -10,6 +10,10 @@ export const VIEW_TABLE = "table";
 const config = {
   projects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
   views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
+  constants: {
+    ownerDef: "Owners request the page and must approve the page for it to go live.",
+    reviewerDef: "Reviewers can contribute to page content, but they can't approve the page to go live.",
+  },
   api: {
     path: "/",
     FETCH_OPTIONS: {

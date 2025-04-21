@@ -13,7 +13,7 @@ const TableViewRowItem: React.FC<TableViewRowItemProps> = ({ page }) => {
     <>
       <TableViewRow page={page} />
       {page.children.map((child) => {
-        return <TableViewRowItem key={child.url} page={child} />;
+        return <TableViewRowItem key={`${child.project?.name}${child.url}`} page={child} />;
       })}
     </>
   );

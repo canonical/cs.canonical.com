@@ -6,7 +6,8 @@ import { useLocation } from "react-router-dom";
 import ProjectContent from "./ProjectContent";
 import ProjectTitle from "./ProjectTitle";
 
-import { VIEW_TABLE, VIEW_TREE } from "@/config";
+import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
+import config, { VIEW_TABLE, VIEW_TREE } from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
 import { useViewsStore } from "@/store/views";
 
@@ -54,19 +55,10 @@ const TableView: React.FC = () => {
           <tr style={{ borderBottom: "none" }}>
             <th>Url</th>
             <th>
-              <Tooltip message="Owners request the page and must approve the page for it to go live." zIndex={999}>
-                Owner&nbsp;
-                <i className="p-icon--information" />
-              </Tooltip>
+              <IconTextWithTooltip icon="information" message={config.constants.ownerDef} text="Owner" />
             </th>
             <th>
-              <Tooltip
-                message="Reviewers can contribute to page content, but they can't approve the page to go live."
-                zIndex={999}
-              >
-                Reviewers&nbsp;
-                <i className="p-icon--information" />
-              </Tooltip>
+              <IconTextWithTooltip icon="information" message={config.constants.reviewerDef} text="Reviewers" />
             </th>
             <th>Products</th>
           </tr>
