@@ -47,7 +47,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
 
   return (
     <CustomSearchAndFilter
-      label={<IconTextWithTooltip icon="information" message={config.constants.ownerDef} text="Owner" />}
+      label={<IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />}
       onChange={handleChange}
       onRemove={handleRemoveOwner}
       onSelect={selectOwner}

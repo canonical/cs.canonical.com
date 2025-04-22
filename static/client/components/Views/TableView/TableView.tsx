@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 
-import { Accordion, Tooltip } from "@canonical/react-components";
+import { Accordion, Spinner } from "@canonical/react-components";
 import { useLocation } from "react-router-dom";
 
 import ProjectContent from "./ProjectContent";
@@ -13,17 +13,13 @@ import { useViewsStore } from "@/store/views";
 
 const TableView: React.FC = () => {
   const { data: projects, isLoading } = useProjects();
-  const [view, setView, setFilter] = useViewsStore((state) => [state.view, state.setView, state.setFilter]);
-  const [expandedProject, setExpandedProject] = useViewsStore((state) => [
+  const [view, setView, setFilter, expandedProject, setExpandedProject] = useViewsStore((state) => [
+    state.view,
+    state.setView,
+    state.setFilter,
     state.expandedProject,
     state.setExpandedProject,
   ]);
-
-  useEffect(() => {
-    if (expandedProject) {
-      setExpandedProject(expandedProject);
-    }
-  }, [expandedProject, setExpandedProject]);
 
   const location = useLocation();
 
@@ -55,26 +51,21 @@ const TableView: React.FC = () => {
           <tr style={{ borderBottom: "none" }}>
             <th>Url</th>
             <th>
-              <IconTextWithTooltip icon="information" message={config.constants.ownerDef} text="Owner" />
+              <IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />
             </th>
             <th>
-              <IconTextWithTooltip icon="information" message={config.constants.reviewerDef} text="Reviewers" />
+              <IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Reviewers" />
             </th>
             <th>Products</th>
           </tr>
         </thead>
       </table>
 
-      {(isLoading || !projects.length) && (
-        <>
-          <span className="u-has-icon">
-            <i className="p-icon--spinner u-animation--spin"></i>
-            Loading projects. Please wait.
-          </span>
-        </>
-      )}
+      {(isLoading || !projects.length) && <Spinner text="Loading projects. Please wait." />}
 
-      <Accordion expanded={expandedProject} onExpandedChange={setExpandedProject} sections={getAccordionSections} />
+      {!isLoading && (
+        <Accordion expanded={expandedProject} onExpandedChange={setExpandedProject} sections={getAccordionSections} />
+      )}
     </>
   );
 };

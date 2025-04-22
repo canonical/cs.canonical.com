@@ -14,7 +14,7 @@ const ProjectContent: React.FC<ProjectContentProps> = ({ project }) => {
     <table>
       <tbody>
         {!isFilterApplied && <TableViewRow page={project.templates} />}
-        {project.templates.children.map((page) => (
+        {project?.templates?.children?.map((page) => (
           <TableViewRowItem key={`${page.project?.name}${page.url}`} page={page} />
         ))}
       </tbody>

@@ -51,7 +51,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
 
   return (
     <CustomSearchAndFilter
-      label={<IconTextWithTooltip icon="information" message={config.constants.reviewerDef} text="Reviewers" />}
+      label={<IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Reviewers" />}
       onChange={handleChange}
       onRemove={handleRemoveReviewer}
       onSelect={selectReviewer}

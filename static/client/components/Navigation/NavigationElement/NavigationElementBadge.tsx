@@ -6,7 +6,7 @@ import type { INavigationElementBadgeProps } from "./NavigationElement.types";
 
 import { PageStatus } from "@/services/api/types/pages";
 
-const NavigationElementBadge = ({ page, appearance = "is-dark" }: INavigationElementBadgeProps): JSX.Element => {
+const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgeProps): JSX.Element => {
   const getIcon = useMemo(() => {
     switch (page.status) {
       case PageStatus.NEW:

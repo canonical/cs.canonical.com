@@ -9,5 +9,5 @@ export interface INavigationElementProps {
 
 export interface INavigationElementBadgeProps {
   page: IPage;
-  appearance?: string;
+  appearance?: "is-dark" | "is-light";
 }

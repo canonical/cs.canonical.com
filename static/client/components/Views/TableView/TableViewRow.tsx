@@ -16,17 +16,20 @@ interface TableViewRowProps {
 const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
   const navigate = useNavigate();
 
-  function onPageSelect(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, page: IPage) {
-    e.stopPropagation();
-    e.preventDefault();
-    navigate(`/app/webpage/${page.project?.name}${page.url}`);
-  }
+  const onPageSelect = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, page: IPage) => {
+      e.stopPropagation();
+      e.preventDefault();
+      navigate(`/app/webpage/${page.project?.name}${page.url}`);
+    },
+    [navigate],
+  );
 
   return (
     <tr data-id={page.id} data-parent-id={page.parent_id} id={`${page?.project?.name}${page.url}`}>
       <td>
         <span className="u-has-icon">
-          <NavigationElementBadge appearance="" page={page} />
+          <NavigationElementBadge page={page} />
           <Button
             appearance="link"
             className="u-no-margin--bottom u-no-padding u-align-text--left"

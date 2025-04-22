@@ -16,7 +16,7 @@ const Reviewers: React.FC<ReviewersProps> = ({ page }) => {
   };
 
   const getReviewers = () => {
-    let reviewers = page.reviewers.map((reviewer) => reviewer.name);
+    let reviewers = page?.reviewers?.map((reviewer) => reviewer.name) || [];
     if (reviewers.length <= 2) {
       return reviewers.join(", ");
     }

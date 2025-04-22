@@ -30,7 +30,7 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
         <main className="l-main">
           <div className="row">
             <div className="col-7">
-              {location.pathname.includes("/webpage") && view !== VIEW_TREE && true && (
+              {location.pathname.includes("/webpage") && view !== VIEW_TREE && (
                 <Button hasIcon onClick={goPrev}>
                   <React.Fragment key=".0">
                     <i className="p-icon--chevron-left" /> <span>Back</span>

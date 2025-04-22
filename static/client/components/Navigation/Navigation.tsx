@@ -20,8 +20,11 @@ const Navigation = (): JSX.Element => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
-  const [view, setView] = useViewsStore((state) => [state.view, state.setView]);
-  const setExpandedProject = useViewsStore((state) => state.setExpandedProject);
+  const [view, setView, setExpandedProject] = useViewsStore((state) => [
+    state.view,
+    state.setView,
+    state.setExpandedProject,
+  ]);
 
   const logout = useCallback(() => {
     setUser({} as IUser);

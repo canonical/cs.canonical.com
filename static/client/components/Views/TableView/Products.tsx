@@ -16,7 +16,7 @@ const Products: React.FC<ProductsProps> = ({ page }) => {
   };
 
   const getProducts = () => {
-    let products = page.products.map((product) => product.name);
+    let products = page?.products?.map((product) => product.name) || [];
     if (products.length <= 3) {
       return products.join(", ");
     }
