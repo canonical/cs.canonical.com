@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { type IBreadcrumb } from "./Breadcrumbs.types";
 
 const Breadcrumbs = () => {
   const location = useLocation();
   const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const pageIndex = location.pathname.indexOf("app/webpage/");
@@ -28,12 +29,20 @@ const Breadcrumbs = () => {
     }
   }, [location]);
 
+  const goToPage = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+      e.preventDefault();
+      navigate(path);
+    },
+    [navigate],
+  );
+
   return (
     <div className="l-breadcrumbs">
       {breadcrumbs.map((bc, index) => (
         <React.Fragment key={`bc-${index}`}>
           {index < breadcrumbs.length - 1 ? (
-            <a className="p-text--small-caps" href={bc.link}>
+            <a className="p-text--small-caps" href={bc.link} onClick={(e) => goToPage(e, bc.link)}>
               {bc.name}
             </a>
           ) : (
