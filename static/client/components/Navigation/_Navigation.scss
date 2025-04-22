@@ -29,6 +29,9 @@
       .l-site-selector,
       .l-site-selector__label,
       .l-new-webpage-button {
+        @media (max-width: $breakpoint-small) {
+          margin-top: 2rem;
+        }
         @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
           visibility: hidden;
         }
@@ -73,7 +76,7 @@
 
       .l-navigation-collapse-toggle {
         position: absolute;
-        right: 20px;
+        right: 0;
         top: 20px;
       }
     }
@@ -81,7 +84,11 @@
     .p-panel__content {
       max-height: calc(100vh - 540px);
       overflow: auto;
+      margin-bottom: 2rem;
 
+    }
+
+    .p-panel__content, .p-panel__views {
       @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
         visibility: hidden;
       }
@@ -111,6 +118,7 @@
   &:hover {
     @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
       .p-panel__content,
+      .p-panel__views,
       .p-panel__header .l-site-selector,
       .p-panel__header .l-site-selector__label,
       .p-panel__header .l-new-webpage-button {

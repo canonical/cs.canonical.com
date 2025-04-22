@@ -109,7 +109,7 @@ const Navigation = (): JSX.Element => {
                 </>
               )}
             </div>
-            <div style={{ marginTop: "2rem" }}>
+            <div className="p-panel__views">
               <hr className="p-rule" />
               <p className="p-muted-heading u-text--muted">Quick views</p>
               <ul className="u-no-margin u-no-padding">

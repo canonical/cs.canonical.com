@@ -27,7 +27,11 @@ const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
       <td>
         <span className="u-has-icon">
           <NavigationElementBadge appearance="" page={page} />
-          <Button appearance="link" className="u-no-margin--bottom u-no-padding" onClick={(e) => onPageSelect(e, page)}>
+          <Button
+            appearance="link"
+            className="u-no-margin--bottom u-no-padding u-align-text--left"
+            onClick={(e) => onPageSelect(e, page)}
+          >
             {page.url || "/"}
           </Button>
         </span>
