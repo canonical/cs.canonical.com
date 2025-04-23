@@ -1,9 +1,5 @@
 import os
-import time
-from collections.abc import Iterator
-from contextlib import contextmanager
 from hashlib import md5
-from multiprocessing import shared_memory
 from urllib.parse import unquote, urlparse, urlunparse
 
 from flask import current_app, redirect, request
@@ -51,36 +47,6 @@ def clear_trailing_slash():
         new_uri = urlunparse(parsed_url._replace(path=path[:-1]))
 
         return redirect(new_uri)
-
-
-@contextmanager
-def shared_memory_lock() -> Iterator:
-    """
-    Context manager for acquiring a generic lock using a shared memory
-    buffer.
-    """
-    try:
-        shm = shared_memory.SharedMemory(
-            create=False,
-            name="cscanonicalshmlock",
-        )
-    except FileNotFoundError:
-        shm = shared_memory.SharedMemory(
-            create=True,
-            size=1,
-            name="cscanonicalshmlock",
-        )
-
-    buffer = shm.buf
-
-    try:
-        if buffer[0] == 0:
-            buffer[0] = 1
-            yield
-    finally:
-        buffer[0] = 0
-        shm.close()
-        shm.unlink()
 
 
 class RegexConverter(BaseConverter):
