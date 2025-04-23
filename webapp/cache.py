@@ -151,7 +151,13 @@ class FileCache(Cache):
         data = json.dumps(value)
         # Delete the file if it exists
         if Path(self.cache_path + "/" + key).exists():
-            os.remove(self.cache_path + "/" + key)
+            try:
+                os.remove(self.cache_path + "/" + key)
+            except FileNotFoundError:
+                # We catch this as due to different processes potentially
+                # accessing this method, deleting a file could face a race
+                # condition.
+                self.logger.info("File already removed")
         # Create base directory if it does not exist
         if not Path(self.cache_path).exists():
             Path(self.cache_path).mkdir(parents=True, exist_ok=True)
