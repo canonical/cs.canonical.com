@@ -24,6 +24,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.orm.session import Session
 
+from webapp.context import file_cache_lock
+
 with open("data/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -200,9 +202,8 @@ def init_db(app: Flask):
 
     db.init_app(app)
     # Use lock to prevent multiple concurrent migrations on startup
-    # with shared_memory_lock(), app.app_context():
     # Automatically upgrade to head revision
-    with app.app_context():
+    with app.app_context(), file_cache_lock():
         upgrade()
 
     @app.before_request
