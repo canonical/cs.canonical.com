@@ -21,6 +21,8 @@
 @include vf-p-icons-common;
 @include vf-p-icon-edit;
 @include vf-p-icon-archive;
+@include vf-p-icon-switcher-dashboard;
+@include vf-p-icon-switcher-environments;
 
 // Utilities
 @include vf-u-align;
@@ -56,4 +58,23 @@
 // allow SearchAndFilter component increase height when there are several options selected (in Reviewers)
 .p-search-and-filter__search-container {
   height: auto !important;
+}
+
+.p-accordion {
+  .p-accordion__heading {
+    position: sticky !important;
+    top: -1.5rem;
+    z-index: 9;
+  
+    & button[aria-expanded="true"]{
+      background: var(--vf-color-background-neutral-hover) !important;
+    }
+  }
+  .p-accordion__panel {
+    padding-left: 0 !important;
+  }
+}
+
+.p-table__row--highlight{
+  background: var(--vf-color-background-neutral-hover) !important;
 }
