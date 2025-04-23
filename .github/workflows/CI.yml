@@ -135,7 +135,8 @@ jobs:
           GOOGLE_DRIVE_FOLDER_ID: folderid
           COPYDOC_TEMPLATE_ID: templateid
         run: |
-          gunicorn webapp.app:app --daemon --bind 0.0.0.0:8104
+          gunicorn webapp.app:app --daemon --reload --log-file ./err --bind 0.0.0.0:8104 & sleep 2
+          cat ./err
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8104
 
   run-image:
@@ -170,11 +171,11 @@ jobs:
           GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
         run: |
           docker run \
-          -p 8104:8104 \
+          -p 8104:80 \
           -e SECRET_KEY=secret_key \
           -e REDIS_HOST=localhost \
           -e REDIS_PORT=6379 \
-          -e GH_TOKEN=${{ github.token }} \
+          -e GH_TOKEN=github.token \
           -e REPO_ORG=https://github.com/canonical \
           -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
           -e JIRA_EMAIL=example@canonical.com \
