@@ -137,7 +137,7 @@ jobs:
         run: |
           gunicorn webapp.app:app --daemon --reload --log-file ./err --bind 0.0.0.0:8104 & sleep 2
           cat ./err
-          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8104
+          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://0.0.0.0:8104
 
   run-image:
     name: Run Image
