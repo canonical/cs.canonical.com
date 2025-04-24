@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { MultiSelectItem } from "@canonical/react-components";
 import { Button, Input, Spinner } from "@canonical/react-components";
@@ -6,6 +6,7 @@ import { Button, Input, Spinner } from "@canonical/react-components";
 import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
+import SiteSelector from "@/components/SiteSelector";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
@@ -63,11 +64,15 @@ const NewWebpage = (): JSX.Element => {
     setProducts(products.map((p) => Number(p.value)));
   }, []);
 
+  const finalUrl = useMemo(() => {
+    return `${location !== "/" ? location : ""}/${titleValue}`;
+  }, [location, titleValue]);
+
   const handleSubmit = useCallback(() => {
     if (titleValue && owner && selectedProject && location) {
       setReloading(LoadingState.LOADING);
       const newPage = {
-        name: `${location}/${titleValue}`,
+        name: finalUrl,
         copy_doc_link: copyDoc,
         owner,
         reviewers,
@@ -83,7 +88,7 @@ const NewWebpage = (): JSX.Element => {
           });
       });
     }
-  }, [titleValue, owner, selectedProject, location, copyDoc, reviewers, products, refetch]);
+  }, [titleValue, owner, selectedProject, location, finalUrl, copyDoc, reviewers, products, refetch]);
 
   // update navigation after new page is added to the tree on the backend
   useEffect(() => {
@@ -99,6 +104,12 @@ const NewWebpage = (): JSX.Element => {
       }
     }
   }, [data, isFetching, reloading, selectedProject, setSelectedProject, location, titleValue]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      setLocation("/");
+    }
+  }, [selectedProject]);
 
   return (
     <div className="l-new-webpage">
@@ -117,8 +128,14 @@ const NewWebpage = (): JSX.Element => {
       </div>
       <div className="l-new-webpage--location">
         <p className="p-text--small-caps">Location</p>
+        <SiteSelector />
         <NavigationItems onSelectPage={handleSelectPage} />
       </div>
+      <p className="u-text--muted">
+        URL will be:&nbsp;
+        {selectedProject?.name}
+        {finalUrl}
+      </p>
       <div>
         <p className="p-text--small-caps" id="copy-doc">
           Copy doc
