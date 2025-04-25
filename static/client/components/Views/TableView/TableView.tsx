@@ -9,9 +9,14 @@ import ProjectTitle from "./ProjectTitle";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config, { VIEW_TABLE, VIEW_TREE } from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
+import type { IViewFilter } from "@/services/api/types/views";
 import { useViewsStore } from "@/store/views";
 
-const TableView: React.FC = () => {
+interface TableViewProps {
+  customFilters?: IViewFilter;
+}
+
+const TableView: React.FC<TableViewProps> = ({ customFilters }) => {
   const { data: projects, isLoading } = useProjects();
   const [view, setView, setFilter, expandedProject, setExpandedProject] = useViewsStore((state) => [
     state.view,
@@ -22,7 +27,6 @@ const TableView: React.FC = () => {
   ]);
 
   const location = useLocation();
-
   const getAccordionSections = useMemo(() => {
     if (!projects?.length) return [];
     return projects.map((project) => ({
@@ -35,14 +39,11 @@ const TableView: React.FC = () => {
   useEffect(() => {
     if (location.pathname === "/app") {
       if (view !== VIEW_TREE) setView(VIEW_TABLE);
-      setFilter({
-        owners: [],
-        reviewers: [],
-        products: [],
-        query: "",
-      });
+      setFilter(customFilters || { owners: [], reviewers: [], products: [], query: "" });
     }
-  }, [location.pathname, setFilter, setView, view]);
+  }, [location.pathname, setFilter, setView, view, customFilters]);
+
+  console.log("table view being rendered");
 
   return (
     <>
@@ -70,4 +71,4 @@ const TableView: React.FC = () => {
   );
 };
 
-export default TableView;
+export default React.memo(TableView);

@@ -1,0 +1,26 @@
+#filter-box {
+  z-index: 100;
+  position: relative;
+  top: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.active-filter-box {
+  position: relative;
+  background: #f5f5f5; /* highlight background */
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.p-filter__group {
+  max-height: 15rem; // or height: 200px;
+  overflow-y: auto;
+}
+
+.filter-search{
+    margin-bottom: 1rem;
+    
+}
