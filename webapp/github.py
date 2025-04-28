@@ -1,10 +1,19 @@
 import json
+import logging
 from pathlib import Path
 
 import flask
 import requests
 
-from webapp.tasks import save_github_file
+from webapp.settings import BASE_DIR, GH_TOKEN
+from webapp.tasks import register_task
+
+# Configure logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s  [%(name)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 class Tree:
@@ -24,18 +33,14 @@ class GithubError(Exception):
 
 
 class GitHub:
-    def __init__(
-        self,
-        app: flask.Flask = None,
-    ):
+    logger = logger
+
+    def __init__(self) -> None:
         """
         Initialize the Github object.
-
-        Args:
-            app (Flask): The Flask application instance.
         """
-        self.REPOSITORY_PATH = Path(app.config["BASE_DIR"]) / "repositories"
-        token = app.config["GH_TOKEN"]
+        self.REPOSITORY_PATH = Path(BASE_DIR) / "repositories"
+        token = GH_TOKEN
         self.headers = {
             "Accept": "application/vnd.github.raw+json",
             "Authorization": f"Bearer {token}",
@@ -46,18 +51,19 @@ class GitHub:
         self,
         method: str,
         url: str,
-        data: dict = {},
-        params: dict = {},
+        data: dict | None = None,
+        params: dict | None = None,
         blob=False,
-    ):
-        if data:
-            data = json.dumps(data)
+    ) -> bytes | dict:
+        req_data = json.dumps(data) if data else data
+
         response = requests.request(
             method,
             GITHUB_API_URL + url,
-            data=data,
+            data=req_data,
             headers=self.headers,
             params=params,
+            timeout=10,
         )
 
         if blob:
@@ -66,14 +72,12 @@ class GitHub:
         if response.status_code == 200:
             return response.json()
 
-        raise GithubError(
+        err = (
             "Failed to make a request to GitHub. Status code:"
             f" {url} {method} {data} {params}"
             f" {response.status_code}. Response: {response.text}",
         )
-
-    def _url_path(self, url: str):
-        return url.split(self.URL)[-1]
+        raise GithubError(err)
 
     def get_file_content(self, repository: str, path: str) -> bytes:
         """
@@ -103,18 +107,53 @@ class GitHub:
         """
         tree_file_path = self.REPOSITORY_PATH / repository
         tree_file_path.mkdir(parents=True, exist_ok=True)
-        data = self.__request__(
-            "GET",
-            f"repos/canonical/{repository}/git/trees/{branch}?recursive=1",
-        )
+
+        try:
+            data = self.__request__(
+                "GET",
+                f"repos/canonical/{repository}/git/trees/{branch}?recursive=1",
+            )
+        except Exception as e:
+            print(f"Failed to get repository tree: {e}")
+            raise
         for item in data["tree"]:
             if item["type"] == "blob" and item["path"].startswith("templates"):
-                save_github_file.delay(
+                task = async_save_file(
                     tree_file_path=str(tree_file_path),
                     repository=repository,
                     path=item["path"],
                 )
+                task()
+
+
+@register_task()
+def async_save_file(
+    repository: str = "",
+    path: str = "",
+    tree_file_path: str = "",
+) -> None:
+    """
+    Download a file to a given repository.
+
+    Args:
+        repository (str): The repository name.
+        path (str): The remote path to the file inside the repository.
+        tree_file_path (str): The local path where the file will be saved.
+    """
+    try:
+        github = GitHub()
+        github.logger.info(f"File path {path}")
+        content = github.get_file_content(repository, path)
+        github.logger.info(f"File {path} downloaded")
+
+        file_path = Path(tree_file_path) / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with file_path.open("wb") as file:
+            file.write(content)
+    except Exception as e:
+        github.logger.exception(f"Failed to save file: {e}")
 
 
 def init_github(app: flask.Flask) -> None:
-    app.config["github"] = GitHub(app=app)
+    app.config["github"] = GitHub()

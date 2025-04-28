@@ -2,7 +2,8 @@ import os
 import re
 import subprocess
 import time
-from typing import Callable, TypedDict
+from collections.abc import Callable
+from typing import TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -84,7 +85,9 @@ class SiteRepository:
         """
         command = command_str.strip("").split(" ")
         process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         # Wait for the process to finish
         process.wait()
@@ -141,7 +144,8 @@ class SiteRepository:
         # Download files from the repository
         github = self.app.config["github"]
         github.get_repository_tree(
-            repository=self.repository_uri, branch=self.branch
+            repository=self.repository_uri,
+            branch=self.branch,
         )
 
     def repository_exists(self):
@@ -195,7 +199,7 @@ class SiteRepository:
         if not folder_exists:
             raise SiteRepositoryError(
                 "Templates folder 'templates' not found for "
-                f"repository {self.repo_path}"
+                f"repository {self.repo_path}",
             )
 
         # Change directory to the templates folder
@@ -244,8 +248,8 @@ class SiteRepository:
         webpages = (
             self.db.session.execute(
                 select(Webpage).where(
-                    Webpage.project_id == get_project_id(self.repository_uri)
-                )
+                    Webpage.project_id == get_project_id(self.repository_uri),
+                ),
             )
             .scalars()
             .all()
@@ -259,7 +263,7 @@ class SiteRepository:
             # If the tree is empty, load from the repository
             if not tree.get("children") and not tree.get("parent_id"):
                 self.logger.info(
-                    f"Reloading incomplete tree root {self.repository_uri}."
+                    f"Reloading incomplete tree root {self.repository_uri}.",
                 )
                 tree = self.get_new_tree()
         return tree
@@ -319,7 +323,12 @@ class SiteRepository:
         return {**node, **webpage_dict}
 
     def __create_webpages_for_children__(
-        self, db, children, project, owner, parent_id
+        self,
+        db,
+        children,
+        project,
+        owner,
+        parent_id,
     ):
         """
         Recursively create webpages for each child in the tree.
@@ -327,14 +336,22 @@ class SiteRepository:
         for child in children:
             # Create a webpage for the root node
             webpage_dict = self.__create_webpage_for_node__(
-                db, child, project, owner, parent_id
+                db,
+                child,
+                project,
+                owner,
+                parent_id,
             )
             # Update the child node with the webpage fields
             child.update(webpage_dict)
             if child.get("children"):
                 # Create webpages for the children recursively
                 self.__create_webpages_for_children__(
-                    db, child["children"], project, owner, webpage_dict["id"]
+                    db,
+                    child["children"],
+                    project,
+                    owner,
+                    webpage_dict["id"],
                 )
 
     def __remove_webpages_to_delete__(self, db, tree):
@@ -343,14 +360,14 @@ class SiteRepository:
         self.add_pages_to_list(tree, webpages)
 
         webpages_to_delete = db.session.execute(
-            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
+            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE),
         )
 
         for row in webpages_to_delete:
             page_to_delete = row[0]
             if page_to_delete.name not in webpages:
                 db.session.execute(
-                    delete(Webpage).where(Webpage.id == page_to_delete.id)
+                    delete(Webpage).where(Webpage.id == page_to_delete.id),
                 )
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
@@ -360,18 +377,28 @@ class SiteRepository:
         self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
-            db.session, Project, name=self.repository_uri
+            db.session,
+            Project,
+            name=self.repository_uri,
         )
         owner, _ = get_or_create(db.session, User, name="Default")
 
         # Create a webpage for the root node
         webpage_dict = self.__create_webpage_for_node__(
-            db, tree, project, owner, None
+            db,
+            tree,
+            project,
+            owner,
+            None,
         )
 
         # Create webpages for the children recursively
         self.__create_webpages_for_children__(
-            db, webpage_dict["children"], project, owner, webpage_dict["id"]
+            db,
+            webpage_dict["children"],
+            project,
+            owner,
+            webpage_dict["id"],
         )
 
         # Remove pages that don't exist in the repository anymore
