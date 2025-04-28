@@ -1,26 +1,48 @@
-#filter-box {
-  z-index: 100;
-  position: relative;
-  top: 0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+.filter-box {
+  position: fixed; /* stays in the same place when you scroll */
+  top: 11rem; /* distance from top */
+  background: #f8f4f4;
+  border: 1px solid #ccc;
+  border-top: 0px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999; /* very high so it stays above everything */
+  border-radius: 8px;
+  padding: 1rem 0 0 0;
+}
+.filter-box__buttons {
+  width: 9rem;
 }
 
-.active-filter-box {
-  position: relative;
-  background: #f5f5f5; /* highlight background */
-  padding: 12px 16px;
-  margin: 16px 0;
-  font-weight: bold;
+.filter-box__content {
+  width: 20rem;
+  padding: 0 1rem 0 0;
+}
+
+.p-filter__button--active {
   display: flex;
   align-items: center;
+  background: #e0e0e0; /* Light grey background */
+  border: none;
+  padding: 8px 12px;
+  position: relative;
+  font-size: 14px;
+  cursor: pointer;
+}
+.p-filter__button--active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: black;
 }
 
 .p-filter__group {
-  max-height: 15rem; // or height: 200px;
+  max-height: 16rem; // or height: 200px;
   overflow-y: auto;
 }
 
-.filter-search{
-    margin-bottom: 1rem;
-    
+.filter-search {
+  margin-bottom: 1rem;
 }
