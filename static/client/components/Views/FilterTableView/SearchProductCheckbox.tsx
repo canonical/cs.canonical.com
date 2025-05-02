@@ -21,7 +21,6 @@ function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps):
       setSearchedProducts(productData);
     }
   }, [data]);
-  console.log("check and search");
   const [searchedProducts, setSearchedProducts] = useState<IProduct[]>([]);
   return (
     <div>

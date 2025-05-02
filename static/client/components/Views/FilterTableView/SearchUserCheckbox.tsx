@@ -21,7 +21,6 @@ function SearchUserCheckbox<T extends string | string[]>({ state, setState }: Se
         setAllUsers([...userData]);
         setSearchedUsers([...userData]);
       }
-      console.log("api");
     };
 
     fetchUsers();

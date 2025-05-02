@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 
 import { Button, Badge, Card, SearchBox } from "@canonical/react-components";
 
@@ -6,24 +6,40 @@ import "./_FilterTableView.scss";
 import SearchProductCheckbox from "./SearchProductCheckbox";
 import SearchUserCheckbox from "./SearchUserCheckbox";
 
+import { useClickOutside } from "@/helpers/ClickOutside";
 import type { IViewFilter } from "@/services/api/types/views";
+import { useViewsStore } from "@/store/views";
 
-const FilterandSearch = ({
-  setCustomFilters,
-}: {
-  setCustomFilters: React.Dispatch<React.SetStateAction<IViewFilter>>;
-}): JSX.Element => {
+const FilterandSearch = (): JSX.Element => {
+  const [filter, setFilter] = useViewsStore((state) => {
+    return [state.filter, state.setFilter];
+  });
+
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedOwner, setSelectedOwner] = useState<string>("");
+  const [selectedOwner, setSelectedOwner] = useState<string[]>([]);
   const [selectedReviewer, setSelectedReviewer] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSelectedOwner(filter.owners);
+    setSelectedReviewer(filter.reviewers);
+    setSelectedProduct(filter.products);
+    setSearchQuery(filter.query || "");
+  }, [filter]);
 
   const [showFilter, setShowFilter] = useState<boolean>(false);
   const [activeFilter, setActiveFilter] = useState<string>("filter-group-owner");
 
+  const filterandSearchDOM = useRef<HTMLDivElement>(null);
+
   const handleSearchChange = useCallback((s: string) => {
     setSearchQuery(s || "");
   }, []);
+  const handleFilterToggle = useCallback(() => {
+    setShowFilter((prev) => !prev);
+  }, []);
+
+  useClickOutside(filterandSearchDOM, handleFilterToggle, showFilter);
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const ariaControls = event.currentTarget.getAttribute("aria-controls");
@@ -31,31 +47,24 @@ const FilterandSearch = ({
   };
 
   const handleApply = () => {
-    setCustomFilters(() => {
-      return {
-        owners: selectedOwner ? [selectedOwner] : [],
-        reviewers: selectedReviewer,
-        products: selectedProduct,
-        query: searchQuery,
-      } as IViewFilter;
-    });
+    setFilter({
+      owners: selectedOwner,
+      reviewers: selectedReviewer,
+      products: selectedProduct,
+      query: searchQuery,
+    } as IViewFilter);
     handleFilterToggle();
   };
 
   const handleClear = () => {
-    setSelectedOwner("");
+    setSelectedOwner([]);
     setSelectedReviewer([]);
     setSelectedProduct([]);
-    setCustomFilters((prevFilters: IViewFilter) => ({
+    setFilter({
       owners: [],
       reviewers: [],
       products: [],
-      query: "",
-    }));
-  };
-
-  const handleFilterToggle = () => {
-    setShowFilter(!showFilter);
+    });
   };
 
   const FilterGroupReviewer = "filter-group-reviewer";
@@ -63,37 +72,43 @@ const FilterandSearch = ({
   const FilterGroupProduct = "filter-group-product";
 
   const totalFilters =
-    (selectedOwner ? 1 : 0) +
+    (selectedOwner ? selectedOwner.length : 0) +
     (selectedReviewer ? selectedReviewer.length : 0) +
     (selectedProduct ? selectedProduct.length : 0);
   return (
     <>
-      <div className="row">
+      <div className="row" ref={filterandSearchDOM}>
         <div className="col-6">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleApply();
-            }}
-          >
+          <form>
             <SearchBox
               externallyControlled={true}
               onChange={handleSearchChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault(); // stop SearchBox from doing anything weird
-                  handleApply();
-                }
+              onClear={() => {
+                setSearchQuery("");
+                setFilter({
+                  ...filter,
+                  query: "",
+                });
+              }}
+              onSearch={() => {
+                setFilter({
+                  ...filter,
+                  query: searchQuery,
+                });
               }}
               value={searchQuery}
             />
           </form>
         </div>
-        <div className="col-4">
+        <div className="col-6">
           <Button appearance="" hasIcon onClick={handleFilterToggle}>
             <i className="p-icon--filter" /> <span>Filters</span>&nbsp;
-            <Badge className="u-no-padding--top u-no-margin--bottom" value={totalFilters} />
-            <i className="p-icon--chevron-down" />
+            {totalFilters !== 0 ? (
+              <Badge className="u-no-padding--top  u-no-margin--bottom" value={totalFilters} />
+            ) : (
+              ""
+            )}
+            <i className="p-icon--chevron-down" style={{ marginLeft: "10rem" }} />
           </Button>
         </div>
         <div className="col-6 col-start-large-5">
@@ -113,8 +128,15 @@ const FilterandSearch = ({
                   small
                   style={{ width: "10rem", padding: "0.25rem" }}
                 >
-                  <i className="p-icon--user" /> <span>By owner</span>&nbsp;
-                  <Badge className="u-no-padding--top  u-no-margin--bottom" value={selectedOwner ? 1 : 0} />
+                  <i className="p-icon--user" style={{ paddingRight: "3rem" }} /> <span>By owner</span>&nbsp;
+                  {selectedOwner.length !== 0 ? (
+                    <Badge
+                      className="u-no-padding--top  u-no-margin--bottom"
+                      value={selectedOwner ? selectedOwner.length : 0}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </Button>
                 <Button
                   appearance="base"
@@ -129,11 +151,15 @@ const FilterandSearch = ({
                   small
                   style={{ width: "10rem", padding: "0.25rem" }}
                 >
-                  <i className="p-icon--show" /> <span>By reviewer</span>&nbsp;
-                  <Badge
-                    className="u-no-padding--top  u-no-margin--bottom"
-                    value={selectedReviewer ? selectedReviewer.length : 0}
-                  />
+                  <i className="p-icon--show" style={{ paddingRight: "3rem" }} /> <span>By reviewer</span>&nbsp;
+                  {selectedReviewer.length !== 0 ? (
+                    <Badge
+                      className="u-no-padding--top  u-no-margin--bottom"
+                      value={selectedReviewer ? selectedReviewer.length : 0}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </Button>
                 <Button
                   appearance="base"
@@ -148,12 +174,16 @@ const FilterandSearch = ({
                   small
                   style={{ width: "10rem", padding: "0.25rem" }}
                 >
-                  <i className="p-icon--repository" /> <span>By product</span>
+                  <i className="p-icon--repository" style={{ paddingRight: "3rem" }} /> <span>By product</span>
                   &nbsp;
-                  <Badge
-                    className="u-no-padding--top u-no-margin--bottom"
-                    value={selectedProduct ? selectedProduct.length : 0}
-                  />
+                  {selectedProduct.length !== 0 ? (
+                    <Badge
+                      className="u-no-padding--top  u-no-margin--bottom"
+                      value={selectedProduct ? selectedProduct.length : 0}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </Button>
               </div>
               <div className="col-4 p-divider__block filter-box__content">
