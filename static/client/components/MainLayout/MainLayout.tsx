@@ -5,9 +5,9 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
+import FilterTableView from "@/components/Views/FilterTableView";
 import { VIEW_TREE } from "@/config";
 import { goBack } from "@/helpers/views";
-import FilterTableView from "@/pages/FilterTableView";
 import { useViewsStore } from "@/store/views";
 
 interface IMainLayoutProps {
