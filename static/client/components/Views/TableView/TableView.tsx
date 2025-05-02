@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 
 import { Accordion, Spinner } from "@canonical/react-components";
-import { useLocation } from "react-router-dom";
 
 import ProjectContent from "./ProjectContent";
 import ProjectTitle from "./ProjectTitle";
 
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
-import config, { VIEW_TABLE, VIEW_TREE } from "@/config";
+import config from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
 import type { IViewFilter } from "@/services/api/types/views";
 import { useViewsStore } from "@/store/views";
@@ -18,15 +17,11 @@ interface TableViewProps {
 
 const TableView: React.FC<TableViewProps> = ({ customFilters }) => {
   const { data: projects, isLoading } = useProjects();
-  const [view, setView, setFilter, expandedProject, setExpandedProject] = useViewsStore((state) => [
-    state.view,
-    state.setView,
-    state.setFilter,
+  const [expandedProject, setExpandedProject] = useViewsStore((state) => [
     state.expandedProject,
     state.setExpandedProject,
   ]);
 
-  const location = useLocation();
   const getAccordionSections = useMemo(() => {
     if (!projects?.length) return [];
     return projects.map((project) => ({
@@ -35,14 +30,6 @@ const TableView: React.FC<TableViewProps> = ({ customFilters }) => {
       content: <ProjectContent project={project} />,
     }));
   }, [projects]);
-
-  useEffect(() => {
-    if (location.pathname === "/app") {
-      if (view !== VIEW_TREE) setView(VIEW_TABLE);
-      setFilter(customFilters || { owners: [], reviewers: [], products: [], query: "" });
-    }
-  }, [location.pathname, setFilter, setView, view, customFilters]);
-
   console.log("table view being rendered");
 
   return (

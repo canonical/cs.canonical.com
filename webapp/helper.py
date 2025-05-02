@@ -266,7 +266,7 @@ def get_user_from_directory_by_key(key, value):
     # so we have to send two requests instead of one for first and last names
     try:
         response = requests.post(
-            "https://directory.wpe.internal/graphql/",
+            "https://api.directory.canonical.com/graphql/",
             json={
                 "query": query,
                 "variables": {"value": value.strip()},
