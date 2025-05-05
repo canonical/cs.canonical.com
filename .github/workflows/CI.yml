@@ -134,6 +134,7 @@ jobs:
           JIRA_COPY_UPDATES_EPIC: WD-9999999
           GOOGLE_DRIVE_FOLDER_ID: folderid
           COPYDOC_TEMPLATE_ID: templateid
+          FLASK_DEBUG: 1
         run: |
           gunicorn webapp.app:app --daemon --reload --log-file ./err --bind 0.0.0.0:8104 & sleep 2
           cat ./err
