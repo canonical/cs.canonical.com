@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 
 import { Button, Badge, ContextualMenu, SearchBox } from "@canonical/react-components";
 
@@ -26,17 +26,45 @@ const FilterandSearch = (): JSX.Element => {
     setSearchQuery(filter.query || "");
   }, [filter]);
 
-  const [showFilter, setShowFilter] = useState<boolean>(false);
   const [activeFilter, setActiveFilter] = useState<string>("filter-group-owner");
-
-  const filterandSearchDOM = useRef<HTMLDivElement>(null);
 
   const handleSearchChange = useCallback((s: string) => {
     setSearchQuery(s || "");
   }, []);
-  const hideFilter = () => {
-    setShowFilter(false);
-  };
+
+  const handleClear = useCallback(() => {
+    setSelectedOwner([]);
+    setSelectedReviewer([]);
+    setSelectedProduct([]);
+    setFilter({
+      owners: [],
+      reviewers: [],
+      products: [],
+    });
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setFilter({
+      ...filter,
+      query: "",
+    });
+  }, [filter, setFilter]);
+
+  const applySearch = useCallback(() => {
+    setFilter({
+      ...filter,
+      query: searchQuery,
+    });
+  }, [filter, searchQuery, setFilter]);
+
+  const totalFilters = useMemo(
+    () =>
+      (selectedOwner ? selectedOwner.length : 0) +
+      (selectedReviewer ? selectedReviewer.length : 0) +
+      (selectedProduct ? selectedProduct.length : 0),
+    [selectedOwner, selectedProduct, selectedReviewer],
+  );
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const ariaControls = event.currentTarget.getAttribute("aria-controls");
@@ -50,49 +78,22 @@ const FilterandSearch = (): JSX.Element => {
       products: selectedProduct,
       query: searchQuery,
     } as IViewFilter);
-    hideFilter();
-  };
-
-  const handleClear = () => {
-    setSelectedOwner([]);
-    setSelectedReviewer([]);
-    setSelectedProduct([]);
-    setFilter({
-      owners: [],
-      reviewers: [],
-      products: [],
-    });
   };
 
   const FilterGroupReviewer = "filter-group-reviewer";
   const FilterGroupOwner = "filter-group-owner";
   const FilterGroupProduct = "filter-group-product";
 
-  const totalFilters =
-    (selectedOwner ? selectedOwner.length : 0) +
-    (selectedReviewer ? selectedReviewer.length : 0) +
-    (selectedProduct ? selectedProduct.length : 0);
   return (
     <>
-      <div className="row" ref={filterandSearchDOM}>
+      <div className="row">
         <div className="col-6">
           <form>
             <SearchBox
               externallyControlled={true}
               onChange={handleSearchChange}
-              onClear={() => {
-                setSearchQuery("");
-                setFilter({
-                  ...filter,
-                  query: "",
-                });
-              }}
-              onSearch={() => {
-                setFilter({
-                  ...filter,
-                  query: searchQuery,
-                });
-              }}
+              onClear={clearSearch}
+              onSearch={applySearch}
               value={searchQuery}
             />
           </form>
@@ -114,7 +115,7 @@ const FilterandSearch = (): JSX.Element => {
                 <span style={{ paddingRight: "10rem" }}></span>
               </>
             }
-            visible={showFilter}
+            visible={false}
           >
             <div className="filter-body">
               <div className="row p-divider u-no-margin--bottom" style={{ padding: "0" }}>

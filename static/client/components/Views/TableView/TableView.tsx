@@ -8,14 +8,9 @@ import ProjectTitle from "./ProjectTitle";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
-import type { IViewFilter } from "@/services/api/types/views";
 import { useViewsStore } from "@/store/views";
 
-interface TableViewProps {
-  customFilters?: IViewFilter;
-}
-
-const TableView: React.FC<TableViewProps> = ({ customFilters }) => {
+const TableView: React.FC = () => {
   const { data: projects, isLoading } = useProjects();
   const [expandedProject, setExpandedProject] = useViewsStore((state) => [
     state.expandedProject,

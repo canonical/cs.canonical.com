@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, useCallback } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
@@ -22,35 +22,35 @@ function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps):
     }
   }, [data]);
   const [searchedProducts, setSearchedProducts] = useState<IProduct[]>([]);
+
+  const searchProducts = useCallback(
+    (s: string) => {
+      if (s.length >= 2) {
+        const filteredProducts = allProducts.filter((product) => product.name.toLowerCase().includes(s.toLowerCase()));
+        setSearchedProducts(filteredProducts);
+      } else {
+        setSearchedProducts([...allProducts]);
+      }
+    },
+    [allProducts],
+  );
+  const handleCheckboxChange = (product: IProduct) => {
+    if (state.includes(product.name)) {
+      setState(state.filter((sel_product) => sel_product !== product.name));
+    } else {
+      setState([...state, product.name]);
+    }
+  };
   return (
     <div>
-      <SearchBox
-        className="filter-search"
-        externallyControlled={true}
-        onChange={(s: string) => {
-          if (s.length >= 2) {
-            const filteredProducts = allProducts.filter((product) =>
-              product.name.toLowerCase().includes(s.toLowerCase()),
-            );
-            setSearchedProducts(filteredProducts);
-          } else {
-            setSearchedProducts([...allProducts]);
-          }
-        }}
-      />
+      <SearchBox className="filter-search" externallyControlled={true} onChange={searchProducts} />
       <div className="u-sv3 p-filter__group">
         {searchedProducts.map((product) => (
           <Input
             checked={state.includes(product.name)}
             key={product.id}
             label={product.name}
-            onChange={() => {
-              if (state.includes(product.name)) {
-                setState(state.filter((sel_product) => sel_product !== product.name));
-              } else {
-                setState([...state, product.name]);
-              }
-            }}
+            onChange={() => handleCheckboxChange(product)}
             type="checkbox"
           />
         ))}

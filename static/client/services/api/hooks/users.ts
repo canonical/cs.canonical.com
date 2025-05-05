@@ -9,8 +9,6 @@ export function useUsers(): IUseQueryHookRest<IUsersResponse> {
   const result = useQuery<IUsersResponse, IApiBasicError>({
     queryKey: ["users"],
     queryFn: () => UsersServices.getUsers(""),
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 15,
   });
 
   return {

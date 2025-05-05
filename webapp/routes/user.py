@@ -24,7 +24,6 @@ user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 def get_users(username: str = None):
     if not username:
         response = get_user_from_directory_by_key("", "")
-        print("response", response)
     else:
         response = get_user_from_directory_by_key("name", username)
 
