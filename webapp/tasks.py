@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from celery import current_app as celery_app
 
-from webapp.celery import register_celery_task
+from webapp.celery import register_celery_task, run_celery_task
 from webapp.tasklib import register_local_task
 
 # Default delay between runs for updating the tree
@@ -15,11 +15,15 @@ UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", "5"))
 
 def register_task(delay: int | None = None) -> Callable:
     def outerwrapper(func: Callable) -> Callable:
+        if os.getenv("REDIS_HOST"):
+            # Register the task as a Celery task
+            register_celery_task(func, celery_app=celery_app)
+
         @functools.wraps(func)
         def wrapper(*args: tuple, **kwargs: dict) -> Callable:
             if os.getenv("REDIS_HOST"):
-                # Register the task as a Celery task
-                task = register_celery_task(
+                # Run the Celery task
+                task = run_celery_task(
                     func,
                     delay=delay,
                     celery_app=celery_app,

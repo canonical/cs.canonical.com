@@ -18,15 +18,27 @@ class CeleryTask(Task, LocalTask):
 
 def register_celery_task(
     fn: Callable | None,
+    celery_app: Proxy,
+) -> CeleryTask:
+    """
+    Register a celery task.
+    """
+    fn = celery_app.task()(fn)
+
+    return fn
+
+
+def run_celery_task(
+    fn: Callable | None,
     delay: int | None,
     celery_app: Proxy,
     args: tuple,
     kwargs: dict,
 ) -> CeleryTask:
     """
-    Register a celery task.
+    Run a registered celery task.
     """
-    fn = celery_app.task()(fn)
+    fn = register_celery_task(fn, celery_app)
 
     def _setup_periodic_tasks(sender: Celery, **snkwargs: dict) -> None:
         sender.add_periodic_task(
