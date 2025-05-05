@@ -5,10 +5,12 @@ import Owned from "@/pages/views/Owned";
 import Reviewed from "@/pages/views/Reviewed";
 import { useAuth } from "@/services/api/hooks/auth";
 import { usePages } from "@/services/api/hooks/pages";
+import { useUsers } from "@/services/api/hooks/users";
 import { RoutesServices } from "@/services/routes";
 
 const Main = (): React.ReactNode => {
   useAuth();
+  useUsers();
   const { data } = usePages();
 
   return (

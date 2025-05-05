@@ -1,22 +1,19 @@
 .filter-box {
   position: fixed; /* stays in the same place when you scroll */
   top: 11rem; /* distance from top */
-  background: #f8f4f4;
   border: 1px solid #ccc;
   border-top: 0px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 9999; /* very high so it stays above everything */
   border-radius: 8px;
   padding: 1rem 0 0 0;
-  margin-top: .3rem;
-}
-.filter-box__buttons {
-  width: 9rem;
+  margin-top: 0.3rem;
 }
 
-.filter-box__content {
-  width: 20rem;
-  padding: 0 1rem 0 0;
+.p-contextual-menu__dropdown {
+  min-width: 30rem;
+  margin-top: 0.3rem;
+  background: #f8f4f4;
 }
 
 .p-filter__button--active {
@@ -28,6 +25,7 @@
   position: relative;
   font-size: 14px;
   cursor: pointer;
+  margin: 0;
 }
 .p-filter__button--active::before {
   content: "";
@@ -45,5 +43,5 @@
 }
 
 .filter-search {
-  margin-bottom: 1rem;
+  margin: 0.5rem;
 }

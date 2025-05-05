@@ -2,7 +2,7 @@ import React, { useEffect, useState, memo } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
-import { UsersServices } from "@/services/api/services/users";
+import { useUsers } from "@/services/api/hooks/users";
 import type { IUser } from "@/services/api/types/users";
 
 type SearchUserCheckboxProps<T extends string | string[]> = {
@@ -12,10 +12,11 @@ type SearchUserCheckboxProps<T extends string | string[]> = {
 
 function SearchUserCheckbox<T extends string | string[]>({ state, setState }: SearchUserCheckboxProps<T>): JSX.Element {
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
+  const { data } = useUsers();
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const users = await UsersServices.getUsers("");
+      const users = data;
       if (users?.data?.length) {
         const userData = users.data;
         setAllUsers([...userData]);
