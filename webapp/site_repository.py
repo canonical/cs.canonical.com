@@ -3,6 +3,7 @@ import re
 import subprocess
 import time
 from collections.abc import Callable
+from pathlib import Path
 from typing import TypedDict
 
 from flask import Flask
@@ -165,8 +166,7 @@ class SiteRepository:
         Get the tree from the cache. Return None if cache is not available.
         """
         if self.cache:
-            if cached_tree := self.cache.get(self.cache_key):
-                return cached_tree
+            return self.cache.get(self.cache_key)
 
     def set_tree_in_cache(self, tree):
         """
@@ -185,33 +185,28 @@ class SiteRepository:
         # Setup the repository
         self.setup_site_repository()
 
-        templates_folder = self.repo_path + "/templates"
+        templates_folder = Path(self.repo_path + "/templates")
         # A background task may still be running to clone the repository,
         # so we need to wait for the templates folder to be available
         # to keep this method synchronous.
-
         for _ in range(10):
-            folder_exists = os.path.exists(templates_folder)
-            if folder_exists:
+            if not templates_folder.exists():
+                time.sleep(1)
+
+        # Parse the templates, retry if a page is unavailable, as it might
+        # still be being downloaded.
+        retries = 5
+        while retries > 0:
+            try:
+                tree = scan_directory(str(templates_folder.absolute()))
                 break
-            time.sleep(1)
+            except Exception as e:
+                retries -= 1
+                if retries == 0:
+                    raise SiteRepositoryError(f"Error scanning directory: {e}")
+                time.sleep(1)
+                continue
 
-        if not folder_exists:
-            raise SiteRepositoryError(
-                "Templates folder 'templates' not found for "
-                f"repository {self.repo_path}",
-            )
-
-        # Change directory to the templates folder
-        os.chdir(templates_folder)
-        # Parse the templates
-        try:
-            tree = scan_directory(os.getcwd())
-        except Exception as e:
-            raise SiteRepositoryError(f"Error scanning directory: {e}")
-        finally:
-            # Change back to the root directory
-            os.chdir("../../..")
         return tree
 
     def get_new_tree(self):
