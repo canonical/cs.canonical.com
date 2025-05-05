@@ -1,6 +1,7 @@
 import functools
 import os
 from collections.abc import Callable
+from typing import Any
 
 from celery import current_app as celery_app
 
@@ -20,7 +21,7 @@ def register_task(delay: int | None = None) -> Callable:
             register_celery_task(func, celery_app=celery_app)
 
         @functools.wraps(func)
-        def wrapper(*args: tuple, **kwargs: dict) -> Callable:
+        def wrapper(*args: tuple, **kwargs: dict) -> Any:
             if os.getenv("REDIS_HOST"):
                 # Run the Celery task
                 task = run_celery_task(
@@ -39,11 +40,8 @@ def register_task(delay: int | None = None) -> Callable:
                     kwargs=kwargs,
                 )
 
-            # Start scheduled tasks
-            if delay:
-                task.delay(*args, **kwargs)
-
-            return task.delay
+            # Start task
+            return task.delay(*args, **kwargs)
 
         return wrapper
 

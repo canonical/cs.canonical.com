@@ -118,12 +118,11 @@ class GitHub:
             raise
         for item in data["tree"]:
             if item["type"] == "blob" and item["path"].startswith("templates"):
-                task = async_save_file(
+                async_save_file(
                     tree_file_path=str(tree_file_path),
                     repository=repository,
                     path=item["path"],
                 )
-                task()
 
 
 @register_task()
@@ -140,19 +139,14 @@ def async_save_file(
         path (str): The remote path to the file inside the repository.
         tree_file_path (str): The local path where the file will be saved.
     """
-    try:
-        github = GitHub()
-        github.logger.info(f"File path {path}")
-        content = github.get_file_content(repository, path)
-        github.logger.info(f"File {path} downloaded")
+    github = GitHub()
+    content = github.get_file_content(repository, path)
 
-        file_path = Path(tree_file_path) / path
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path = Path(tree_file_path) / path
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with file_path.open("wb") as file:
-            file.write(content)
-    except Exception as e:
-        github.logger.exception(f"Failed to save file: {e}")
+    with file_path.open("wb") as file:
+        file.write(content)
 
 
 def init_github(app: flask.Flask) -> None:
