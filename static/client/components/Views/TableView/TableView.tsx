@@ -30,7 +30,6 @@ const TableView: React.FC<TableViewProps> = ({ customFilters }) => {
       content: <ProjectContent project={project} />,
     }));
   }, [projects]);
-  console.log("table view being rendered");
 
   return (
     <>
