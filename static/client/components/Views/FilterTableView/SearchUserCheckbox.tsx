@@ -27,7 +27,7 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
     };
 
     fetchUsers();
-  }, []);
+  }, [data]);
 
   const searchUsers = useCallback(
     (s: string): void => {
