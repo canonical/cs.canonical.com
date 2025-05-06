@@ -216,8 +216,12 @@ def build_tree(session, page, webpages):
 
 def get_tree_struct(session, webpages):
     # sort webpages list by their name
-    webpages_list = sorted(list(webpages), key=lambda p: p.name.rsplit("/", 1)[-1])
-    parent_page = next(filter(lambda p: p.parent_id is None, webpages_list), None)
+    webpages_list = sorted(
+        list(webpages), key=lambda p: p.name.rsplit("/", 1)[-1]
+    )
+    parent_page = next(
+        filter(lambda p: p.parent_id is None, webpages_list), None
+    )
 
     if parent_page:
         project = get_or_create(session, Project, id=parent_page.project_id)
@@ -231,7 +235,7 @@ def get_tree_struct(session, webpages):
 
 
 def get_user_from_directory_by_key(key, value):
-    
+
     if not key and not value:
         # If both key and value are empty, return all employees
         query = """
@@ -246,7 +250,7 @@ def get_user_from_directory_by_key(key, value):
                 }
             }
             """
-    else:     
+    else:
         query = f"""
         query($value: String!) {{
             employees(filter: {{ contains: {{ {key}: $value }} }}) {{

@@ -13,7 +13,9 @@ from webapp.models import (
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 
-DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get("FLASK_DISABLE_SSO")
+DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
+    "FLASK_DISABLE_SSO"
+)
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
@@ -57,7 +59,9 @@ def set_reviewers():
 
     # Create new reviewer rows
     for user_id in user_ids:
-        get_or_create(db.session, Reviewer, user_id=user_id, webpage_id=webpage_id)
+        get_or_create(
+            db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
+        )
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
     project = Project.query.filter_by(id=webpage.project_id).first()
