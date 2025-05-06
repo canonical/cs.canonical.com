@@ -163,7 +163,7 @@ jobs:
           GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: secret_key
-          REDIS_HOST: localhost
+          REDIS_HOST: 127.0.0.1
           REDIS_PORT: 6379
           GH_TOKEN: ${{ github.token }}
           REPO_ORG: https://github.com/canonical
