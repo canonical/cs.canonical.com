@@ -2,20 +2,29 @@ import React, { useCallback, useState } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import NavigationBanner from "./NavigationBanner";
 import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
+import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
+import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
+import { useViewsStore } from "@/store/views";
 
 const Navigation = (): JSX.Element => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
+  const [view, setView, setExpandedProject] = useViewsStore((state) => [
+    state.view,
+    state.setView,
+    state.setExpandedProject,
+  ]);
 
   const logout = useCallback(() => {
     setUser({} as IUser);
@@ -25,6 +34,24 @@ const Navigation = (): JSX.Element => {
   const handleNewPageClick = useCallback(() => {
     navigate("/app/new-webpage");
   }, [navigate]);
+
+  const changeView = useCallback(
+    (view: TView) => {
+      setExpandedProject("");
+      setView(view);
+      if ([VIEW_OWNED, VIEW_REVIEWED].includes(view)) navigate(`/app/views/${view}`);
+      if ([VIEW_TABLE, VIEW_TREE].includes(view)) navigate("/app");
+    },
+    [navigate, setExpandedProject, setView],
+  );
+
+  const isViewActive = useCallback(
+    (linkView: TView) => {
+      if (view === VIEW_TREE) return linkView === view;
+      return linkView === view && location.pathname === `/app/views/${linkView}`;
+    },
+    [location.pathname, view],
+  );
 
   return (
     <>
@@ -48,15 +75,66 @@ const Navigation = (): JSX.Element => {
               <div className="l-navigation__controls">
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
-              <SiteSelector />
-              <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
-                <React.Fragment key=".0">
-                  <i className="p-icon--plus" /> <span>Request new page</span>
-                </React.Fragment>
-              </Button>
+              <div>
+                <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
+                  <React.Fragment key=".0">
+                    <i className="p-icon--plus" /> <span>Request new page</span>
+                  </React.Fragment>
+                </Button>
+              </div>
             </div>
+            <hr className="p-rule" />
             <div className="p-panel__content">
-              <NavigationItems />
+              <ul className="u-no-margin--left u-no-padding">
+                <li
+                  className={`p-side-navigation__link ${location.pathname === "/app" && view !== VIEW_TREE && "is-active"}`}
+                  onClick={() => changeView(VIEW_TABLE)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--switcher-dashboard is-dark" />
+                    Table view
+                  </span>
+                </li>
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_TREE) && "is-active"}`}
+                  onClick={() => changeView(VIEW_TREE)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--switcher-environments is-dark" />
+                    Tree view
+                  </span>
+                </li>
+              </ul>
+              {isViewActive(VIEW_TREE) && (
+                <>
+                  <SiteSelector />
+                  <NavigationItems />
+                </>
+              )}
+            </div>
+            <div className="p-panel__views">
+              <hr className="p-rule" />
+              <p className="p-muted-heading u-text--muted">Quick views</p>
+              <ul className="u-no-margin u-no-padding">
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_OWNED)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--user" />
+                    Owned by me
+                  </span>
+                </li>
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_REVIEWED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_REVIEWED)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--show" />
+                    Reviewed by me
+                  </span>
+                </li>
+              </ul>
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
               <div className="u-no-margin u-truncate p-side-navigation__label">

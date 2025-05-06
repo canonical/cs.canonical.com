@@ -10,7 +10,7 @@ export interface IOwnerAndReviewersProps {
 }
 
 export interface ICustomSearchAndFilterProps {
-  label: string;
+  label: string | JSX.Element;
   options: IUser[];
   selectedOptions: IUser[];
   placeholder: string;
