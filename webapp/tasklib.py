@@ -5,6 +5,7 @@ import logging
 import os
 import signal
 import time
+import traceback
 from collections.abc import Callable
 from multiprocessing import Process, Queue
 
@@ -109,6 +110,7 @@ def close_background_tasks() -> None:
     Close all background tasks.
     """
     print("Closing background tasks...")
+    print(traceback.format_exc())
     with contextlib.suppress(Exception):
         for pid in task_queue.get(block=False):
             print(f"Task pid: {pid}")
