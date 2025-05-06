@@ -41,7 +41,7 @@ const FilterandSearch = (): JSX.Element => {
       reviewers: [],
       products: [],
     });
-  }, []);
+  }, [setFilter]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery("");
@@ -59,10 +59,7 @@ const FilterandSearch = (): JSX.Element => {
   }, [filter, searchQuery, setFilter]);
 
   const totalFilters = useMemo(
-    () =>
-      (selectedOwner ? selectedOwner.length : 0) +
-      (selectedReviewer ? selectedReviewer.length : 0) +
-      (selectedProduct ? selectedProduct.length : 0),
+    () => selectedOwner?.length + selectedReviewer?.length + selectedProduct?.length,
     [selectedOwner, selectedProduct, selectedReviewer],
   );
 
