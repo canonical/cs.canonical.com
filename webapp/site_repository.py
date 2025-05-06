@@ -228,7 +228,7 @@ class SiteRepository:
 
     def sort_tree_by_page_name(self, tree):
         if "children" in tree:
-            tree["children"].sort(key=lambda p: p.name.rsplit("/", 1)[-1])
+            tree["children"].sort(key=lambda p: p["name"].rsplit("/", 1)[-1])
             for child in tree["children"]:
                 self.sort_tree_by_page_name(child)
 
