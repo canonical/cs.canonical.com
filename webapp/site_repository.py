@@ -268,9 +268,8 @@ class SiteRepository:
         Get the tree from the cache or load a new tree to cache and db.
         """
         # Return from cache if available
-        if not no_cache:
-            if tree := self.get_tree_from_cache():
-                return tree
+        if (not no_cache) and (tree := self.get_tree_from_cache()):
+            return tree
 
         self.invalidate_cache()
         return self.get_new_tree()

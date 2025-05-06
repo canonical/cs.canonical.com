@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlparse, urlunparse
 from flask import current_app, redirect, request
 from werkzeug.routing import BaseConverter
 
-from webapp.cache import FileCache
+from webapp.cache import init_cache
 
 
 def versioned_static(filename):
@@ -58,24 +58,24 @@ DB_LOCK_NAME = "db_lock"
 
 
 @contextmanager
-def file_cache_lock() -> Generator:
+def database_lock() -> Generator:
     """
     A context manager for acquiring a file-based lock to control access
-    to shared resources.
+    to a shared db.
 
-    This function creates a distributed lock using FileCache to ensure only
-    one process can access a protected resource at a time. If the lock is
-    already acquired by another process, this will poll every 2 seconds until
-    the lock is released.
+    This function creates a distributed lock using the available Cache to
+    ensure only one process can access a protected resource at a time. If the
+    lock is already acquired by another process, this will poll every 2 seconds
+    until the lock is released.
 
     Yields:
         The current lock status from the cache
 
     Example:
-        with file_cache_lock():
+        with database_lock():
             . . .
     """
-    cache = FileCache(current_app)
+    cache = init_cache(current_app)
     locked = cache.get(DB_LOCK_NAME)
     while locked:
         sleep(2)
