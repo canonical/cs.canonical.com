@@ -230,7 +230,18 @@ class SiteRepository:
         the database. This function returns whether a page is invalid.
         """
         for webpage in webpages:
-            if webpage.parent_id and not (webpage.name or webpage.title):
+            children = (
+                self.db.session.execute(
+                    select(Webpage).where(
+                        Webpage.parent_id == webpage.id,
+                    ),
+                )
+                .scalars()
+                .all()
+            )
+            if (webpage.parent_id and not (webpage.name or webpage.title)) or (
+                not webpage.parent_id and not children
+            ):
                 self.logger.warning(f"Page {webpage.id} is incomplete.")
                 return True
         return False
@@ -408,9 +419,8 @@ class SiteRepository:
         Try to get the tree from the cache, database or repository.
         """
         # First try to get the tree from the cache
-        if not no_cache:
-            if tree := self.get_tree_from_cache():
-                return tree
+        if not no_cache and (tree := self.get_tree_from_cache()):
+            return tree
 
         self.logger.info(f"Loading {self.repository_uri} from database")
         self.invalidate_cache()
