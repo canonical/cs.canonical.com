@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useCallback } from "react";
+import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
@@ -34,18 +34,35 @@ function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps):
     },
     [allProducts],
   );
-  const handleCheckboxChange = (product: IProduct) => {
-    if (state.includes(product.name)) {
-      setState(state.filter((sel_product) => sel_product !== product.name));
-    } else {
-      setState([...state, product.name]);
-    }
-  };
+  const handleCheckboxChange = useCallback(
+    (product: IProduct) => {
+      if (state.includes(product.name)) {
+        setState((prevState) => prevState.filter((sel_product) => sel_product !== product.name));
+      } else {
+        setState((prevState) => [...prevState, product.name]);
+      }
+    },
+    [state, setState],
+  );
+
+  const sortedProducts = useMemo(() => {
+    return [...searchedProducts].sort((a, b) => {
+      const aChecked = state.includes(a.name);
+      const bChecked = state.includes(b.name);
+
+      if (aChecked !== bChecked) {
+        return aChecked ? -1 : 1; // Checked users come first
+      }
+
+      // If both are either checked or unchecked, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  }, [searchedProducts, state]);
   return (
     <div>
       <SearchBox className="filter-search" externallyControlled={true} onChange={searchProducts} />
       <div className="u-sv3 p-filter__group">
-        {searchedProducts.map((product) => (
+        {sortedProducts.map((product) => (
           <Input
             checked={state.includes(product.name)}
             key={product.id}

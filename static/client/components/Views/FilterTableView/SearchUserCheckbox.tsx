@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useCallback } from "react";
+import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
@@ -27,7 +27,7 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
     };
 
     fetchUsers();
-  }, []);
+  }, [data]);
 
   const searchUsers = useCallback(
     (s: string): void => {
@@ -41,19 +41,36 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
     [allUsers],
   );
 
-  const handleCheckboxChange = (user: IUser) => {
-    if (state.includes(user.email)) {
-      setState(state.filter((email) => email !== user.email) as T);
-    } else {
-      setState([...state, user.email] as T);
-    }
-  };
+  const handleCheckboxChange = useCallback(
+    (user: IUser) => {
+      if (state.includes(user.email)) {
+        setState((prevState) => prevState.filter((email) => email !== user.email) as T);
+      } else {
+        setState((prevState) => [...prevState, user.email] as T);
+      }
+    },
+    [state, setState],
+  );
+
+  const sortedUsers = useMemo(() => {
+    return [...searchedUsers].sort((a, b) => {
+      const aChecked = state.includes(a.email);
+      const bChecked = state.includes(b.email);
+
+      if (aChecked !== bChecked) {
+        return aChecked ? -1 : 1; // Checked users come first
+      }
+
+      // If both are either checked or unchecked, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  }, [searchedUsers, state]);
 
   return (
     <div className="u-sv3">
       <SearchBox className="filter-search" onChange={searchUsers} />
       <div className="u-sv3 p-filter__group">
-        {searchedUsers.map((user) => (
+        {sortedUsers.map((user) => (
           <Input
             checked={state.includes(user.email)}
             key={user.id}
