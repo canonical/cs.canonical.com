@@ -85,15 +85,13 @@ const FilterandSearch = (): JSX.Element => {
     <>
       <div className="row">
         <div className="col-6">
-          <form>
-            <SearchBox
-              externallyControlled={true}
-              onChange={handleSearchChange}
-              onClear={clearSearch}
-              onSearch={applySearch}
-              value={searchQuery}
-            />
-          </form>
+          <SearchBox
+            externallyControlled={true}
+            onChange={handleSearchChange}
+            onClear={clearSearch}
+            onSearch={applySearch}
+            value={searchQuery}
+          />
         </div>
         <div className="col-6">
           <ContextualMenu
