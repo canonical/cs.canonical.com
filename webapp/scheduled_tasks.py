@@ -21,22 +21,21 @@ def load_site_trees() -> None:
     Load the site trees from the queue.
     """
     app = create_app()
-    with app.app_context():
-        app.logger.info("Running scheduled task: load_site_trees")
+    yaml_path = Path(BASE_DIR) / "data/sites.yaml"
 
-        github = app.config.get("github")
-        if not github:
-            app.logger.error("GitHub configuration not found")
-            return
-
-        yaml_path = Path(BASE_DIR) / "data/sites.yaml"
-        with yaml_path.open("r") as f:
-            data = yaml.safe_load(f)
-            for site in data["sites"]:
-                # Enqueue the sites for setup
-                site_repository = SiteRepository(site, app, db=db)
-                # build the tree from GH source without using cache
-                site_repository.get_tree(no_cache=True)
+    with app.app_context(), yaml_path.open("r") as f:
+        data = yaml.safe_load(f)
+        for site in data["sites"]:
+            retries = 3
+            while retries > 0:
+                try:
+                    # Enqueue the sites for setup
+                    site_repository = SiteRepository(site, app, db=db)
+                    # build the tree from GH source without using cache
+                    site_repository.get_tree(no_cache=True)
+                    retries = 0
+                except Exception:
+                    retries -= 1
 
 
 @register_task(delay=UPDATE_STATUS_DELAY)
