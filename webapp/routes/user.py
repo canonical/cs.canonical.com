@@ -20,10 +20,14 @@ DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
 user_blueprint = Blueprint("user", __name__, url_prefix="/api")
 
 
+@user_blueprint.route("/get-users", methods=["GET"])
 @user_blueprint.route("/get-users/<username>", methods=["GET"])
 @login_required
-def get_users(username: str):
-    response = get_user_from_directory_by_key("name", username)
+def get_users(username: str = None):
+    if not username:
+        response = get_user_from_directory_by_key("", "")
+    else:
+        response = get_user_from_directory_by_key("name", username)
 
     if response.status_code == 200:
         users = response.json().get("data", {}).get("employees", [])

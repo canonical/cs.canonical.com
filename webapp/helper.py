@@ -235,18 +235,34 @@ def get_tree_struct(session, webpages):
 
 
 def get_user_from_directory_by_key(key, value):
-    query = f"""
-    query($value: String!) {{
-        employees(filter: {{ contains: {{ {key}: $value }} }}) {{
-            id
-            name
-            email
-            team
-            department
-            jobTitle
+
+    if not key and not value:
+        # If both key and value are empty, return all employees
+        query = """
+            query {
+                employees {
+                    id
+                    name
+                    email
+                    team
+                    department
+                    jobTitle
+                }
+            }
+            """
+    else:
+        query = f"""
+        query($value: String!) {{
+            employees(filter: {{ contains: {{ {key}: $value }} }}) {{
+                id
+                name
+                email
+                team
+                department
+                jobTitle
+            }}
         }}
-    }}
-    """
+        """
     token = current_app.config["DIRECTORY_API_TOKEN"]
     headers = {"Authorization": "token " + token}
 

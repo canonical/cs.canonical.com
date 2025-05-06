@@ -211,10 +211,9 @@ const RequestTaskModal = ({
                     <>
                       <span>Copy updates include:</span>
                       <ul className="u-no-margin">
-                        <li>Text changes to existing sections</li>
-                        <li>Adding a section that is a copy of an existing section, with different text</li>
-                        <li>Removing a section</li>
-                        <li>Replacing or removing logos or images</li>
+                        {config.tooltips.copyUpdates.map((item) => (
+                          <li>{item}</li>
+                        ))}
                       </ul>
                     </>
                   }
@@ -237,8 +236,9 @@ const RequestTaskModal = ({
                     <>
                       <span>Page refreshes include:</span>
                       <ul className="u-no-margin">
-                        <li>Changing or adding to the page layout</li>
-                        <li>Modifications that change the layout</li>
+                        {config.tooltips.pageRefreshes.map((item) => (
+                          <li>{item}</li>
+                        ))}
                       </ul>
                     </>
                   }
