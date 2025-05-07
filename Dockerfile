@@ -32,5 +32,6 @@ ARG BUILD_ID
 ENV TALISKER_REVISION_ID="${BUILD_ID}"
 
 # Setup commands to run web service
+RUN chmod +x ./entrypoint
 ENTRYPOINT ["./entrypoint"]
 CMD ["0.0.0.0:80"]
