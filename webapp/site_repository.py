@@ -25,6 +25,8 @@ from webapp.models import (
 )
 from webapp.parse_tree import scan_directory
 
+BACKGROUND_TASK_RUNNING_PREFIX = "BACKGROUND_TASK_RUNNING"
+
 
 class SiteRepositoryError(Exception):
     """
@@ -186,12 +188,15 @@ class SiteRepository:
         self.setup_site_repository()
 
         templates_folder = Path(self.repo_path + "/templates")
-        # A background task may still be running to clone the repository,
-        # so we need to wait for the templates folder to be available
-        # to keep this method synchronous.
-        for _ in range(10):
-            if not templates_folder.exists():
-                time.sleep(1)
+
+        # Check if a background task is active. if so, wait until it completes
+        # with a timeout of 30s
+        for _ in range(6):
+            if not self.cache.get(
+                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
+            ):
+                break
+            time.sleep(5)
 
         # Parse the templates, retry if a page is unavailable, as it might
         # still be being downloaded.

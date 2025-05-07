@@ -4,8 +4,10 @@ from pathlib import Path
 
 import flask
 import requests
+from flask.app import Flask
 
 from webapp.settings import BASE_DIR, GH_TOKEN
+from webapp.site_repository import BACKGROUND_TASK_RUNNING_PREFIX
 from webapp.tasks import register_task
 
 # Configure logger
@@ -35,7 +37,7 @@ class GithubError(Exception):
 class GitHub:
     logger = logger
 
-    def __init__(self) -> None:
+    def __init__(self, app: Flask) -> None:
         """
         Initialize the Github object.
         """
@@ -46,6 +48,7 @@ class GitHub:
             "Authorization": f"Bearer {token}",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+        self.cache = app.config["CACHE"]
 
     def __request__(
         self,
@@ -116,7 +119,19 @@ class GitHub:
         except Exception as e:
             print(f"Failed to get repository tree: {e}")
             raise
-        for item in data["tree"]:
+        for index, item in enumerate(data["tree"]):
+            # First item sets the lock
+            if index == 0:
+                self.cache.set(
+                    f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                    1,
+                )
+            # Last item clears the lock
+            if index == len(data["tree"]) - 1:
+                self.cache.set(
+                    f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                    0,
+                )
             if item["type"] == "blob" and item["path"].startswith("templates"):
                 async_save_file(
                     tree_file_path=str(tree_file_path),
@@ -139,15 +154,16 @@ def async_save_file(
         path (str): The remote path to the file inside the repository.
         tree_file_path (str): The local path where the file will be saved.
     """
-    github = GitHub()
-    content = github.get_file_content(repository, path)
+    with flask.current_app.app_context():
+        github = GitHub(flask.current_app)
+        content = github.get_file_content(repository, path)
 
-    file_path = Path(tree_file_path) / path
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path = Path(tree_file_path) / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with file_path.open("wb") as file:
-        file.write(content)
+        with file_path.open("wb") as file:
+            file.write(content)
 
 
 def init_github(app: flask.Flask) -> None:
-    app.config["github"] = GitHub()
+    app.config["github"] = GitHub(app)
