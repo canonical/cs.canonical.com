@@ -192,11 +192,12 @@ class SiteRepository:
         # Check if a background task is active. if so, wait until it completes
         # with a timeout of 30s
         for _ in range(6):
+            # We sleep first to give the download a chance to complete
+            time.sleep(5)
             if not self.cache.get(
                 f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
             ):
                 break
-            time.sleep(5)
 
         # Parse the templates, retry if a page is unavailable, as it might
         # still be being downloaded.
