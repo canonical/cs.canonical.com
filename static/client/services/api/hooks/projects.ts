@@ -79,5 +79,10 @@ export function useProjects() {
     return projects;
   }
 
-  return { data: getFilteredProjects(), isLoading, isFilterApplied };
+  return {
+    data: getFilteredProjects(),
+    unfilteredProjects: data?.map((project) => project?.data),
+    isLoading,
+    isFilterApplied,
+  };
 }

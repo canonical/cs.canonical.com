@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import TableView from "@/components/Views/TableView";
+import FilterTableView from "@/components/Views/FilterTableView";
 import { VIEW_OWNED } from "@/config";
 import { useStore } from "@/store";
 import { useViewsStore } from "@/store/views";
@@ -17,12 +17,20 @@ const Owned: React.FC = () => {
       products: [],
       query: "",
     });
+    return () => {
+      setFilter({
+        owners: [],
+        reviewers: [],
+        products: [],
+        query: "",
+      });
+    };
   }, [setFilter, setView, user.email]);
 
   return (
     <div className="l-owned-view-page">
       <h2>Owned by me</h2>
-      <TableView />
+      <FilterTableView />
     </div>
   );
 };

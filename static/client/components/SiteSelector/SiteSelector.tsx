@@ -8,7 +8,7 @@ import { useStore } from "@/store";
 
 const SiteSelector = (): JSX.Element | null => {
   const location = useLocation();
-  const { data: projects, isLoading } = useProjects();
+  const { unfilteredProjects: projects, isLoading } = useProjects();
 
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
 

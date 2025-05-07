@@ -5,7 +5,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
-import TableView from "@/components/Views/TableView";
+import FilterTableView from "@/components/Views/FilterTableView";
 import { VIEW_TREE } from "@/config";
 import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
@@ -47,7 +47,7 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
             {location.pathname === "/app" && (
               <>
                 <h2>All pages</h2>
-                <TableView />
+                <FilterTableView />
               </>
             )}
             {children}

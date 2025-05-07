@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import TableView from "@/components/Views/TableView";
+import FilterTableView from "@/components/Views/FilterTableView";
 import { VIEW_REVIEWED } from "@/config";
 import { useStore } from "@/store";
 import { useViewsStore } from "@/store/views";
@@ -17,12 +17,20 @@ const Reviewed: React.FC = () => {
       products: [],
       query: "",
     });
+    return () => {
+      setFilter({
+        owners: [],
+        reviewers: [],
+        products: [],
+        query: "",
+      });
+    };
   }, [setFilter, setView, user.email]);
 
   return (
     <div className="l-reviwed-view-page">
       <h2>Reviewed by me</h2>
-      <TableView />
+      <FilterTableView />
     </div>
   );
 };
