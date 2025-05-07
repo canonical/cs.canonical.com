@@ -1,0 +1,37 @@
+.p-contextual-menu__dropdown {
+  min-width: 30rem;
+  margin-top: 0.3rem;
+  background: #f8f4f4;
+}
+
+.p-filter__button--active {
+  display: flex;
+  align-items: center;
+  background: #e0e0e0;
+  border: none;
+  padding: 8px 12px;
+  position: relative;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.p-filter__button--active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: black;
+}
+
+.p-filter__group {
+  max-height: 16rem;
+  overflow-y: auto;
+  min-height: 16rem;
+}
+
+.filter-search {
+  margin: 0.5rem;
+}

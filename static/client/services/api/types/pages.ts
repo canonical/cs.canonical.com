@@ -28,6 +28,14 @@ export interface IPage {
   jira_tasks: IJiraTask[];
   children: IPage[];
   products: IProduct[];
+  parent_id?: number;
+  url?: string;
+  project?: {
+    created_at: string;
+    id: number;
+    name: string;
+    updated_at: string;
+  };
 }
 
 export interface IPagesResponse {

@@ -221,8 +221,15 @@ class SiteRepository:
         # Save the tree metadata to the database and return an updated tree
         # that has all fields
         tree = self.create_webpages_for_tree(self.db, base_tree)
+        self.sort_tree_by_page_name(tree)
         self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
+
+    def sort_tree_by_page_name(self, tree):
+        if "children" in tree:
+            tree["children"].sort(key=lambda p: p["name"].rsplit("/", 1)[-1])
+            for child in tree["children"]:
+                self.sort_tree_by_page_name(child)
 
     def _has_incomplete_pages(self, webpages) -> bool:
         """
