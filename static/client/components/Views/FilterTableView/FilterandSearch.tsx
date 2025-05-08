@@ -113,7 +113,7 @@ const FilterandSearch = (): JSX.Element => {
             visible={false}
           >
             <div className="filter-body">
-              <div className="row p-divider u-no-margin--bottom" style={{ padding: "0" }}>
+              <div className="row p-divider u-no-margin--bottom u-no-padding">
                 <div className="col-5 p-divider__block">
                   <Button
                     appearance="base"
@@ -201,12 +201,11 @@ const FilterandSearch = (): JSX.Element => {
                 </div>
               </div>
               <hr />
-              <div className="u-align--right" style={{ padding: "0 0.5rem 0 0.5rem" }}>
-                <Button appearance="link" hasIcon onClick={handleClear} small>
-                  {" "}
+              <div className="u-align--right p-filter-panel__footer">
+                <Button appearance="link" onClick={handleClear}>
                   <span>Clear all</span>
                 </Button>
-                <Button appearance="positive" hasIcon onClick={handleApply} small style={{ marginLeft: "0.5rem" }}>
+                <Button appearance="positive" onClick={handleApply}>
                   <span>Apply</span>
                 </Button>
               </div>
