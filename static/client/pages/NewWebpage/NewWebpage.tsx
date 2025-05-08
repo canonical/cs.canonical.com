@@ -22,7 +22,7 @@ const LoadingState = {
 };
 
 const NewWebpage = (): JSX.Element => {
-  const [titleValue, setTitleValue] = useState<string>();
+  const [titleValue, setTitleValue] = useState<string>("");
   const [copyDoc, setCopyDoc] = useState<string>();
   const [owner, setOwner] = useState<IUser | null>();
   const [reviewers, setReviewers] = useState<IUser[]>([]);
