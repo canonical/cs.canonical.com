@@ -1,19 +1,19 @@
 .p-contextual-menu__dropdown {
-  min-width: 30rem;
+  min-width: 35rem;
   margin-top: 0.3rem;
-  background: #f8f4f4;
+  background: var(--vf-suru-background);
+}
+
+.p-filter__button {
+  width: 100%;
 }
 
 .p-filter__button--active {
-  display: flex;
   align-items: center;
   background: #e0e0e0;
   border: none;
-  padding: 8px 12px;
   position: relative;
-  font-size: 14px;
   cursor: pointer;
-  margin: 0;
 }
 
 .p-filter__button--active::before {
