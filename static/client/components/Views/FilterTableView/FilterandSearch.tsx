@@ -112,77 +112,57 @@ const FilterandSearch = (): JSX.Element => {
             }
             visible={false}
           >
-            <div className="filter-body">
-              <div className="row p-divider u-no-margin--bottom" style={{ padding: "0" }}>
+            <div className="p-filter__body">
+              <div className="row p-divider u-no-margin--bottom u-no-padding">
                 <div className="col-5 p-divider__block">
                   <Button
                     appearance="base"
                     aria-controls={FilterGroupOwner}
-                    className={
-                      activeFilter === FilterGroupOwner
-                        ? "p-filter__button--active u-align--left u-no-margin--right"
-                        : "u-no-margin--right u-align--left"
-                    }
+                    className={`u-no-margin u-align--left p-filter__button ${
+                      activeFilter === FilterGroupOwner && "p-filter__button--active"
+                    }`}
                     hasIcon
                     onClick={handleFilterClick}
-                    small
-                    style={{ width: "12.38rem", padding: "0.3rem", marginBottom: "0.1rem" }}
                   >
                     <i className="p-icon--user" style={{ paddingRight: "3rem" }} /> <span>By owner</span>&nbsp;
-                    {selectedOwner.length !== 0 ? (
-                      <Badge
-                        className="u-no-padding--top  u-no-margin--bottom"
-                        value={selectedOwner ? selectedOwner.length : 0}
-                      />
-                    ) : (
-                      ""
+                    {!!selectedOwner.length && (
+                      <Badge className="u-no-padding--top  u-no-margin--bottom" value={selectedOwner.length} />
                     )}
                   </Button>
                   <Button
                     appearance="base"
                     aria-controls={FilterGroupReviewer}
-                    className={
-                      activeFilter === FilterGroupReviewer
-                        ? "p-filter__button--active u-no-margin--right u-align--left"
-                        : "u-no-margin--right u-align--left"
-                    }
+                    className={`u-no-margin u-align--left p-filter__button ${
+                      activeFilter === FilterGroupReviewer && "p-filter__button--active"
+                    }`}
                     hasIcon
                     onClick={handleFilterClick}
-                    small
-                    style={{ width: "12.38rem", padding: "0.3rem", marginBottom: "0.1rem" }}
                   >
                     <i className="p-icon--show" style={{ paddingRight: "3rem" }} /> <span>By reviewer</span>&nbsp;
-                    {selectedReviewer.length !== 0 ? (
+                    {!!selectedReviewer.length && (
                       <Badge
                         className="u-no-padding--top  u-no-margin--bottom"
                         value={selectedReviewer ? selectedReviewer.length : 0}
                       />
-                    ) : (
-                      ""
                     )}
                   </Button>
+
                   <Button
                     appearance="base"
                     aria-controls={FilterGroupProduct}
-                    className={
-                      activeFilter === FilterGroupProduct
-                        ? "p-filter__button--active u-no-margin--right u-align--left"
-                        : "u-no-margin--right u-align--left"
-                    }
+                    className={`u-no-margin u-align--left p-filter__button ${
+                      activeFilter === FilterGroupProduct && "p-filter__button--active"
+                    }`}
                     hasIcon
                     onClick={handleFilterClick}
-                    small
-                    style={{ width: "12.38rem", padding: "0.3rem", marginBottom: "0.1rem" }}
                   >
                     <i className="p-icon--repository" style={{ paddingRight: "3rem" }} /> <span>By product</span>
                     &nbsp;
-                    {selectedProduct.length !== 0 ? (
+                    {!!selectedProduct.length && (
                       <Badge
                         className="u-no-padding--top  u-no-margin--bottom"
                         value={selectedProduct ? selectedProduct.length : 0}
                       />
-                    ) : (
-                      ""
                     )}
                   </Button>
                 </div>
@@ -201,13 +181,12 @@ const FilterandSearch = (): JSX.Element => {
                 </div>
               </div>
               <hr />
-              <div className="u-align--right" style={{ padding: "0 0.5rem 0 0.5rem" }}>
-                <Button appearance="link" hasIcon onClick={handleClear} small>
-                  {" "}
-                  <span>Clear all</span>
+              <div className="u-align--right p-filter-panel__footer">
+                <Button appearance="link" className={"u-no-margin"} onClick={handleClear}>
+                  Clear all
                 </Button>
-                <Button appearance="positive" hasIcon onClick={handleApply} small style={{ marginLeft: "0.5rem" }}>
-                  <span>Apply</span>
+                <Button appearance="positive" className={"u-no-margin"} onClick={handleApply}>
+                  Apply
                 </Button>
               </div>
             </div>
