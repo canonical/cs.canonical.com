@@ -4,6 +4,20 @@
   background: var(--vf-suru-background);
 }
 
+.p-filter__body{
+  .p-divider {
+    grid-gap: 0;
+
+    & .p-divider__block::before {
+      left: 0;
+    }
+  }
+
+  & .p-divider__block:not(:first-of-type){
+    padding-left: 0.8rem;
+  }
+}
+
 .p-filter__button {
   width: 100%;
 }
@@ -39,6 +53,6 @@
 
 .p-filter-panel__footer {
   display: flex;
-  gap: 1rem;
-  padding: 0 0.5rem;
+  gap: 1.5rem;
+  padding: 0 0.5rem 0.5rem;
 }
