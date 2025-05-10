@@ -24,6 +24,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.orm.session import Session
 
+from webapp.context import database_lock
+
 with open("data/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -50,18 +52,19 @@ def get_or_create(session: Session, model: Base, commit=True, **kwargs):
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance, False
-    else:
-        instance = model(**kwargs)
-        session.add(instance)
-        # Allow adding multiple instances before committing
-        if commit:
-            session.commit()
-        return instance, True
+    instance = model(**kwargs)
+    session.add(instance)
+    # Allow adding multiple instances before committing
+    if commit:
+        session.commit()
+    return instance, True
 
 
-class DateTimeMixin(object):
+class DateTimeMixin:
     created_at: Mapped[datetime] = Column(
-        DateTime, default=datetime.now(timezone.utc), nullable=False
+        DateTime,
+        default=datetime.now(timezone.utc),
+        nullable=False,
     )
     updated_at: Mapped[datetime] = Column(
         DateTime,
@@ -108,7 +111,8 @@ class Webpage(db.Model, DateTimeMixin):
         order_by="desc(JiraTask.created_at)",
     )
     webpage_products = relationship(
-        "WebpageProduct", back_populates="webpages"
+        "WebpageProduct",
+        back_populates="webpages",
     )
 
 
@@ -179,7 +183,8 @@ class Product(db.Model, DateTimeMixin):
     name: str = Column(String)
 
     webpage_products = relationship(
-        "WebpageProduct", back_populates="products"
+        "WebpageProduct",
+        back_populates="products",
     )
 
 
@@ -197,11 +202,12 @@ class WebpageProduct(db.Model, DateTimeMixin):
 def init_db(app: Flask):
     engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     session_factory = sessionmaker(bind=engine)
-
     Migrate(app, db)
+
     db.init_app(app)
+    # Use lock to prevent multiple concurrent migrations on startup
     # Automatically upgrade to head revision
-    with app.app_context():
+    with app.app_context(), database_lock():
         upgrade()
 
     @app.before_request

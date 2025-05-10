@@ -23,8 +23,5 @@ activate() {
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
     fi
 
-    # Run new migrations if needed
-    flask db upgrade
-
     ${RUN_COMMAND}
 }

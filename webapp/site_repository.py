@@ -2,7 +2,9 @@ import os
 import re
 import subprocess
 import time
-from typing import Callable, TypedDict
+from collections.abc import Callable
+from pathlib import Path
+from typing import TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +24,8 @@ from webapp.models import (
     get_or_create,
 )
 from webapp.parse_tree import scan_directory
+
+BACKGROUND_TASK_RUNNING_PREFIX = "BACKGROUND_TASK_RUNNING"
 
 
 class SiteRepositoryError(Exception):
@@ -84,7 +88,9 @@ class SiteRepository:
         """
         command = command_str.strip("").split(" ")
         process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         # Wait for the process to finish
         process.wait()
@@ -141,7 +147,8 @@ class SiteRepository:
         # Download files from the repository
         github = self.app.config["github"]
         github.get_repository_tree(
-            repository=self.repository_uri, branch=self.branch
+            repository=self.repository_uri,
+            branch=self.branch,
         )
 
     def repository_exists(self):
@@ -161,8 +168,7 @@ class SiteRepository:
         Get the tree from the cache. Return None if cache is not available.
         """
         if self.cache:
-            if cached_tree := self.cache.get(self.cache_key):
-                return cached_tree
+            return self.cache.get(self.cache_key)
 
     def set_tree_in_cache(self, tree):
         """
@@ -181,33 +187,32 @@ class SiteRepository:
         # Setup the repository
         self.setup_site_repository()
 
-        templates_folder = self.repo_path + "/templates"
-        # A background task may still be running to clone the repository,
-        # so we need to wait for the templates folder to be available
-        # to keep this method synchronous.
+        templates_folder = Path(self.repo_path + "/templates")
 
-        for _ in range(10):
-            folder_exists = os.path.exists(templates_folder)
-            if folder_exists:
+        # Check if a background task is active. if so, wait until it completes
+        # with a timeout of 30s
+        for _ in range(6):
+            # We sleep first to give the download a chance to complete
+            time.sleep(5)
+            if not self.cache.get(
+                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
+            ):
                 break
-            time.sleep(1)
 
-        if not folder_exists:
-            raise SiteRepositoryError(
-                "Templates folder 'templates' not found for "
-                f"repository {self.repo_path}"
-            )
+        # Parse the templates, retry if a page is unavailable, as it might
+        # still be being downloaded.
+        retries = 5
+        while retries > 0:
+            try:
+                tree = scan_directory(str(templates_folder.absolute()))
+                break
+            except Exception as e:
+                retries -= 1
+                if retries == 0:
+                    raise SiteRepositoryError(f"Error scanning directory: {e}")
+                time.sleep(1)
+                continue
 
-        # Change directory to the templates folder
-        os.chdir(templates_folder)
-        # Parse the templates
-        try:
-            tree = scan_directory(os.getcwd())
-        except Exception as e:
-            raise SiteRepositoryError(f"Error scanning directory: {e}")
-        finally:
-            # Change back to the root directory
-            os.chdir("../../..")
         return tree
 
     def get_new_tree(self):
@@ -238,7 +243,18 @@ class SiteRepository:
         the database. This function returns whether a page is invalid.
         """
         for webpage in webpages:
-            if webpage.parent_id and not (webpage.name or webpage.title):
+            children = (
+                self.db.session.execute(
+                    select(Webpage).where(
+                        Webpage.parent_id == webpage.id,
+                    ),
+                )
+                .scalars()
+                .all()
+            )
+            if (webpage.parent_id and not (webpage.name or webpage.title)) or (
+                not webpage.parent_id and not children
+            ):
                 self.logger.warning(f"Page {webpage.id} is incomplete.")
                 return True
         return False
@@ -251,8 +267,8 @@ class SiteRepository:
         webpages = (
             self.db.session.execute(
                 select(Webpage).where(
-                    Webpage.project_id == get_project_id(self.repository_uri)
-                )
+                    Webpage.project_id == get_project_id(self.repository_uri),
+                ),
             )
             .scalars()
             .all()
@@ -266,7 +282,7 @@ class SiteRepository:
             # If the tree is empty, load from the repository
             if not tree.get("children") and not tree.get("parent_id"):
                 self.logger.info(
-                    f"Reloading incomplete tree root {self.repository_uri}."
+                    f"Reloading incomplete tree root {self.repository_uri}.",
                 )
                 tree = self.get_new_tree()
         return tree
@@ -276,9 +292,8 @@ class SiteRepository:
         Get the tree from the cache or load a new tree to cache and db.
         """
         # Return from cache if available
-        if not no_cache:
-            if tree := self.get_tree_from_cache():
-                return tree
+        if (not no_cache) and (tree := self.get_tree_from_cache()):
+            return tree
 
         self.invalidate_cache()
         return self.get_new_tree()
@@ -326,7 +341,12 @@ class SiteRepository:
         return {**node, **webpage_dict}
 
     def __create_webpages_for_children__(
-        self, db, children, project, owner, parent_id
+        self,
+        db,
+        children,
+        project,
+        owner,
+        parent_id,
     ):
         """
         Recursively create webpages for each child in the tree.
@@ -334,14 +354,22 @@ class SiteRepository:
         for child in children:
             # Create a webpage for the root node
             webpage_dict = self.__create_webpage_for_node__(
-                db, child, project, owner, parent_id
+                db,
+                child,
+                project,
+                owner,
+                parent_id,
             )
             # Update the child node with the webpage fields
             child.update(webpage_dict)
             if child.get("children"):
                 # Create webpages for the children recursively
                 self.__create_webpages_for_children__(
-                    db, child["children"], project, owner, webpage_dict["id"]
+                    db,
+                    child["children"],
+                    project,
+                    owner,
+                    webpage_dict["id"],
                 )
 
     def __remove_webpages_to_delete__(self, db, tree):
@@ -350,14 +378,14 @@ class SiteRepository:
         self.add_pages_to_list(tree, webpages)
 
         webpages_to_delete = db.session.execute(
-            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
+            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE),
         )
 
         for row in webpages_to_delete:
             page_to_delete = row[0]
             if page_to_delete.name not in webpages:
                 db.session.execute(
-                    delete(Webpage).where(Webpage.id == page_to_delete.id)
+                    delete(Webpage).where(Webpage.id == page_to_delete.id),
                 )
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
@@ -367,18 +395,28 @@ class SiteRepository:
         self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
-            db.session, Project, name=self.repository_uri
+            db.session,
+            Project,
+            name=self.repository_uri,
         )
         owner, _ = get_or_create(db.session, User, name="Default")
 
         # Create a webpage for the root node
         webpage_dict = self.__create_webpage_for_node__(
-            db, tree, project, owner, None
+            db,
+            tree,
+            project,
+            owner,
+            None,
         )
 
         # Create webpages for the children recursively
         self.__create_webpages_for_children__(
-            db, webpage_dict["children"], project, owner, webpage_dict["id"]
+            db,
+            webpage_dict["children"],
+            project,
+            owner,
+            webpage_dict["id"],
         )
 
         # Remove pages that don't exist in the repository anymore
@@ -394,9 +432,8 @@ class SiteRepository:
         Try to get the tree from the cache, database or repository.
         """
         # First try to get the tree from the cache
-        if not no_cache:
-            if tree := self.get_tree_from_cache():
-                return tree
+        if not no_cache and (tree := self.get_tree_from_cache()):
+            return tree
 
         self.logger.info(f"Loading {self.repository_uri} from database")
         self.invalidate_cache()

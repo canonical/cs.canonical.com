@@ -201,7 +201,7 @@ If you do not want to use a dedicated cache, a simple filecache has been include
 
 ```bash
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
-docker run -d -p 6379:6379 valkey/valkey
+docker run -d -p 6379:6379 redis
 ```
 
 #### Virtual Environment
@@ -253,7 +253,7 @@ Please note, make sure the containers for postgres and valkey are already runnin
 
 ```bash
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
-docker run -d -p 6379:6379 valkey/valkey
+docker run -d -p 6379:6379 redis
 ```
 
 You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is merged, then we can use dotrun without the `--release` flag.
