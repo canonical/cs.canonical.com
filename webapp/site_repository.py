@@ -29,9 +29,7 @@ BACKGROUND_TASK_RUNNING_PREFIX = "BACKGROUND_TASK_RUNNING"
 
 
 class SiteRepositoryError(Exception):
-    """
-    Exception raised for errors in the SiteRepository class
-    """
+    """Exception raised for errors in the SiteRepository class"""
 
 
 class Tree(TypedDict):
@@ -73,9 +71,7 @@ class SiteRepository:
         return f"SiteRepository({self.repository_uri}, {self.branch})"
 
     def get_repo_path(self, repository_uri: str):
-        """
-        Get the repository path
-        """
+        """Get the repository path"""
         return (
             self.REPOSITORY_DIRECTORY
             + "/"
@@ -83,9 +79,7 @@ class SiteRepository:
         )
 
     def __exec__(self, command_str: str):
-        """
-        Execute a command and return the output
-        """
+        """Execute a command and return the output"""
         command = command_str.strip("").split(" ")
         process = subprocess.Popen(
             command,
@@ -100,9 +94,7 @@ class SiteRepository:
         return stdout.decode("utf-8")
 
     def __decorate_errors__(self, func: Callable, msg: str):
-        """
-        Decorator to catch Exceptions and raise SiteRepositoryError
-        """
+        """Decorator to catch Exceptions and raise SiteRepositoryError"""
 
         def wrapper(*args, **kwargs):
             try:
@@ -116,9 +108,7 @@ class SiteRepository:
         return wrapper
 
     def __sanitize_command__(self, command_str: str):
-        """
-        Sanitize the command string
-        """
+        """Sanitize the command string"""
         command_str = command_str.strip()
         return re.sub(r"[(\;\|\|\&|\n)]|", "", command_str)
 
@@ -131,17 +121,14 @@ class SiteRepository:
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
     def delete_local_files(self):
-        """
-        Delete a local folder
-        """
+        """Delete a local folder"""
         return self.__run__(
             f"rm -rf {self.repo_path}",
             f"Error deleting folder {self.repo_path}",
         )
 
     def setup_site_repository(self):
-        """
-        Clone the repository to a specific directory, or checkout the latest
+        """Clone the repository to a specific directory, or checkout the latest
         updates if the repository exists.
         """
         # Download files from the repository
@@ -152,9 +139,7 @@ class SiteRepository:
         )
 
     def repository_exists(self):
-        """
-        Check if the repository exists
-        """
+        """Check if the repository exists"""
         absolute_path = (
             self.app.config["BASE_DIR"]
             + "/repositories/"
@@ -164,16 +149,12 @@ class SiteRepository:
         return os.path.exists(absolute_path)
 
     def get_tree_from_cache(self):
-        """
-        Get the tree from the cache. Return None if cache is not available.
-        """
+        """Get the tree from the cache. Return None if cache is not available."""
         if self.cache:
             return self.cache.get(self.cache_key)
 
     def set_tree_in_cache(self, tree):
-        """
-        Set the tree in the cache. Silently pass if cache is not available.
-        """
+        """Set the tree in the cache. Silently pass if cache is not available."""
         if self.cache:
             return self.cache.set(self.cache_key, tree)
 
@@ -181,9 +162,7 @@ class SiteRepository:
         self.cache.set(self.cache_key, None)
 
     def get_tree_from_disk(self):
-        """
-        Get a tree from a freshly cloned repository.
-        """
+        """Get a tree from a freshly cloned repository."""
         # Setup the repository
         self.setup_site_repository()
 
@@ -216,8 +195,7 @@ class SiteRepository:
         return tree
 
     def get_new_tree(self):
-        """
-        Get the tree from the repository, update the cache and save to the
+        """Get the tree from the repository, update the cache and save to the
         database.
 
         """
@@ -238,8 +216,7 @@ class SiteRepository:
                 self.sort_tree_by_page_name(child)
 
     def _has_incomplete_pages(self, webpages) -> bool:
-        """
-        At times, the tree might not be fully loaded at the point when saved to
+        """At times, the tree might not be fully loaded at the point when saved to
         the database. This function returns whether a page is invalid.
         """
         for webpage in webpages:
@@ -260,8 +237,7 @@ class SiteRepository:
         return False
 
     def get_tree_from_db(self):
-        """
-        Get the tree from the database. If the tree is incomplete, reload from
+        """Get the tree from the database. If the tree is incomplete, reload from
         the repository.
         """
         webpages = (
@@ -288,9 +264,7 @@ class SiteRepository:
         return tree
 
     def get_tree(self, no_cache: bool = False):
-        """
-        Get the tree from the cache or load a new tree to cache and db.
-        """
+        """Get the tree from the cache or load a new tree to cache and db."""
         # Return from cache if available
         if (not no_cache) and (tree := self.get_tree_from_cache()):
             return tree
@@ -306,9 +280,7 @@ class SiteRepository:
         owner: User,
         parent_id: int,
     ):
-        """
-        Create a webpage from a node in the tree.
-        """
+        """Create a webpage from a node in the tree."""
         # Get a webpage for this name and project, or create a new one
         webpage, created = get_or_create(
             db.session,
@@ -348,9 +320,7 @@ class SiteRepository:
         owner,
         parent_id,
     ):
-        """
-        Recursively create webpages for each child in the tree.
-        """
+        """Recursively create webpages for each child in the tree."""
         for child in children:
             # Create a webpage for the root node
             webpage_dict = self.__create_webpage_for_node__(
@@ -389,9 +359,7 @@ class SiteRepository:
                 )
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
-        """
-        Create webpages for each node in the tree.
-        """
+        """Create webpages for each node in the tree."""
         self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
@@ -428,9 +396,7 @@ class SiteRepository:
         return webpage_dict
 
     def get_tree_sync(self, no_cache: bool = False):
-        """
-        Try to get the tree from the cache, database or repository.
-        """
+        """Try to get the tree from the cache, database or repository."""
         # First try to get the tree from the cache
         if not no_cache and (tree := self.get_tree_from_cache()):
             return tree

@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from pathlib import Path
 
 import flask
@@ -29,18 +30,14 @@ GITHUB_API_URL = "https://api.github.com/"
 
 
 class GithubError(Exception):
-    """
-    Exception raised for errors in the GitHub class.
-    """
+    """Exception raised for errors in the GitHub class."""
 
 
 class GitHub:
     logger = logger
 
     def __init__(self, app: Flask) -> None:
-        """
-        Initialize the Github object.
-        """
+        """Initialize the Github object."""
         self.REPOSITORY_PATH = Path(BASE_DIR) / "repositories"
         token = GH_TOKEN
         self.headers = {
@@ -83,8 +80,7 @@ class GitHub:
         raise GithubError(err)
 
     def get_file_content(self, repository: str, path: str) -> bytes:
-        """
-        Get the raw content of a file in a repository.
+        """Get the raw content of a file in a repository.
 
         Args:
             repository (str): The repository name.
@@ -92,6 +88,7 @@ class GitHub:
 
         Returns:
             bytes: The raw content of the file.
+
         """
         res = self.__request__(
             "GET",
@@ -101,43 +98,46 @@ class GitHub:
         return res
 
     def get_repository_tree(self, repository: str, branch: str = "main"):
-        """
-        Get a listing of all the files in a repository.
+        """Get a listing of all the files in a repository.
 
         Args:
             repository (str): The repository name.
             branch (str): The branch to get the tree from.
+
         """
         tree_file_path = self.REPOSITORY_PATH / repository
         tree_file_path.mkdir(parents=True, exist_ok=True)
 
         try:
+            # Set the lock
+            self.cache.set(
+                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                1,
+            )
             data = self.__request__(
                 "GET",
                 f"repos/canonical/{repository}/git/trees/{branch}?recursive=1",
             )
+            for item in data["tree"]:
+                if item["type"] == "blob" and item["path"].startswith(
+                    "templates",
+                ):
+                    async_save_file(
+                        tree_file_path=str(tree_file_path),
+                        repository=repository,
+                        path=item["path"],
+                    )
         except Exception as e:
             print(f"Failed to get repository tree: {e}")
             raise
-        for index, item in enumerate(data["tree"]):
-            # First item sets the lock
-            if index == 0:
-                self.cache.set(
-                    f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                    1,
-                )
-            # Last item clears the lock
-            if index == len(data["tree"]) - 1:
-                self.cache.set(
-                    f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                    0,
-                )
-            if item["type"] == "blob" and item["path"].startswith("templates"):
-                async_save_file(
-                    tree_file_path=str(tree_file_path),
-                    repository=repository,
-                    path=item["path"],
-                )
+        finally:
+            # Release the lock after a short delay, as downloads are async
+            # and may not be finished yet.
+            time.sleep(5)
+            self.cache.set(
+                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                0,
+            )
 
 
 @register_task()
@@ -146,13 +146,13 @@ def async_save_file(
     path: str = "",
     tree_file_path: str = "",
 ) -> None:
-    """
-    Download a file to a given repository.
+    """Download a file to a given repository.
 
     Args:
         repository (str): The repository name.
         path (str): The remote path to the file inside the repository.
         tree_file_path (str): The local path where the file will be saved.
+
     """
     with flask.current_app.app_context():
         github = GitHub(flask.current_app)
