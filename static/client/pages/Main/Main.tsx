@@ -13,19 +13,23 @@ const Main = (): React.ReactNode => {
   useUsers();
   const { data } = usePages();
 
+  function getDynamicRoutes() {
+    if (!data?.length) return;
+    return data.map(
+      (project) =>
+        project?.data?.templates && RoutesServices.generateRoutes(project.data.name, [project.data.templates]),
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />} path="/app">
           <Route element={<Owned />} path="views/owned" />
           <Route element={<Reviewed />} path="views/reviewed" />
+          {getDynamicRoutes()}
         </Route>
         <Route element={<Navigate to="/app" />} path="/" />
-        {data?.length &&
-          data.map(
-            (project) =>
-              project?.data?.templates && RoutesServices.generateRoutes(project.data.name, [project.data.templates]),
-          )}
       </Routes>
     </BrowserRouter>
   );

@@ -275,9 +275,8 @@ $ docker inspect <postgres-container-id> | grep IPAddress
 
 To ensure hot module reloading, make sure to do the following changes.
 
-- Add <code>FLASK_ENV=development</code> in .env.local file.
-- Comment out <code>"process.env.NODE_ENV": '"production"'</code> in vite.config.ts file.
-- Run the vite dev server locally, using <code>yarn run dev</code>.
+- Set <code>FLASK_ENV=development</code> in .env.local file.
+- Run the vite dev server locally, using <code>yarn dev</code>.
 
 ### Background tasks
 
