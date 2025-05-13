@@ -149,12 +149,16 @@ class SiteRepository:
         return os.path.exists(absolute_path)
 
     def get_tree_from_cache(self):
-        """Get the tree from the cache. Return None if cache is not available."""
+        """Get the tree from the cache. Return None if cache is not
+        available.
+        """
         if self.cache:
             return self.cache.get(self.cache_key)
 
     def set_tree_in_cache(self, tree):
-        """Set the tree in the cache. Silently pass if cache is not available."""
+        """Set the tree in the cache. Silently pass if cache is not
+        available.
+        """
         if self.cache:
             return self.cache.set(self.cache_key, tree)
 
@@ -216,8 +220,8 @@ class SiteRepository:
                 self.sort_tree_by_page_name(child)
 
     def _has_incomplete_pages(self, webpages) -> bool:
-        """At times, the tree might not be fully loaded at the point when saved to
-        the database. This function returns whether a page is invalid.
+        """At times, the tree might not be fully loaded at the point when saved
+        to the database. This function returns whether a page is invalid.
         """
         for webpage in webpages:
             children = (
@@ -237,8 +241,8 @@ class SiteRepository:
         return False
 
     def get_tree_from_db(self):
-        """Get the tree from the database. If the tree is incomplete, reload from
-        the repository.
+        """Get the tree from the database. If the tree is incomplete, reload
+        from the repository.
         """
         webpages = (
             self.db.session.execute(
