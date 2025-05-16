@@ -7,9 +7,9 @@ from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from webapp.cache import init_cache
-from webapp.celery import init_celery
 from webapp.context import RegexConverter, base_context, clear_trailing_slash
 from webapp.gdrive import init_gdrive
+from webapp.github import init_github
 from webapp.jira import init_jira
 from webapp.models import init_db
 from webapp.sso import init_sso
@@ -47,8 +47,8 @@ def create_app():
     # Initialize gdrive
     init_gdrive(app)
 
-    # Initialize celery
-    init_celery(app)
+    # Initialize github
+    init_github(app)
 
     return app
 
@@ -67,7 +67,8 @@ def set_security_headers(response):
     if flask.request.endpoint in flask.current_app.view_functions:
         view_func = flask.current_app.view_functions[flask.request.endpoint]
         add_xframe_options_header = not hasattr(
-            view_func, "_exclude_xframe_options_header"
+            view_func,
+            "_exclude_xframe_options_header",
         )
 
     if add_xframe_options_header and "X-Frame-Options" not in response.headers:
@@ -106,10 +107,14 @@ def set_cache_control_headers(response):
 
         max_age = response.cache_control.max_age
         stale_while_revalidate = response.cache_control._get_cache_value(
-            "stale-while-revalidate", False, int
+            "stale-while-revalidate",
+            False,
+            int,
         )
         stale_if_error = response.cache_control._get_cache_value(
-            "stale-if-error", False, int
+            "stale-if-error",
+            False,
+            int,
         )
 
         if type(max_age) is not int:
@@ -142,7 +147,9 @@ def set_cache_control_headers(response):
             #
             # An additional day will hopefully be long enough for most cases.
             response.cache_control._set_cache_value(
-                "stale-while-revalidate", "86400", int
+                "stale-while-revalidate",
+                "86400",
+                int,
             )
 
         if type(stale_if_error) is not int:
@@ -164,7 +171,9 @@ def set_cache_control_headers(response):
             #
             # So we set this to 5 minutes following expiry as a trade-off.
             response.cache_control._set_cache_value(
-                "stale-if-error", "300", int
+                "stale-if-error",
+                "300",
+                int,
             )
 
     return response
@@ -267,7 +276,8 @@ class FlaskBase(flask.Flask):
             def not_found_error(error):
                 return (
                     flask.render_template(
-                        template_404, message=error.description
+                        template_404,
+                        message=error.description,
                     ),
                     404,
                 )
@@ -278,7 +288,8 @@ class FlaskBase(flask.Flask):
             def internal_error(error):
                 return (
                     flask.render_template(
-                        template_500, message=error.description
+                        template_500,
+                        message=error.description,
                     ),
                     500,
                 )
@@ -294,7 +305,8 @@ class FlaskBase(flask.Flask):
             @self.route("/favicon.ico")
             def favicon():
                 return flask.send_file(
-                    favicon_path, mimetype="image/vnd.microsoft.icon"
+                    favicon_path,
+                    mimetype="image/vnd.microsoft.icon",
                 )
 
         elif favicon_url:

@@ -10,19 +10,6 @@ from flask import Flask
 from redis import exceptions as redis_exceptions
 
 
-def init_cache(app: Flask):
-    try:
-        cache = RedisCache(app)
-    except Exception as e:
-        cache = FileCache(app)
-        app.logger.info(
-            f"Error: {e} Redis cache is not available."
-            " Using FileCache instead."
-        )
-    app.config["CACHE"] = cache
-    return cache
-
-
 class Cache(ABC):
     """Abstract Cache class"""
 
@@ -32,22 +19,18 @@ class Cache(ABC):
     @abstractmethod
     def get(self, key: str):
         """Get a value from the cache"""
-        pass
 
     @abstractmethod
     def set(self, key: str, value: Any):
         """Set a value in the cache"""
-        pass
 
     @abstractmethod
     def delete(self, key: str):
         """Delete a value from the cache"""
-        pass
 
     @abstractmethod
     def is_available(self):
         """Check if the cache is available"""
-        pass
 
 
 class RedisCache(Cache):
@@ -139,7 +122,8 @@ class FileCache(Cache):
 
         path_exists = Path(self.cache_path).exists()
         path_writable = Path(self.cache_path).is_dir() and os.access(
-            self.cache_path, os.W_OK
+            self.cache_path,
+            os.W_OK,
         )
         if not path_exists and path_writable:
             raise ConnectionError("Cache directory is not writable")
@@ -151,7 +135,13 @@ class FileCache(Cache):
         data = json.dumps(value)
         # Delete the file if it exists
         if Path(self.cache_path + "/" + key).exists():
-            os.remove(self.cache_path + "/" + key)
+            try:
+                os.remove(self.cache_path + "/" + key)
+            except FileNotFoundError:
+                # We catch this as due to different processes potentially
+                # accessing this method, deleting a file could face a race
+                # condition.
+                self.logger.info("File already removed")
         # Create base directory if it does not exist
         if not Path(self.cache_path).exists():
             Path(self.cache_path).mkdir(parents=True, exist_ok=True)
@@ -165,7 +155,7 @@ class FileCache(Cache):
         # Check if the file exists
         if not Path(self.cache_path + "/" + key).exists():
             return None
-        with open(self.cache_path + "/" + key, "r") as f:
+        with open(self.cache_path + "/" + key) as f:
             data = f.read()
         return json.loads(data)
 
@@ -187,3 +177,15 @@ class FileCache(Cache):
             os.chmod(self.cache_path + "/" + key, 0o777)
 
         return shutil.rmtree(self.cache_path + "/" + key, onerror=onerror)
+
+
+def init_cache(app: Flask) -> Cache:
+    try:
+        cache = RedisCache(app)
+    except Exception as e:
+        cache = FileCache(app)
+        msg = f"Error: {e} Redis cache is not available."
+        " Using FileCache instead."
+        app.logger.info(msg)
+    app.config["CACHE"] = cache
+    return cache
