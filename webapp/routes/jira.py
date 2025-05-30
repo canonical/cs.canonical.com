@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, current_app, jsonify
 from flask_pydantic import validate
 
@@ -361,7 +362,20 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
         copy_doc_link = body.copy_doc_link
         jira_id = body.jira_id
 
-        webpage = Webpage.query.filter_by(copy_doc_link=copy_doc_link).first()
+        # extract google doc id
+        match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
+        google_doc_id = match.group(1) if match else None
+
+        if not google_doc_id:
+            return (
+                jsonify({"error": "Webpage by given copydoc_link not found"}),
+                404,
+            )
+
+        webpage = Webpage.query.filter(
+            Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
+        ).first()
+
         if not webpage:
             return (
                 jsonify({"error": "Webpage by given copydoc_link not found"}),
