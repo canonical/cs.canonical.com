@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from flask import Flask
 import yaml
 
 from webapp import create_app
@@ -79,6 +80,10 @@ def update_jira_statuses() -> None:
                 site_repository.invalidate_cache()
 
 
-def init_scheduled_tasks() -> None:
-    load_site_trees()
-    update_jira_statuses()
+def init_scheduled_tasks(app: Flask) -> None:
+    @app.before_request
+    def start_tasks():
+        # only run this task once
+        app.before_request_funcs[None].remove(start_tasks)
+        update_jira_statuses()
+        load_site_trees()
