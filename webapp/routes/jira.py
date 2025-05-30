@@ -352,7 +352,8 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
     This function creates a new entry in jira_tasks table with the provided
     copy_doc_link, jira_id and associated webpage.
     Args:
-        body (dict): The request body containing the copy_doc_link and jira_id.
+        body (dict): The request body containing the copy_doc_link, jira_id
+        and summary.
     Returns:
         Response: A JSON response indicating the result of the operation.
         - If successful, returns a 200 status with a success message.
@@ -361,6 +362,7 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
     try:
         copy_doc_link = body.copy_doc_link
         jira_id = body.jira_id
+        summary = body.summary
 
         # extract google doc id
         match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
@@ -389,6 +391,7 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
             jira_id=jira_id,
             webpage_id=webpage.id,
             user_id=webpage.owner_id,
+            summary=summary,
         )
 
         # clean the cache for a new Jira task to appear in the tree
