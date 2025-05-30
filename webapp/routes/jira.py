@@ -23,6 +23,7 @@ from webapp.models import (
     get_or_create,
 )
 from webapp.schemas import (
+    AttachJiraWithWebpageReq,
     ChangesRequestModel,
     CreatePageModel,
     PlaywrightCleanupReqBody,
@@ -340,3 +341,48 @@ def playwright_cleanup(body: PlaywrightCleanupReqBody):
 
     db.session.commit()
     return jsonify({"message": "Tasks cleaned up successfully"}), 200
+
+
+@jira_blueprint.route("/attach-jira-with-webpage", methods=["POST"])
+@validate()
+def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
+    """
+    Attach a JIRA task to a webpage.
+    This function creates a new entry in jira_tasks table with the provided
+    copy_doc_link, jira_id and associated webpage.
+    Args:
+        body (dict): The request body containing the copy_doc_link and jira_id.
+    Returns:
+        Response: A JSON response indicating the result of the operation.
+        - If successful, returns a 200 status with a success message.
+        - If there is an error, returns a 500 error with a message.
+    """
+    try:
+        copy_doc_link = body.copy_doc_link
+        jira_id = body.jira_id
+
+        webpage = Webpage.query.filter_by(copy_doc_link=copy_doc_link).first()
+        if not webpage:
+            return (
+                jsonify({"error": "Webpage by given copydoc_link not found"}),
+                404,
+            )
+
+        # Create jira task in the database
+        jira_task, _ = get_or_create(
+            db.session,
+            JiraTask,
+            jira_id=jira_id,
+            webpage_id=webpage.id,
+            user_id=webpage.owner_id,
+        )
+
+        # clean the cache for a new Jira task to appear in the tree
+        invalidate_cache(webpage)
+
+        return jsonify({"message": "Jira task attached successfully"}), 200
+    except Exception as e:
+        current_app.logger.error(
+            f"Error attaching JIRA task with webpage: {e}"
+        )
+        return jsonify({"error": "Failed to attach JIRA task"}), 500
