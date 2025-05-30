@@ -73,3 +73,9 @@ class SetProductsModel(BaseModel):
 
 class PlaywrightCleanupReqBody(BaseModel):
     jira_tasks: List[str]
+
+
+class AttachJiraWithWebpageReq(BaseModel):
+    copy_doc_link: str
+    jira_id: str
+    summary: str
