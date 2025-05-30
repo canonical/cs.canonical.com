@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from flask import Flask
 import yaml
 from flask import Flask
 
@@ -84,16 +85,6 @@ def update_jira_statuses() -> None:
                     site_repository.invalidate_cache()
 
 
-@register_task(delay=1)
-def scheduled_tasks_alert() -> None:
-    """Run every second to test the task scheduler."""
-    app = create_app()
-    with app.app_context():
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message = f"[ALERT][{timestamp}] Scheduled tasks running successfully."
-        logger.debug(message)
-
-
 def init_scheduled_tasks(app: Flask) -> None:
     @app.before_request
     def start_tasks():
@@ -101,4 +92,3 @@ def init_scheduled_tasks(app: Flask) -> None:
         app.before_request_funcs[None].remove(start_tasks)
         update_jira_statuses()
         load_site_trees()
-        scheduled_tasks_alert()
