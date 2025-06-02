@@ -274,6 +274,7 @@ def create_page(body: CreatePageModel):
         parent_id=get_webpage_id(data["parent"], project_id),
         owner_id=owner_id,
         status=WebpageStatus.NEW,
+        content_jira_id=data["content_jira_id"],
     )
 
     # Create new reviewer rows
@@ -300,6 +301,10 @@ def create_page(body: CreatePageModel):
             webpage_id=new_webpage[0].id,
             product_id=product_id,
         )
+
+    if data["content_jira_id"]:
+        jira = current_app.config["JIRA"]
+        jira.link_copydoc_with_content_page(copy_doc, data["content_jira_id"])
 
     return jsonify({"copy_doc": copy_doc}), 201
 
