@@ -16,7 +16,7 @@ TAG_MAPPING = {
     "link": ["meta_copydoc"],
 }
 
-EXCLUDE_PATHS = ["tutorials", "engage", "blog", "partials"]
+EXCLUDE_PATHS = ["partials"]
 
 def is_index(path):
     return path.name == "index.html"
