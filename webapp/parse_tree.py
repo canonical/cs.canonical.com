@@ -16,6 +16,7 @@ TAG_MAPPING = {
     "link": ["meta_copydoc"],
 }
 
+EXCLUDE_PATHS = ["tutorials", "engage", "blog", "partials"]
 
 def is_index(path):
     return path.name == "index.html"
@@ -37,6 +38,15 @@ def is_template(path):
         if path.name.startswith(prefix):
             return True
     return False
+
+def is_partial(path):
+    """
+    Return True if the file name starts with an underscore, that indicates it as a partial
+
+    Partials are templates that are not meant to be rendered directly, but
+    included in other templates.
+    """
+    return path.name.startswith("_")
 
 
 def append_base_path(base, path_name):
@@ -204,7 +214,10 @@ def is_valid_page(path, extended_path, is_index=True):
     - They contain the same extended path as the index html.
     - They extend from the base html.
     """
-    if is_template(path):
+
+    path = Path(path)
+    
+    if not path.is_file() or is_template(path) or is_partial(path):
         return False
 
     if not is_index and extended_path:
@@ -223,8 +236,9 @@ def get_extended_path(path):
     with path.open("r") as f:
         for line in f.readlines():
             # TODO: also match single quotes \'
-            if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
-                return match.group(1)
+            if ".html" in str(path):
+                if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
+                    return match.group(1)
 
 
 def update_tags(tags, new_tags):
@@ -255,6 +269,11 @@ def scan_directory(path_name, base=None):
     node_path = Path(path_name)
     node = create_node()
     node["name"] = path_name.split("/templates", 1)[-1]
+
+    # Skip scanning directory if it is in excluded paths
+    for path in EXCLUDE_PATHS:
+        if re.search(path, node["name"]):
+            return node
 
     # We get the relative parent for the path
     if base is None:
