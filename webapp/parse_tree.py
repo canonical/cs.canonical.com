@@ -259,6 +259,7 @@ def create_node():
         "description": None,
         "link": None,
         "children": [],
+        "ext": None,
     }
 
 
@@ -296,6 +297,9 @@ def scan_directory(path_name, base=None):
             # Get tags, add as child
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
+    
+    else:
+        node["ext"] = ".dir"
 
     # Cycle through other files in this directory
     for child in node_path.iterdir():
@@ -306,6 +310,7 @@ def scan_directory(path_name, base=None):
                 child, extended_path, is_index=False
             ):
                 child_tags = get_tags_rolling_buffer(child)
+                child_tags["ext"] = child.suffix
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
                     child_tags["link"] = get_extended_copydoc(

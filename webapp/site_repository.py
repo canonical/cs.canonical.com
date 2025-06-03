@@ -305,6 +305,7 @@ class SiteRepository:
         webpage.description = node["description"]
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
+        webpage.ext = node["ext"]
         if webpage.status == WebpageStatus.NEW:
             webpage.status = WebpageStatus.AVAILABLE
 
