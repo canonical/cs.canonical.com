@@ -4,10 +4,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { type IBreadcrumb } from "./Breadcrumbs.types";
 
+import { findPage } from "@/services/tree/pages";
+import { useStore } from "@/store";
+
 const Breadcrumbs = () => {
   const location = useLocation();
   const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
   const navigate = useNavigate();
+  const selectedProject = useStore((state) => state.selectedProject);
 
   useEffect(() => {
     const pageIndex = location.pathname.indexOf("app/webpage/");
@@ -37,14 +41,26 @@ const Breadcrumbs = () => {
     [navigate],
   );
 
+  function isValidPage(path: string) {
+    if (!selectedProject) return false;
+    const pageUrl = path.split(`/${selectedProject.name}`)[1];
+    if (!pageUrl) return true; // Means it's parent index
+    const page = findPage(selectedProject.templates, pageUrl, "", true);
+    return page && typeof page === "object" && "ext" in page && page.ext !== ".dir";
+  }
+
   return (
     <div className="l-breadcrumbs">
       {breadcrumbs.map((bc, index) => (
         <React.Fragment key={`bc-${index}`}>
           {index < breadcrumbs.length - 1 ? (
-            <a className="p-text--small-caps" href={bc.link} onClick={(e) => goToPage(e, bc.link)}>
-              {bc.name}
-            </a>
+            isValidPage(bc.link) ? (
+              <a className="p-text--small-caps" href={bc.link} onClick={(e) => goToPage(e, bc.link)}>
+                {bc.name}
+              </a>
+            ) : (
+              <span className="p-text--small-caps">{bc.name}</span>
+            )
           ) : (
             <span className="p-text--small-caps">{bc.name}</span>
           )}
