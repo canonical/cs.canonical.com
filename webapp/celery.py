@@ -1,5 +1,6 @@
 import os
 from collections.abc import Callable
+from typing import Optional
 
 from celery import Celery, Task
 from celery.app import Proxy
