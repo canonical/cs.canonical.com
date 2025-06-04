@@ -254,7 +254,9 @@ class SiteRepository:
             .all()
         )
         # build tree from repository in case DB table is empty
-        if not webpages or self._has_incomplete_pages(webpages):
+        # TODO: Revert this line to `if not webpages ...` before merging this PR
+        # This is only for QA
+        if True or not webpages or self._has_incomplete_pages(webpages):
             tree = self.get_new_tree()
         # otherwise, build tree from DB
         else:
