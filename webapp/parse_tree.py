@@ -18,6 +18,7 @@ TAG_MAPPING = {
 
 EXCLUDE_PATHS = ["partials"]
 
+
 def is_index(path):
     return path.name == "index.html"
 
@@ -39,9 +40,11 @@ def is_template(path):
             return True
     return False
 
+
 def is_partial(path):
     """
-    Return True if the file name starts with an underscore, that indicates it as a partial
+    Return True if the file name starts with an underscore, 
+    that indicates it as a partial
 
     Partials are templates that are not meant to be rendered directly, but
     included in other templates.
@@ -216,7 +219,7 @@ def is_valid_page(path, extended_path, is_index=True):
     """
 
     path = Path(path)
-    
+
     if not path.is_file() or is_template(path) or is_partial(path):
         return False
 
@@ -297,7 +300,7 @@ def scan_directory(path_name, base=None):
             # Get tags, add as child
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
-    
+
     else:
         node["ext"] = ".dir"
 
