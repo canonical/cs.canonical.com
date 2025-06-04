@@ -11,7 +11,7 @@ interface TableViewRowItemProps {
 const TableViewRowItem: React.FC<TableViewRowItemProps> = ({ page }) => {
   return (
     <>
-      <TableViewRow page={page} />
+      {page.ext !== ".dir" && <TableViewRow page={page} />}
       {page?.children?.map((child) => {
         return <TableViewRowItem key={`${child.project?.name}${child.url}`} page={child} />;
       })}

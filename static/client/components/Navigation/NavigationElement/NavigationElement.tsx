@@ -24,7 +24,11 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
         setExpanded((prevValue) => !prevValue);
         setChildrenHidden((prevValue) => !prevValue);
       } else {
-        onSelect(page.name);
+        if (page.ext !== ".dir") onSelect(page.name);
+        else {
+          setExpanded((prevValue) => !prevValue);
+          setChildrenHidden((prevValue) => !prevValue);
+        }
       }
     },
     [expandButtonRef, page, onSelect],

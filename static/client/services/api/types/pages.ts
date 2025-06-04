@@ -36,6 +36,7 @@ export interface IPage {
     name: string;
     updated_at: string;
   };
+  ext?: string;
 }
 
 export interface IPagesResponse {
