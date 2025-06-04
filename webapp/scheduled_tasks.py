@@ -92,3 +92,4 @@ def init_scheduled_tasks(app: Flask) -> None:
         app.before_request_funcs[None].remove(start_tasks)
         update_jira_statuses()
         load_site_trees()
+
