@@ -67,7 +67,7 @@ def update_jira_statuses() -> None:
                     webpage = Webpage.query.filter_by(
                         id=task.webpage_id,
                     ).first()
-                    if webpage.project_id not in project_ids:
+                    if webpage and webpage.project_id not in project_ids:
                         project_ids.append(webpage.project_id)
             db.session.commit()
 
@@ -75,9 +75,10 @@ def update_jira_statuses() -> None:
             # have changed status
             for project_id in project_ids:
                 project = Project.query.filter_by(id=project_id).first()
-                site_repository = SiteRepository(project.name, app)
-                # clean the cache for a new Jira task to appgear in the tree
-                site_repository.invalidate_cache()
+                if project:
+                    site_repository = SiteRepository(project.name, app)
+                    # clean the cache for a new Jira task to appear in the tree
+                    site_repository.invalidate_cache()
 
 
 def init_scheduled_tasks(app: Flask) -> None:
@@ -87,3 +88,4 @@ def init_scheduled_tasks(app: Flask) -> None:
         app.before_request_funcs[None].remove(start_tasks)
         update_jira_statuses()
         load_site_trees()
+
