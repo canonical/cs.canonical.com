@@ -3,7 +3,7 @@ import os
 import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import redis
 from flask import Flask
@@ -48,14 +48,11 @@ class RedisCache(Cache):
         ConnectionError.
         """
         self.logger.info("Connecting to Redis cache.")
-        if url := os.environ.get("REDIS_DB_CONNECT_STRING"):
+        if app.config.get("REDIS_HOST"):
+            url = app.config.get("REDIS_DB_CONNECT_STRING")
             r = redis.from_url(url)
-        else:
-            host = app.config["REDIS_HOST"]
-            port = app.config["REDIS_PORT"]
-            r = redis.Redis(host=host, port=port, db=0)
-        r.ping()
-        return r
+            r.ping()
+            return r
 
     def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
