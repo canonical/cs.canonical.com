@@ -177,11 +177,11 @@ class FileCache(Cache):
 
 
 def init_cache(app: Flask) -> Cache:
-    try:
+    if app.config.get("REDIS_HOST"):
         cache = RedisCache(app)
-    except Exception as e:
+    else:
         cache = FileCache(app)
-        msg = f"Error: {e} Redis cache is not available."
+        msg = "Redis cache is not available."
         " Using FileCache instead."
         app.logger.info(msg)
     app.config["CACHE"] = cache
