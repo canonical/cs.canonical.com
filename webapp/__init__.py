@@ -32,14 +32,14 @@ def create_app():
 
     app.context_processor(base_context)
 
+    # Initialize cache
+    init_cache(app)
+
     # Initialize database
     init_db(app)
 
     # Initialize SSO
     init_sso(app)
-
-    # Initialize cache
-    init_cache(app)
 
     # Initialize JIRA
     init_jira(app)

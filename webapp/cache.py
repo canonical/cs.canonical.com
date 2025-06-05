@@ -47,15 +47,12 @@ class RedisCache(Cache):
         Return an instance of the redis cache. If not available, throw a
         ConnectionError.
         """
-        self.logger.info("Connecting to Redis cache.")
-        if url := os.environ.get("REDIS_DB_CONNECT_STRING"):
+        if app.config.get("REDIS_HOST"):
+            self.logger.info("Connecting to Redis cache.")
+            url = app.config.get("REDIS_DB_CONNECT_STRING")
             r = redis.from_url(url)
-        else:
-            host = app.config["REDIS_HOST"]
-            port = app.config["REDIS_PORT"]
-            r = redis.Redis(host=host, port=port, db=0)
-        r.ping()
-        return r
+            r.ping()
+            return r
 
     def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
@@ -152,12 +149,13 @@ class FileCache(Cache):
         """
         Load the JSON data from a file and return the python object.
         """
+        file_path = Path(f"{self.cache_path}/{key}")
         # Check if the file exists
-        if not Path(self.cache_path + "/" + key).exists():
+        if not file_path.exists():
             return None
-        with open(self.cache_path + "/" + key) as f:
+        with file_path.open("r") as f:
             data = f.read()
-        return json.loads(data)
+            return json.loads(data)
 
     def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
@@ -180,11 +178,11 @@ class FileCache(Cache):
 
 
 def init_cache(app: Flask) -> Cache:
-    try:
+    if app.config.get("REDIS_HOST"):
         cache = RedisCache(app)
-    except Exception as e:
+    else:
         cache = FileCache(app)
-        msg = f"Error: {e} Redis cache is not available."
+        msg = "Redis cache is not available."
         " Using FileCache instead."
         app.logger.info(msg)
     app.config["CACHE"] = cache

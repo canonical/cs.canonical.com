@@ -36,8 +36,6 @@ def register_task(delay: int | None = None) -> Callable:
                 task = register_local_task(
                     func,
                     delay=delay,
-                    args=args,
-                    kwargs=kwargs,
                 )
 
             # Start task

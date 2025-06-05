@@ -1,5 +1,6 @@
 import os
 from collections.abc import Callable
+from typing import Optional
 
 from celery import Celery, Task
 from celery.app import Proxy
@@ -54,31 +55,29 @@ def run_celery_task(
     return fn
 
 
-def init_celery(app: Flask) -> Celery:
+def init_celery(app: Flask) -> Optional[Celery]:
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:
             with app.app_context():
                 return self.run(*args, **kwargs)
 
-    celery_app = Celery(app.name, task_cls=FlaskTask)
     # Use redis if available
     if os.getenv("REDIS_HOST"):
+        celery_app = Celery(app.name, task_cls=FlaskTask)
         broker_url = app.config.get("REDIS_DB_CONNECT_STRING")
-    # Otherwise, use default broke
-    else:
-        app.logger.error(
-            "No Redis host found, celery tasks will not be available.",
+        app.config.from_mapping(
+            CELERY={
+                "broker_url": broker_url,
+                "result_backend": broker_url,
+                "task_ignore_result": True,
+            },
         )
-        return None
+        celery_app.config_from_object(app.config["CELERY"])
+        celery_app.set_default()
+        app.extensions["celery"] = celery_app
+        return celery_app
 
-    app.config.from_mapping(
-        CELERY={
-            "broker_url": broker_url,
-            "result_backend": broker_url,
-            "task_ignore_result": True,
-        },
+    app.logger.error(
+        "No Redis host found, celery tasks will not be available.",
     )
-    celery_app.config_from_object(app.config["CELERY"])
-    celery_app.set_default()
-    app.extensions["celery"] = celery_app
-    return celery_app
+    return None
