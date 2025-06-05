@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from webapp.models import JiraTask, Project, Webpage, db
 from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
 from webapp.tasks import register_task
+
+logger = logging.getLogger(__name__)
 
 # Default delay between runs for updating the tree
 TASK_DELAY = int(os.getenv("TASK_DELAY", "5"))
@@ -27,6 +30,7 @@ def load_site_trees() -> None:
     with app.app_context(), yaml_path.open("r") as f:
         data = yaml.safe_load(f)
         for site in data["sites"]:
+            logger.info(f"Loading site tree for {site}")
             retries = 3
             while retries > 0:
                 try:
@@ -35,7 +39,8 @@ def load_site_trees() -> None:
                     # build the tree from GH source without using cache
                     site_repository.get_tree(no_cache=True)
                     retries = 0
-                except Exception:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     retries -= 1
 
 
@@ -88,4 +93,3 @@ def init_scheduled_tasks(app: Flask) -> None:
         app.before_request_funcs[None].remove(start_tasks)
         update_jira_statuses()
         load_site_trees()
-
