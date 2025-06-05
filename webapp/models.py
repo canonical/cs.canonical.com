@@ -202,12 +202,12 @@ class WebpageProduct(db.Model, DateTimeMixin):
 def init_db(app: Flask):
     engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     session_factory = sessionmaker(bind=engine)
-    Migrate(app, db)
 
     db.init_app(app)
     # Use lock to prevent multiple concurrent migrations on startup
     # Automatically upgrade to head revision
     with app.app_context(), database_lock():
+        Migrate(app, db)
         upgrade()
 
     @app.before_request
