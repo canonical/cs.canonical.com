@@ -47,8 +47,8 @@ class RedisCache(Cache):
         Return an instance of the redis cache. If not available, throw a
         ConnectionError.
         """
-        self.logger.info("Connecting to Redis cache.")
         if app.config.get("REDIS_HOST"):
+            self.logger.info("Connecting to Redis cache.")
             url = app.config.get("REDIS_DB_CONNECT_STRING")
             r = redis.from_url(url)
             r.ping()
