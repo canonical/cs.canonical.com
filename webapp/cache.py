@@ -149,12 +149,13 @@ class FileCache(Cache):
         """
         Load the JSON data from a file and return the python object.
         """
+        file_path = Path(f"{self.cache_path}/{key}")
         # Check if the file exists
-        if not Path(self.cache_path + "/" + key).exists():
+        if not file_path.exists():
             return None
-        with open(self.cache_path + "/" + key) as f:
+        with file_path.open("r") as f:
             data = f.read()
-        return json.loads(data)
+            return json.loads(data)
 
     def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
