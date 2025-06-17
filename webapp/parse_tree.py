@@ -238,7 +238,6 @@ def get_extended_path(path):
     """Get the path extended by the file"""
     with path.open("r") as f:
         for line in f.readlines():
-            # TODO: also match single quotes \'
             if ".html" in str(path):
                 if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
                     return match.group(1)

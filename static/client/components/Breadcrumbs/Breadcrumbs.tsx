@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { Button, Tooltip } from "@canonical/react-components";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { type IBreadcrumb } from "./Breadcrumbs.types";
@@ -59,12 +60,20 @@ const Breadcrumbs = () => {
                 {bc.name}
               </a>
             ) : (
-              <span className="p-text--small-caps">{bc.name}</span>
+              <Tooltip
+                message="This part of the path isn't a page and can't be opened"
+                position="btm-center"
+                zIndex={999}
+              >
+                <Button className="p-button--base u-no-margin u-no-padding" disabled>
+                  {bc.name}
+                </Button>
+              </Tooltip>
             )
           ) : (
             <span className="p-text--small-caps">{bc.name}</span>
           )}
-          {index < breadcrumbs.length - 1 && <span>&nbsp;/&nbsp;</span>}
+          {index < breadcrumbs.length - 1 && <span aria-hidden="true">&nbsp;/&nbsp;</span>}
         </React.Fragment>
       ))}
     </div>
