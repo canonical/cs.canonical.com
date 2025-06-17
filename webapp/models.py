@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import yaml
 from flask import Flask
-from flask_migrate import Migrate, upgrade
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
     Column,
@@ -24,8 +24,6 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.orm.session import Session
 
-from webapp.context import database_lock
-
 with open("data/data.yaml") as file:
     data = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -38,8 +36,7 @@ db = SQLAlchemy(model_class=Base, engine_options={"poolclass": None})
 
 
 def get_or_create(session: Session, model: Base, commit=True, **kwargs):
-    """
-    Return an instance of the specified model if it exists, otherwise create a
+    """Return an instance of the specified model if it exists, otherwise create a
     new instance.
 
     :param session: The database session to use for querying and committing
@@ -204,11 +201,6 @@ def init_db(app: Flask):
     session_factory = sessionmaker(bind=engine)
 
     db.init_app(app)
-    # Use lock to prevent multiple concurrent migrations on startup
-    # Automatically upgrade to head revision
-    with app.app_context(), database_lock():
-        Migrate(app, db)
-        upgrade()
 
     @app.before_request
     def before_request():
