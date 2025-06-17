@@ -114,7 +114,7 @@ test.describe("Test project actions", () => {
     }
 
     await expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
-
+    await page.waitForTimeout(5000);
     await removeWebpage(page, JIRA_TASKS);
   });
 
