@@ -65,7 +65,7 @@ const Breadcrumbs = () => {
                 position="btm-center"
                 zIndex={999}
               >
-                <Button className="p-button--base u-no-margin u-no-padding" disabled>
+                <Button className="p-button--base p-text--small-caps u-no-margin u-no-padding" disabled>
                   {bc.name}
                 </Button>
               </Tooltip>
