@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 import yaml
 from flask import Flask
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
     Column,
@@ -200,6 +201,7 @@ def init_db(app: Flask):
     session_factory = sessionmaker(bind=engine)
 
     db.init_app(app)
+    Migrate(app, db)
 
     @app.before_request
     def before_request():
