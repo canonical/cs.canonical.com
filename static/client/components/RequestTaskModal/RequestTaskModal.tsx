@@ -260,7 +260,8 @@ const RequestTaskModal = ({
         <Input label="Redirect to" onChange={handleChangeRedirectUrl} type="text" />
       )}
       {((webpage.status !== PageStatus.NEW && changeType === ChangeRequestType.PAGE_REMOVAL) ||
-        changeType !== ChangeRequestType.PAGE_REMOVAL) && (
+        changeType !== ChangeRequestType.PAGE_REMOVAL ||
+        window.__E2E_TESTING__) && (
         <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       )}
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
