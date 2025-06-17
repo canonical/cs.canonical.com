@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 import yaml
 from flask import Flask
-from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
     Column,
@@ -36,8 +35,8 @@ db = SQLAlchemy(model_class=Base, engine_options={"poolclass": None})
 
 
 def get_or_create(session: Session, model: Base, commit=True, **kwargs):
-    """Return an instance of the specified model if it exists, otherwise create a
-    new instance.
+    """Return an instance of the specified model if it exists, otherwise create
+    a new instance.
 
     :param session: The database session to use for querying and committing
         changes.
