@@ -1,7 +1,7 @@
 import { test, expect, APIRequestContext } from "@playwright/test";
 import { config } from "./config";
 import type { IJiraTask } from "@/services/api/types/pages";
-import { removeWebpage } from "./utils/common";
+import { removeWebpage, selectTreeView } from "./utils/common";
 
 const JIRA_TASKS: IJiraTask[] = [];
 let apiContext: APIRequestContext;
@@ -28,6 +28,7 @@ test.describe("Test project actions", () => {
   });
 
   test("remove page", async ({ page }) => {
+    await selectTreeView(page);
     const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
     const child = tree.locator(".p-list-tree__item").first();
     await child.click();
@@ -35,6 +36,7 @@ test.describe("Test project actions", () => {
   });
 
   test("request page changes", async ({ page }) => {
+    await selectTreeView(page);
     const tree = page.locator(".l-navigation__drawer .p-panel__content .p-list-tree").first();
     const child = tree.locator(".p-list-tree__item").first();
     await child.click();
@@ -67,6 +69,7 @@ test.describe("Test project actions", () => {
   });
 
   test("create new page", async ({ page }) => {
+    await selectTreeView(page);
     await page.getByRole("button", { name: /Request new page/i }).click();
     await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
     await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
