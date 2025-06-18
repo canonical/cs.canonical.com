@@ -105,10 +105,9 @@ def register_local_task(
     func: Callable,
     delay: int | None,
 ) -> Task:
-    """
-    Register a local task.
-    """
-    logger.info("INFO  [Registered task]", func.__name__)
+    """Register a local task."""
+    msg = f"INFO  [Registered task] {func.__name__}"
+    logger.info(msg)
 
     return Task(
         fn=func,
