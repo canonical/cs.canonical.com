@@ -17,6 +17,10 @@ activate() {
 {
     activate
 
+    # Provision database
+    # ===
+    flask --app webapp.app db upgrade
+
     RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=2 --bind $1"
 
     if [ -z ${FLASK_DEBUG+x} ]; then

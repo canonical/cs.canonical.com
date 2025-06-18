@@ -17,7 +17,7 @@ app = create_app()
 celery_app = init_celery(app)
 
 # Initialize scheduled tasks
-init_scheduled_tasks()
+init_scheduled_tasks(app)
 
 
 # Server-side routes

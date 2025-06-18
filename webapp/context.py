@@ -12,8 +12,7 @@ from webapp.cache import init_cache
 
 
 def versioned_static(filename):
-    """
-    Template function for generating URLs to static assets:
+    """Template function for generating URLs to static assets:
     Given the path for a static file, output a url path
     with a hex hash as a query string for versioning
     """
@@ -40,11 +39,9 @@ def base_context():
 
 
 def clear_trailing_slash():
-    """
-    Remove trailing slashes from all routes
+    """Remove trailing slashes from all routes
     We like our URLs without slashes
     """
-
     parsed_url = urlparse(unquote(request.url))
     path = parsed_url.path
 
@@ -58,9 +55,43 @@ DB_LOCK_NAME = "db_lock"
 
 
 @contextmanager
-def database_lock() -> Generator:
+def site_cloning_lock(site_name: str) -> Generator:
+    """A context manager for acquiring a lock to control access
+    to site cloning operations.
+
+    This function creates a distributed lock using the available Cache to
+    ensure only one process can clone a specific site at a time. If the
+    lock is already acquired by another process, this will poll every 2 seconds
+    until the lock is released.
+
+    Args:
+        site_name: The name of the site to acquire a lock for
+
+    Yields:
+        The current lock status from the cache
+
+    Example:
+        with site_cloning_lock("ubuntu.com"):
+            # Site cloning operations here
+            ...
+
     """
-    A context manager for acquiring a file-based lock to control access
+    cache = init_cache(current_app)
+    lock_name = f"{site_name}_lock"
+    locked = cache.get(lock_name)
+    while locked:
+        sleep(2)
+        locked = cache.get(lock_name)
+    try:
+        cache.set(lock_name, 1)
+        yield cache.get(lock_name)
+    finally:
+        cache.set(lock_name, 0)
+
+
+@contextmanager
+def database_lock() -> Generator:
+    """A context manager for acquiring a lock to control access
     to a shared db.
 
     This function creates a distributed lock using the available Cache to
@@ -74,6 +105,7 @@ def database_lock() -> Generator:
     Example:
         with database_lock():
             . . .
+
     """
     cache = init_cache(current_app)
     locked = cache.get(DB_LOCK_NAME)
