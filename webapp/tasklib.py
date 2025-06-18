@@ -84,7 +84,7 @@ def scheduled_process(
     """
     while True:
         local_process(func, *args, **kwargs)
-        time.sleep(schedule)
+        time.sleep(schedule * 60)  # Convert to minutes
 
 
 def close_background_tasks() -> None:

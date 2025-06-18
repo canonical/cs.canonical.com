@@ -1,10 +1,8 @@
 import os
 from collections.abc import Callable
-from typing import Optional
 
 from celery import Celery, Task
 from celery.app import Proxy
-from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from flask import Flask
 
@@ -21,41 +19,35 @@ def register_celery_task(
     fn: Callable | None,
     celery_app: Proxy,
 ) -> CeleryTask:
-    """
-    Register a celery task.
-    """
+    """Register a celery task."""
     fn = celery_app.task()(fn)
 
     return fn
 
 
 def run_celery_task(
-    fn: Callable | None,
+    fn: Callable,
     delay: int | None,
     celery_app: Proxy,
     args: tuple,
     kwargs: dict,
-) -> CeleryTask:
-    """
-    Run a registered celery task.
-    """
-    fn = register_celery_task(fn, celery_app)
-
-    def _setup_periodic_tasks(sender: Celery, **snkwargs: dict) -> None:
-        sender.add_periodic_task(
-            crontab(minute=str(delay)),
-            fn.s(*args, **kwargs),
-            name=f"{fn.__name__} every {delay}",
-            **snkwargs,
-        )
-
+) -> CeleryTask | LocalTask:
+    """Run a registered celery task."""
     if delay:
-        celery_app.on_after_configure.connect(_setup_periodic_tasks)
+        # Celery doesn't allow us to add tasks to the beat schedule
+        # at runtime, so we'll use the non-celery asynchronous
+        # task decorator to handle periodic tasks
+        func = LocalTask(
+            fn=fn,
+            delay=delay,
+        )
+    else:
+        func = register_celery_task(fn, celery_app)
 
-    return fn
+    return func
 
 
-def init_celery(app: Flask) -> Optional[Celery]:
+def init_celery(app: Flask) -> Celery | None:
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:
             with app.app_context():
