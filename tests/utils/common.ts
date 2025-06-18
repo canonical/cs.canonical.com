@@ -27,3 +27,21 @@ export async function removeWebpage(page: Page, JIRA_TASKS: string[]): Promise<v
 
   await expect(page.locator(".l-notification__container .p-notification--negative")).not.toBeVisible();
 }
+
+export async function selectTableView(page: Page): Promise<void> {
+  const tableViewListItem = page.locator(".l-navigation__drawer .p-panel__content .p-side-navigation__link", {
+    hasText: /Table view/i,
+  });
+  await tableViewListItem.click();
+
+  await page.getByText("/Loading projects. Please wait./i").waitFor({ state: "detached" });
+}
+
+export async function selectTreeView(page: Page): Promise<void> {
+  const treeViewListItem = page.locator(".l-navigation__drawer .p-panel__content .p-side-navigation__link", {
+    hasText: /Tree view/i,
+  });
+  await treeViewListItem.click();
+
+  await page.getByText("/Loading.../i").waitFor({ state: "detached" });
+}
