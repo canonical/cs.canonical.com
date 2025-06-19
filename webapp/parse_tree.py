@@ -16,6 +16,8 @@ TAG_MAPPING = {
     "link": ["meta_copydoc"],
 }
 
+EXCLUDE_PATHS = ["partials"]
+
 
 def is_index(path):
     return path.name == "index.html"
@@ -37,6 +39,17 @@ def is_template(path):
         if path.name.startswith(prefix):
             return True
     return False
+
+
+def is_partial(path):
+    """
+    Return True if the file name starts with an underscore, 
+    that indicates it as a partial
+
+    Partials are templates that are not meant to be rendered directly, but
+    included in other templates.
+    """
+    return path.name.startswith("_")
 
 
 def append_base_path(base, path_name):
@@ -204,7 +217,10 @@ def is_valid_page(path, extended_path, is_index=True):
     - They contain the same extended path as the index html.
     - They extend from the base html.
     """
-    if is_template(path):
+
+    path = Path(path)
+
+    if not path.is_file() or is_template(path) or is_partial(path):
         return False
 
     if not is_index and extended_path:
@@ -222,9 +238,9 @@ def get_extended_path(path):
     """Get the path extended by the file"""
     with path.open("r") as f:
         for line in f.readlines():
-            # TODO: also match single quotes \'
-            if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
-                return match.group(1)
+            if ".html" in str(path):
+                if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
+                    return match.group(1)
 
 
 def update_tags(tags, new_tags):
@@ -245,6 +261,7 @@ def create_node():
         "description": None,
         "link": None,
         "children": [],
+        "ext": None,
     }
 
 
@@ -255,6 +272,11 @@ def scan_directory(path_name, base=None):
     node_path = Path(path_name)
     node = create_node()
     node["name"] = path_name.split("/templates", 1)[-1]
+
+    # Skip scanning directory if it is in excluded paths
+    for path in EXCLUDE_PATHS:
+        if re.search(path, node["name"]):
+            return node
 
     # We get the relative parent for the path
     if base is None:
@@ -278,6 +300,9 @@ def scan_directory(path_name, base=None):
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
 
+    else:
+        node["ext"] = ".dir"
+
     # Cycle through other files in this directory
     for child in node_path.iterdir():
         # If the child is a file, check if it is a valid page
@@ -287,6 +312,7 @@ def scan_directory(path_name, base=None):
                 child, extended_path, is_index=False
             ):
                 child_tags = get_tags_rolling_buffer(child)
+                child_tags["ext"] = child.suffix
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
                     child_tags["link"] = get_extended_copydoc(
