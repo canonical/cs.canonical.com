@@ -64,6 +64,7 @@ class CreatePageModel(BaseModel):
     reviewers: Optional[List[UserModel]]
     parent: str
     product_ids: List[int]
+    content_jira_id: Optional[str] = None
 
 
 class SetProductsModel(BaseModel):

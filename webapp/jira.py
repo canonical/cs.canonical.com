@@ -312,7 +312,23 @@ class Jira:
             path=f"issue/{issue_id}",
             data=payload,
         )
+    
+    def link_copydoc_with_content_page(self, copydoc, jira_id):
+        """Link a copydoc with a content page in Jira.
 
+        Args:
+            copydoc (str): The URL of the copydoc.
+            jira_id (str): The ID of the Jira issue.
+
+        Returns:
+            dict: The response from the Jira API.
+        """
+
+        # TODO: Implement an API call provided by content team
+        # Payload:
+        #   - copydoc: link to the copy doc
+        #   - jira_id: Jira ID of the content team's board task
+        return
 
 def init_jira(app):
     try:
