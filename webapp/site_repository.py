@@ -171,6 +171,7 @@ class SiteRepository:
         self.setup_site_repository()
 
         templates_folder = Path(self.repo_path + "/templates")
+        templates_folder.mkdir(parents=True, exist_ok=True)
 
         # Check if a background task is active. if so, wait until it completes
         # with a timeout of 30s
