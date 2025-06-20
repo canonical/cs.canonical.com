@@ -269,8 +269,12 @@ class SiteRepository:
                 if not tree or (
                     tree.get("children") and not tree.get("parent_id")
                 ):
+                    msg = (
+                        "Reloading incomplete tree root "
+                        f"{self.repository_uri}."
+                    )
                     self.logger.info(
-                        f"Reloading incomplete tree root {self.repository_uri}.",
+                        msg,
                     )
                     tree = self.get_new_tree()
             return tree
