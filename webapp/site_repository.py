@@ -362,7 +362,12 @@ class SiteRepository:
 
         for row in webpages_to_delete:
             page_to_delete = row[0]
-            if page_to_delete.name not in webpages:
+            # Delete pages which aren't in the tree, but don't delete pages
+            # which have associated Jira tasks
+            if (
+                page_to_delete.name not in webpages
+                and len(page_to_delete.jira_tasks) == 0
+            ):
                 db.session.execute(
                     delete(Webpage).where(Webpage.id == page_to_delete.id),
                 )
