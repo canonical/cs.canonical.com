@@ -19,3 +19,5 @@ htmlcov/
 .cache/
 Dockerfile
 docker-compose.yml
+*.charm
+*.rock
