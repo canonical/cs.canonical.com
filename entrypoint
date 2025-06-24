@@ -23,6 +23,17 @@ activate() {
 
     RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=2 --bind $1"
 
+    # Start Celery worker if Redis is available
+    if [ ! -z ${REDIS_HOST+x} ]; then
+        CELERY_COMMAND="celery -A webapp.app.celery_app worker -B  --loglevel="
+        if [ ! -z ${FLASK_DEBUG+x} ]; then
+            CELERY_COMMAND="${CELERY_COMMAND}debug"
+        else
+            CELERY_COMMAND="${CELERY_COMMAND}info"
+        fi
+        ${CELERY_COMMAND} &
+    fi
+
     if [ -z ${FLASK_DEBUG+x} ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
     fi
