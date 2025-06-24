@@ -276,8 +276,7 @@ class SiteRepository:
                     )
                     tree = self.get_new_tree()
             return tree
-        # Raise an error if the project does not exist.
-        raise SiteRepositoryError("Invalid project_id. Unable to load tree.")
+        return None
 
     def get_tree(self, no_cache: bool = False):
         """Get the tree from the cache or load a new tree to cache and db."""
@@ -403,14 +402,14 @@ class SiteRepository:
         self.invalidate_cache()
 
         # Load the tree from database
-        try:
-            tree = self.get_tree_from_db()
+        if tree := self.get_tree_from_db():
             self.logger.info(f"Tree refreshed for {self.repository_uri}")
-            # Update the cache
-            self.set_tree_in_cache(tree)
+            try:
+                # Update the cache
+                self.set_tree_in_cache(tree)
+            except Exception as e:
+                self.logger.error(f"Unable to save tree to cache: {e}")
             return tree
-        except Exception as e:
-            self.logger.error(f"Error loading tree: {e}")
 
         # Or just return an empty tree
         return {
