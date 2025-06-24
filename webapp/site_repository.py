@@ -265,7 +265,7 @@ class SiteRepository:
                 tree = get_tree_struct(db.session, webpages)
                 # If the tree is empty, load from the repository
                 if not tree or (
-                    tree.get("children") and not tree.get("parent_id")
+                    not tree.get("children") and not tree.get("parent_id")
                 ):
                     msg = (
                         "Reloading incomplete tree root "
