@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from webapp.helper import (
     convert_webpage_to_dict,
-    get_project_id,
+    get_or_create_project_id,
     get_tree_struct,
 )
 from webapp.models import (
@@ -245,15 +245,14 @@ class SiteRepository:
         """Get the tree from the database. If the tree is incomplete, reload
         from the repository.
         """
-        if project_id := get_project_id(self.repository_uri):
+        if project_id := get_or_create_project_id(self.repository_uri):
             webpages = (
                 self.db.session.execute(
                     select(Webpage)
                     .where(
-                        Webpage.project_id
-                        == project_id
-                        & (Webpage.status != WebpageStatus.TO_DELETE),
+                        Webpage.project_id == project_id,
                     )
+                    .where(Webpage.status != WebpageStatus.TO_DELETE),
                 )
                 .scalars()
                 .all()
