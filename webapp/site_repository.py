@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import time
+import traceback
 from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
@@ -269,7 +270,7 @@ class SiteRepository:
                 ):
                     msg = (
                         "Reloading incomplete tree root "
-                        f"{self.repository_uri}."
+                        f"{self.repository_uri}. {tree}"
                     )
                     self.logger.info(
                         msg,
@@ -408,6 +409,7 @@ class SiteRepository:
                 # Update the cache
                 self.set_tree_in_cache(tree)
             except Exception as e:
+                self.logger.exception(traceback.format_exc())
                 self.logger.error(f"Unable to save tree to cache: {e}")
             return tree
 
