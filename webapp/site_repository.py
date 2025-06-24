@@ -254,7 +254,6 @@ class SiteRepository:
                         == project_id
                         & (Webpage.status != WebpageStatus.TO_DELETE),
                     )
-                    .where(),
                 )
                 .scalars()
                 .all()
