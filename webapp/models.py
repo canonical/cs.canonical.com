@@ -98,6 +98,7 @@ class Webpage(db.Model, DateTimeMixin):
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
     status: str = Column(Enum(WebpageStatus), default=WebpageStatus.AVAILABLE)
+    ext: str = Column(String, nullable=True)
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")

@@ -85,6 +85,17 @@ def get_project_id(project_name):
     return project.id if project else None
 
 
+def get_or_create_project_id(project_name):
+    project = Project.query.filter_by(name=project_name).first()
+    if not project:
+        project, _ = get_or_create(
+            db.session,
+            Project,
+            name=project_name,
+        )
+    return project.id if project else None
+
+
 def get_webpage_id(name, project_id):
     webpage = Webpage.query.filter_by(name=name, project_id=project_id).first()
     return webpage.id if webpage else None

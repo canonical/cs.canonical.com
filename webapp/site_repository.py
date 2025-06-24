@@ -8,11 +8,11 @@ from typing import TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import delete, select
+from sqlalchemy import select
 
 from webapp.helper import (
     convert_webpage_to_dict,
-    get_project_id,
+    get_or_create_project_id,
     get_tree_struct,
 )
 from webapp.models import (
@@ -245,28 +245,39 @@ class SiteRepository:
         """Get the tree from the database. If the tree is incomplete, reload
         from the repository.
         """
-        webpages = (
-            self.db.session.execute(
-                select(Webpage).where(
-                    Webpage.project_id == get_project_id(self.repository_uri),
-                ),
-            )
-            .scalars()
-            .all()
-        )
-        # build tree from repository in case DB table is empty
-        if not webpages or self._has_incomplete_pages(webpages):
-            tree = self.get_new_tree()
-        # otherwise, build tree from DB
-        else:
-            tree = get_tree_struct(db.session, webpages)
-            # If the tree is empty, load from the repository
-            if not tree.get("children") and not tree.get("parent_id"):
-                self.logger.info(
-                    f"Reloading incomplete tree root {self.repository_uri}.",
+        if project_id := get_or_create_project_id(self.repository_uri):
+            webpages = (
+                self.db.session.execute(
+                    select(Webpage)
+                    .where(
+                        Webpage.project_id == project_id,
+                    )
+                    .where(Webpage.status != WebpageStatus.TO_DELETE),
                 )
+                .scalars()
+                .all()
+            )
+            # build tree from repository in case DB table is empty
+            if not webpages or self._has_incomplete_pages(webpages):
                 tree = self.get_new_tree()
-        return tree
+            # otherwise, build tree from DB
+            else:
+                tree = get_tree_struct(db.session, webpages)
+                # If the tree is empty, load from the repository
+                if not tree or (
+                    tree.get("children") and not tree.get("parent_id")
+                ):
+                    msg = (
+                        "Reloading incomplete tree root "
+                        f"{self.repository_uri}."
+                    )
+                    self.logger.info(
+                        msg,
+                    )
+                    tree = self.get_new_tree()
+            return tree
+        # Raise an error if the project does not exist.
+        raise SiteRepositoryError("Invalid project_id. Unable to load tree.")
 
     def get_tree(self, no_cache: bool = False):
         """Get the tree from the cache or load a new tree to cache and db."""
@@ -306,6 +317,7 @@ class SiteRepository:
         webpage.description = node["description"]
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
+        webpage.ext = node["ext"]
         if webpage.status == WebpageStatus.NEW:
             webpage.status = WebpageStatus.AVAILABLE
 
@@ -347,22 +359,6 @@ class SiteRepository:
                     webpage_dict["id"],
                 )
 
-    def __remove_webpages_to_delete__(self, db, tree):
-        # convert tree of pages from repository to list
-        webpages = []
-        self.add_pages_to_list(tree, webpages)
-
-        webpages_to_delete = db.session.execute(
-            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE),
-        )
-
-        for row in webpages_to_delete:
-            page_to_delete = row[0]
-            if page_to_delete.name not in webpages:
-                db.session.execute(
-                    delete(Webpage).where(Webpage.id == page_to_delete.id),
-                )
-
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """Create webpages for each node in the tree."""
         self.logger.info(f"Existing tree {tree}")
@@ -391,9 +387,6 @@ class SiteRepository:
             owner,
             webpage_dict["id"],
         )
-
-        # Remove pages that don't exist in the repository anymore
-        self.__remove_webpages_to_delete__(db, tree)
 
         self.logger.info(f"Existing dict {webpage_dict}")
 
