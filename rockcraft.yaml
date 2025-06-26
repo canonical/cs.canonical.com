@@ -20,6 +20,7 @@ parts:
       - flask/app/.env
       - flask/app/app.py
       - flask/app/data
+      - flask/app/migrate.py
       - flask/app/migrations
       - flask/app/webapp
       - flask/app/templates

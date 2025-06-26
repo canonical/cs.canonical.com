@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import time
+import traceback
 from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
@@ -265,19 +266,18 @@ class SiteRepository:
                 tree = get_tree_struct(db.session, webpages)
                 # If the tree is empty, load from the repository
                 if not tree or (
-                    tree.get("children") and not tree.get("parent_id")
+                    not tree.get("children") and not tree.get("parent_id")
                 ):
                     msg = (
                         "Reloading incomplete tree root "
-                        f"{self.repository_uri}."
+                        f"{self.repository_uri}. {tree}"
                     )
                     self.logger.info(
                         msg,
                     )
                     tree = self.get_new_tree()
             return tree
-        # Raise an error if the project does not exist.
-        raise SiteRepositoryError("Invalid project_id. Unable to load tree.")
+        return None
 
     def get_tree(self, no_cache: bool = False):
         """Get the tree from the cache or load a new tree to cache and db."""
@@ -403,14 +403,15 @@ class SiteRepository:
         self.invalidate_cache()
 
         # Load the tree from database
-        try:
-            tree = self.get_tree_from_db()
+        if tree := self.get_tree_from_db():
             self.logger.info(f"Tree refreshed for {self.repository_uri}")
-            # Update the cache
-            self.set_tree_in_cache(tree)
+            try:
+                # Update the cache
+                self.set_tree_in_cache(tree)
+            except Exception as e:
+                self.logger.exception(traceback.format_exc())
+                self.logger.error(f"Unable to save tree to cache: {e}")
             return tree
-        except Exception as e:
-            self.logger.error(f"Error loading tree: {e}")
 
         # Or just return an empty tree
         return {
