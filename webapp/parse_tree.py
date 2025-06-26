@@ -52,7 +52,7 @@ def is_template(path):
 
 def is_partial(path):
     """
-    Return True if the file name starts with an underscore, 
+    Return True if the file name starts with an underscore,
     that indicates it as a partial
 
     Partials are templates that are not meant to be rendered directly, but
@@ -90,7 +90,7 @@ def extends_base(path, base="templates"):
                     else:
                         # extract absolute path from the parent path
                         absolute_path = str(path)[
-                            0 : str(path).find(base) + len(base)
+                            0: str(path).find(base) + len(base)
                         ]
                         # check if the file from which the current file
                         # extends extends from the base template
@@ -148,7 +148,7 @@ def get_extended_copydoc(path, base):
     with base.joinpath(path).open("r") as f:
         file_data = f.read()
         if match := re.search(
-            "\{\% block meta_copydoc *\%\}(.*)\{\%( *)endblock", file_data
+            r"\{\% block meta_copydoc *\%\}(.*)\{\%( *)endblock", file_data
         ):
             return match.group(1)
 
@@ -166,8 +166,6 @@ def get_tags_rolling_buffer(path):
 
     # check if the path is html or md file
     is_md = path.suffix == ".md"
-
-    print("is_md = ", is_md)
 
     with path.open("r") as f:
         for tag in available_tags:
@@ -189,7 +187,9 @@ def get_tags_rolling_buffer(path):
                             buffer.append(line)
 
                         if not is_buffering and (
-                            match := re.search(f"{{% block {variant}( *)%}}", line)
+                            match := re.search(
+                                f"{{% block {variant}( *)%}}", line
+                            )
                         ):
                             # We remove line contents before the tag
                             line = line[match.start() :]  # noqa: E203
@@ -198,12 +198,14 @@ def get_tags_rolling_buffer(path):
                             is_buffering = True
                             variants_mapping[tag] = variant
 
-                        # We search for the end of the tag in the existing buffer
+                        # We search for the end of the tag in the existing
+                        # buffer
                         buffer_string = "".join(buffer)
                         if is_buffering and re.search(
                             "(.*){%( *)endblock", buffer_string
                         ):
-                            # We save the buffer contents to the tags dictionary
+                            # We save the buffer contents to the tags
+                            # dictionary
                             tags[tag] = buffer_string
 
                             # We extract the text within the tags
@@ -216,12 +218,15 @@ def get_tags_rolling_buffer(path):
                             is_buffering = False
                             tag_found = True
                             break
-                
+
                 else:
                     for line in f:
-                        match = re.match(rf"^\s*{variant}\s*:\s*\"?(.+?)\"?\s*$", line, re.IGNORECASE)
+                        match = re.match(
+                            rf"^\s*{variant}\s*:\s*\"?(.+?)\"?\s*$",
+                            line,
+                            re.IGNORECASE,
+                        )
                         if match:
-                            print(f"Found tag '{variant}' in {path}")
                             variants_mapping[tag] = variant
                             tags[tag] = match.group(1).strip()
                             tag_found = True
