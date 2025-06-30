@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "@/components/MainLayout";
+import NewWebpage from "@/pages/NewWebpage";
 import Owned from "@/pages/views/Owned";
 import Reviewed from "@/pages/views/Reviewed";
 import { useAuth } from "@/services/api/hooks/auth";
@@ -27,6 +28,7 @@ const Main = (): React.ReactNode => {
         <Route element={<MainLayout />} path="/app">
           <Route element={<Owned />} path="views/owned" />
           <Route element={<Reviewed />} path="views/reviewed" />
+          <Route element={<NewWebpage />} path="new-webpage" />
           {getDynamicRoutes()}
         </Route>
         <Route element={<Navigate to="/app" />} path="/" />
