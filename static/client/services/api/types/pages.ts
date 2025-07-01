@@ -56,7 +56,9 @@ export interface INewPage {
 }
 
 export interface INewPageResponse {
-  copy_doc: string;
+  data: {
+    webpage: IPage;
+  };
 }
 
 export const ChangeRequestType = {

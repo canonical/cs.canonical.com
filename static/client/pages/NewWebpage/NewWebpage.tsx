@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { MultiSelectItem } from "@canonical/react-components";
 import { Button, Input, Spinner } from "@canonical/react-components";
+import { useQueryClient } from "react-query";
+import { useNavigate } from "react-router-dom";
 
 import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
@@ -10,7 +12,7 @@ import SiteSelector from "@/components/SiteSelector";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
-import { TreeServices } from "@/services/tree/pages";
+import { insertPage, TreeServices } from "@/services/tree/pages";
 import { useStore } from "@/store";
 
 const errorMessage = "Please specify the URL title";
@@ -28,11 +30,13 @@ const NewWebpage = (): JSX.Element => {
   const [reviewers, setReviewers] = useState<IUser[]>([]);
   const [products, setProducts] = useState<number[]>([]);
   const [location, setLocation] = useState<string>();
-  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const [reloading, setReloading] = useState<(typeof LoadingState)[keyof typeof LoadingState]>(LoadingState.INITIAL);
 
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
-  const { data, isFetching, refetch } = usePages(true);
+  const { data, isFetching } = usePages(true);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (titleValue && location && owner) {
@@ -77,23 +81,41 @@ const NewWebpage = (): JSX.Element => {
         owner,
         reviewers,
         project: selectedProject.name,
-        parent: location,
+        parent: location === "/" ? "" : location,
         product_ids: products,
       };
-      PagesServices.createPage(newPage).then(() => {
-        // refetch the tree from the backend after a new webpage is added to the database
-        refetch &&
-          refetch().then(() => {
-            setReloading(LoadingState.DONE);
-          });
+      PagesServices.createPage(newPage).then(async (response) => {
+        const new_webpage = response.data.webpage;
+
+        if (new_webpage.project && new_webpage.project.name) {
+          insertPage(new_webpage, queryClient);
+          const project = data?.find((p) => p.name === new_webpage.project?.name);
+          if (project) setSelectedProject(project);
+          navigate(`/app/webpage/${new_webpage.project?.name}${new_webpage.url}`);
+        } else {
+          throw new Error("Error creating a new webpage.");
+        }
       });
     }
-  }, [titleValue, owner, selectedProject, location, finalUrl, copyDoc, reviewers, products, refetch]);
+  }, [
+    titleValue,
+    owner,
+    selectedProject,
+    location,
+    finalUrl,
+    copyDoc,
+    reviewers,
+    products,
+    queryClient,
+    data,
+    setSelectedProject,
+    navigate,
+  ]);
 
   // update navigation after new page is added to the tree on the backend
   useEffect(() => {
     if (!isFetching && reloading === LoadingState.DONE && data?.length && selectedProject) {
-      const project = data.find((p) => p.data.name === selectedProject.name)?.data;
+      const project = data.find((p) => p.name === selectedProject.name);
       if (project) {
         const isNewPageExist = TreeServices.findPage(project.templates, `${location}/${titleValue}`);
         if (isNewPageExist) {

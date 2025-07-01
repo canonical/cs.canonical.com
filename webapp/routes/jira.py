@@ -4,6 +4,7 @@ from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
+    convert_webpage_to_dict,
     create_copy_doc,
     create_jira_task,
     get_or_create_user_id,
@@ -301,7 +302,8 @@ def create_page(body: CreatePageModel):
             product_id=product_id,
         )
 
-    return jsonify({"copy_doc": copy_doc}), 201
+    invalidate_cache(new_webpage[0])
+    return jsonify({"webpage": convert_webpage_to_dict(new_webpage[0], new_webpage[0].owner, new_webpage[0].project)}), 201
 
 
 def invalidate_cache(webpage: Webpage):

@@ -17,8 +17,7 @@ const Main = (): React.ReactNode => {
   function getDynamicRoutes() {
     if (!data?.length) return;
     return data.map(
-      (project) =>
-        project?.data?.templates && RoutesServices.generateRoutes(project.data.name, [project.data.templates]),
+      (project) => project?.templates && RoutesServices.generateRoutes(project.name, [project.templates]),
     );
   }
 
