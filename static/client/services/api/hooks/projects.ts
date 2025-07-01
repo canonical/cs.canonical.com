@@ -12,7 +12,8 @@ export function useProjects() {
 
   const [projects, setProjects] = useState<IPagesResponse["data"][]>([]);
 
-  if (!isLoading && data?.length && projects.length !== data.length) {
+  const hasData = data?.every((project) => project!);
+  if (!isLoading && data?.length && hasData && projects.length !== data.length) {
     setProjects(data);
   }
 
