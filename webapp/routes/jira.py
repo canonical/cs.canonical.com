@@ -303,7 +303,18 @@ def create_page(body: CreatePageModel):
         )
 
     invalidate_cache(new_webpage[0])
-    return jsonify({"webpage": convert_webpage_to_dict(new_webpage[0], new_webpage[0].owner, new_webpage[0].project)}), 201
+    return (
+        jsonify(
+            {
+                "webpage": convert_webpage_to_dict(
+                    new_webpage[0],
+                    new_webpage[0].owner,
+                    new_webpage[0].project,
+                )
+            }
+        ),
+        201,
+    )
 
 
 def invalidate_cache(webpage: Webpage):
