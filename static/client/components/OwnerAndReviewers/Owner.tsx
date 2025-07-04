@@ -7,6 +7,7 @@ import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
+import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
 const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element => {
@@ -14,12 +15,18 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
   const { options, setOptions, handleChange } = useUsersRequest();
 
   useEffect(() => {
-    if (page) {
-      let owner = page.owner as IUser | null;
-      if (page.owner.name === "Default" || !page.owner.email) owner = null;
-      setCurrentOwner(owner);
-      if (onSelectOwner) onSelectOwner(owner);
+    let owner = null;
+    if (Boolean(window.__E2E_TESTING__)) {
+      owner = getDefaultUser();
     }
+
+    if (page) {
+      owner = page.owner as IUser | null;
+      if (page.owner.name === "Default" || !page.owner.email) owner = null;
+    }
+
+    setCurrentOwner(owner);
+    if (onSelectOwner) onSelectOwner(owner);
   }, [onSelectOwner, page]);
 
   const handleRemoveOwner = useCallback(
