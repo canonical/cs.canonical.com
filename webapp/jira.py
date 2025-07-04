@@ -326,6 +326,8 @@ class Jira:
 
         payload = {
             "fields": {
+                # TODO: Update the field ID when switching to
+                # real Content Team project in Jira
                 "customfield_11133": copydoc,
             },
         }

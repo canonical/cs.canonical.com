@@ -99,7 +99,8 @@ class Webpage(db.Model, DateTimeMixin):
     owner_id: int = Column(Integer, ForeignKey("users.id"))
     status: str = Column(Enum(WebpageStatus), default=WebpageStatus.AVAILABLE)
     ext: str = Column(String, nullable=True)
-    content_jira_id: str = Column(String, nullable=True)
+    content_jira_id: str = Column(String, nullable=True)  # This field is used
+    # to track which pages were created from the content team's board on Jira
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
