@@ -22,13 +22,17 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
     window.open(page.copy_doc_link);
   }, [page]);
 
+  const pageExtension = useMemo(() => {
+    return page.ext || ".html";
+  }, [page.ext]);
+
   const openGitHub = useCallback(() => {
     if (page.children.length) {
-      window.open(`${config.ghLink(project)}${page.name}/index.html`);
+      window.open(`${config.ghLink(project)}${page.name}/index${pageExtension}`);
     } else {
-      window.open(`${config.ghLink(project)}${page.name}.html`);
+      window.open(`${config.ghLink(project)}${page.name}${pageExtension}`);
     }
-  }, [page, project]);
+  }, [page.children.length, page.name, pageExtension, project]);
 
   const createNewPage = useCallback(() => {
     setChangeType(ChangeRequestType.NEW_WEBPAGE);

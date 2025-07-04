@@ -9,22 +9,31 @@ BASE_TEMPLATES = [
     "templates/one-column.html",
     "_base/base.html",
 ]
+MARKDOWN_TEMPLATES = [
+    "legal/_base_legal_markdown.html",
+    "appliance/shared/_base_appliance_index.html",
+]
 TEMPLATE_PREFIXES = ["base", "_base"]
 TAG_MAPPING = {
     "title": ["title"],
     "description": ["meta_description", "description"],
-    "link": ["meta_copydoc"],
+    "link": ["meta_copydoc", "copydoc"],
 }
 
 EXCLUDE_PATHS = ["partials"]
 
 
 def is_index(path):
-    return path.name == "index.html"
+    return path.name == "index.html" or path.name == "index.md"
 
 
 def check_has_index(path):
-    return (path / "index.html").exists()
+    if (path / "index.html").exists():
+        return True, ".html"
+    elif (path / "index.md").exists():
+        return True, ".md"
+    else:
+        return False, None
 
 
 def is_template(path):
@@ -43,7 +52,7 @@ def is_template(path):
 
 def is_partial(path):
     """
-    Return True if the file name starts with an underscore, 
+    Return True if the file name starts with an underscore,
     that indicates it as a partial
 
     Partials are templates that are not meant to be rendered directly, but
@@ -81,7 +90,7 @@ def extends_base(path, base="templates"):
                     else:
                         # extract absolute path from the parent path
                         absolute_path = str(path)[
-                            0 : str(path).find(base) + len(base)
+                            0: str(path).find(base) + len(base)
                         ]
                         # check if the file from which the current file
                         # extends extends from the base template
@@ -139,7 +148,7 @@ def get_extended_copydoc(path, base):
     with base.joinpath(path).open("r") as f:
         file_data = f.read()
         if match := re.search(
-            "\{\% block meta_copydoc *\%\}(.*)\{\%( *)endblock", file_data
+            r"\{\% block meta_copydoc *\%\}(.*)\{\%( *)endblock", file_data
         ):
             return match.group(1)
 
@@ -155,6 +164,9 @@ def get_tags_rolling_buffer(path):
     # We create a map of the selected variants for each tag
     variants_mapping = {v: "" for v in available_tags}
 
+    # check if the path is html or md file
+    is_md = path.suffix == ".md"
+
     with path.open("r") as f:
         for tag in available_tags:
             buffer = []
@@ -168,44 +180,63 @@ def get_tags_rolling_buffer(path):
                 # Return to start of file
                 f.seek(0)
 
-                for line in f.readlines():
-                    if is_buffering:
-                        buffer.append(line)
+                if not is_md:
 
-                    if not is_buffering and (
-                        match := re.search(f"{{% block {variant}( *)%}}", line)
-                    ):
-                        # We remove line contents before the tag
-                        line = line[match.start() :]  # noqa: E203
+                    for line in f.readlines():
+                        if is_buffering:
+                            buffer.append(line)
 
-                        buffer.append(line)
-                        is_buffering = True
-                        variants_mapping[tag] = variant
+                        if not is_buffering and (
+                            match := re.search(
+                                f"{{% block {variant}( *)%}}", line
+                            )
+                        ):
+                            # We remove line contents before the tag
+                            line = line[match.start() :]  # noqa: E203
 
-                    # We search for the end of the tag in the existing buffer
-                    buffer_string = "".join(buffer)
-                    if is_buffering and re.search(
-                        "(.*){%( *)endblock", buffer_string
-                    ):
-                        # We save the buffer contents to the tags dictionary
-                        tags[tag] = buffer_string
+                            buffer.append(line)
+                            is_buffering = True
+                            variants_mapping[tag] = variant
 
-                        # We extract the text within the tags
-                        tags[tag] = extract_text_from_tag(
-                            variants_mapping[tag], tags[tag]
+                        # We search for the end of the tag in the existing
+                        # buffer
+                        buffer_string = "".join(buffer)
+                        if is_buffering and re.search(
+                            "(.*){%( *)endblock", buffer_string
+                        ):
+                            # We save the buffer contents to the tags
+                            # dictionary
+                            tags[tag] = buffer_string
+
+                            # We extract the text within the tags
+                            tags[tag] = extract_text_from_tag(
+                                variants_mapping[tag], tags[tag]
+                            )
+
+                            # We now reset the buffer
+                            buffer = []
+                            is_buffering = False
+                            tag_found = True
+                            break
+
+                else:
+                    for line in f:
+                        match = re.match(
+                            rf"^\s*{variant}\s*:\s*\"?(.+?)\"?\s*$",
+                            line,
+                            re.IGNORECASE,
                         )
-
-                        # We now reset the buffer
-                        buffer = []
-                        is_buffering = False
-                        tag_found = True
-                        break
+                        if match:
+                            variants_mapping[tag] = variant
+                            tags[tag] = match.group(1).strip()
+                            tag_found = True
+                            break
 
                 if tag_found:
                     break
 
     # We add the name from the path
-    raw_name = re.sub(r"(?i)(.html|/index.html)", "", str(path))
+    raw_name = re.sub(r"(?i)(.html|/index.html|/index.md)", "", str(path))
     tags["name"] = raw_name.split("/templates", 1)[-1]
 
     return tags
@@ -216,11 +247,10 @@ def is_valid_page(path, extended_path, is_index=True):
     Determine if path is a valid page. Pages are valid if:
     - They contain the same extended path as the index html.
     - They extend from the base html.
+    - Does not live in a shared template directory.
+    - They are markdown files with a valid wrapper template.
     """
-
-    path = Path(path)
-
-    if not path.is_file() or is_template(path) or is_partial(path):
+    if is_template(path):
         return False
 
     if not is_index and extended_path:
@@ -229,6 +259,17 @@ def is_valid_page(path, extended_path, is_index=True):
                 if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
                     if match.group(1) == extended_path:
                         return True
+
+    if "index.md" in str(path):
+        with path.open("r") as f:
+            for line in f.readlines():
+                if match := re.search(
+                    r"wrapper_template:\s*[\"']?(.*?)[\"']?$", line
+                ):
+                    template = match.group(1)
+                    if template in MARKDOWN_TEMPLATES:
+                        return True
+
     # If the file does not share the extended path, check if it extends the
     # base html
     return extends_base(path)
@@ -288,9 +329,9 @@ def scan_directory(path_name, base=None):
     is_index_page_valid = False
 
     # Check if an index.html file exists in this directory
-    has_index = check_has_index(node_path)
+    (has_index, index_type) = check_has_index(node_path)
     if has_index:
-        index_path = node_path / "index.html"
+        index_path = node_path / ("index" + index_type)
         # Get the path extended by the index.html file
         extended_path = get_extended_path(index_path)
         # If the file is valid, add it as a child
@@ -299,6 +340,7 @@ def scan_directory(path_name, base=None):
             # Get tags, add as child
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
+            node["ext"] = index_type
 
     else:
         node["ext"] = ".dir"
