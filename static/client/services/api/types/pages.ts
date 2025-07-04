@@ -37,6 +37,7 @@ export interface IPage {
     updated_at: string;
   };
   ext?: string;
+  content_jira_id?: string;
 }
 
 export interface IPagesResponse {
