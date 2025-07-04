@@ -9,6 +9,7 @@ import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
 import SiteSelector from "@/components/SiteSelector";
+import { useQueryParams } from "@/helpers/hooks";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
@@ -37,6 +38,8 @@ const NewWebpage = (): JSX.Element => {
   const { data, isFetching } = usePages(true);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const queryParams = useQueryParams();
 
   useEffect(() => {
     if (titleValue && location && owner) {
@@ -83,6 +86,7 @@ const NewWebpage = (): JSX.Element => {
         project: selectedProject.name,
         parent: location === "/" ? "" : location,
         product_ids: products,
+        content_jira_id: queryParams.get("content_jira_id") || "",
       };
       PagesServices.createPage(newPage).then(async (response) => {
         const new_webpage = response.data.webpage;
@@ -106,6 +110,7 @@ const NewWebpage = (): JSX.Element => {
     copyDoc,
     reviewers,
     products,
+    queryParams,
     queryClient,
     data,
     setSelectedProject,

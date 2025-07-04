@@ -22,13 +22,17 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
     window.open(page.copy_doc_link);
   }, [page]);
 
+  const pageExtension = useMemo(() => {
+    return page.ext || ".html";
+  }, [page.ext]);
+
   const openGitHub = useCallback(() => {
     if (page.children.length) {
-      window.open(`${config.ghLink(project)}${page.name}/index.html`);
+      window.open(`${config.ghLink(project)}${page.name}/index${pageExtension}`);
     } else {
-      window.open(`${config.ghLink(project)}${page.name}.html`);
+      window.open(`${config.ghLink(project)}${page.name}${pageExtension}`);
     }
-  }, [page, project]);
+  }, [page.children.length, page.name, pageExtension, project]);
 
   const createNewPage = useCallback(() => {
     setChangeType(ChangeRequestType.NEW_WEBPAGE);
@@ -52,6 +56,10 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
   const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
+
+  // A page which was created from the content team's board on Jira
+  // must have a valid content_jira_id
+  const isContentBoardPage = useMemo(() => page.content_jira_id, [page]);
 
   return (
     <div className="l-webpage">
@@ -79,7 +87,7 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
       </div>
       <div className="l-webpage--buttons">
         <>
-          {isNew && !hasJiraTasks && (
+          {isNew && !hasJiraTasks && !isContentBoardPage && (
             <Button appearance="positive" onClick={createNewPage}>
               Submit for publication...
             </Button>
