@@ -17,12 +17,12 @@ const checkMatches = (pages: IPage[], value: string, matches: IMatch[], project:
   });
 };
 
-export const searchForMatches = (value: string, tree: IPagesResponse[]): IMatch[] => {
+export const searchForMatches = (value: string, tree: IPagesResponse["data"][]): IMatch[] => {
   const matches: IMatch[] = [];
 
   tree.forEach((project) => {
-    if (project.data.templates.children?.length) {
-      checkMatches(project.data.templates.children, value, matches, project.data.name);
+    if (project.templates.children?.length) {
+      checkMatches(project.templates.children, value, matches, project.name);
     }
   });
 
@@ -30,10 +30,10 @@ export const searchForMatches = (value: string, tree: IPagesResponse[]): IMatch[
 };
 
 export const getProjectByName = (
-  data: IPagesResponse[] | undefined,
+  data: IPagesResponse["data"][] | undefined,
   projectName: string,
 ): IPagesResponse["data"] | undefined => {
-  return data?.find((project) => project.data.name === projectName)?.data;
+  return data?.find((project) => project.name === projectName);
 };
 
 export * as SearchServices from "./Search.services";

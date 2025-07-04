@@ -10,6 +10,7 @@ import NavigationItems from "./NavigationItems";
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import SiteSelector from "@/components/SiteSelector";
 import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
+import { useProjects } from "@/services/api/hooks/projects";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -25,6 +26,7 @@ const Navigation = (): JSX.Element => {
     state.setView,
     state.setExpandedProject,
   ]);
+  const { data: projects, isLoading } = useProjects();
 
   const logout = useCallback(() => {
     setUser({} as IUser);
@@ -108,7 +110,7 @@ const Navigation = (): JSX.Element => {
               {isViewActive(VIEW_TREE) && (
                 <>
                   <SiteSelector />
-                  <NavigationItems />
+                  {!(isLoading || !projects.length) && <NavigationItems />}
                 </>
               )}
             </div>

@@ -7,12 +7,12 @@ import { PagesServices } from "@/services/api/services/pages";
 import type { IPagesResponse } from "@/services/api/types/pages";
 import type { IApiBasicError, IUseQueryHookRest } from "@/services/api/types/query";
 
-export function usePages(noCache: boolean = false): IUseQueryHookRest<IPagesResponse[]> {
-  const results = useQueries<UseQueryOptions<IPagesResponse, IApiBasicError>[]>(
+export function usePages(noCache: boolean = false): IUseQueryHookRest<IPagesResponse["data"][]> {
+  const results = useQueries<UseQueryOptions<IPagesResponse["data"], IApiBasicError>[]>(
     config.projects.map((project) => {
       return {
         queryKey: ["pages", project],
-        queryFn: () => PagesServices.getPages(project, noCache),
+        queryFn: () => PagesServices.getPages(project, noCache).then((response) => response.data),
         staleTime: noCache ? 0 : 300000,
         cacheTime: noCache ? 0 : 300000,
         refetchOnMount: false,

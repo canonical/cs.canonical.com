@@ -20,7 +20,7 @@ const Search = (): JSX.Element => {
 
   const handleChange = useCallback(
     (inputValue: string) => {
-      if (inputValue.length > 2 && data?.length && data[0]?.data) {
+      if (inputValue.length > 2 && data?.length && data[0]) {
         setMatches(SearchServices.searchForMatches(inputValue, data));
       } else if (inputValue.length === 0) {
         setMatches([]);
@@ -63,7 +63,7 @@ const Search = (): JSX.Element => {
       <SearchBox
         autocomplete="off"
         className="l-search-box"
-        disabled={!(data?.length && data[0]?.data)}
+        disabled={!(data?.length && data[0])}
         onBlur={handleInputBlur}
         onChange={handleChange}
         placeholder="Search a webpage"

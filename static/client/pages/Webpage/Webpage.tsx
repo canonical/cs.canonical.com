@@ -27,12 +27,12 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
   }, [page.ext]);
 
   const openGitHub = useCallback(() => {
-    if (page.children.length) {
+    if (page.children?.length) {
       window.open(`${config.ghLink(project)}${page.name}/index${pageExtension}`);
     } else {
       window.open(`${config.ghLink(project)}${page.name}${pageExtension}`);
     }
-  }, [page.children.length, page.name, pageExtension, project]);
+  }, [page.children?.length, page.name, pageExtension, project]);
 
   const createNewPage = useCallback(() => {
     setChangeType(ChangeRequestType.NEW_WEBPAGE);

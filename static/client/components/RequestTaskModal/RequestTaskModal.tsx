@@ -2,7 +2,6 @@ import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip, useNotify } from "@canonical/react-components";
-import type { QueryObserverResult } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
@@ -11,9 +10,7 @@ import Reporter from "@/components/Reporter";
 import config from "@/config";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
-import type { IPagesResponse } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
-import type { IApiBasicError } from "@/services/api/types/query";
 import { DatesServices } from "@/services/dates";
 import { useStore } from "@/store";
 
@@ -69,11 +66,11 @@ const RequestTaskModal = ({
       onClose();
       if (refetch) {
         refetch()
-          .then((data: QueryObserverResult<IPagesResponse, IApiBasicError>[]) => {
+          .then((data) => {
             if (data?.length) {
-              const project = data.find((p) => p.data?.data?.name === selectedProject?.name);
-              if (project && project.data?.data) {
-                setSelectedProject(project.data.data);
+              const project = data.find((p) => p.data?.name === selectedProject?.name);
+              if (project && project.data) {
+                setSelectedProject(project.data);
               }
             }
           })
