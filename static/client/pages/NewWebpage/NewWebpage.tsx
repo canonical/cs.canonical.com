@@ -31,7 +31,7 @@ const NewWebpage = (): JSX.Element => {
   const [reviewers, setReviewers] = useState<IUser[]>([]);
   const [products, setProducts] = useState<number[]>([]);
   const [location, setLocation] = useState<string>();
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
   const [reloading, setReloading] = useState<(typeof LoadingState)[keyof typeof LoadingState]>(LoadingState.INITIAL);
 
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
