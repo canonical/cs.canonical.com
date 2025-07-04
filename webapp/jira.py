@@ -313,6 +313,29 @@ class Jira:
             data=payload,
         )
 
+    def link_copydoc_with_content_page(self, copydoc, jira_id):
+        """Link a copydoc with a content page in Jira.
+
+        Args:
+            copydoc (str): The URL of the copydoc.
+            jira_id (str): The ID of the Jira issue.
+
+        Returns:
+            dict: The response from the Jira API.
+        """
+
+        payload = {
+            "fields": {
+                # TODO: Update the field ID when switching to
+                # real Content Team project in Jira
+                "customfield_11133": copydoc,
+            },
+        }
+
+        return self.__request__(
+            method="PUT", path=f"issue/{jira_id}", data=payload
+        )
+
 
 def init_jira(app):
     try:

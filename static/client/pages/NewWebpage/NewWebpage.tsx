@@ -7,6 +7,7 @@ import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
 import SiteSelector from "@/components/SiteSelector";
+import { useQueryParams } from "@/helpers/hooks";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
@@ -33,6 +34,8 @@ const NewWebpage = (): JSX.Element => {
 
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
   const { data, isFetching, refetch } = usePages(true);
+
+  const queryParams = useQueryParams();
 
   useEffect(() => {
     if (titleValue && location && owner) {
@@ -79,6 +82,7 @@ const NewWebpage = (): JSX.Element => {
         project: selectedProject.name,
         parent: location,
         product_ids: products,
+        content_jira_id: queryParams.get("content_jira_id") || "",
       };
       PagesServices.createPage(newPage).then(() => {
         // refetch the tree from the backend after a new webpage is added to the database
@@ -88,7 +92,7 @@ const NewWebpage = (): JSX.Element => {
           });
       });
     }
-  }, [titleValue, owner, selectedProject, location, finalUrl, copyDoc, reviewers, products, refetch]);
+  }, [titleValue, owner, selectedProject, location, finalUrl, copyDoc, reviewers, products, queryParams, refetch]);
 
   // update navigation after new page is added to the tree on the backend
   useEffect(() => {
