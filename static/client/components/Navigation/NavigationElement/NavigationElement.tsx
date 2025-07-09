@@ -46,7 +46,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
   }, [page, project, location]);
 
   useEffect(() => {
-    if (page?.children.length) {
+    if (page?.children?.length) {
       setChildren(
         page.children.sort((c1, c2) =>
           NavigationServices.formatPageName(c1.name) < NavigationServices.formatPageName(c2.name) ? -1 : 1,
