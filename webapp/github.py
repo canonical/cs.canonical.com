@@ -10,7 +10,6 @@ from flask.app import Flask
 
 from webapp.settings import BASE_DIR, GH_TOKEN, REPO_ORG
 from webapp.site_repository import BACKGROUND_TASK_RUNNING_PREFIX
-from webapp.tasks import register_task
 
 # Configure logger
 logging.basicConfig(
