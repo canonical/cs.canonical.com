@@ -121,34 +121,6 @@ class SiteRepository:
         command_str = self.__sanitize_command__(command_str)
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
-    def delete_local_files(self):
-        """Delete a local folder"""
-        return self.__run__(
-            f"rm -rf {self.repo_path}",
-            f"Error deleting folder {self.repo_path}",
-        )
-
-    def setup_site_repository(self):
-        """Clone the repository to a specific directory, or checkout the latest
-        updates if the repository exists.
-        """
-        # Download files from the repository
-        github = self.app.config["github"]
-        github.get_repository_tree(
-            repository=self.repository_uri,
-            branch=self.branch,
-        )
-
-    def repository_exists(self):
-        """Check if the repository exists"""
-        absolute_path = (
-            self.app.config["BASE_DIR"]
-            + "/repositories/"
-            + self.repository_uri
-            + "/.git"
-        )
-        return os.path.exists(absolute_path)
-
     def get_tree_from_cache(self):
         """Get the tree from the cache. Return None if cache is not
         available.
@@ -168,8 +140,8 @@ class SiteRepository:
 
     def get_tree_from_disk(self):
         """Get a tree from a freshly cloned repository."""
-        # Setup the repository
-        self.setup_site_repository()
+        github = self.app.config["github"]
+        github.clone_repository(self.repository_uri)
 
         templates_folder = Path(self.repo_path + "/templates")
         templates_folder.mkdir(parents=True, exist_ok=True)
@@ -361,7 +333,6 @@ class SiteRepository:
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """Create webpages for each node in the tree."""
-        self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
             db.session,
@@ -387,8 +358,6 @@ class SiteRepository:
             owner,
             webpage_dict["id"],
         )
-
-        self.logger.info(f"Existing dict {webpage_dict}")
 
         db.session.commit()
         return webpage_dict
