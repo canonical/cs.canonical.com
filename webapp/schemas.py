@@ -80,3 +80,7 @@ class AttachJiraWithWebpageReq(BaseModel):
     copy_doc_link: str
     jira_id: str
     summary: str
+
+
+class FindWebpageByCopydoc(BaseModel):
+    copy_doc_link: str
