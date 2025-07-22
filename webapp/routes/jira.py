@@ -383,25 +383,11 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
         jira_id = body.jira_id
         summary = body.summary
 
-        # extract google doc id
-        match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
-        google_doc_id = match.group(1) if match else None
+        copy_doc_link = body.copy_doc_link
+        webpage, error, status_code = find_webpage_by_copydoc(copy_doc_link)
 
-        if not google_doc_id:
-            return (
-                jsonify({"error": "Webpage by given copydoc_link not found"}),
-                404,
-            )
-
-        webpage = Webpage.query.filter(
-            Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
-        ).first()
-
-        if not webpage:
-            return (
-                jsonify({"error": "Webpage by given copydoc_link not found"}),
-                404,
-            )
+        if error:
+            return jsonify({"error": error}), status_code
 
         # Create jira task in the database
         jira_task, _ = get_or_create(
@@ -435,22 +421,40 @@ def find_page_by_copydoc(body: FindWebpageByCopydoc):
         Response: A JSON response with the found webpage or an error message.
     """
     copy_doc_link = body.copy_doc_link
+    webpage, error, status_code = find_webpage_by_copydoc(copy_doc_link)
 
-    # extract google doc id
+    if error:
+        return jsonify({"error": error}), status_code
+
+    return (
+        {"webpage": webpage.name},
+        status_code
+    )
+
+
+def find_webpage_by_copydoc(copy_doc_link: str):
+    """
+    Extracts the Google Doc ID from a copy doc link and finds the associated
+    webpage.
+
+    Args:
+        copy_doc_link (str): The link to the Google Doc.
+
+    Returns:
+        tuple: (webpage object or None, error message or None, status code of
+        400, 404 or 200)
+    """
     match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
     google_doc_id = match.group(1) if match else None
 
     if not google_doc_id:
-        return (
-            jsonify({"error": "Please provide a valid copydoc link"}),
-            400,
-        )
+        return None, "Please provide a valid copydoc link", 400
 
     webpage = Webpage.query.filter(
         Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
     ).first()
 
-    return (
-        {"webpage": webpage.name if webpage else False},
-        200 if webpage else 404,
-    )
+    if not webpage:
+        return None, "Webpage by given copydoc not found", 404
+
+    return webpage, None, 200
