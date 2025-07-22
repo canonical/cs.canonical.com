@@ -28,6 +28,7 @@ from webapp.schemas import (
     AttachJiraWithWebpageReq,
     ChangesRequestModel,
     CreatePageModel,
+    FindWebpageByCopydoc,
     PlaywrightCleanupReqBody,
     RemoveWebpageModel,
 )
@@ -421,3 +422,35 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
             f"Error attaching JIRA task with webpage: {e}"
         )
         return jsonify({"error": "Failed to attach JIRA task"}), 500
+
+
+@jira_blueprint.route("/find-page-by-copydoc", methods=["POST"])
+@validate()
+def find_page_by_copydoc(body: FindWebpageByCopydoc):
+    """
+    Find a webpage by its copy doc link.
+    Args:
+        body (dict): The request body containing the copy_doc_link.
+    Returns:
+        Response: A JSON response with the found webpage or an error message.
+    """
+    copy_doc_link = body.copy_doc_link
+
+    # extract google doc id
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
+    google_doc_id = match.group(1) if match else None
+
+    if not google_doc_id:
+        return (
+            jsonify({"error": "Please provide a valid copydoc link"}),
+            400,
+        )
+
+    webpage = Webpage.query.filter(
+        Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
+    ).first()
+
+    return (
+        {"webpage": webpage.name if webpage else False},
+        200 if webpage else 404,
+    )
