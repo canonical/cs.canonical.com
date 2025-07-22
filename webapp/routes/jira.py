@@ -383,7 +383,6 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
         jira_id = body.jira_id
         summary = body.summary
 
-        copy_doc_link = body.copy_doc_link
         webpage, error, status_code = find_webpage_by_copydoc(copy_doc_link)
 
         if error:
