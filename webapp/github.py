@@ -84,13 +84,11 @@ class GitHub:
 
         Args:
             repository (str): The repository name.
-            branch (str): The branch to get the tree from.
 
         """
         tree_file_path = self.REPOSITORY_PATH / repository
         if tree_file_path.exists():
             shutil.rmtree(tree_file_path)
-        tree_file_path.mkdir(parents=True, exist_ok=True)
 
         try:
             # Set the lock
@@ -98,6 +96,7 @@ class GitHub:
                 f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
                 1,
             )
+            logger.info(f"Cloning repository {repository} to {tree_file_path}")
             Repo.clone_from(
                 f"{REPO_ORG}/{repository}.git",
                 tree_file_path,
@@ -106,6 +105,7 @@ class GitHub:
             print(f"Failed to clone {repository}: {e}")
             raise
         finally:
+            logger.info(f"Finished cloning {repository}")
             self.cache.set(
                 f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
                 0,
