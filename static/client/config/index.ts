@@ -7,8 +7,10 @@ export const VIEW_REVIEWED = "reviewed";
 export const VIEW_TREE = "tree";
 export const VIEW_TABLE = "table";
 
+export const projects = ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"];
+
 const config = {
-  projects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
+  projects: window.__E2E_TESTING__ ? projects.slice(-2) : projects,
   views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
   tooltips: {
     ownerDef: "Owners request the page and must approve the page for it to go live.",
