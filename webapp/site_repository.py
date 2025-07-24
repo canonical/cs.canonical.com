@@ -256,8 +256,9 @@ class SiteRepository:
         if (not no_cache) and (tree := self.get_tree_from_cache()):
             return tree
 
+        new_tree = self.get_new_tree()
         self.invalidate_cache()
-        return self.get_new_tree()
+        return new_tree
 
     def __create_webpage_for_node__(
         self,
@@ -368,12 +369,12 @@ class SiteRepository:
             return tree
 
         self.logger.info(f"Loading {self.repository_uri} from database")
-        self.invalidate_cache()
 
         # Load the tree from database
         if tree := self.get_tree_from_db():
-            self.logger.info(f"Tree refreshed for {self.repository_uri}")
+            self.logger.info(f"Tree obtained from db for {self.repository_uri}")
             try:
+                self.invalidate_cache()
                 # Update the cache
                 self.set_tree_in_cache(tree)
             except Exception as e:

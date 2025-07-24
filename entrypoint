@@ -21,7 +21,7 @@ activate() {
     # ===
     flask --app webapp.app db upgrade
 
-    RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=2 --bind $1"
+    RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=1 --bind $1"
 
     if [ -z ${FLASK_DEBUG+x} ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
