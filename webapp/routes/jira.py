@@ -425,10 +425,7 @@ def find_page_by_copydoc(body: FindWebpageByCopydoc):
     if error:
         return jsonify({"error": error}), status_code
 
-    return (
-        {"webpage": webpage.name},
-        status_code
-    )
+    return ({"webpage": webpage.name}, status_code)
 
 
 def find_webpage_by_copydoc(copy_doc_link: str):
