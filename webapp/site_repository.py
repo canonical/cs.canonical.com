@@ -372,7 +372,9 @@ class SiteRepository:
 
         # Load the tree from database
         if tree := self.get_tree_from_db():
-            self.logger.info(f"Tree obtained from db for {self.repository_uri}")
+            self.logger.info(
+                f"Tree obtained from db for {self.repository_uri}"
+            )
             try:
                 self.invalidate_cache()
                 # Update the cache
