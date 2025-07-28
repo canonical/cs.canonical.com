@@ -7,10 +7,11 @@ import { type IWebpageProps } from "./Webpage.types";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
-import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import Owner from "@/components/Owner";
 import Products from "@/components/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
 import WebpageAssets from "@/components/WebpageAssets";
+import Reviewers from "@/components/Reviewers";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { useStore } from "@/store";
@@ -163,6 +164,13 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             webpage={page}
           />
         )}
+        <div className={isNew ? "col-12" : "col-5"}>
+          <Owner page={page} />
+          <div className="u-sv3" />
+          <Reviewers page={page} />
+          <div className="u-sv3" />
+          <Products page={page} />
+        </div>
         <EditProductPanel isOpen={editProductPanelOpen} onClose={toggleEditProductPanelClose} />
       </div>
     </>
