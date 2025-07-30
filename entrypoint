@@ -23,7 +23,7 @@ activate() {
 
     RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=1 --bind $1"
 
-    if [ -z ${FLASK_DEBUG+x} ]; then
+    if [ "${FLASK_DEBUG:-0}" == "1" ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
     fi
 
