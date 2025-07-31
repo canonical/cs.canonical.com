@@ -3,9 +3,7 @@ import { type MouseEvent, useCallback, useEffect, useRef, useState, type ReactNo
 
 import type { ICustomSearchAndFilterProps } from "./types";
 
-import type { IUser } from "@/services/api/types/users";
-
-const CustomSearchAndFilter = ({
+const CustomSearchAndFilter = <T,>({
   label,
   options,
   selectedOptions,
@@ -13,6 +11,8 @@ const CustomSearchAndFilter = ({
   onChange,
   onRemove,
   onSelect,
+  indexKey = "id",
+  labelKey = "name",
 }: ICustomSearchAndFilterProps): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
@@ -25,7 +25,7 @@ const CustomSearchAndFilter = ({
   }, [options]);
 
   const handleSelect = useCallback(
-    (option: IUser) => () => {
+    (option: T) => () => {
       onSelect(option);
       if (inputRef.current) {
         inputRef.current.value = "";
@@ -62,8 +62,8 @@ const CustomSearchAndFilter = ({
         {selectedOptions?.map(
           (option) =>
             option && (
-              <span className="p-chip" key={option.id}>
-                <span className="p-chip__value">{option.name}</span>
+              <span className="p-chip" key={indexKey}>
+                <span className="p-chip__value">{labelKey}</span>
                 <button className="p-chip__dismiss" onClick={onRemove(option)}>
                   Dismiss
                 </button>
@@ -90,7 +90,7 @@ const CustomSearchAndFilter = ({
           <div aria-expanded="false" className="p-filter-panel-section__chips">
             {options.map((option) => (
               <button className="p-chip" onClick={handleSelect(option)} onMouseDown={handleOptionMouseDown}>
-                <span className="p-chip__value">{option.name}</span>
+                <span className="p-chip__value">{labelKey}</span>
               </button>
             ))}
           </div>

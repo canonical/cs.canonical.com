@@ -27,7 +27,7 @@ const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label="Reporter"
       onChange={handleChange}
       onRemove={handleRemoveReporter}

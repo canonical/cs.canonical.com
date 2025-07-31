@@ -53,7 +53,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): ReactNode => {
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label={<IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />}
       onChange={handleChange}
       onRemove={handleRemoveOwner}

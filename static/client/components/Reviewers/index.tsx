@@ -50,7 +50,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): ReactN
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label={<IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Reviewers" />}
       onChange={handleChange}
       onRemove={handleRemoveReviewer}
