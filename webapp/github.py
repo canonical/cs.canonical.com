@@ -27,6 +27,7 @@ class Tree:
 
 
 GITHUB_API_URL = "https://api.github.com/"
+MAX_RETRIES = 5
 
 
 class GithubError(Exception):
@@ -90,26 +91,42 @@ class GitHub:
         if tree_file_path.exists():
             shutil.rmtree(tree_file_path)
 
-        try:
-            # Set the lock
-            self.cache.set(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                1,
-            )
-            logger.info(f"Cloning repository {repository} to {tree_file_path}")
-            Repo.clone_from(
-                f"{REPO_ORG}/{repository}.git",
-                tree_file_path,
-            )
-        except Exception as e:
-            print(f"Failed to clone {repository}: {e}")
-            raise
-        finally:
-            logger.info(f"Finished cloning {repository}")
-            self.cache.set(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                0,
-            )
+        # Set the lock
+        self.cache.set(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+            1,
+        )
+
+        retries = 1
+        while retries <= MAX_RETRIES:
+            try:
+                logger.info(
+                    f"Cloning repository {repository} to {tree_file_path}, "
+                    f"try {retries} of {MAX_RETRIES}"
+                )
+                Repo.clone_from(
+                    f"{REPO_ORG}/{repository}.git",
+                    tree_file_path,
+                )
+                logger.info(
+                    f"Finished cloning {repository} in {retries} retries"
+                )
+                break
+            except Exception as e:
+                if retries > MAX_RETRIES:
+                    logger.error(
+                        f"Failed to clone {repository} after "
+                        f"{retries} retries."
+                    )
+                    raise GithubError(
+                        f"Failed to clone {repository} after "
+                        f"{retries} retries."
+                    ) from e
+                retries += 1
+        self.cache.set(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+            0,
+        )
 
 
 def init_github(app: flask.Flask) -> None:

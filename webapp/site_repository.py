@@ -131,29 +131,31 @@ class SiteRepository:
         """Set the tree in the cache. Silently pass if cache is not
         available.
         """
-        if self.cache:
-            return self.cache.set(self.cache_key, tree)
+        try:
+            self.invalidate_cache()
+            # Update the cache
+            if self.cache:
+                self.cache.set(self.cache_key, tree)
+        except Exception as e:
+            self.logger.exception(traceback.format_exc())
+            self.logger.error(f"Unable to save tree to cache: {e}")
 
     def invalidate_cache(self):
         self.cache.set(self.cache_key, None)
 
     def get_tree_from_disk(self):
         """Get a tree from a freshly cloned repository."""
+        # Check if a background task is active. if so do not proceed
+        if self.cache.get(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
+        ):
+            return None
+
         github = self.app.config["github"]
         github.clone_repository(self.repository_uri)
 
         templates_folder = Path(self.repo_path + "/templates")
         templates_folder.mkdir(parents=True, exist_ok=True)
-
-        # Check if a background task is active. if so, wait until it completes
-        # with a timeout of 30s
-        for _ in range(6):
-            # We sleep first to give the download a chance to complete
-            time.sleep(5)
-            if not self.cache.get(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
-            ):
-                break
 
         # Parse the templates, retry if a page is unavailable, as it might
         # still be being downloaded.
@@ -179,12 +181,14 @@ class SiteRepository:
         # Generate the base tree from the repository
         base_tree = self.get_tree_from_disk()
 
-        # Save the tree metadata to the database and return an updated tree
-        # that has all fields
-        tree = self.create_webpages_for_tree(self.db, base_tree)
-        self.sort_tree_by_page_name(tree)
-        self.logger.info(f"Tree loaded for {self.repository_uri}")
-        return tree
+        if base_tree:
+            # Save the tree metadata to the database and return an updated tree
+            # that has all fields
+            tree = self.create_webpages_for_tree(self.db, base_tree)
+            self.sort_tree_by_page_name(tree)
+            self.logger.info(f"Tree loaded for {self.repository_uri}")
+            return tree
+        return None
 
     def sort_tree_by_page_name(self, tree):
         if "children" in tree:
@@ -213,6 +217,7 @@ class SiteRepository:
                 return True
         return False
 
+    # This method is called when an endpoint is called from FE to get the tree
     def get_tree_from_db(self):
         """Get the tree from the database. If the tree is incomplete, reload
         from the repository.
@@ -250,15 +255,12 @@ class SiteRepository:
             return tree
         return None
 
-    def get_tree(self, no_cache: bool = False):
-        """Get the tree from the cache or load a new tree to cache and db."""
-        # Return from cache if available
-        if (not no_cache) and (tree := self.get_tree_from_cache()):
-            return tree
+    # This method is called from a scheduled task that clones repositories
+    def get_tree(self):
+        """Get a new tree from the repository"""
 
         new_tree = self.get_new_tree()
-        self.invalidate_cache()
-        return new_tree
+        self.set_tree_in_cache(new_tree)
 
     def __create_webpage_for_node__(
         self,
@@ -375,13 +377,7 @@ class SiteRepository:
             self.logger.info(
                 f"Tree obtained from db for {self.repository_uri}"
             )
-            try:
-                self.invalidate_cache()
-                # Update the cache
-                self.set_tree_in_cache(tree)
-            except Exception as e:
-                self.logger.exception(traceback.format_exc())
-                self.logger.error(f"Unable to save tree to cache: {e}")
+            self.set_tree_in_cache(tree)
             return tree
 
         # Or just return an empty tree
