@@ -83,3 +83,4 @@ tests/cassettes/TestRoutes.test_ceph_docs.yaml
 repositories/
 tree-cache/
 instance/
+celerybeat-schedule.db

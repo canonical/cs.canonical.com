@@ -18,7 +18,7 @@ COPY . .
 
 # Install python and import python dependencies
 RUN apt-get update \
-    && apt-get install --no-install-recommends --yes ca-certificates python3-venv python3-pip python3-psycopg2
+    && apt-get install --no-install-recommends --yes ca-certificates python3-venv python3-pip python3-psycopg2 git
 RUN python3 -m venv .venv \
     && . .venv/bin/activate \
     && pip install --no-cache-dir -r requirements.txt
