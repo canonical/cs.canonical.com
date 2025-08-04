@@ -53,12 +53,10 @@ const SiteSelector = (): JSX.Element | null => {
       className="l-site-selector"
       labelClassName="p-text--small-caps l-site-selector__label"
       onChange={handleProjectChange}
-      options={projects
-        ?.filter((project) => project)
-        .map((project) => ({
-          label: project.name,
-          value: project.name,
-        }))}
+      options={fetchedProjects?.map((project) => ({
+        label: project.name,
+        value: project.name,
+      }))}
       value={selectedProject?.name}
     />
   ) : null;
