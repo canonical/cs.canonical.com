@@ -8,7 +8,8 @@ export const VIEW_TREE = "tree";
 export const VIEW_TABLE = "table";
 
 const config = {
-  projects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
+  allProjects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
+  testProjects: ["canonical.com", "jp.ubuntu.com"],
   views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
   tooltips: {
     ownerDef: "Owners request the page and must approve the page for it to go live.",

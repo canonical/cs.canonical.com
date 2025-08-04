@@ -8,8 +8,9 @@ import type { IPagesResponse } from "@/services/api/types/pages";
 import type { IApiBasicError, IUseQueryHookRest } from "@/services/api/types/query";
 
 export function usePages(noCache: boolean = false): IUseQueryHookRest<IPagesResponse["data"][]> {
+  let projects = window.__E2E_TESTING__ ? config.testProjects : config.allProjects;
   const results = useQueries<UseQueryOptions<IPagesResponse["data"], IApiBasicError>[]>(
-    config.projects.map((project) => {
+    projects.map((project) => {
       return {
         queryKey: ["pages", project],
         queryFn: () => PagesServices.getPages(project, noCache).then((response) => response.data),
