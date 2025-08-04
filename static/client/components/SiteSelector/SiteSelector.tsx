@@ -43,7 +43,7 @@ const SiteSelector = (): JSX.Element | null => {
       <>
         <span>
           <Spinner />
-          &nbsp;&nbsp;Loading...
+          &nbsp;&nbsp;Loading....
         </span>
       </>
     );
