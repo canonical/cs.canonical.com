@@ -37,7 +37,7 @@ def load_site_trees() -> None:
                     # Enqueue the sites for setup
                     site_repository = SiteRepository(site, app, db=db)
                     # build the tree from GH source without using cache
-                    site_repository.get_tree(no_cache=True)
+                    site_repository.get_tree()
                 except Exception as e:
                     logger.error(e, exc_info=True)
 

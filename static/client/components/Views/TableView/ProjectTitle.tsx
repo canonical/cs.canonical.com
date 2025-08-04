@@ -9,7 +9,8 @@ interface ProjectTitleProps {
 
 function countPages(page: IPage): number {
   if (!page) return 0;
-  return 1 + page.children?.reduce((acc, child) => acc + countPages(child), 0);
+  const children = page.children ?? [];
+  return 1 + children?.reduce((acc, child) => acc + countPages(child), 0);
 }
 
 const ProjectTitle: React.FC<ProjectTitleProps> = ({ project }) => {

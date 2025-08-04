@@ -1,15 +1,15 @@
 import json
 import logging
-import time
+import shutil
 from pathlib import Path
 
 import flask
 import requests
+from git import Repo
 from flask.app import Flask
 
-from webapp.settings import BASE_DIR, GH_TOKEN
+from webapp.settings import BASE_DIR, GH_TOKEN, REPO_ORG
 from webapp.site_repository import BACKGROUND_TASK_RUNNING_PREFIX
-from webapp.tasks import register_task
 
 # Configure logger
 logging.basicConfig(
@@ -27,6 +27,7 @@ class Tree:
 
 
 GITHUB_API_URL = "https://api.github.com/"
+MAX_RETRIES = 5
 
 
 class GithubError(Exception):
@@ -79,90 +80,53 @@ class GitHub:
         )
         raise GithubError(err)
 
-    def get_file_content(self, repository: str, path: str) -> bytes:
-        """Get the raw content of a file in a repository.
-
-        Args:
-            repository (str): The repository name.
-            path (str): The path to the file, from the repository root.
-
-        Returns:
-            bytes: The raw content of the file.
-
-        """
-        res = self.__request__(
-            "GET",
-            f"repos/canonical/{repository}/contents/{path}",
-            blob=True,
-        )
-        return res
-
-    def get_repository_tree(self, repository: str, branch: str = "main"):
+    def clone_repository(self, repository: str):
         """Get a listing of all the files in a repository.
 
         Args:
             repository (str): The repository name.
-            branch (str): The branch to get the tree from.
 
         """
         tree_file_path = self.REPOSITORY_PATH / repository
-        tree_file_path.mkdir(parents=True, exist_ok=True)
+        if tree_file_path.exists():
+            shutil.rmtree(tree_file_path)
 
-        try:
-            # Set the lock
-            self.cache.set(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                1,
-            )
-            data = self.__request__(
-                "GET",
-                f"repos/canonical/{repository}/git/trees/{branch}?recursive=1",
-            )
-            for item in data["tree"]:
-                if item["type"] == "blob" and item["path"].startswith(
-                    "templates",
-                ):
-                    async_save_file(
-                        tree_file_path=str(tree_file_path),
-                        repository=repository,
-                        path=item["path"],
+        # Set the lock
+        self.cache.set(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+            1,
+        )
+
+        retries = 1
+        while retries <= MAX_RETRIES:
+            try:
+                logger.info(
+                    f"Cloning repository {repository} to {tree_file_path}, "
+                    f"try {retries} of {MAX_RETRIES}"
+                )
+                Repo.clone_from(
+                    f"{REPO_ORG}/{repository}.git",
+                    tree_file_path,
+                )
+                logger.info(
+                    f"Finished cloning {repository} in {retries} retries"
+                )
+                break
+            except Exception as e:
+                if retries > MAX_RETRIES:
+                    logger.error(
+                        f"Failed to clone {repository} after "
+                        f"{retries} retries."
                     )
-        except Exception as e:
-            print(f"Failed to get repository tree: {e}")
-            raise
-        finally:
-            # Release the lock after a short delay, as downloads are async
-            # and may not be finished yet.
-            time.sleep(5)
-            self.cache.set(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
-                0,
-            )
-
-
-@register_task()
-def async_save_file(
-    repository: str = "",
-    path: str = "",
-    tree_file_path: str = "",
-) -> None:
-    """Download a file to a given repository.
-
-    Args:
-        repository (str): The repository name.
-        path (str): The remote path to the file inside the repository.
-        tree_file_path (str): The local path where the file will be saved.
-
-    """
-    with flask.current_app.app_context():
-        github = GitHub(flask.current_app)
-        content = github.get_file_content(repository, path)
-
-        file_path = Path(tree_file_path) / path
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with file_path.open("wb") as file:
-            file.write(content)
+                    raise GithubError(
+                        f"Failed to clone {repository} after "
+                        f"{retries} retries."
+                    ) from e
+                retries += 1
+        self.cache.set(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+            0,
+        )
 
 
 def init_github(app: flask.Flask) -> None:

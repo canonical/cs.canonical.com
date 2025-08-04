@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { Select, Spinner } from "@canonical/react-components";
 import { useLocation } from "react-router-dom";
@@ -25,17 +25,20 @@ const SiteSelector = (): JSX.Element | null => {
     }
   }, [location, projects, selectedProject, setSelectedProject]);
 
+  // Filter out any undefined projects
+  const fetchedProjects = useMemo(() => projects?.filter((project) => project), [projects]);
+
   const handleProjectChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const project = projects?.find((p) => p.name === e.target.value);
+      const project = fetchedProjects?.find((p) => p.name === e.target.value);
       if (project) {
         setSelectedProject(project);
       }
     },
-    [projects, setSelectedProject],
+    [fetchedProjects, setSelectedProject],
   );
 
-  if (isLoading || !projects?.length)
+  if (isLoading || fetchedProjects?.length !== projects?.length)
     return (
       <>
         <span>
@@ -50,7 +53,7 @@ const SiteSelector = (): JSX.Element | null => {
       className="l-site-selector"
       labelClassName="p-text--small-caps l-site-selector__label"
       onChange={handleProjectChange}
-      options={projects?.map((project) => ({
+      options={fetchedProjects?.map((project) => ({
         label: project.name,
         value: project.name,
       }))}

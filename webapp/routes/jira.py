@@ -4,6 +4,7 @@ from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
+    convert_webpage_to_dict,
     create_copy_doc,
     create_jira_task,
     get_or_create_user_id,
@@ -27,6 +28,7 @@ from webapp.schemas import (
     AttachJiraWithWebpageReq,
     ChangesRequestModel,
     CreatePageModel,
+    FindWebpageByCopydoc,
     PlaywrightCleanupReqBody,
     RemoveWebpageModel,
 )
@@ -274,6 +276,7 @@ def create_page(body: CreatePageModel):
         parent_id=get_webpage_id(data["parent"], project_id),
         owner_id=owner_id,
         status=WebpageStatus.NEW,
+        content_jira_id=data["content_jira_id"],
     )
 
     # Create new reviewer rows
@@ -301,7 +304,23 @@ def create_page(body: CreatePageModel):
             product_id=product_id,
         )
 
-    return jsonify({"copy_doc": copy_doc}), 201
+    if data["content_jira_id"]:
+        jira = current_app.config["JIRA"]
+        jira.link_copydoc_with_content_page(copy_doc, data["content_jira_id"])
+
+    invalidate_cache(new_webpage[0])
+    return (
+        jsonify(
+            {
+                "webpage": convert_webpage_to_dict(
+                    new_webpage[0],
+                    new_webpage[0].owner,
+                    new_webpage[0].project,
+                )
+            }
+        ),
+        201,
+    )
 
 
 def invalidate_cache(webpage: Webpage):
@@ -364,25 +383,10 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
         jira_id = body.jira_id
         summary = body.summary
 
-        # extract google doc id
-        match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
-        google_doc_id = match.group(1) if match else None
+        webpage, error, status_code = find_webpage_by_copydoc(copy_doc_link)
 
-        if not google_doc_id:
-            return (
-                jsonify({"error": "Webpage by given copydoc_link not found"}),
-                404,
-            )
-
-        webpage = Webpage.query.filter(
-            Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
-        ).first()
-
-        if not webpage:
-            return (
-                jsonify({"error": "Webpage by given copydoc_link not found"}),
-                404,
-            )
+        if error:
+            return jsonify({"error": error}), status_code
 
         # Create jira task in the database
         jira_task, _ = get_or_create(
@@ -403,3 +407,50 @@ def attach_jira_with_webpage(body: AttachJiraWithWebpageReq):
             f"Error attaching JIRA task with webpage: {e}"
         )
         return jsonify({"error": "Failed to attach JIRA task"}), 500
+
+
+@jira_blueprint.route("/find-page-by-copydoc", methods=["POST"])
+@validate()
+def find_page_by_copydoc(body: FindWebpageByCopydoc):
+    """
+    Find a webpage by its copy doc link.
+    Args:
+        body (dict): The request body containing the copy_doc_link.
+    Returns:
+        Response: A JSON response with the found webpage or an error message.
+    """
+    copy_doc_link = body.copy_doc_link
+    webpage, error, status_code = find_webpage_by_copydoc(copy_doc_link)
+
+    if error:
+        return jsonify({"error": error}), status_code
+
+    return ({"webpage": webpage.name}, status_code)
+
+
+def find_webpage_by_copydoc(copy_doc_link: str):
+    """
+    Extracts the Google Doc ID from a copy doc link and finds the associated
+    webpage.
+
+    Args:
+        copy_doc_link (str): The link to the Google Doc.
+
+    Returns:
+        tuple: (webpage object or None, error message or None, status code of
+        400, 404 or 200)
+    """
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", copy_doc_link)
+    google_doc_id = match.group(1) if match else None
+
+    if not google_doc_id:
+        return None, "Please provide a valid copydoc link", 400
+
+    webpage = Webpage.query.filter(
+        Webpage.copy_doc_link.ilike(f"%/d/{google_doc_id}%")
+    ).first()
+
+    if not webpage:
+        return None, "Webpage by given copydoc not found", 404
+
+    return webpage, None, 200

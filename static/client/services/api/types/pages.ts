@@ -37,6 +37,7 @@ export interface IPage {
     updated_at: string;
   };
   ext?: string;
+  content_jira_id?: string;
 }
 
 export interface IPagesResponse {
@@ -56,7 +57,9 @@ export interface INewPage {
 }
 
 export interface INewPageResponse {
-  copy_doc: string;
+  data: {
+    webpage: IPage;
+  };
 }
 
 export const ChangeRequestType = {

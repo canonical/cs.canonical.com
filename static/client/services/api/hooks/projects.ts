@@ -12,9 +12,9 @@ export function useProjects() {
 
   const [projects, setProjects] = useState<IPagesResponse["data"][]>([]);
 
-  const hasData = data?.every((project) => project?.data);
+  const hasData = data?.every((project) => project!);
   if (!isLoading && data?.length && hasData && projects.length !== data.length) {
-    setProjects(data.map((project) => project.data));
+    setProjects(data);
   }
 
   function filterProjectsAndPages(data: IPagesResponse["data"]) {
@@ -81,7 +81,7 @@ export function useProjects() {
 
   return {
     data: getFilteredProjects(),
-    unfilteredProjects: data?.map((project) => project?.data),
+    unfilteredProjects: data,
     isLoading,
     isFilterApplied,
   };

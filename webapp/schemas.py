@@ -64,6 +64,7 @@ class CreatePageModel(BaseModel):
     reviewers: Optional[List[UserModel]]
     parent: str
     product_ids: List[int]
+    content_jira_id: Optional[str] = None
 
 
 class SetProductsModel(BaseModel):
@@ -79,3 +80,7 @@ class AttachJiraWithWebpageReq(BaseModel):
     copy_doc_link: str
     jira_id: str
     summary: str
+
+
+class FindWebpageByCopydoc(BaseModel):
+    copy_doc_link: str

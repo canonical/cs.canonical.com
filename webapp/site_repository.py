@@ -1,7 +1,7 @@
-import os
 import re
 import subprocess
 import time
+import traceback
 from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
@@ -120,34 +120,6 @@ class SiteRepository:
         command_str = self.__sanitize_command__(command_str)
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
-    def delete_local_files(self):
-        """Delete a local folder"""
-        return self.__run__(
-            f"rm -rf {self.repo_path}",
-            f"Error deleting folder {self.repo_path}",
-        )
-
-    def setup_site_repository(self):
-        """Clone the repository to a specific directory, or checkout the latest
-        updates if the repository exists.
-        """
-        # Download files from the repository
-        github = self.app.config["github"]
-        github.get_repository_tree(
-            repository=self.repository_uri,
-            branch=self.branch,
-        )
-
-    def repository_exists(self):
-        """Check if the repository exists"""
-        absolute_path = (
-            self.app.config["BASE_DIR"]
-            + "/repositories/"
-            + self.repository_uri
-            + "/.git"
-        )
-        return os.path.exists(absolute_path)
-
     def get_tree_from_cache(self):
         """Get the tree from the cache. Return None if cache is not
         available.
@@ -159,29 +131,31 @@ class SiteRepository:
         """Set the tree in the cache. Silently pass if cache is not
         available.
         """
-        if self.cache:
-            return self.cache.set(self.cache_key, tree)
+        try:
+            self.invalidate_cache()
+            # Update the cache
+            if self.cache:
+                self.cache.set(self.cache_key, tree)
+        except Exception as e:
+            self.logger.exception(traceback.format_exc())
+            self.logger.error(f"Unable to save tree to cache: {e}")
 
     def invalidate_cache(self):
         self.cache.set(self.cache_key, None)
 
     def get_tree_from_disk(self):
         """Get a tree from a freshly cloned repository."""
-        # Setup the repository
-        self.setup_site_repository()
+        # Check if a background task is active. if so do not proceed
+        if self.cache.get(
+            f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
+        ):
+            return None
+
+        github = self.app.config["github"]
+        github.clone_repository(self.repository_uri)
 
         templates_folder = Path(self.repo_path + "/templates")
         templates_folder.mkdir(parents=True, exist_ok=True)
-
-        # Check if a background task is active. if so, wait until it completes
-        # with a timeout of 30s
-        for _ in range(6):
-            # We sleep first to give the download a chance to complete
-            time.sleep(5)
-            if not self.cache.get(
-                f"{BACKGROUND_TASK_RUNNING_PREFIX}-{self.repository_uri}",
-            ):
-                break
 
         # Parse the templates, retry if a page is unavailable, as it might
         # still be being downloaded.
@@ -207,12 +181,14 @@ class SiteRepository:
         # Generate the base tree from the repository
         base_tree = self.get_tree_from_disk()
 
-        # Save the tree metadata to the database and return an updated tree
-        # that has all fields
-        tree = self.create_webpages_for_tree(self.db, base_tree)
-        self.sort_tree_by_page_name(tree)
-        self.logger.info(f"Tree loaded for {self.repository_uri}")
-        return tree
+        if base_tree:
+            # Save the tree metadata to the database and return an updated tree
+            # that has all fields
+            tree = self.create_webpages_for_tree(self.db, base_tree)
+            self.sort_tree_by_page_name(tree)
+            self.logger.info(f"Tree loaded for {self.repository_uri}")
+            return tree
+        return None
 
     def sort_tree_by_page_name(self, tree):
         if "children" in tree:
@@ -241,6 +217,7 @@ class SiteRepository:
                 return True
         return False
 
+    # This method is called when an endpoint is called from FE to get the tree
     def get_tree_from_db(self):
         """Get the tree from the database. If the tree is incomplete, reload
         from the repository.
@@ -265,28 +242,25 @@ class SiteRepository:
                 tree = get_tree_struct(db.session, webpages)
                 # If the tree is empty, load from the repository
                 if not tree or (
-                    tree.get("children") and not tree.get("parent_id")
+                    not tree.get("children") and not tree.get("parent_id")
                 ):
                     msg = (
                         "Reloading incomplete tree root "
-                        f"{self.repository_uri}."
+                        f"{self.repository_uri}. {tree}"
                     )
                     self.logger.info(
                         msg,
                     )
                     tree = self.get_new_tree()
             return tree
-        # Raise an error if the project does not exist.
-        raise SiteRepositoryError("Invalid project_id. Unable to load tree.")
+        return None
 
-    def get_tree(self, no_cache: bool = False):
-        """Get the tree from the cache or load a new tree to cache and db."""
-        # Return from cache if available
-        if (not no_cache) and (tree := self.get_tree_from_cache()):
-            return tree
+    # This method is called from a scheduled task that clones repositories
+    def get_tree(self):
+        """Get a new tree from the repository"""
 
-        self.invalidate_cache()
-        return self.get_new_tree()
+        new_tree = self.get_new_tree()
+        self.set_tree_in_cache(new_tree)
 
     def __create_webpage_for_node__(
         self,
@@ -361,7 +335,6 @@ class SiteRepository:
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """Create webpages for each node in the tree."""
-        self.logger.info(f"Existing tree {tree}")
         # Get the default project and owner for new webpages
         project, _ = get_or_create(
             db.session,
@@ -388,8 +361,6 @@ class SiteRepository:
             webpage_dict["id"],
         )
 
-        self.logger.info(f"Existing dict {webpage_dict}")
-
         db.session.commit()
         return webpage_dict
 
@@ -400,17 +371,14 @@ class SiteRepository:
             return tree
 
         self.logger.info(f"Loading {self.repository_uri} from database")
-        self.invalidate_cache()
 
         # Load the tree from database
-        try:
-            tree = self.get_tree_from_db()
-            self.logger.info(f"Tree refreshed for {self.repository_uri}")
-            # Update the cache
+        if tree := self.get_tree_from_db():
+            self.logger.info(
+                f"Tree obtained from db for {self.repository_uri}"
+            )
             self.set_tree_in_cache(tree)
             return tree
-        except Exception as e:
-            self.logger.error(f"Error loading tree: {e}")
 
         # Or just return an empty tree
         return {
