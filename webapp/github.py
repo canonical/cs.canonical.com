@@ -112,16 +112,24 @@ class GitHub:
                     f"Finished cloning {repository} in {retries} retries"
                 )
                 break
-            except Exception as e:
+            except BaseException as e:
                 if retries > MAX_RETRIES:
                     logger.error(
                         f"Failed to clone {repository} after "
                         f"{retries} retries."
                     )
+                    self.cache.set(
+                        f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                        0,
+                    )
                     raise GithubError(
                         f"Failed to clone {repository} after "
                         f"{retries} retries."
                     ) from e
+                logger.error(
+                    f"Error cloning {repository} on try {retries} of "
+                    f"{MAX_RETRIES}: {e}"
+                )
                 retries += 1
         self.cache.set(
             f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",

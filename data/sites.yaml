@@ -3,3 +3,7 @@ sites:
   - canonical.com
   - cn.ubuntu.com
   - jp.ubuntu.com
+  - snapcraft.io
+  - charmhub.io
+  # - canonical.design TODO: uncomment this after repo name changes
+  - netplan.io
