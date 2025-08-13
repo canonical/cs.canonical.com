@@ -101,6 +101,7 @@ class Webpage(db.Model, DateTimeMixin):
     ext: str = Column(String, nullable=True)
     content_jira_id: str = Column(String, nullable=True)  # This field is used
     # to track which pages were created from the content team's board on Jira
+    file_path: str = Column(String, nullable=True)
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
@@ -112,6 +113,12 @@ class Webpage(db.Model, DateTimeMixin):
     )
     webpage_products = relationship(
         "WebpageProduct",
+        back_populates="webpages",
+    )
+    # Relationship to assets via association table
+    assets = relationship(
+        "Asset",
+        secondary="webpage_assets",
         back_populates="webpages",
     )
 
@@ -197,6 +204,41 @@ class WebpageProduct(db.Model, DateTimeMixin):
 
     webpages = relationship("Webpage", back_populates="webpage_products")
     products = relationship("Product", back_populates="webpage_products")
+
+
+class Asset(db.Model, DateTimeMixin):
+    __tablename__ = "assets"
+
+    id: int = Column(Integer, primary_key=True)
+    webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
+    type: str = Column(String, nullable=False)
+    url: str = Column(String, nullable=False)
+
+    # Relationship to webpages via association table
+    webpages = relationship(
+        "Webpage",
+        secondary="webpage_assets",
+        back_populates="assets",
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.type,
+            "url": self.url,
+        }
+
+
+class WebpageAsset(db.Model, DateTimeMixin):
+    __tablename__ = "webpage_assets"
+
+    __table_args__ = (
+        db.UniqueConstraint("webpage_id", "asset_id", name="uq_webpage_asset"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    webpage_id = Column(Integer, ForeignKey("webpages.id"), nullable=False)
+    asset_id = Column(Integer, ForeignKey("assets.id"), nullable=False)
 
 
 def init_db(app: Flask):
