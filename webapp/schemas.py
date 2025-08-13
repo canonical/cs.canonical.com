@@ -84,3 +84,8 @@ class AttachJiraWithWebpageReq(BaseModel):
 
 class FindWebpageByCopydoc(BaseModel):
     copy_doc_link: str
+
+
+class GetWebpageAssetsModel(BaseModel):
+    webpage_url: str
+    project_name: str
