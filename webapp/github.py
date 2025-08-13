@@ -113,7 +113,7 @@ class GitHub:
                 )
                 break
             except BaseException as e:
-                if retries > MAX_RETRIES:
+                if retries >= MAX_RETRIES:
                     logger.error(
                         f"Failed to clone {repository} after "
                         f"{retries} retries."
