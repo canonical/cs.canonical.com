@@ -50,14 +50,12 @@ class SiteRepository:
         self,
         repository_uri: str,
         app: Flask,
-        branch="main",
         db: SQLAlchemy = None,
     ):
         base_dir = app.config["BASE_DIR"]
         self.REPOSITORY_DIRECTORY = f"{base_dir}/repositories"
         self.repository_uri = repository_uri
-        self.cache_key = f"{self.CACHE_KEY_PREFIX}_{repository_uri}_{branch}"
-        self.branch = branch
+        self.cache_key = f"{self.CACHE_KEY_PREFIX}_{repository_uri}"
         self.app = app
         self.logger = app.logger
         self.cache = app.config["CACHE"]
@@ -68,7 +66,7 @@ class SiteRepository:
             self.db = db
 
     def __str__(self) -> str:
-        return f"SiteRepository({self.repository_uri}, {self.branch})"
+        return f"SiteRepository({self.repository_uri})"
 
     def get_repo_path(self, repository_uri: str):
         """Get the repository path"""
