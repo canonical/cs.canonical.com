@@ -89,7 +89,7 @@ class GitHub:
         original_path = self.REPOSITORY_PATH / repository
         temp_path = self.REPOSITORY_PATH / f"{repository}-copy"
 
-        # Remove the temp folder if it exists (clean slate)
+        # Remove the temp folder if it exists (clean state)
         if temp_path.exists():
             shutil.rmtree(temp_path)
 
