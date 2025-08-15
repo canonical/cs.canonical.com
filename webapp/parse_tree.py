@@ -8,6 +8,9 @@ BASE_TEMPLATES = [
     "templates/base_no_nav.html",
     "templates/one-column.html",
     "_base/base.html",
+    "_base-layout.html",
+    "base_layout.html",
+    "base.html",
 ]
 MARKDOWN_TEMPLATES = [
     "legal/_base_legal_markdown.html",

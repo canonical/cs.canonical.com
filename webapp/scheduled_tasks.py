@@ -8,7 +8,6 @@ import yaml
 from flask import Flask
 
 from webapp import create_app
-from webapp.context import site_cloning_lock
 from webapp.models import Asset, JiraTask, Project, Webpage, db
 from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
@@ -35,15 +34,14 @@ def load_site_trees() -> None:
         data = yaml.safe_load(f)
         for site in data["sites"]:
             logger.info(f"Loading site tree for {site}")
-            # Prevent overlapping cloning operations
-            with site_cloning_lock(site):
-                try:
-                    # Enqueue the sites for setup
-                    site_repository = SiteRepository(site, app, db=db)
-                    # build the tree from GH source without using cache
-                    site_repository.get_tree()
-                except Exception as e:
-                    logger.error(e, exc_info=True)
+
+            try:
+                # Enqueue the sites for setup
+                site_repository = SiteRepository(site, app, db=db)
+                # build the tree from GH source without using cache
+                site_repository.get_tree()
+            except Exception as e:
+                logger.error(e, exc_info=True)
 
 
 @register_task(delay=UPDATE_STATUS_DELAY)

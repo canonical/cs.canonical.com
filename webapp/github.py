@@ -131,7 +131,7 @@ class GitHub:
                     shutil.rmtree(backup_path)
 
                 break
-            except Exception as e:
+            except BaseException as e:
                 if retries >= MAX_RETRIES:
                     logger.error(
                         f"Failed to clone {repository} after "
@@ -140,10 +140,18 @@ class GitHub:
                     # Clean up temp folder if cloning failed
                     if temp_path.exists():
                         shutil.rmtree(temp_path)
+                    self.cache.set(
+                        f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
+                        0,
+                    )
                     raise GithubError(
                         f"Failed to clone {repository} after "
                         f"{retries} retries."
                     ) from e
+                logger.error(
+                    f"Error cloning {repository} on try {retries} of "
+                    f"{MAX_RETRIES}: {e}"
+                )
                 retries += 1
 
         self.cache.set(

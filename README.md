@@ -312,7 +312,7 @@ def some_route():
 </details>
 
 <details>
- <summary><code>GET</code> <code><b>/get-tree/site-name/branch-name</b></code> <code>(you can optionally specify the branch)</code></summary>
+ <summary><code>GET</code> <code><b>/get-tree/site-name</b></code></summary>
 </details>
 
 ```json
