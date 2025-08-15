@@ -16,6 +16,8 @@ extensions:
   - flask-framework
 parts:
   flask-framework/install-app:
+    stage-packages:
+      - git
     prime:
       - flask/app/.env
       - flask/app/app.py
