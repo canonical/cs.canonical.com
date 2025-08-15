@@ -8,7 +8,16 @@ export const VIEW_TREE = "tree";
 export const VIEW_TABLE = "table";
 
 const config = {
-  allProjects: ["canonical.com", "ubuntu.com", "cn.ubuntu.com", "jp.ubuntu.com"],
+  allProjects: [
+    "canonical.com",
+    "ubuntu.com",
+    "cn.ubuntu.com",
+    "jp.ubuntu.com",
+    "snapcraft.io",
+    "charmhub.io",
+    // "canonical.design", TODO: uncomment this after repo name changes
+    "netplan.io",
+  ],
   testProjects: ["canonical.com", "jp.ubuntu.com"],
   views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
   tooltips: {
