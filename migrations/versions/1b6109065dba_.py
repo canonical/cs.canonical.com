@@ -24,15 +24,10 @@ def upgrade():
     op.create_table(
         "assets",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("webpage_id", sa.Integer(), nullable=True),
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("url", sa.String(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["webpage_id"],
-            ["webpages.id"],
-        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(

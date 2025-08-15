@@ -210,7 +210,6 @@ class Asset(db.Model, DateTimeMixin):
     __tablename__ = "assets"
 
     id: int = Column(Integer, primary_key=True)
-    webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     type: str = Column(String, nullable=False)
     url: str = Column(String, nullable=False)
 

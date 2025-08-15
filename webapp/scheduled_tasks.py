@@ -178,7 +178,7 @@ def parse_webpage_assets() -> None:
                 existing_assets[key] = asset
 
         db.session.commit()
-        return parsed_assets_data
+        app.logger.info("Finished scheduled task: parse_webpage_assets")
 
 
 def init_scheduled_tasks(app: Flask) -> None:
