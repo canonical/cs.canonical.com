@@ -121,7 +121,7 @@ jobs:
       - name: Deploy Application to staging
         run: |
           export JUJU_MODEL=admin/stg-cs-canonical-com
-          if juju status --relations | grep -q "cs-canonical-com"; then
+          if juju status --relations | grep -q "^cs-canonical-com"; then
             echo "Application 'cs-canonical-com' exists. Running juju refresh..."
             juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
           else
@@ -165,7 +165,7 @@ jobs:
       - name: Deploy Application to production
         run: |
           export JUJU_MODEL=admin/prod-cs-canonical-com
-          if juju status --relations | grep -q "cs-canonical-com"; then
+          if juju status --relations | grep -q "^cs-canonical-com"; then
             echo "Application 'cs-canonical-com' exists. Running juju refresh..."
             juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
           else
