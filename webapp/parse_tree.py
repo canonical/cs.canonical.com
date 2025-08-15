@@ -23,7 +23,7 @@ TAG_MAPPING = {
     "link": ["meta_copydoc", "copydoc"],
 }
 
-EXCLUDE_PATHS = ["partials"]
+EXCLUDE_PATHS = ["partials", "shared"]
 
 
 def is_index(path):
@@ -306,6 +306,7 @@ def create_node():
         "link": None,
         "children": [],
         "ext": None,
+        "file_path": None,
     }
 
 
@@ -316,6 +317,9 @@ def scan_directory(path_name, base=None):
     node_path = Path(path_name)
     node = create_node()
     node["name"] = path_name.split("/templates", 1)[-1]
+    node["file_path"] = (
+        f"repositories/{str(node_path).split('/repositories/')[1]}"
+    )
 
     # Skip scanning directory if it is in excluded paths
     for path in EXCLUDE_PATHS:
@@ -344,6 +348,9 @@ def scan_directory(path_name, base=None):
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
             node["ext"] = index_type
+            node["file_path"] = (
+                f"repositories/{str(index_path).split('/repositories/')[1]}"
+            )
 
     else:
         node["ext"] = ".dir"
@@ -358,6 +365,9 @@ def scan_directory(path_name, base=None):
             ):
                 child_tags = get_tags_rolling_buffer(child)
                 child_tags["ext"] = child.suffix
+                child_tags["file_path"] = (
+                    f"repositories/{str(child).split('/repositories/')[1]}"
+                )
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
                     child_tags["link"] = get_extended_copydoc(

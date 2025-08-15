@@ -81,15 +81,17 @@ class GitHub:
         raise GithubError(err)
 
     def clone_repository(self, repository: str):
-        """Get a listing of all the files in a repository.
+        """Clone repository into a duplicate folder, then replace the original.
 
         Args:
             repository (str): The repository name.
-
         """
-        tree_file_path = self.REPOSITORY_PATH / repository
-        if tree_file_path.exists():
-            shutil.rmtree(tree_file_path)
+        original_path = self.REPOSITORY_PATH / repository
+        temp_path = self.REPOSITORY_PATH / f"{repository}-copy"
+
+        # Remove the temp folder if it exists (clean state)
+        if temp_path.exists():
+            shutil.rmtree(temp_path)
 
         # Set the lock
         self.cache.set(
@@ -101,16 +103,33 @@ class GitHub:
         while retries <= MAX_RETRIES:
             try:
                 logger.info(
-                    f"Cloning repository {repository} to {tree_file_path}, "
+                    f"Cloning repository {repository} to {temp_path}, "
                     f"try {retries} of {MAX_RETRIES}"
                 )
                 Repo.clone_from(
                     f"{REPO_ORG}/{repository}.git",
-                    tree_file_path,
+                    temp_path,
                 )
                 logger.info(
                     f"Finished cloning {repository} in {retries} retries"
                 )
+
+                # After successful clone, replace the original directory
+                if original_path.exists():
+                    backup_path = self.REPOSITORY_PATH / f"{repository}-backup"
+                    # Remove any existing backup
+                    if backup_path.exists():
+                        shutil.rmtree(backup_path)
+                    # Rename original to backup
+                    original_path.rename(backup_path)
+
+                # Rename temp to original
+                temp_path.rename(original_path)
+
+                # Remove backup after successful replacement
+                if "backup_path" in locals() and backup_path.exists():
+                    shutil.rmtree(backup_path)
+
                 break
             except BaseException as e:
                 if retries >= MAX_RETRIES:
@@ -118,6 +137,9 @@ class GitHub:
                         f"Failed to clone {repository} after "
                         f"{retries} retries."
                     )
+                    # Clean up temp folder if cloning failed
+                    if temp_path.exists():
+                        shutil.rmtree(temp_path)
                     self.cache.set(
                         f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
                         0,
@@ -131,6 +153,7 @@ class GitHub:
                     f"{MAX_RETRIES}: {e}"
                 )
                 retries += 1
+
         self.cache.set(
             f"{BACKGROUND_TASK_RUNNING_PREFIX}-{repository}",
             0,

@@ -290,6 +290,7 @@ class SiteRepository:
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
         webpage.ext = node["ext"]
+        webpage.file_path = node["file_path"]
         if webpage.status == WebpageStatus.NEW:
             webpage.status = WebpageStatus.AVAILABLE
 

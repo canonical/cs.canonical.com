@@ -8,6 +8,7 @@ from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
+from webapp.routes.webpage import webpage_blueprint
 from webapp.scheduled_tasks import init_scheduled_tasks
 from webapp.sso import login_required
 
@@ -25,6 +26,7 @@ app.register_blueprint(tree_blueprint)
 app.register_blueprint(user_blueprint)
 app.register_blueprint(jira_blueprint)
 app.register_blueprint(product_blueprint)
+app.register_blueprint(webpage_blueprint)
 
 
 # Client-side routes
