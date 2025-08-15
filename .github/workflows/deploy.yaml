@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cs-canonical-com-charm
-          path: ./*.charm
+          path: ./charm/*.charm
 
   pack-rock:
     runs-on: ubuntu-latest
@@ -53,8 +53,8 @@ jobs:
 
       - name: Create repositories directory
         run: |
-            mkdir -m 777 repositories
-            mkdir -m 777 tree-cache
+          mkdir -m 777 repositories
+          mkdir -m 777 tree-cache
 
       - name: Setup Rockcraft
         run: sudo snap install rockcraft --classic --channel=latest/edge
