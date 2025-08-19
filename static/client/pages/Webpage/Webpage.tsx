@@ -114,23 +114,23 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
           </Button>
         </>
       </div>
-      <div className="row">
+      <div className={isNew ? "grid-row" : "grid-row--50-50"}>
         {!isNew && (
-          <div className="col-7">
+          <div className="grid-col">
             <p className="p-text--small-caps" id="page-descr">
               Description
             </p>
             <p aria-labelledby="page-descr">{page.description || "-"}</p>
           </div>
         )}
-        <div className={isNew ? "col-12" : "col-5"}>
+        <div className="grid-col">
           <OwnerAndReviewers page={page} />
           <div className="u-sv3" />
           <Products page={page} />
         </div>
       </div>
       {page.jira_tasks?.length ? (
-        <div className="l-webpage--tasks row">
+        <div className="l-webpage--tasks grid-row">
           <p className="p-text--small-caps">Related Jira Tickets</p>
           <JiraTasks tasks={page.jira_tasks} />
         </div>

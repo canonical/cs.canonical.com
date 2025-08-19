@@ -18,7 +18,7 @@
     "format-python": "black --line-length 79 webapp tests"
   },
   "dependencies": {
-    "@canonical/react-components": "0.60.0",
+    "@canonical/react-components": "2.16.1",
     "axios": "1.8.2",
     "classnames": "2.5.1",
     "formik": "2.4.6",
@@ -26,7 +26,7 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.29.0",
-    "vanilla-framework": "4.22.0",
+    "vanilla-framework": "4.30.0",
     "zustand": "4.5.6"
   },
   "devDependencies": {

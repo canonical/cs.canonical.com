@@ -28,8 +28,8 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
       <div className="l-application">
         <Navigation />
         <main className="l-main">
-          <div className="row">
-            <div className="col-7">
+          <div className="grid-row--50-50">
+            <div className="grid-col">
               {location.pathname.includes("/webpage") && view !== VIEW_TREE && (
                 <Button hasIcon onClick={goPrev}>
                   <React.Fragment key=".0">
@@ -38,12 +38,12 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
                 </Button>
               )}
             </div>
-            <div className="col-5">
+            <div className="grid-col">
               <Search />
             </div>
           </div>
           <hr />
-          <div className="row">
+          <div className="grid-row">
             {location.pathname === "/app" && (
               <>
                 <h2>All pages</h2>

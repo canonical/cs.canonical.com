@@ -83,8 +83,8 @@ const FilterandSearch = (): JSX.Element => {
 
   return (
     <>
-      <div className="row">
-        <div className="col-6">
+      <div className="grid-row--50-50">
+        <div className="grid-col">
           <SearchBox
             externallyControlled={true}
             onChange={handleSearchChange}
@@ -93,7 +93,7 @@ const FilterandSearch = (): JSX.Element => {
             value={searchQuery}
           />
         </div>
-        <div className="col-6">
+        <div className="grid-col">
           <ContextualMenu
             closeOnEsc={true}
             closeOnOutsideClick={true}
@@ -113,71 +113,75 @@ const FilterandSearch = (): JSX.Element => {
             visible={false}
           >
             <div className="p-filter__body">
-              <div className="row p-divider u-no-margin--bottom u-no-padding">
-                <div className="col-5 p-divider__block">
-                  <Button
-                    appearance="base"
-                    aria-controls={FilterGroupOwner}
-                    className={`u-no-margin u-align--left p-filter__button ${
-                      activeFilter === FilterGroupOwner && "p-filter__button--active"
-                    }`}
-                    hasIcon
-                    onClick={handleFilterClick}
-                  >
-                    <i className="p-icon--user" style={{ paddingRight: "3rem" }} /> <span>By owner</span>&nbsp;
-                    {!!selectedOwner.length && (
-                      <Badge className="u-no-padding--top  u-no-margin--bottom" value={selectedOwner.length} />
-                    )}
-                  </Button>
-                  <Button
-                    appearance="base"
-                    aria-controls={FilterGroupReviewer}
-                    className={`u-no-margin u-align--left p-filter__button ${
-                      activeFilter === FilterGroupReviewer && "p-filter__button--active"
-                    }`}
-                    hasIcon
-                    onClick={handleFilterClick}
-                  >
-                    <i className="p-icon--show" style={{ paddingRight: "3rem" }} /> <span>By reviewer</span>&nbsp;
-                    {!!selectedReviewer.length && (
-                      <Badge
-                        className="u-no-padding--top  u-no-margin--bottom"
-                        value={selectedReviewer ? selectedReviewer.length : 0}
-                      />
-                    )}
-                  </Button>
+              <div className="grid-row p-divider u-no-margin--bottom u-no-padding">
+                <div className="grid-col-3 p-divider__block">
+                  <span>
+                    <Button
+                      appearance="base"
+                      aria-controls={FilterGroupOwner}
+                      className={`u-no-margin u-align--left p-filter__button ${
+                        activeFilter === FilterGroupOwner && "p-filter__button--active"
+                      }`}
+                      hasIcon
+                      onClick={handleFilterClick}
+                    >
+                      <i className="p-icon--user" style={{ paddingRight: "3rem" }} /> <span>By owner</span>&nbsp;
+                      {!!selectedOwner.length && (
+                        <Badge className="u-no-padding--top  u-no-margin--bottom" value={selectedOwner.length} />
+                      )}
+                    </Button>
+                    <Button
+                      appearance="base"
+                      aria-controls={FilterGroupReviewer}
+                      className={`u-no-margin u-align--left p-filter__button ${
+                        activeFilter === FilterGroupReviewer && "p-filter__button--active"
+                      }`}
+                      hasIcon
+                      onClick={handleFilterClick}
+                    >
+                      <i className="p-icon--show" style={{ paddingRight: "3rem" }} /> <span>By reviewer</span>&nbsp;
+                      {!!selectedReviewer.length && (
+                        <Badge
+                          className="u-no-padding--top  u-no-margin--bottom"
+                          value={selectedReviewer ? selectedReviewer.length : 0}
+                        />
+                      )}
+                    </Button>
 
-                  <Button
-                    appearance="base"
-                    aria-controls={FilterGroupProduct}
-                    className={`u-no-margin u-align--left p-filter__button ${
-                      activeFilter === FilterGroupProduct && "p-filter__button--active"
-                    }`}
-                    hasIcon
-                    onClick={handleFilterClick}
-                  >
-                    <i className="p-icon--repository" style={{ paddingRight: "3rem" }} /> <span>By product</span>
-                    &nbsp;
-                    {!!selectedProduct.length && (
-                      <Badge
-                        className="u-no-padding--top  u-no-margin--bottom"
-                        value={selectedProduct ? selectedProduct.length : 0}
-                      />
-                    )}
-                  </Button>
+                    <Button
+                      appearance="base"
+                      aria-controls={FilterGroupProduct}
+                      className={`u-no-margin u-align--left p-filter__button ${
+                        activeFilter === FilterGroupProduct && "p-filter__button--active"
+                      }`}
+                      hasIcon
+                      onClick={handleFilterClick}
+                    >
+                      <i className="p-icon--repository" style={{ paddingRight: "3rem" }} /> <span>By product</span>
+                      &nbsp;
+                      {!!selectedProduct.length && (
+                        <Badge
+                          className="u-no-padding--top  u-no-margin--bottom"
+                          value={selectedProduct ? selectedProduct.length : 0}
+                        />
+                      )}
+                    </Button>
+                  </span>
                 </div>
-                <div className="col-7 p-divider__block">
-                  <form>
-                    <div className={activeFilter === FilterGroupOwner ? "" : "u-hide"} id={FilterGroupOwner}>
-                      <SearchUserCheckbox setState={setSelectedOwner} state={selectedOwner} />{" "}
-                    </div>
-                    <div className={activeFilter === FilterGroupReviewer ? "" : "u-hide"} id={FilterGroupReviewer}>
-                      <SearchUserCheckbox setState={setSelectedReviewer} state={selectedReviewer} />
-                    </div>
-                    <div className={activeFilter === FilterGroupProduct ? "" : "u-hide"} id={FilterGroupProduct}>
-                      <SearchProductCheckbox setState={setSelectedProduct} state={selectedProduct} />
-                    </div>
-                  </form>
+                <div className="grid-col-5 p-divider__block">
+                  <span>
+                    <form>
+                      <div className={activeFilter === FilterGroupOwner ? "" : "u-hide"} id={FilterGroupOwner}>
+                        <SearchUserCheckbox setState={setSelectedOwner} state={selectedOwner} />{" "}
+                      </div>
+                      <div className={activeFilter === FilterGroupReviewer ? "" : "u-hide"} id={FilterGroupReviewer}>
+                        <SearchUserCheckbox setState={setSelectedReviewer} state={selectedReviewer} />
+                      </div>
+                      <div className={activeFilter === FilterGroupProduct ? "" : "u-hide"} id={FilterGroupProduct}>
+                        <SearchProductCheckbox setState={setSelectedProduct} state={selectedProduct} />
+                      </div>
+                    </form>
+                  </span>
                 </div>
               </div>
               <hr />
