@@ -1,9 +1,11 @@
+import { type ReactNode } from "react";
+
 import type { IJiraTasksProps } from "./JiraTasks.types";
 
 import config from "@/config";
 import { DatesServices } from "@/services/dates";
 
-const JiraTasks = ({ tasks }: IJiraTasksProps): JSX.Element => {
+const JiraTasks = ({ tasks }: IJiraTasksProps): ReactNode => {
   return (
     <table>
       <thead>

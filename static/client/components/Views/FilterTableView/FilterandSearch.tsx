@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
 
 import { Button, Badge, ContextualMenu, SearchBox } from "@canonical/react-components";
 
@@ -9,7 +9,7 @@ import SearchUserCheckbox from "./SearchUserCheckbox";
 import type { IViewFilter } from "@/services/api/types/views";
 import { useViewsStore } from "@/store/views";
 
-const FilterandSearch = (): JSX.Element => {
+const FilterandSearch = (): ReactNode => {
   const [filter, setFilter] = useViewsStore((state) => {
     return [state.filter, state.setFilter];
   });

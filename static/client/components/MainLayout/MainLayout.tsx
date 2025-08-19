@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type ReactNode } from "react";
 
 import { Button, NotificationConsumer } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -11,10 +11,10 @@ import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
 
 interface IMainLayoutProps {
-  children?: JSX.Element;
+  children?: ReactNode;
 }
 
-const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
+const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
   const location = useLocation();
   const navigate = useNavigate();
   const view = useViewsStore((state) => state.view);

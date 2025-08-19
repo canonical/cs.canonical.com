@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { MultiSelectItem } from "@canonical/react-components";
 import { Button, Input, Spinner } from "@canonical/react-components";
@@ -24,7 +24,7 @@ const LoadingState = {
   DONE: 2,
 };
 
-const NewWebpage = (): JSX.Element => {
+const NewWebpage = (): ReactNode => {
   const [titleValue, setTitleValue] = useState<string>("");
   const [copyDoc, setCopyDoc] = useState<string>();
   const [owner, setOwner] = useState<IUser | null>();

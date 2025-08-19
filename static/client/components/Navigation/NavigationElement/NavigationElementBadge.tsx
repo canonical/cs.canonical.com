@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, type ReactNode } from "react";
 
 import { Tooltip } from "@canonical/react-components";
 
@@ -6,7 +6,7 @@ import type { INavigationElementBadgeProps } from "./NavigationElement.types";
 
 import { PageStatus } from "@/services/api/types/pages";
 
-const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgeProps): JSX.Element => {
+const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgeProps): ReactNode => {
   const getIcon = useMemo(() => {
     switch (page.status) {
       case PageStatus.NEW:

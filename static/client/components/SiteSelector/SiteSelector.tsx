@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 
 import { Select, Spinner } from "@canonical/react-components";
 import { useLocation } from "react-router-dom";
@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import { useProjects } from "@/services/api/hooks/projects";
 import { useStore } from "@/store";
 
-const SiteSelector = (): JSX.Element | null => {
+const SiteSelector = (): ReactNode | null => {
   const location = useLocation();
   const { unfilteredProjects: projects, isLoading } = useProjects();
 

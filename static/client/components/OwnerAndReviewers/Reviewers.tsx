@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
@@ -9,7 +9,7 @@ import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
-const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.Element => {
+const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): ReactNode => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
   const { options, setOptions, handleChange } = useUsersRequest();
 

@@ -1,4 +1,4 @@
-import { type ChangeEvent, useCallback, useMemo, useState } from "react";
+import { type ChangeEvent, useCallback, useMemo, useState, type ReactNode } from "react";
 import React from "react";
 
 import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip, useNotify } from "@canonical/react-components";
@@ -20,7 +20,7 @@ const RequestTaskModal = ({
   onTypeChange,
   onClose,
   webpage,
-}: IRequestTaskModalProps): JSX.Element => {
+}: IRequestTaskModalProps): ReactNode => {
   const [dueDate, setDueDate] = useState<string>();
   const [checked, setChecked] = useState(false);
   const [summary, setSummary] = useState<string>();

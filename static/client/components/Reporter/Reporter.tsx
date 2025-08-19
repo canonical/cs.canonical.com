@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 
 import type { IReporterProps } from "./Reporter.types";
 
@@ -7,7 +7,7 @@ import { useUsersRequest } from "@/components/OwnerAndReviewers/OwnerAndReviewer
 import { type IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 
-const Reporter = ({ reporter, setReporter }: IReporterProps): JSX.Element => {
+const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
   const user = useStore((state) => state.user);
   const { options, setOptions, handleChange } = useUsersRequest();
 

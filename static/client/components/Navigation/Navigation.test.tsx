@@ -1,10 +1,12 @@
+import { type ReactNode } from "react";
+
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { MemoryRouter } from "react-router-dom";
 
 import Navigation from "./Navigation";
 
-const renderWithQuery = (children: JSX.Element) => {
+const renderWithQuery = (children: ReactNode) => {
   const queryClient = new QueryClient();
   return render(<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>);
 };

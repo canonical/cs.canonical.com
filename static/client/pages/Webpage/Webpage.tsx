@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 
@@ -12,7 +12,7 @@ import RequestTaskModal from "@/components/RequestTaskModal";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 
-const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
+const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,

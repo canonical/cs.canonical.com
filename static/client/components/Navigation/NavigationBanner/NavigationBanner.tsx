@@ -1,3 +1,5 @@
+import { type ReactNode } from "react";
+
 import { Link, useLocation } from "react-router-dom";
 
 import { isSelected } from "@/components/Navigation/utils";
@@ -6,7 +8,7 @@ interface NavigationBannerProps {
   children?: React.ReactNode;
 }
 
-const NavigationBanner = ({ children }: NavigationBannerProps): JSX.Element => {
+const NavigationBanner = ({ children }: NavigationBannerProps): ReactNode => {
   const location = useLocation();
   const homepageLink = { url: "/", label: "Homepage" };
   return (

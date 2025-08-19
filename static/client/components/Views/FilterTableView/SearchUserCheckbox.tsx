@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
+import React, { useEffect, useState, memo, useCallback, useMemo, type ReactNode } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
@@ -10,7 +10,7 @@ type SearchUserCheckboxProps<T extends string[]> = {
   setState: React.Dispatch<React.SetStateAction<T>>;
 };
 
-function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserCheckboxProps<T>): JSX.Element {
+function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserCheckboxProps<T>): ReactNode {
   const [allUsers, setAllUsers] = useState<IUser[]>([]);
   const [searchedUsers, setSearchedUsers] = useState<IUser[]>([]);
 

@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { type MouseEvent, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useLocation } from "react-router-dom";
 
@@ -8,7 +8,7 @@ import NavigationElementBadge from "./NavigationElementBadge";
 import type { IPage } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
 
-const NavigationElement = ({ activePageName, page, project, onSelect }: INavigationElementProps): JSX.Element => {
+const NavigationElement = ({ activePageName, page, project, onSelect }: INavigationElementProps): ReactNode => {
   const [expanded, setExpanded] = useState(false);
   const [childrenHidden, setChildrenHidden] = useState(true);
   const [children, setChildren] = useState<IPage[]>([]);

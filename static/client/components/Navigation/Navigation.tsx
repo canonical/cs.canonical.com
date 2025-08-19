@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -16,7 +16,7 @@ import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
 import { useViewsStore } from "@/store/views";
 
-const Navigation = (): JSX.Element => {
+const Navigation = (): ReactNode => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(true);
