@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
+import React, { useEffect, useState, memo, useCallback, useMemo, type ReactNode } from "react";
 
 import { SearchBox, Input } from "@canonical/react-components";
 
@@ -10,7 +10,7 @@ type SearchProductCheckboxProps = {
   setState: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps): JSX.Element {
+function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps): ReactNode {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const { data } = useProducts();
 

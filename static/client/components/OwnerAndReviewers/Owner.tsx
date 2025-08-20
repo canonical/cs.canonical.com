@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { useUsersRequest } from "./OwnerAndReviewers.hooks";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
@@ -10,7 +10,7 @@ import { PagesServices } from "@/services/api/services/pages";
 import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
-const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element => {
+const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): ReactNode => {
   const [currentOwner, setCurrentOwner] = useState<IUser | null>(null);
   const { options, setOptions, handleChange } = useUsersRequest();
 

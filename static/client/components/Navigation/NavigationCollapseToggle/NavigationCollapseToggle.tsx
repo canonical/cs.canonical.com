@@ -1,3 +1,5 @@
+import { type ReactNode } from "react";
+
 import { Button, Icon, Tooltip } from "@canonical/react-components";
 import classNames from "classnames";
 
@@ -9,7 +11,7 @@ const NavigationCollapseToggle = ({
   isCollapsed: boolean;
   setIsCollapsed: (isCollapsed: boolean) => void;
   className?: string;
-}): JSX.Element => {
+}): ReactNode => {
   return (
     <Tooltip
       message={<>{!isCollapsed ? "collapse" : "expand"}</>}

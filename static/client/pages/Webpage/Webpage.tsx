@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 
@@ -12,7 +12,7 @@ import RequestTaskModal from "@/components/RequestTaskModal";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 
-const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
+const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
@@ -114,23 +114,23 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
           </Button>
         </>
       </div>
-      <div className="row">
+      <div className={isNew ? "grid-row" : "grid-row--50-50"}>
         {!isNew && (
-          <div className="col-7">
+          <div className="grid-col">
             <p className="p-text--small-caps" id="page-descr">
               Description
             </p>
             <p aria-labelledby="page-descr">{page.description || "-"}</p>
           </div>
         )}
-        <div className={isNew ? "col-12" : "col-5"}>
+        <div className="grid-col">
           <OwnerAndReviewers page={page} />
           <div className="u-sv3" />
           <Products page={page} />
         </div>
       </div>
       {page.jira_tasks?.length ? (
-        <div className="l-webpage--tasks row">
+        <div className="l-webpage--tasks grid-row">
           <p className="p-text--small-caps">Related Jira Tickets</p>
           <JiraTasks tasks={page.jira_tasks} />
         </div>

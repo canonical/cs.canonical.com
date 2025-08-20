@@ -1,4 +1,4 @@
-import { type MouseEvent, useCallback, useRef, useState } from "react";
+import { type MouseEvent, useCallback, useRef, useState, type ReactNode } from "react";
 
 import { SearchBox } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import type { IMatch } from "./Search.types";
 import { usePages } from "@/services/api/hooks/pages";
 import { useStore } from "@/store";
 
-const Search = (): JSX.Element => {
+const Search = (): ReactNode => {
   const { data } = usePages();
   const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);

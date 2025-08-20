@@ -76,7 +76,8 @@ test.describe("Test project actions", () => {
     await page.locator(".l-new-webpage--location .p-list-tree .p-list-tree__item").first().click();
     const productsDropdown = page.getByRole("combobox", { name: "Select products" });
     await productsDropdown.click();
-    const products = productsDropdown.locator("xpath=parent::*").locator(".multi-select__dropdown-item");
+    const productsList = page.locator(".multi-select.p-contextual-menu");
+    const products = productsList.locator(".multi-select__dropdown-item");
     expect(await products.count()).toBeGreaterThan(0);
     for (let i = 0; i < 3; i++) {
       await products.nth(i).click();

@@ -1,4 +1,4 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction, ReactNode } from "react";
 
 import type { IPage } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
@@ -10,7 +10,7 @@ export interface IOwnerAndReviewersProps {
 }
 
 export interface ICustomSearchAndFilterProps {
-  label: string | JSX.Element;
+  label: string | ReactNode;
   options: IUser[];
   selectedOptions: IUser[];
   placeholder: string;
