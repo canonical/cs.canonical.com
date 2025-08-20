@@ -1,4 +1,5 @@
 import { api } from "@/services/api";
+import type { IGetWebpageAssets } from "@/services/api/types/assets";
 import type {
   INewPage,
   INewPageResponse,
@@ -35,6 +36,10 @@ export const requestRemoval = async (body: IRequestRemoval): Promise<void> => {
 
 export const setProducts = async (body: ISetProducts) => {
   return api.pages.setProducts(body);
+};
+
+export const getWebpageAssets = async (body: IGetWebpageAssets) => {
+  return api.pages.getWebpageAssets(body);
 };
 
 export * as PagesServices from "./pages";

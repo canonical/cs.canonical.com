@@ -20,7 +20,10 @@ const ProjectTitle: React.FC<ProjectTitleProps> = ({ project }) => {
       <span className="p-muted-heading" style={{ margin: "0 0.5rem" }}>
         {project.name}
       </span>
-      <Badge className="u-no-padding--top" value={countPages(project.templates) - (isFilterApplied ? 1 : 0)} />
+      <Badge
+        className="u-no-padding--top u-no-margin--bottom"
+        value={countPages(project.templates) - (isFilterApplied ? 1 : 0)}
+      />
     </span>
   );
 };
