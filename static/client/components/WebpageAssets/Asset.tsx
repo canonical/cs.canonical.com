@@ -14,7 +14,7 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
 
   return (
     <>
-      <div className="p-image-container--3-2 is-highlighted">
+      <div className="p-image-container--3-2 p-asset__image">
         <img
           alt=""
           className="p-image-container__image"
