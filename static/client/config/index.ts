@@ -31,6 +31,7 @@ const config = {
     ],
     pageRefreshes: ["Changing or adding to the page layout", "Modifications that change the layout"],
   },
+  assetsManagerUrl: "https://assets.ubuntu.com/manager",
   api: {
     path: "/",
     FETCH_OPTIONS: {

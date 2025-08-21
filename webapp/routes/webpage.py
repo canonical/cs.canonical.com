@@ -37,6 +37,7 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
         .join(WebpageAsset, WebpageAsset.asset_id == Asset.id)
         .filter(WebpageAsset.webpage_id == webpage.id)
         .order_by(Asset.id)  # Optional, but good for consistent pagination
+        .distinct()  # If join might cause duplicate Asset rows
     )
 
     total = query.count()

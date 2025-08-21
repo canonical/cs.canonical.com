@@ -9,11 +9,13 @@ export function useWebpageAssets(
   projectName: string,
   page: number = 1,
   perPage: number = 12,
-): IUseQueryHookRest<IAssetsResponse> {
-  const result = useQuery<IAssetsResponse, IApiBasicError>({
+): IUseQueryHookRest<IAssetsResponse["data"]> {
+  const result = useQuery<IAssetsResponse["data"], IApiBasicError>({
     queryKey: ["webpageAssets", pageUrl, projectName, page, perPage],
     queryFn: () =>
-      PagesServices.getWebpageAssets({ pageUrl, projectName, page, perPage }).then((response: any) => response.data),
+      PagesServices.getWebpageAssets({ pageUrl, projectName, page, perPage }).then(
+        (response: IAssetsResponse) => response.data,
+      ),
   });
 
   const error = result.error;

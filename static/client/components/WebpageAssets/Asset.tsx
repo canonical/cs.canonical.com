@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 
+import config from "@/config";
 import type { IAsset } from "@/services/api/types/assets";
 
 const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
@@ -7,12 +8,20 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
     return asset.url.split("/v1/")[1];
   }, [asset.url]);
 
+  const isImgFile = useMemo(() => {
+    return [".jpg", ".jpeg", ".png", ".gif", ".svg"].includes(asset.type.toLowerCase());
+  }, [asset.type]);
+
   return (
     <>
-      <div className="p-image-container--3-2">
-        <img alt="" className="p-image-container__image" src={asset.url} />
+      <div className="p-image-container--3-2 is-highlighted">
+        <img
+          alt=""
+          className="p-image-container__image"
+          src={isImgFile ? asset.url : "https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"}
+        />
       </div>
-      <div className="asset-name">
+      <div className="asset-name u-truncate">
         <b>{assetName}</b>
       </div>
       <div className="asset-type">
@@ -24,7 +33,7 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
         <div className="p-cta-block">
           <a
             className="p-button--positive"
-            href={`https://assets.ubuntu.com/manager/details?file-path=${assetName}`}
+            href={`${config.assetsManagerUrl}/details?file-path=${assetName}`}
             rel="noreferrer"
             target="_blank"
           >
@@ -32,7 +41,7 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
           </a>
           <a
             className="p-button"
-            href={`https://assets.ubuntu.com/manager/update?file-path=${assetName}`}
+            href={`${config.assetsManagerUrl}/update?file-path=${assetName}`}
             rel="noreferrer"
             target="_blank"
           >

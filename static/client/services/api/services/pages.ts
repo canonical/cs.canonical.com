@@ -1,5 +1,5 @@
 import { api } from "@/services/api";
-import type { IGetWebpageAssets } from "@/services/api/types/assets";
+import type { IAssetsResponse, IGetWebpageAssets } from "@/services/api/types/assets";
 import type {
   INewPage,
   INewPageResponse,
@@ -38,7 +38,7 @@ export const setProducts = async (body: ISetProducts) => {
   return api.pages.setProducts(body);
 };
 
-export const getWebpageAssets = async (body: IGetWebpageAssets) => {
+export const getWebpageAssets = async (body: IGetWebpageAssets): Promise<IAssetsResponse> => {
   return api.pages.getWebpageAssets(body);
 };
 

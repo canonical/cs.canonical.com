@@ -5,11 +5,13 @@ export interface IAsset {
 }
 
 export interface IAssetsResponse {
-  assets: IAsset[];
-  page: number;
-  page_size: number;
-  total: number;
-  total_pages: number;
+  data: {
+    assets: IAsset[];
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
 }
 
 export interface IGetWebpageAssets {

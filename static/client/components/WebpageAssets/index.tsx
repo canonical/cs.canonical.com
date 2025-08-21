@@ -13,10 +13,14 @@ const WebpageAssets: React.FC<{ page: IPage }> = ({ page }) => {
 
   const paginate = useCallback((pageNumber: number) => {
     setCurrentPage(pageNumber);
+    document.querySelector("#webpage-assets")?.scrollIntoView({
+      block: "start",
+      behavior: "smooth",
+    });
   }, []);
 
   if (isLoading) return <Spinner text="Loading assets ..." />;
-  if (!assetsData?.assets?.length) return <></>;
+  if (!assetsData?.assets?.length) return null;
 
   return (
     <div id="webpage-assets">
