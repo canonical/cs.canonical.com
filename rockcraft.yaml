@@ -18,6 +18,8 @@ parts:
   flask-framework/install-app:
     stage-packages:
       - git
+    stage:
+      - usr/bin/git
     prime:
       - flask/app/.env
       - flask/app/app.py
