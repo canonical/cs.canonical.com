@@ -68,8 +68,8 @@
     position: sticky !important;
     top: -1.5rem;
     z-index: 9;
-  
-    & button[aria-expanded="true"]{
+
+    & button[aria-expanded="true"] {
       background: var(--vf-color-background-neutral-hover) !important;
     }
   }
@@ -78,6 +78,10 @@
   }
 }
 
-.p-table__row--highlight{
+.p-table__row--highlight {
   background: var(--vf-color-background-neutral-hover) !important;
+}
+
+.p-asset__image {
+  background: $color-mid-x-light;
 }

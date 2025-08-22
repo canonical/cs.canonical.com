@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
 
-from webapp.models import Project, Webpage
+from webapp.models import Asset, Project, Webpage, WebpageAsset, db
 from webapp.schemas import GetWebpageAssetsModel
 from webapp.sso import login_required
 
@@ -22,15 +22,36 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
         return jsonify({"error": "Project not found"}), 404
 
     webpage = Webpage.query.filter_by(
-        url=webpage_url, project_id=project.id
+        url=webpage_url,
+        project_id=project.id
     ).first()
 
     if not webpage:
         return jsonify({"error": "Webpage not found"}), 404
 
-    webpage_assets = webpage.assets
+    page = request.values.get("page", type=int, default=1)
+    per_page = request.values.get("per_page", type=int, default=12)
+
+    query = (
+        db.session.query(Asset)
+        .join(WebpageAsset, WebpageAsset.asset_id == Asset.id)
+        .filter(WebpageAsset.webpage_id == webpage.id)
+        .order_by(Asset.id)  # Optional, but good for consistent pagination
+        .distinct()  # If join might cause duplicate Asset rows
+    )
+
+    total = query.count()
+    assets = query.offset((page - 1) * per_page).limit(per_page).all()
 
     return (
-        jsonify({"assets": [asset.to_dict() for asset in webpage_assets]}),
+        jsonify(
+            {
+                "assets": [asset.to_dict() for asset in assets],
+                "page": page,
+                "page_size": per_page,
+                "total": total,
+                "total_pages": (total + per_page - 1) // per_page,
+            }
+        ),
         200,
     )

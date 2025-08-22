@@ -9,6 +9,7 @@ import JiraTasks from "@/components/JiraTasks";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
+import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 
@@ -135,6 +136,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
           <JiraTasks tasks={page.jira_tasks} />
         </div>
       ) : null}
+      <WebpageAssets page={page} />
       {modalOpen && (
         <RequestTaskModal
           changeType={changeType}

@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   currentUser: "/api/current-user",
   getProducts: "/api/get-products",
   setProducts: "/api/set-product",
+  getWebpageAssets: "/api/get-webpage-assets",
 };
 
 export const REST_TYPES = {

@@ -1,6 +1,7 @@
 import { BasicApiClass } from "./BasicApiClass";
 
 import { ENDPOINTS, REST_TYPES } from "@/services/api/constants";
+import type { IAssetsResponse, IGetWebpageAssets } from "@/services/api/types/assets";
 import type {
   INewPage,
   INewPageResponse,
@@ -44,5 +45,12 @@ export class PagesApiClass extends BasicApiClass {
 
   public setProducts(body: ISetProducts) {
     return this.callApi(ENDPOINTS.setProducts, REST_TYPES.POST, body);
+  }
+
+  public getWebpageAssets(body: IGetWebpageAssets): Promise<IAssetsResponse> {
+    return this.callApi(`${ENDPOINTS.getWebpageAssets}?page=${body.page}&per_page=${body.perPage}`, REST_TYPES.POST, {
+      webpage_url: body.pageUrl,
+      project_name: body.projectName,
+    });
   }
 }
