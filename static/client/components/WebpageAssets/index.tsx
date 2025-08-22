@@ -37,14 +37,14 @@ const WebpageAssets: React.FC<{ page: IPage }> = ({ page }) => {
             );
           })}
         </div>
+        <Pagination
+          centered
+          currentPage={assetsData.page}
+          itemsPerPage={assetsData.page_size}
+          paginate={paginate}
+          totalItems={assetsData.total}
+        />
       </section>
-      <Pagination
-        centered
-        currentPage={assetsData.page}
-        itemsPerPage={assetsData.page_size}
-        paginate={paginate}
-        totalItems={assetsData.total}
-      />
     </div>
   );
 };
