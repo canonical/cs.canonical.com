@@ -144,6 +144,8 @@ const Navigation = (): ReactNode => {
               </div>
               <div className="p-text--small u-text--muted u-truncate p-side-navigation__label">
                 <span>{user?.email}</span>
+                <br />
+                <span>Role: {user?.role?.toUpperCase()}</span>
               </div>
               <hr className="p-rule" />
               <Button appearance="base" className="p-side-navigation__link" onClick={logout}>

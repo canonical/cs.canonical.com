@@ -5,6 +5,7 @@ export interface IUser {
   jobTitle: string;
   department: string;
   team: string;
+  role: string;
 }
 
 export interface IUsersResponse {
