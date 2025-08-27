@@ -15,7 +15,7 @@ const config = {
     "jp.ubuntu.com",
     "snapcraft.io",
     "charmhub.io",
-    // "canonical.design", TODO: uncomment this after repo name changes
+    "canonical.design",
     "netplan.io",
   ],
   testProjects: ["canonical.com", "jp.ubuntu.com"],
