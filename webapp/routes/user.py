@@ -11,7 +11,7 @@ from webapp.models import (
     get_or_create,
 )
 from webapp.site_repository import SiteRepository
-from webapp.sso import is_admin, login_required
+from webapp.sso import login_required
 
 DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
     "FLASK_DISABLE_SSO"
@@ -115,15 +115,5 @@ def current_user():
                 "role": user.role,
             }
         ),
-        200,
-    )
-
-# For QA only, to be removed before merging
-@user_blueprint.route("/check_admin", methods=["GET"])
-@login_required
-@is_admin
-def checkAdmin():
-    return (
-        jsonify({"message": "You are an admin"}),
         200,
     )
