@@ -27,6 +27,7 @@ def get_or_create_user_id(user):
             department=user.get("department"),
             job_title=user.get("jobTitle"),
             hrc_id=user.get("id"),
+            role=user.get("role"),
         )
 
     return user_exists.id

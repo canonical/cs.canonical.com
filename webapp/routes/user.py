@@ -112,6 +112,7 @@ def current_user():
                 "team": user.team,
                 "department": user.department,
                 "jobTitle": user.job_title,
+                "role": user.role,
             }
         ),
         200,
