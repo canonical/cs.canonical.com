@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - feat-semantic-releases
+
+env:
+  TARGET_BRANCH: feat-semantic-releases
+
+jobs:
+  prepare-version:
+    name: Determine and prepare next version
+    runs-on: ubuntu-latest
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+      new_release_git_tag: ${{ steps.semantic.outputs.new_release_git_tag }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        with:
+          dry_run: true
+          branch: ${{ env.TARGET_BRANCH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display next version
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          echo "## 📦 Next Release Version" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.semantic.outputs.new_release_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Git Tag:** ${{ steps.semantic.outputs.new_release_git_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Will Publish:** ${{ steps.semantic.outputs.new_release_published }}" >> $GITHUB_STEP_SUMMARY
+
+  release:
+    name: Rollout Release
+    runs-on: ubuntu-latest
+    needs: prepare-version
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    if: needs.prepare-version.outputs.new_release_published == 'true'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        with:
+          branch: ${{ env.TARGET_BRANCH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display new release summary
+        if: needs.prepare-version.outputs.new_release_published == 'true'
+        run: |
+          echo "## 🚀 Release Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ needs.prepare-version.outputs.new_release_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Git Tag:** ${{ needs.prepare-version.outputs.new_release_git_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [📋 View Release](https://github.com/${{ github.repository }}/releases/tag/${{ needs.prepare-version.outputs.new_release_git_tag }})" >> $GITHUB_STEP_SUMMARY
