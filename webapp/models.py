@@ -242,7 +242,13 @@ class WebpageAsset(db.Model, DateTimeMixin):
 
 
 def init_db(app: Flask):
-    engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+    engine = create_engine(
+        app.config["SQLALCHEMY_DATABASE_URI"],
+        pool_timeout=30,
+        pool_recycle=3600,
+        pool_size=10,
+        pool_pre_ping=True,
+    )
     session_factory = sessionmaker(bind=engine)
 
     db.init_app(app)
