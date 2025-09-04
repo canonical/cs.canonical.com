@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   currentUser: "/api/current-user",
   getProducts: "/api/get-products",
   setProducts: "/api/set-product",
+  crudProduct: "/api/product",
   getWebpageAssets: "/api/get-webpage-assets",
 };
 
