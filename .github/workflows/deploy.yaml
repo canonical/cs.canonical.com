@@ -1,107 +1,88 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - add-charm
-      - main
-
-env:
-  CHARMCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
-  ROCKCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to deploy (e.g., v1.0.0)"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      release_tag:
+        description: "Release tag to deploy (e.g., v1.0.0)"
+        required: true
+        type: string
 
 jobs:
-  pack-charm:
+  setup:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup LXD
-        uses: canonical/setup-lxd@main
-
-      - name: Setup Charmcraft
-        run: sudo snap install charmcraft --classic --channel=latest/edge
-
-      - name: Pack charm
-        run: |
-          cd charm
-          charmcraft pack -v --project-dir ./
-
-      - name: Upload charm
-        uses: actions/upload-artifact@v4
-        with:
-          name: cs-canonical-com-charm
-          path: ./charm/*.charm
-
-  pack-rock:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-
-      - name: Build Assets
-        run: |
-          yarn install
-          yarn run build
-
-      - name: Setup LXD
-        uses: canonical/setup-lxd@main
-
-      - name: Create repositories directory
-        run: |
-          mkdir -m 777 repositories
-          mkdir -m 777 tree-cache
-
-      - name: Setup Rockcraft
-        run: sudo snap install rockcraft --classic --channel=latest/edge
-
-      - name: Pack Rock
-        run: rockcraft pack
-
-      - name: Upload Rock
-        uses: actions/upload-artifact@v4
-        with:
-          name: cs-canonical-com-rock
-          path: ./*.rock
-
-  publish-image:
-    runs-on: ubuntu-latest
-    needs: pack-rock
     outputs:
-      image_url: ${{ steps.set_image_url.outputs.image_url }}
+      RELEASE_TAG: ${{ steps.set-vars.outputs.RELEASE_TAG }}
+      IMAGE_URL: ${{ steps.set-vars.outputs.IMAGE_URL }}
     steps:
-      - name: Get Rock
-        uses: actions/download-artifact@v4
-        with:
-          name: cs-canonical-com-rock
+      - id: set-vars
+        run: |
+          echo "RELEASE_TAG=${{ inputs.release_tag || github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
+          echo "IMAGE_URL=ghcr.io/${{ github.repository }}:${{ inputs.release_tag || github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
 
-      - name: Set image URL
-        id: set_image_url
-        run: echo "image_url=ghcr.io/canonical/cs.canonical.com:$(date +%s)-${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+  validate:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Validate Release Tag
+        run: |
+          echo "Validating release tag: ${{ needs.setup.outputs.RELEASE_TAG }}"
 
-      - name: Push to GHCR
-        run: skopeo --insecure-policy copy oci-archive:$(ls *.rock) docker://${{ steps.set_image_url.outputs.image_url }} --dest-creds "canonical:${{ secrets.GITHUB_TOKEN }}"
+          # Check if the release exists
+          if ! gh release view ${{ needs.setup.outputs.RELEASE_TAG }} > /dev/null 2>&1; then
+            echo "Error: Release with tag '${{ needs.setup.outputs.RELEASE_TAG }}' does not exist."
+            echo "Available releases:"
+            gh release list --limit 10
+            echo "## ❌ Release Validation Failed" >> $GITHUB_STEP_SUMMARY
+            echo "**Release Tag:** ${{ needs.setup.outputs.RELEASE_TAG }} (not found)" >> $GITHUB_STEP_SUMMARY
+            echo "**Available Releases:** Check the workflow logs for available tags" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo "✓ Release '${{ needs.setup.outputs.RELEASE_TAG }}' exists and is valid"
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Release Validation" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Tag:** ${{ needs.setup.outputs.RELEASE_TAG }}" >> $GITHUB_STEP_SUMMARY
 
   deploy-staging:
+    needs: [setup, validate]
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
-    needs: [pack-charm, publish-image]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           sudo snap install juju --channel=3.4/stable --classic
           sudo snap install vault --classic
 
-      - name: Download Charm Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: cs-canonical-com-charm
+      - name: Download Release Artifacts
+        run: |
+          echo "Downloading release assets for tag: ${{ needs.setup.outputs.RELEASE_TAG }}"
+
+          # Download the charm file from the release
+          gh release download ${{ needs.setup.outputs.RELEASE_TAG }} --pattern "*.charm" --dir ./
+
+          # Verify the files were downloaded
+          if [ ! -f *.charm ]; then
+            echo "Error: Charm file not found in release ${{ needs.setup.outputs.RELEASE_TAG }}"
+            echo "## ❌ Asset Download Failed" >> $GITHUB_STEP_SUMMARY
+            echo "**Issue:** Charm file not found in release ${{ needs.setup.outputs.RELEASE_TAG }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          CHARM_FILE=$(ls *.charm)
+          echo "Successfully downloaded charm: $CHARM_FILE"
+          echo "## 📦 Release Assets Downloaded" >> $GITHUB_STEP_SUMMARY
+          echo "**Charm:** $CHARM_FILE" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure Vault and Juju
         run: |
@@ -123,29 +104,46 @@ jobs:
           export JUJU_MODEL=admin/stg-cs-canonical-com
           if juju status --relations | grep -q "^cs-canonical-com"; then
             echo "Application 'cs-canonical-com' exists. Running juju refresh..."
-            juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
+            juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.setup.outputs.IMAGE_URL }}
           else
             echo "Application 'cs-canonical-com' not found. Running juju deploy..."
-            juju deploy ./*.charm cs-canonical-com --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
+            juju deploy ./*.charm cs-canonical-com --resource flask-app-image=${{ needs.setup.outputs.IMAGE_URL }}
           fi
           juju wait-for application cs-canonical-com --query='name=="cs-canonical-com" && (status=="active" || status=="idle")'
 
   deploy-production:
+    name: Deploy to production
+    needs: [setup, validate]
+    if: false #temporary disable for now
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
-    needs: [pack-charm, publish-image]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           sudo snap install juju --channel=3.6/stable --classic
           sudo snap install vault --classic
 
-      - name: Download Charm Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: cs-canonical-com-charm
+      - name: Download Release Artifacts
+        run: |
+          echo "Downloading release assets for tag: ${{ needs.setup.outputs.RELEASE_TAG }}"
+
+          # Download the charm file from the release
+          gh release download ${{ needs.setup.outputs.RELEASE_TAG }} --pattern "*.charm" --dir ./
+
+          # Verify the files were downloaded
+          if [ ! -f *.charm ]; then
+            echo "Error: Charm file not found in release ${{ needs.setup.outputs.RELEASE_TAG }}"
+            echo "## ❌ Asset Download Failed" >> $GITHUB_STEP_SUMMARY
+            echo "**Issue:** Charm file not found in release ${{ needs.setup.outputs.RELEASE_TAG }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          CHARM_FILE=$(ls *.charm)
+          echo "Successfully downloaded charm: $CHARM_FILE"
+          echo "## 📦 Release Assets Downloaded" >> $GITHUB_STEP_SUMMARY
+          echo "**Charm:** $CHARM_FILE" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure Vault and Juju
         run: |
@@ -167,9 +165,9 @@ jobs:
           export JUJU_MODEL=admin/prod-cs-canonical-com
           if juju status --relations | grep -q "^cs-canonical-com"; then
             echo "Application 'cs-canonical-com' exists. Running juju refresh..."
-            juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
+            juju refresh cs-canonical-com --path ./*.charm --resource flask-app-image=${{ needs.setup.outputs.IMAGE_URL }}
           else
             echo "Application 'cs-canonical-com' not found. Running juju deploy..."
-            juju deploy ./*.charm cs-canonical-com --resource flask-app-image=${{ needs.publish-image.outputs.image_url }}
+            juju deploy ./*.charm cs-canonical-com --resource flask-app-image=${{ needs.setup.outputs.IMAGE_URL }}
           fi
           juju wait-for application cs-canonical-com --query='name=="cs-canonical-com" && (status=="active" || status=="idle")'
