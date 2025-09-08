@@ -11,7 +11,8 @@
         "assets": [
           "**/*.rock",
           "**/*.charm"
-        ]
+        ],
+        "success": false
       }
     ]
   ]
