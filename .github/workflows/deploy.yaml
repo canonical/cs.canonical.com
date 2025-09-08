@@ -29,6 +29,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     needs: setup
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -55,6 +57,8 @@ jobs:
   deploy-staging:
     needs: [setup, validate]
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -114,7 +118,9 @@ jobs:
   deploy-production:
     name: Deploy to production
     needs: [setup, validate]
-    if: false #temporary disable for now
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    if: false
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
     steps:
       - name: Checkout Code
