@@ -1,11 +1,23 @@
 import { useCallback, useState, type ReactNode } from "react";
 
 import { Modal, Button, Input, useNotify, Spinner } from "@canonical/react-components";
-import { ProductsServices } from "@/services/api/services/products";
+import { useQueryClient } from "react-query";
 
-const ProductActionModal = ({ product, onClose, action }): ReactNode => {
+import { ProductsServices } from "@/services/api/services/products";
+import type { IProduct, IProductAction } from "@/services/api/types/products";
+
+interface ProductActionModalProps {
+  product: IProduct | null;
+  onClose: () => void;
+  action: IProductAction;
+  closeProductPanel: () => void;
+}
+
+const ProductActionModal = ({ product, onClose, action, closeProductPanel }: ProductActionModalProps): ReactNode => {
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(product?.name || "");
+  const queryClient = useQueryClient();
+
   let actionButton = null;
   let content = null;
   let heading = "";
@@ -21,17 +33,22 @@ const ProductActionModal = ({ product, onClose, action }): ReactNode => {
       } else if (action === "add") {
         await ProductsServices.addProduct(newName);
       }
+
+      await queryClient.invalidateQueries("products", { refetchActive: true });
+      queryClient.getQueryData("products");
       onClose();
+      closeProductPanel();
       notify.success(
-        `${newName} was successfully ${action === "add" ? "created" : action === "edit" ? "updated" : "deleted"}.`,
+        `${action === "delete" ? product?.name : newName} was successfully ${
+          action === "add" ? "created" : action === "edit" ? "updated" : "deleted"
+        }.`,
       );
     } catch (error) {
-      notify.failure(`There was an error trying to ${action} the tag. Please try again.`, null, null);
-      console.error("Error performing action:", error);
+      notify.failure(`There was an error trying to ${action} the product. Please try again.`, null, null);
     } finally {
       setIsLoading(false);
     }
-  }, [action, product, newName, onClose, notify]);
+  }, [action, product, queryClient, onClose, closeProductPanel, notify, newName]);
 
   if (action === "edit") {
     heading = `Edit tag`;
@@ -92,6 +109,7 @@ const ProductActionModal = ({ product, onClose, action }): ReactNode => {
         </>
       }
       close={onClose}
+      closeOnOutsideClick={true}
       title={heading}
     >
       {content}

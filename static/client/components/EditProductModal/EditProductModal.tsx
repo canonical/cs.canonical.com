@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 import { Button, SidePanel, Icon, List } from "@canonical/react-components";
 
@@ -10,13 +10,19 @@ import ProductActionModal from "./ProductActionModal";
 import { useProducts } from "@/services/api/hooks/products";
 import type { IProduct, IProductAction } from "@/services/api/types/products";
 
-const EditProductModal = ({ isOpen, onClose }): ReactNode => {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [productActionModalOpen, setProductActionModalOpen] = useState(false);
+interface EditProductModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const EditProductModal = ({ isOpen, onClose }: EditProductModalProps): ReactNode => {
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [action, setAction] = useState<IProductAction>(null);
+  const [productActionModalOpen, setProductActionModalOpen] = useState(false);
+
   const toggleActionModal = useCallback(() => setProductActionModalOpen((prev) => !prev), []);
   const { data } = useProducts();
+  const products = data?.data ?? [];
 
   const openEditProductModal = useCallback((product: IProduct | null) => {
     setProductActionModalOpen(true);
@@ -35,20 +41,15 @@ const EditProductModal = ({ isOpen, onClose }): ReactNode => {
     setSelectedProduct(null);
   }, []);
 
-  useEffect(() => {
-    if (data?.data?.length) {
-      setProducts(
-        data.data.map((p) => ({
-          name: p.name,
-          id: p.id,
-        })),
-      );
-    }
-  }, [data]);
   return (
     <>
       {productActionModalOpen && (
-        <ProductActionModal action={action} onClose={toggleActionModal} product={selectedProduct} />
+        <ProductActionModal
+          action={action}
+          closeProductPanel={onClose}
+          onClose={toggleActionModal}
+          product={selectedProduct}
+        />
       )}
       <SidePanel className="p-side-panel" isOpen={isOpen} overlay>
         <SidePanel.Sticky>
@@ -74,11 +75,10 @@ const EditProductModal = ({ isOpen, onClose }): ReactNode => {
             divided={true}
             items={products.map((product) => (
               <ProductActionChip
-                id={product.id}
                 key={product.id}
-                name={product.name}
                 onDelete={() => openDeleteProductModal(product)}
                 onEdit={() => openEditProductModal(product)}
+                product={product}
               />
             ))}
           />
