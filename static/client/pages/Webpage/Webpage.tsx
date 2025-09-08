@@ -143,13 +143,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
                 Edit product tags
               </Button>
             ) : (
-              <>
-                To edit a product tag,
-                <Button appearance="link" onClick={() => alert(user)}>
-                  please submit a feature request
-                </Button>
-                .
-              </>
+              <p>To edit product tags, please contact the Sites team.</p>
             )}
           </div>
         </div>
