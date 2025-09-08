@@ -32,6 +32,8 @@ def get_products():
     product_list = []
     for product in products:
         product_list.append({"id": product.id, "name": product.name})
+    if product_list:
+        product_list = sorted(product_list, key=lambda x: x["name"].lower())
     return jsonify(product_list)
 
 
@@ -72,8 +74,8 @@ def set_product(body: SetProductsModel):
 # Add a product
 @product_blueprint.route("/product", methods=["POST"])
 @validate()
-# @is_admin
-# @login_required
+@is_admin
+@login_required
 def add_product(body: AddProductModel):
     product_slug = slugify(body.name, separator="_")
     print("work is going on", product_slug)
@@ -109,8 +111,8 @@ def add_product(body: AddProductModel):
 # Edit a product
 @product_blueprint.route("/product/<int:product_id>", methods=["PUT"])
 @validate()
-# @is_admin
-# @login_required
+@is_admin
+@login_required
 def edit_product(product_id: int, body: AddProductModel):
     product = Product.query.get(product_id)
     if not product:
@@ -146,8 +148,8 @@ def edit_product(product_id: int, body: AddProductModel):
 
 # delete a product
 @product_blueprint.route("/product/<int:product_id>", methods=["DELETE"])
-# @is_admin
-# @login_required
+@is_admin
+@login_required
 def delete_product(product_id: int):
     product = Product.query.filter_by(id=product_id).first()
 
