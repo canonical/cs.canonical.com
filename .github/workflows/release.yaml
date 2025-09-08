@@ -3,11 +3,10 @@ name: Release
 on:
   push:
     branches:
-      - feat-semantic-releases
-      # - main
+      - main
 
 env:
-  TARGET_BRANCH: feat-semantic-releases
+  TARGET_BRANCH: main
   CHARMCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
   ROCKCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
 

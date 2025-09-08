@@ -120,7 +120,6 @@ jobs:
     needs: [setup, validate]
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    if: false
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
     steps:
       - name: Checkout Code

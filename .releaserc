@@ -1,6 +1,6 @@
 {
   "branches": [
-    "feat-semantic-releases"
+    "main"
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
@@ -11,8 +11,7 @@
         "assets": [
           "**/*.rock",
           "**/*.charm"
-        ],
-        "success": false
+        ]
       }
     ]
   ]
