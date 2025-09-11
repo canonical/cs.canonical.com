@@ -59,6 +59,11 @@ jobs:
     runs-on: [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VAULT_ADDR: https://vault.admin.canonical.com:8200
+      TF_VAR_login_approle_role_id: ${{ secrets.VAULT_APPROLE_ROLE_ID }}
+      TF_VAR_login_approle_secret_id: ${{ secrets.VAULT_APPROLE_SECRET_ID }}
+      VAULT_SECRET_PATH_ROLE: secret/prodstack6/roles/stg-cs-canonical-com
+      VAULT_SECRET_PATH_COMMON: secret/prodstack6/juju/common
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -90,11 +95,6 @@ jobs:
 
       - name: Configure Vault and Juju
         run: |
-          export VAULT_ADDR=https://vault.admin.canonical.com:8200
-          export TF_VAR_login_approle_role_id=${{ secrets.VAULT_APPROLE_ROLE_ID }}
-          export TF_VAR_login_approle_secret_id=${{ secrets.VAULT_APPROLE_SECRET_ID }}
-          export VAULT_SECRET_PATH_ROLE=secret/prodstack6/roles/stg-cs-canonical-com
-          export VAULT_SECRET_PATH_COMMON=secret/prodstack6/juju/common
           VAULT_TOKEN=$(vault write -f -field=token auth/approle/login role_id=${TF_VAR_login_approle_role_id} secret_id=${TF_VAR_login_approle_secret_id}) 
           export VAULT_TOKEN
           mkdir -p ~/.local/share/juju
