@@ -22,8 +22,7 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
         return jsonify({"error": "Project not found"}), 404
 
     webpage = Webpage.query.filter_by(
-        url=webpage_url,
-        project_id=project.id
+        url=webpage_url, project_id=project.id
     ).first()
 
     if not webpage:

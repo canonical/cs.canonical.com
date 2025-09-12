@@ -1,3 +1,16 @@
+from webapp.models import (
+    Product,
+    Project,
+    Webpage,
+    WebpageProduct,
+    db,
+    get_or_create,
+)
+
+from webapp.schemas import SetProductsModel, AddProductModel
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
+
 import logging
 
 from flask import Blueprint, current_app, jsonify
@@ -9,17 +22,6 @@ from webapp.sso import is_admin
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from webapp.models import (
-    Product,
-    Project,
-    Webpage,
-    WebpageProduct,
-    db,
-    get_or_create,
-)
-from webapp.schemas import SetProductsModel, AddProductModel
-from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
 
 product_blueprint = Blueprint("product", __name__, url_prefix="/api")
 
@@ -49,7 +51,9 @@ def set_product(body: SetProductsModel):
 
     if webpage:
         # Remove previous products that were set for the webpage
-        existing_products = WebpageProduct.query.filter_by(webpage_id=webpage_id)
+        existing_products = WebpageProduct.query.filter_by(
+            webpage_id=webpage_id
+        )
         for p in existing_products:
             db.session.delete(p)
         db.session.commit()
@@ -104,7 +108,7 @@ def add_product(body: AddProductModel):
         )
     except Exception as e:
         db.session.rollback()
-        logger.exception("Error adding product")
+        logger.exception(f"Error adding product: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
 
 
@@ -120,8 +124,15 @@ def edit_product(product_id: int, body: AddProductModel):
 
     new_slug = slugify(body.name, separator="-")
 
-    if Product.query.filter(Product.slug == new_slug, Product.id != product_id).first():
-        return jsonify({"error": "Another product with this name already exists"}), 400
+    if Product.query.filter(
+        Product.slug == new_slug, Product.id != product_id
+    ).first():
+        return (
+            jsonify(
+                {"error": "Another product with this name already exists"}
+            ),
+            400,
+        )
 
     product.name = body.name.strip()
     product.slug = new_slug
@@ -142,7 +153,7 @@ def edit_product(product_id: int, body: AddProductModel):
         )
     except Exception as e:
         db.session.rollback()
-        logger.exception("Error updating product")
+        logger.exception(f"Error updating product: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
 
 
