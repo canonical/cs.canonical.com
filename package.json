@@ -55,7 +55,7 @@
     "eslint-plugin-no-only-tests": "3.3.0",
     "eslint-plugin-no-relative-import-paths": "1.6.1",
     "eslint-plugin-prettier": "5.2.3",
-    "eslint-plugin-react": "7.37.4",
+    "eslint-plugin-react": "7.37.5",
     "jsdom": "21.1.2",
     "npm-package-json-lint": "8.0.0",
     "postcss": "8.5.1",
