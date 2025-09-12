@@ -202,5 +202,6 @@ jobs:
     name: Deploy Application
     needs: [prepare-version, release]
     uses: ./.github/workflows/deploy.yaml
+    secrets: inherit
     with:
       release_tag: ${{ needs.prepare-version.outputs.new_release_git_tag }}
