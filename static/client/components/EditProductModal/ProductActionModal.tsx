@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { use, useCallback, useState, type ReactNode } from "react";
 
 import { Modal, Button, Input, useNotify, Spinner } from "@canonical/react-components";
 import { useQueryClient } from "react-query";
@@ -22,7 +22,6 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
   let content = null;
   let heading = "";
   const notify = useNotify();
-
   const handleAction = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -34,7 +33,8 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
         await ProductsServices.addProduct(newName);
       }
 
-      await queryClient.invalidateQueries("products", { refetchActive: true });
+      await queryClient.invalidateQueries("products");
+      await queryClient.refetchQueries("products");
       queryClient.getQueryData("products");
       onClose();
       closeProductPanel();
@@ -54,7 +54,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
     heading = `Edit tag`;
     actionButton = (
       <Button appearance="positive" onClick={handleAction}>
-        {isLoading ? <Spinner /> : "Update"}
+        {isLoading ? <Spinner isLight={true} /> : "Update"}
       </Button>
     );
     content = (
@@ -70,7 +70,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
     heading = `Delete tag`;
     actionButton = (
       <Button appearance="negative" onClick={handleAction}>
-        {isLoading ? <Spinner /> : "Delete"}
+        {isLoading ? <Spinner isLight={true} /> : "Delete"}
       </Button>
     );
     content = (
@@ -84,7 +84,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
 
     actionButton = (
       <Button appearance="positive" onClick={handleAction}>
-        {isLoading ? <Spinner /> : "Create"}
+        {isLoading ? <Spinner isLight={true} /> : "Create"}
       </Button>
     );
     content = (
