@@ -1,0 +1,21 @@
+.p-side-panel--content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 80%;
+}
+
+.p-product-action-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6rem;
+  width: 100%;
+}
+
+.p-form__group.p-form-validation {
+  min-width: 40rem;
+}
+
+.l-notification__container {
+  top: 90%;
+}
