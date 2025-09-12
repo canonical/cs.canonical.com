@@ -1,28 +1,35 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Button, SidePanel, Icon, List } from "@canonical/react-components";
 
-import "./_EditProductModal.scss";
+import "./_EditProductPanel.scss";
 
 import ProductActionChip from "./ProductActionChip";
 import ProductActionModal from "./ProductActionModal";
 
-import { useProducts } from "@/services/api/hooks/products";
+import { ProductsServices } from "@/services/api/services/products";
 import type { IProduct, IProductAction } from "@/services/api/types/products";
 
-interface EditProductModalProps {
+interface EditProductPanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const EditProductModal = ({ isOpen, onClose }: EditProductModalProps): ReactNode => {
+const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode => {
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [action, setAction] = useState<IProductAction>(null);
   const [productActionModalOpen, setProductActionModalOpen] = useState(false);
 
   const toggleActionModal = useCallback(() => setProductActionModalOpen((prev) => !prev), []);
-  const { data } = useProducts();
-  const products = data?.data ?? [];
+  const [products, setProducts] = useState<IProduct[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await ProductsServices.getProducts();
+      setProducts(data?.data ?? []);
+    };
+    if (isOpen) fetchProducts();
+  }, [isOpen]);
 
   const openEditProductModal = useCallback((product: IProduct | null) => {
     setProductActionModalOpen(true);
@@ -51,7 +58,7 @@ const EditProductModal = ({ isOpen, onClose }: EditProductModalProps): ReactNode
           product={selectedProduct}
         />
       )}
-      <SidePanel className="p-side-panel" isOpen={isOpen} overlay>
+      <SidePanel isOpen={isOpen} pinned>
         <SidePanel.Sticky>
           <div className="p-section--shallow">
             <SidePanel.Header>
@@ -88,4 +95,4 @@ const EditProductModal = ({ isOpen, onClose }: EditProductModalProps): ReactNode
   );
 };
 
-export default EditProductModal;
+export default EditProductPanel;
