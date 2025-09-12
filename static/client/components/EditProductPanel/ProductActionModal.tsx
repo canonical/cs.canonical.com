@@ -1,4 +1,4 @@
-import { use, useCallback, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 import { Modal, Button, Input, useNotify, Spinner } from "@canonical/react-components";
 import { useQueryClient } from "react-query";
@@ -35,7 +35,6 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
 
       await queryClient.invalidateQueries("products");
       await queryClient.refetchQueries("products");
-      queryClient.getQueryData("products");
       onClose();
       closeProductPanel();
       notify.success(

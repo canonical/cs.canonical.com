@@ -5,7 +5,7 @@ import { Button } from "@canonical/react-components";
 import { type IWebpageProps } from "./Webpage.types";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
-import EditProductModal from "@/components/EditProductModal/EditProductModal";
+import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import Products from "@/components/Products";
@@ -17,7 +17,7 @@ import { useStore } from "@/store";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [editProductModalOpen, setEditProductModalOpen] = useState(false);
+  const [editProductPanelOpen, setEditProductPanelOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
   );
@@ -58,8 +58,8 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
     setModalOpen(false);
   }, []);
 
-  const toggleEditProductModalClose = useCallback(() => {
-    setEditProductModalOpen((x) => !x);
+  const toggleEditProductPanelClose = useCallback(() => {
+    setEditProductPanelOpen((x) => !x);
   }, []);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
@@ -139,7 +139,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <div className="u-sv3" />
             <Products page={page} />
             {user.role === "admin" ? (
-              <Button appearance="link" onClick={toggleEditProductModalClose}>
+              <Button appearance="link" onClick={toggleEditProductPanelClose}>
                 Edit product tags
               </Button>
             ) : (
@@ -163,7 +163,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             webpage={page}
           />
         )}
-        <EditProductModal isOpen={editProductModalOpen} onClose={toggleEditProductModalClose} />
+        <EditProductPanel isOpen={editProductPanelOpen} onClose={toggleEditProductPanelClose} />
       </div>
     </>
   );
