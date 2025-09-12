@@ -25,7 +25,7 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
 
   return (
     <>
-      <div className="l-application">
+      <div className="l-application" id="l-application">
         <Navigation />
         <main className="l-main">
           <div className="grid-row--50-50">
