@@ -193,6 +193,7 @@ class Product(db.Model, DateTimeMixin):
     webpage_products = relationship(
         "WebpageProduct",
         back_populates="products",
+        cascade="all, delete-orphan",
     )
 
 

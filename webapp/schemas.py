@@ -72,6 +72,10 @@ class SetProductsModel(BaseModel):
     product_ids: List[int]
 
 
+class AddProductModel(BaseModel):
+    name: str
+
+
 class PlaywrightCleanupReqBody(BaseModel):
     jira_tasks: List[str]
 

@@ -93,7 +93,7 @@ def extends_base(path, base="templates"):
                     else:
                         # extract absolute path from the parent path
                         absolute_path = str(path)[
-                            0: str(path).find(base) + len(base)
+                            0 : str(path).find(base) + len(base)
                         ]
                         # check if the file from which the current file
                         # extends extends from the base template
