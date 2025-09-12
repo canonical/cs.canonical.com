@@ -54,7 +54,7 @@
     "eslint-import-resolver-typescript": "3.7.0",
     "eslint-plugin-no-only-tests": "3.3.0",
     "eslint-plugin-no-relative-import-paths": "1.6.1",
-    "eslint-plugin-prettier": "5.2.3",
+    "eslint-plugin-prettier": "5.5.4",
     "eslint-plugin-react": "7.37.4",
     "jsdom": "21.1.2",
     "npm-package-json-lint": "8.0.0",
