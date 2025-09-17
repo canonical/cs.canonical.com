@@ -31,21 +31,10 @@ const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode
     if (isOpen) fetchProducts();
   }, [isOpen]);
 
-  const openEditProductModal = useCallback((product: IProduct | null) => {
+  const openProductActionModal = useCallback((product: IProduct | null, action: IProductAction) => {
     setProductActionModalOpen(true);
-    setAction("edit");
+    setAction(action);
     setSelectedProduct(product);
-  }, []);
-  const openDeleteProductModal = useCallback((product: IProduct) => {
-    setProductActionModalOpen(true);
-    setAction("delete");
-    setSelectedProduct(product);
-  }, []);
-
-  const openAddProductModal = useCallback(() => {
-    setProductActionModalOpen(true);
-    setAction("add");
-    setSelectedProduct(null);
   }, []);
 
   return (
@@ -72,19 +61,20 @@ const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode
           </div>
         </SidePanel.Sticky>
         <div className="u-align--right">
-          <Button appearance="" hasIcon onClick={openAddProductModal}>
+          <Button appearance="" hasIcon onClick={() => openProductActionModal(null, "add")}>
             <i className="p-icon--plus" /> <span>Add new product tag</span>
           </Button>
         </div>
         <p className="p-text--small-caps"> Product tag</p>
         <SidePanel.Content className="u-no-padding p-side-panel--content">
           <List
+            className="u-no-margin--bottom"
             divided={true}
             items={products.map((product) => (
               <ProductActionChip
                 key={product.id}
-                onDelete={() => openDeleteProductModal(product)}
-                onEdit={() => openEditProductModal(product)}
+                onDelete={() => openProductActionModal(product, "delete")}
+                onEdit={() => openProductActionModal(product, "edit")}
                 product={product}
               />
             ))}

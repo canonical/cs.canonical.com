@@ -16,11 +16,9 @@ interface ProductActionModalProps {
 const ProductActionModal = ({ product, onClose, action, closeProductPanel }: ProductActionModalProps): ReactNode => {
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(product?.name || "");
+  const [inputError, setInputError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  let actionButton = null;
-  let content = null;
-  let heading = "";
   const notify = useNotify();
   const handleAction = useCallback(async () => {
     setIsLoading(true);
@@ -49,51 +47,61 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
     }
   }, [action, product, queryClient, onClose, closeProductPanel, notify, newName]);
 
+  let actionButton = null;
+  let heading = "";
+  let content = (
+    <Input
+      error={inputError}
+      label="Tag Name"
+      onChange={(e) => {
+        if (e.target.value.trim() === "") {
+          setInputError("Product name cannot be empty");
+        } else {
+          setInputError(null);
+        }
+        setNewName(e.target.value);
+      }}
+      type="text"
+      value={newName}
+    />
+  );
+
   if (action === "edit") {
     heading = `Edit tag`;
     actionButton = (
-      <Button appearance="positive" onClick={handleAction}>
+      <Button
+        appearance="positive"
+        className="u-no-margin--bottom"
+        disabled={newName.length === 0}
+        onClick={handleAction}
+      >
         {isLoading ? <Spinner isLight={true} /> : "Update"}
       </Button>
-    );
-    content = (
-      <Input
-        error={!newName.trim() ? "Tag name cannot be empty" : ""}
-        label="Tag Name"
-        onChange={(e) => setNewName(e.target.value)}
-        type="text"
-        value={newName}
-      />
     );
   } else if (action === "delete") {
     heading = `Delete tag`;
     actionButton = (
-      <Button appearance="negative" onClick={handleAction}>
+      <Button appearance="negative" className="u-no-margin--bottom" onClick={handleAction}>
         {isLoading ? <Spinner isLight={true} /> : "Delete"}
       </Button>
     );
     content = (
       <p>
-        Are you sure you would like to delete the {product?.name} tag? This will permanently delete the tag from every
-        page it is currently being used.
+        Are you sure you would like to delete the <b>{product?.name}</b> tag? This will permanently delete the tag from
+        every page it is currently being used.
       </p>
     );
   } else if (action === "add") {
     heading = `Add tag`;
-
     actionButton = (
-      <Button appearance="positive" onClick={handleAction}>
+      <Button
+        appearance="positive"
+        className="u-no-margin--bottom"
+        disabled={newName.length === 0}
+        onClick={handleAction}
+      >
         {isLoading ? <Spinner isLight={true} /> : "Create"}
       </Button>
-    );
-    content = (
-      <Input
-        error={!newName.trim() ? "Tag name cannot be empty" : ""}
-        label="Tag Name"
-        onChange={(e) => setNewName(e.target.value)}
-        type="text"
-        value={newName}
-      />
     );
   }
 

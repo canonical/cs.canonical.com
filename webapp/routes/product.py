@@ -82,7 +82,6 @@ def set_product(body: SetProductsModel):
 @login_required
 def add_product(body: AddProductModel):
     product_slug = slugify(body.name, separator="_")
-    print("work is going on", product_slug)
     if not product_slug:
         return jsonify({"error": "Invalid product name"}), 400
 
