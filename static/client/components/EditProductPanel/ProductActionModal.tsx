@@ -32,7 +32,6 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
       }
 
       await queryClient.invalidateQueries("products");
-      await queryClient.refetchQueries("products");
       onClose();
       closeProductPanel();
       notify.success(
@@ -49,6 +48,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
 
   let actionButton = null;
   let heading = "";
+  const spinner = <Spinner isLight={true} />;
   let content = (
     <Input
       error={inputError}
@@ -72,17 +72,17 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
       <Button
         appearance="positive"
         className="u-no-margin--bottom"
-        disabled={newName.length === 0}
+        disabled={newName.length === 0 || newName === product?.name}
         onClick={handleAction}
       >
-        {isLoading ? <Spinner isLight={true} /> : "Update"}
+        {isLoading ? spinner : "Update"}
       </Button>
     );
   } else if (action === "delete") {
     heading = `Delete tag`;
     actionButton = (
       <Button appearance="negative" className="u-no-margin--bottom" onClick={handleAction}>
-        {isLoading ? <Spinner isLight={true} /> : "Delete"}
+        {isLoading ? spinner : "Delete"}
       </Button>
     );
     content = (
@@ -100,7 +100,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
         disabled={newName.length === 0}
         onClick={handleAction}
       >
-        {isLoading ? <Spinner isLight={true} /> : "Create"}
+        {isLoading ? spinner : "Create"}
       </Button>
     );
   }
