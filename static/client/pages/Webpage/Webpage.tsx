@@ -136,9 +136,13 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             </div>
           )}
           <div className="grid-col">
-            <OwnerAndReviewers page={page} />
-            <div className="u-sv3" />
-            <Products page={page} />
+            <div className={isNew ? "col-12" : "col-5"}>
+              <Owner page={page} />
+              <div className="u-sv3" />
+              <Reviewers page={page} />
+              <div className="u-sv3" />
+              <Products page={page} />
+            </div>
             {user.role === "admin" ? (
               <Button appearance="link" onClick={toggleEditProductPanelClose}>
                 Edit product tags
@@ -164,13 +168,6 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             webpage={page}
           />
         )}
-        <div className={isNew ? "col-12" : "col-5"}>
-          <Owner page={page} />
-          <div className="u-sv3" />
-          <Reviewers page={page} />
-          <div className="u-sv3" />
-          <Products page={page} />
-        </div>
         <EditProductPanel isOpen={editProductPanelOpen} onClose={toggleEditProductPanelClose} />
       </div>
     </>
