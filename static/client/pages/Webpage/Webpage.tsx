@@ -10,8 +10,8 @@ import JiraTasks from "@/components/JiraTasks";
 import Owner from "@/components/Owner";
 import Products from "@/components/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
-import WebpageAssets from "@/components/WebpageAssets";
 import Reviewers from "@/components/Reviewers";
+import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { useStore } from "@/store";
@@ -158,11 +158,10 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <JiraTasks tasks={page.jira_tasks} />
           </div>
         ) : null}
-        <WebpageAssets page={page} />
+        <WebpageAssets projectName={page.project?.name || ""} url={page.url || ""} />
         {modalOpen && (
           <RequestTaskModal
             changeType={changeType}
-            copyDocLink={page.copy_doc_link}
             onClose={handleModalClose}
             onTypeChange={setChangeType}
             webpage={page}

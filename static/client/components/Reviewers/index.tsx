@@ -9,7 +9,7 @@ import { useUsersRequest } from "@/hooks/useUsersRequest";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
-const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): ReactNode => {
+const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
   const { options, setOptions, handleChange } = useUsersRequest();
 

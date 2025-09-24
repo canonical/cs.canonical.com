@@ -10,7 +10,7 @@ import { PagesServices } from "@/services/api/services/pages";
 import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
-const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): ReactNode => {
+const Owner = ({ page, onSelectOwner }: IOwnerProps): ReactNode => {
   const [currentOwner, setCurrentOwner] = useState<IUser | null>(null);
   const { options, setOptions, handleChange } = useUsersRequest();
 

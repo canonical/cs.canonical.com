@@ -79,7 +79,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
               ref={expandButtonRef}
             >
               {NavigationServices.formatPageName(page.name)}
-              <NavigationElementBadge appearance="is-dark" page={page} />
+              <NavigationElementBadge appearance="is-dark" status={page.status} />
             </button>
           </>
           <ul
@@ -99,7 +99,7 @@ const NavigationElement = ({ activePageName, page, project, onSelect }: INavigat
       ) : (
         <div className={`p-list-tree__link ${page.name === activePageName ? "is-active" : ""}`} onClick={handleSelect}>
           {NavigationServices.formatPageName(page.name)}
-          <NavigationElementBadge appearance="is-dark" page={page} />
+          <NavigationElementBadge appearance="is-dark" status={page.status} />
         </div>
       )}
     </li>
