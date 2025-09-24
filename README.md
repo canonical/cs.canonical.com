@@ -285,12 +285,12 @@ To ensure hot module reloading, make sure to do the following changes.
 Since we're using a hybrid of celery + native task management, tasks need to be registered before they can be called asynchronously.
 
 1. To create a task, simply add the following to the bottom of tasks.py
+
 ```python
 some_new_task = register_task(some_new_task)
 ```
 
 This will attach the correct task runner behind the scenes.
-
 
 2. Call the task from your Flask route as a normal python function:
 
@@ -302,6 +302,37 @@ def some_route():
   some_new_task.delay()  # async
   return 'Task started'
 ```
+
+### Deployment
+
+This project uses [semantic releases](https://github.com/semantic-release/semantic-release) to create and release semantically versioned packages.
+
+Every release is shipped with:
+
+1. A [charm](https://documentation.ubuntu.com/juju/3.6/reference/charm/)
+2. A [rock](https://documentation.ubuntu.com/rockcraft/stable/explanation/rocks/)
+3. Source code (zip)
+4. Source code (tar.gz)
+
+<div style="display: flex; align-item: center; gap: 0.5rem">
+  <span><img src="https://img.shields.io/github/v/release/canonical/cs.canonical.com" alt="Latest Release Badge"></span>
+  <span>is currently the latest version of this project.</span>
+</div>
+
+The entire process of releasing new version consists of two parts.
+
+1. Release - It uses [release.yaml](./.github/workflows/release.yaml) workflow which determines the next version and generates release artifacts. 
+2. Deploy - It uses [deploy.yaml](./.github/workflows/deploy.yaml) workflow which deploys the given release version to staging and production environments.
+
+#### Deploying a specific release manually
+
+If you need to rollout a past release in the case of new breaking release then instead of reverting your commits, or restoring old branches and merging them to the main branch to deploy an older version, you can simply redeploy an older release by running the deployment workflow manually.
+
+To deploy a specific release to staging and production environments manually, you can go to Repository > Actions > Deploy and click on "Run workflow". Alternatively, you can access it [here](https://github.com/canonical/cs.canonical.com/actions/workflows/deploy.yaml).
+
+You will need to specify a target branch (default is "main" branch), as well as a valid release tag, e.g., v1.0.0.
+
+After validating the inputs, the deployment workflow will dispatch and deploy the specified release to both staging and production deployments.
 
 ### API Requests
 
@@ -383,6 +414,7 @@ BASE_URL: `http://localhost:${process.env.PORT}`
 #### Running Playwright tests
 
 Install browsers
+
 ```bash
 yarn playwright install --with-deps
 ```

@@ -1,7 +1,10 @@
 {
   "name": "websites-content-system",
   "version": "0.0.1",
-  "repository": "git@github.com:canonical/canonicalwebteam.templateparser-backend.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/canonical/cs.canonical.com"
+  },
   "author": "Canonical Webteam",
   "license": "MIT",
   "scripts": {
