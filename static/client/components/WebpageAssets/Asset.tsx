@@ -33,7 +33,7 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
         <div className="p-cta-block">
           <a
             className="p-button--positive"
-            href={`${config.assetsManagerUrl}/details?file-path=${assetName}`}
+            href={`${config.assetsManagerUrl}/details?file_path=${assetName}`}
             rel="noreferrer"
             target="_blank"
           >
@@ -41,7 +41,7 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
           </a>
           <a
             className="p-button"
-            href={`${config.assetsManagerUrl}/update?file-path=${assetName}`}
+            href={`${config.assetsManagerUrl}/update?file_path=${assetName}`}
             rel="noreferrer"
             target="_blank"
           >
