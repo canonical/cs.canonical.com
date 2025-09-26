@@ -13,7 +13,7 @@ const CustomSearchAndFilter = <T,>({
   onSelect,
   indexKey = "id",
   labelKey = "name",
-}: ICustomSearchAndFilterProps): ReactNode => {
+}: ICustomSearchAndFilterProps<T>): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
 

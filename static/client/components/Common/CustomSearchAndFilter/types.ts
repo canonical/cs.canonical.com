@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 import type { IUser } from "@/services/api/types/users";
 
 export interface ICustomSearchAndFilterProps<T> {
-  label: string | JSX.Element;
+  label: string | React.ReactNode;
   options: T[];
   selectedOptions: T[];
   placeholder: string;
