@@ -7,7 +7,10 @@ export type ApiClientType = "rest" | "mock";
 
 export class ApiClientFactory {
   private static instance: ApiClient | null = null;
-  private static currentType: ApiClientType = "rest";
+  private static currentType: ApiClientType =
+    process.env.API_CLIENT_TYPE === "mock" || process.env.API_CLIENT_TYPE === "rest"
+      ? (process.env.API_CLIENT_TYPE as ApiClientType)
+      : "rest";
 
   static getClient(): ApiClient {
     if (!this.instance) {
