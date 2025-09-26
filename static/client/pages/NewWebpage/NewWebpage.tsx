@@ -6,8 +6,9 @@ import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 import NavigationItems from "@/components/Navigation/NavigationItems";
-import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import Owner from "@/components/Owner";
 import Products from "@/components/Products";
+import Reviewers from "@/components/Reviewers";
 import SiteSelector from "@/components/SiteSelector";
 import { useQueryParams } from "@/helpers/hooks";
 import { usePages } from "@/services/api/hooks/pages";
@@ -175,7 +176,9 @@ const NewWebpage = (): ReactNode => {
           value={copyDoc}
         />
       </div>
-      <OwnerAndReviewers onSelectOwner={handleSelectOwner} onSelectReviewers={handleSelectReviewers} />
+      <Owner onSelectOwner={handleSelectOwner} />
+      <div className="u-sv3" />
+      <Reviewers onSelectReviewers={handleSelectReviewers} />
       <div className="u-sv3" />
       <Products onSelectProducts={handleSelectProducts} />
       <Button appearance="positive" className="l-new-webpage--submit" disabled={buttonDisabled} onClick={handleSubmit}>

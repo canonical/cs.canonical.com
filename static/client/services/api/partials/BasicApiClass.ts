@@ -1,38 +1,23 @@
-import axios from "axios";
-
-import config from "@/config";
+import type { ApiClient } from "@/services/abstractions/ApiClient";
 import type { REST_TYPES } from "@/services/api/constants";
+import { ApiClientFactory } from "@/services/api-client/ApiClientFactory";
 
 export class BasicApiClass {
-  private basePath = "";
-  private headers = {};
-  private timeout = 0;
+  protected apiClient: ApiClient;
 
   constructor() {
-    this.basePath = config.api.path;
-    this.timeout = 5 * 60 * 1000;
-    this.headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
+    this.apiClient = ApiClientFactory.getClient();
+  }
+
+  setApiClient(client: ApiClient) {
+    this.apiClient = client;
   }
 
   protected async callApi<T extends any>(
-    to: string,
-    type: (typeof REST_TYPES)[keyof typeof REST_TYPES],
+    endpoint: string,
+    method: (typeof REST_TYPES)[keyof typeof REST_TYPES],
     params?: any,
   ): Promise<T> {
-    const instance = axios.create({
-      baseURL: this.basePath,
-      timeout: this.timeout,
-      headers: this.headers,
-    });
-
-    return instance({
-      method: type,
-      url: to,
-      withCredentials: false,
-      ...(params ? { data: params } : {}),
-    });
+    return this.apiClient.callApi<T>(endpoint, method, params);
   }
 }

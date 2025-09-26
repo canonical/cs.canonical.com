@@ -2,13 +2,13 @@ import React, { useMemo, type ReactNode } from "react";
 
 import { Tooltip } from "@canonical/react-components";
 
-import type { INavigationElementBadgeProps } from "./NavigationElement.types";
+import type { NavigationElementBadgeProps } from "./NavigationElement.types";
 
 import { PageStatus } from "@/services/api/types/pages";
 
-const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgeProps): ReactNode => {
+const NavigationElementBadge = ({ status, appearance }: NavigationElementBadgeProps): ReactNode => {
   const getIcon = useMemo(() => {
-    switch (page.status) {
+    switch (status) {
       case PageStatus.NEW:
         return <i className={`p-icon--edit ${appearance}`} />;
       case PageStatus.TO_DELETE:
@@ -16,10 +16,10 @@ const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgePro
       default:
         return <></>;
     }
-  }, [appearance, page.status]);
+  }, [appearance, status]);
 
   const getTitle = useMemo(() => {
-    switch (page.status) {
+    switch (status) {
       case PageStatus.NEW:
         return "In drafts";
       case PageStatus.TO_DELETE:
@@ -27,10 +27,10 @@ const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgePro
       default:
         return null;
     }
-  }, [page.status]);
+  }, [status]);
 
   const getText = useMemo(() => {
-    switch (page.status) {
+    switch (status) {
       case PageStatus.NEW:
         return "This page isn't live yet.";
       case PageStatus.TO_DELETE:
@@ -38,7 +38,7 @@ const NavigationElementBadge = ({ page, appearance }: INavigationElementBadgePro
       default:
         return null;
     }
-  }, [page.status]);
+  }, [status]);
 
   return (
     <Tooltip

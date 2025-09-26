@@ -2,13 +2,13 @@ import React, { useState } from "react";
 
 import { Button } from "@canonical/react-components";
 
-import type { IPage } from "@/services/api/types/pages";
+import type { IUser } from "@/services/api/types/users";
 
 interface ReviewersProps {
-  page: IPage;
+  reviewers: IUser[];
 }
 
-const Reviewers: React.FC<ReviewersProps> = ({ page }) => {
+const Reviewers: React.FC<ReviewersProps> = ({ reviewers }) => {
   const [showMore, setShowMore] = useState(false);
 
   const toggleShowMore = () => {
@@ -16,16 +16,16 @@ const Reviewers: React.FC<ReviewersProps> = ({ page }) => {
   };
 
   const getReviewers = () => {
-    let reviewers = page?.reviewers?.map((reviewer) => reviewer.name) || [];
-    if (reviewers.length <= 2) {
-      return reviewers.join(", ");
+    let reviewerNames = reviewers?.map((reviewer) => reviewer.name) || [];
+    if (reviewerNames.length <= 2) {
+      return reviewerNames.join(", ");
     }
     return (
       <>
-        {showMore ? reviewers.join(", ") : reviewers.slice(0, 2).join(", ")}
+        {showMore ? reviewerNames.join(", ") : reviewerNames.slice(0, 2).join(", ")}
         <br />
         <Button appearance="link" onClick={toggleShowMore}>
-          {showMore ? "Show less" : `Show ${reviewers.length - 2} more`}
+          {showMore ? "Show less" : `Show ${reviewerNames.length - 2} more`}
         </Button>
       </>
     );

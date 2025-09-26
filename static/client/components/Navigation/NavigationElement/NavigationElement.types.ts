@@ -1,4 +1,4 @@
-import type { IPage } from "@/services/api/types/pages";
+import type { IPage, PageStatus } from "@/services/api/types/pages";
 
 export interface INavigationElementProps {
   activePageName: string | null;
@@ -7,7 +7,7 @@ export interface INavigationElementProps {
   onSelect: (path: string) => void;
 }
 
-export interface INavigationElementBadgeProps {
-  page: IPage;
+export interface NavigationElementBadgeProps {
+  status: (typeof PageStatus)[keyof typeof PageStatus];
   appearance?: "is-dark" | "is-light";
 }

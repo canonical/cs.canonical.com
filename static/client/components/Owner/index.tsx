@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
-import { useUsersRequest } from "./OwnerAndReviewers.hooks";
-import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
+import type { IOwnerProps } from "./types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config from "@/config";
+import { useUsersRequest } from "@/hooks/useUsersRequest";
 import { PagesServices } from "@/services/api/services/pages";
 import { getDefaultUser } from "@/services/api/services/users";
 import { type IUser } from "@/services/api/types/users";
 
-const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): ReactNode => {
+const Owner = ({ page, onSelectOwner }: IOwnerProps): ReactNode => {
   const [currentOwner, setCurrentOwner] = useState<IUser | null>(null);
   const { options, setOptions, handleChange } = useUsersRequest();
 
@@ -53,7 +53,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): ReactNode => {
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label={<IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />}
       onChange={handleChange}
       onRemove={handleRemoveOwner}

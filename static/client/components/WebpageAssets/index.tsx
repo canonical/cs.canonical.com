@@ -5,11 +5,15 @@ import { Pagination, Spinner } from "@canonical/react-components";
 import Asset from "./Asset";
 
 import { useWebpageAssets } from "@/services/api/hooks/assets";
-import type { IPage } from "@/services/api/types/pages";
 
-const WebpageAssets: React.FC<{ page: IPage }> = ({ page }) => {
+interface WebpageAssetsProps {
+  url: string;
+  projectName: string;
+}
+
+const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url, projectName }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data: assetsData, isLoading } = useWebpageAssets(page.url ?? "", page.project?.name ?? "", currentPage, 12);
+  const { data: assetsData, isLoading } = useWebpageAssets(url, projectName, currentPage, 12);
 
   const paginate = useCallback((pageNumber: number) => {
     setCurrentPage(pageNumber);

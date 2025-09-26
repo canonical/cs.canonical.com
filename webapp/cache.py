@@ -89,12 +89,6 @@ class RedisCache(Cache):
             raise e
 
 
-class FileCacheError(Exception):
-    """
-    Exception raised for errors in the FileCache class.
-    """
-
-
 class FileCache(Cache):
     """Cache interface"""
 
@@ -177,13 +171,21 @@ class FileCache(Cache):
         return shutil.rmtree(self.cache_path + "/" + key, onerror=onerror)
 
 
+class CacheFactory:
+    @staticmethod
+    def create(app: Flask) -> Cache:
+        if app.config.get("REDIS_HOST"):
+            app.logger.info("Using RedisCache.")
+            return RedisCache(app)
+        else:
+            app.logger.info(
+                "Redis cache not available. "
+                "Using FileCache instead."
+            )
+            return FileCache(app)
+
+
 def init_cache(app: Flask) -> Cache:
-    if app.config.get("REDIS_HOST"):
-        cache = RedisCache(app)
-    else:
-        cache = FileCache(app)
-        msg = "Redis cache is not available."
-        " Using FileCache instead."
-        app.logger.info(msg)
+    cache = CacheFactory.create(app)
     app.config["CACHE"] = cache
     return cache

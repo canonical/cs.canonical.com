@@ -1,6 +1,7 @@
-import { type ChangeEvent, useCallback, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useState } from "react";
 
-import type { IUseUsersRequest } from "./OwnerAndReviewers.types";
+import type { IUseUsersRequest } from "./types";
 
 import { UsersServices } from "@/services/api/services/users";
 import { UtilServices } from "@/services/api/services/utils";
