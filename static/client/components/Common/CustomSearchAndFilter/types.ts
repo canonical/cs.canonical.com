@@ -1,7 +1,5 @@
 import type { ChangeEvent } from "react";
 
-import type { IUser } from "@/services/api/types/users";
-
 export interface ICustomSearchAndFilterProps<T> {
   label: string | React.ReactNode;
   options: T[];
