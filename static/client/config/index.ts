@@ -42,6 +42,7 @@ const config = {
       staleTime: staleTime,
       cacheTime: staleTime,
     },
+    mode: "rest", // or "mock"
   },
   ghLink: (project: string) => `https://github.com/canonical/${project}/tree/main/templates`,
   copyStyleGuideLink: "https://docs.google.com/document/d/1AX-kSNztuAmShEoohe8L3LNLRnSKF7I0qkZGNeoGOok/edit?tab=t.0",
