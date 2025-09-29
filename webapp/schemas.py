@@ -59,7 +59,7 @@ class UserModel(BaseModel):
 class CreatePageModel(BaseModel):
     project: str
     name: str
-    copy_doc: Optional[str] = None
+    copy_doc_link: Optional[str] = None
     owner: UserModel
     reviewers: Optional[List[UserModel]]
     parent: str
