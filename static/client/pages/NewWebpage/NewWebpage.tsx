@@ -10,12 +10,14 @@ import Owner from "@/components/Owner";
 import Products from "@/components/Products";
 import Reviewers from "@/components/Reviewers";
 import SiteSelector from "@/components/SiteSelector";
+import { VIEW_TREE } from "@/config";
 import { useQueryParams } from "@/helpers/hooks";
 import { usePages } from "@/services/api/hooks/pages";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IUser } from "@/services/api/types/users";
 import { insertPage, TreeServices } from "@/services/tree/pages";
 import { useStore } from "@/store";
+import { useViewsStore } from "@/store/views";
 
 const errorMessage = "Please specify the URL title";
 
@@ -34,6 +36,7 @@ const NewWebpage = (): ReactNode => {
   const [location, setLocation] = useState<string>();
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [reloading, setReloading] = useState<(typeof LoadingState)[keyof typeof LoadingState]>(LoadingState.INITIAL);
+  const [view, setView] = useViewsStore((state) => [state.view, state.setView]);
 
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
   const { data, isFetching } = usePages(true);
@@ -97,6 +100,7 @@ const NewWebpage = (): ReactNode => {
           const project = data?.find((p) => p.name === new_webpage.project?.name);
           if (project) setSelectedProject(project);
           navigate(`/app/webpage/${new_webpage.project?.name}${new_webpage.url}`);
+          if (view !== VIEW_TREE) setView(VIEW_TREE);
         } else {
           throw new Error("Error creating a new webpage.");
         }
@@ -116,6 +120,8 @@ const NewWebpage = (): ReactNode => {
     data,
     setSelectedProject,
     navigate,
+    view,
+    setView,
   ]);
 
   // update navigation after new page is added to the tree on the backend
