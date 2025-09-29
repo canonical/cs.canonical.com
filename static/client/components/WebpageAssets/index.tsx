@@ -7,11 +7,11 @@ import Asset from "./Asset";
 import { useWebpageAssets } from "@/services/api/hooks/assets";
 
 interface WebpageAssetsProps {
-  url: string;
-  projectName: string;
+  url?: string;
+  projectName?: string;
 }
 
-const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url, projectName }) => {
+const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url = "", projectName = "" }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data: assetsData, isLoading } = useWebpageAssets(url, projectName, currentPage, 12);
 

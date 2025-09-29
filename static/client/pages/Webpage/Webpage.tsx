@@ -136,13 +136,11 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             </div>
           )}
           <div className="grid-col">
-            <div className={isNew ? "col-12" : "col-5"}>
-              <Owner page={page} />
-              <div className="u-sv3" />
-              <Reviewers page={page} />
-              <div className="u-sv3" />
-              <Products page={page} />
-            </div>
+            <Owner page={page} />
+            <div className="u-sv3" />
+            <Reviewers page={page} />
+            <div className="u-sv3" />
+            <Products page={page} />
             {user.role === "admin" ? (
               <Button appearance="link" onClick={toggleEditProductPanelClose}>
                 Edit product tags
@@ -158,7 +156,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <JiraTasks tasks={page.jira_tasks} />
           </div>
         ) : null}
-        <WebpageAssets projectName={page.project?.name || ""} url={page.url || ""} />
+        <WebpageAssets projectName={page.project?.name} url={page.url} />
         {modalOpen && (
           <RequestTaskModal
             changeType={changeType}

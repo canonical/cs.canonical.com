@@ -13,5 +13,3 @@ export interface ICustomSearchAndFilterProps<T> {
   indexKey?: string;
   labelKey?: string;
 }
-
-export interface IUserSearchAndFilterProps extends ICustomSearchAndFilterProps<IUser> {}
