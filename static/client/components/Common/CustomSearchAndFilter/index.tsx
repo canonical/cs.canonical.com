@@ -3,7 +3,7 @@ import { type MouseEvent, useCallback, useEffect, useRef, useState, type ReactNo
 
 import type { ICustomSearchAndFilterProps } from "./types";
 
-const CustomSearchAndFilter = <T,>({
+const CustomSearchAndFilter = <T extends Record<string, any>>({
   label,
   options,
   selectedOptions,
@@ -63,7 +63,7 @@ const CustomSearchAndFilter = <T,>({
           (option) =>
             option && (
               <span className="p-chip" key={indexKey}>
-                <span className="p-chip__value">{labelKey}</span>
+                <span className="p-chip__value">{option[labelKey]}</span>
                 <button className="p-chip__dismiss" onClick={onRemove(option)}>
                   Dismiss
                 </button>
@@ -90,7 +90,7 @@ const CustomSearchAndFilter = <T,>({
           <div aria-expanded="false" className="p-filter-panel-section__chips">
             {options.map((option) => (
               <button className="p-chip" onClick={handleSelect(option)} onMouseDown={handleOptionMouseDown}>
-                <span className="p-chip__value">{labelKey}</span>
+                <span className="p-chip__value">{option[labelKey]}</span>
               </button>
             ))}
           </div>
