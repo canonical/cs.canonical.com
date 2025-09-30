@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
-import { useUsersRequest } from "./OwnerAndReviewers.hooks";
-import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
+import type { IReviewersProps } from "./types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config from "@/config";
+import { useUsersRequest } from "@/hooks/useUsersRequest";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
-const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): ReactNode => {
+const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
   const { options, setOptions, handleChange } = useUsersRequest();
 
@@ -50,7 +50,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): ReactN
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label={<IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Reviewers" />}
       onChange={handleChange}
       onRemove={handleRemoveReviewer}

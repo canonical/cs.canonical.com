@@ -3,7 +3,7 @@ import { useCallback, type ReactNode } from "react";
 import type { IReporterProps } from "./Reporter.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
-import { useUsersRequest } from "@/components/OwnerAndReviewers/OwnerAndReviewers.hooks";
+import { useUsersRequest } from "@/hooks/useUsersRequest";
 import { type IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 
@@ -27,7 +27,7 @@ const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
   );
 
   return (
-    <CustomSearchAndFilter
+    <CustomSearchAndFilter<IUser>
       label="Reporter"
       onChange={handleChange}
       onRemove={handleRemoveReporter}

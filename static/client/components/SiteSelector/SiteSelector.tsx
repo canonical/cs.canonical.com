@@ -40,12 +40,10 @@ const SiteSelector = (): ReactNode | null => {
 
   if (isLoading || fetchedProjects?.length !== projects?.length)
     return (
-      <>
-        <span>
-          <Spinner />
-          &nbsp;&nbsp;Loading...
-        </span>
-      </>
+      <span>
+        <Spinner />
+        &nbsp;&nbsp;Loading projects ...
+      </span>
     );
 
   return selectedProject ? (

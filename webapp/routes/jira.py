@@ -277,6 +277,7 @@ def create_page(body: CreatePageModel):
         owner_id=owner_id,
         status=WebpageStatus.NEW,
         content_jira_id=data["content_jira_id"],
+        copy_doc_link=data["copy_doc_link"],
     )
 
     # Create new reviewer rows
@@ -289,7 +290,7 @@ def create_page(body: CreatePageModel):
             webpage_id=new_webpage[0].id,
         )
 
-    copy_doc = data["copy_doc"]
+    copy_doc = data["copy_doc_link"]
     if not copy_doc:
         copy_doc = create_copy_doc(current_app, new_webpage[0])
         new_webpage[0].copy_doc_link = copy_doc

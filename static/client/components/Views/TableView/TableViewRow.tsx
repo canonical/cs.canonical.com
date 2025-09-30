@@ -29,7 +29,7 @@ const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
     <tr data-id={page.id} data-parent-id={page.parent_id} id={`${page?.project?.name}${page.url}`}>
       <td>
         <span className="u-has-icon">
-          <NavigationElementBadge page={page} />
+          <NavigationElementBadge status={page.status} />
           <Button
             appearance="link"
             className="u-no-margin--bottom u-no-padding u-align-text--left"
@@ -41,10 +41,10 @@ const TableViewRow: React.FC<TableViewRowProps> = ({ page }) => {
       </td>
       <td>{!(page.owner?.name === "Default" || !page.owner?.email) && page.owner?.name}</td>
       <td>
-        <Reviewers page={page} />
+        <Reviewers reviewers={page.reviewers} />
       </td>
       <td>
-        <Products page={page} />
+        <Products products={page.products} />
       </td>
     </tr>
   );

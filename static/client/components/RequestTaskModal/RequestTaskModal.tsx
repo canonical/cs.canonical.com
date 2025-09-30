@@ -14,13 +14,7 @@ import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
 import { useStore } from "@/store";
 
-const RequestTaskModal = ({
-  changeType,
-  copyDocLink,
-  onTypeChange,
-  onClose,
-  webpage,
-}: IRequestTaskModalProps): ReactNode => {
+const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IRequestTaskModalProps): ReactNode => {
   const [dueDate, setDueDate] = useState<string>();
   const [checked, setChecked] = useState(false);
   const [summary, setSummary] = useState<string>();
@@ -269,7 +263,7 @@ const RequestTaskModal = ({
           label={
             <span>
               I have added all the content to the{" "}
-              <a href={copyDocLink} rel="noreferrer" target="_blank">
+              <a href={webpage.copy_doc_link} rel="noreferrer" target="_blank">
                 copy doc
               </a>
               , and it is consistent with our{" "}

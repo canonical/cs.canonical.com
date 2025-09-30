@@ -115,6 +115,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
           {actionButton}
         </>
       }
+      className={"p-product-modal"}
       close={onClose}
       closeOnOutsideClick={true}
       title={heading}

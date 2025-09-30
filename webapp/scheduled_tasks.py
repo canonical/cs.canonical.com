@@ -138,7 +138,7 @@ def parse_webpage_assets() -> None:
                 with open(file_path, "r") as f:
                     for line in f:
                         match = re.search(
-                            r"https?://assets\.ubuntu\.com\/[^\"'()<>\?]+",
+                            r"https?://assets\.ubuntu\.com\/[^\"'()<>\?{}]+",
                             line,
                         )
                         if match:

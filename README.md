@@ -321,7 +321,7 @@ Every release is shipped with:
 
 The entire process of releasing new version consists of two parts.
 
-1. Release - It uses [release.yaml](./.github/workflows/release.yaml) workflow which determines the next version and generates release artifacts. 
+1. Release - It uses [release.yaml](./.github/workflows/release.yaml) workflow which determines the next version and generates release artifacts.
 2. Deploy - It uses [deploy.yaml](./.github/workflows/deploy.yaml) workflow which deploys the given release version to staging and production environments.
 
 #### Deploying a specific release manually
@@ -432,3 +432,11 @@ yarn playwright test --ui
 ```
 
 **Note:** Please make sure the `BASE_URL` in `tests/config.ts` is correct and reflects your webserver. For example, if your project is running on localhost:8104, it should be `BASE_URL: http://localhost:8104`
+
+## Mock Server
+
+This project also supports running with an in-memory mock server.
+
+It simulates backend API responses, allowing frontend development and integration, without requiring a live backend service. This is useful for rapid prototyping, testing error, handling, and developing features in isolation.
+
+For detailed usage instructions and advanced configuration options, refer to [MOCK_SERVER_USAGE.md](./MOCK_SERVER_USAGE.md) in this project.

@@ -7,9 +7,10 @@ import { type IWebpageProps } from "./Webpage.types";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
-import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import Owner from "@/components/Owner";
 import Products from "@/components/Products";
 import RequestTaskModal from "@/components/RequestTaskModal";
+import Reviewers from "@/components/Reviewers";
 import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
@@ -135,7 +136,9 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             </div>
           )}
           <div className="grid-col">
-            <OwnerAndReviewers page={page} />
+            <Owner page={page} />
+            <div className="u-sv3" />
+            <Reviewers page={page} />
             <div className="u-sv3" />
             <Products page={page} />
             {user.role === "admin" ? (
@@ -153,11 +156,10 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <JiraTasks tasks={page.jira_tasks} />
           </div>
         ) : null}
-        <WebpageAssets page={page} />
+        <WebpageAssets projectName={page.project?.name} url={page.url} />
         {modalOpen && (
           <RequestTaskModal
             changeType={changeType}
-            copyDocLink={page.copy_doc_link}
             onClose={handleModalClose}
             onTypeChange={setChangeType}
             webpage={page}
