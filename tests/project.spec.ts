@@ -122,7 +122,27 @@ test.describe("Test project actions", () => {
     await removeWebpage(page, JIRA_TASKS);
   });
 
+  test("create new page with existing copydoc", async ({ page }) => {
+    await selectTreeView(page);
+    await page.getByRole("button", { name: /Request new page/i }).click();
+    await expect(page.getByRole("heading", { name: /New page/i })).toBeVisible();
+    await page.locator("input[aria-labelledby='url-title']").fill(config.PLAYWRIGHT_TEST_PAGE_URL);
+    await page.locator(".l-new-webpage--location .p-list-tree .p-list-tree__item").first().click();
+    await page.locator("input[aria-labelledby='copy-doc']").fill(config.SAMPLE_COPYDOC_URL);
+
+    var responsePromise = page.waitForResponse((response) => {
+      return response.url().includes("api/create-page") && response.status() === 201;
+    });
+
+    await page.getByRole("button", { name: /Save/i }).click();
+    var response = await responsePromise;
+    expect(response.status()).toBe(201);
+    const data = await response.json();
+    expect(data?.webpage?.copy_doc_link).toEqual(config.SAMPLE_COPYDOC_URL);
+  });
+
   test.afterAll(async () => {
+    if (!JIRA_TASKS.length) return;
     const cleanup = await apiContext.post("/api/playwright-cleanup", {
       data: {
         jira_tasks: JIRA_TASKS,
