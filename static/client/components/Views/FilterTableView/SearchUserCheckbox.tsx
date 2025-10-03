@@ -1,9 +1,13 @@
-import React, { useEffect, useState, memo, useCallback, useMemo, type ReactNode } from "react";
+import React, { useState, memo, useCallback, useMemo, type ReactNode, useEffect } from "react";
 
-import { SearchBox, Input } from "@canonical/react-components";
+import { SearchBox, Input, Spinner } from "@canonical/react-components";
 
 import { useUsers } from "@/services/api/hooks/users";
 import type { IUser } from "@/services/api/types/users";
+
+const INITIAL_LOAD_COUNT = 50; // Number of users to render initially
+const LOAD_MORE_COUNT = 50; // Number of additional users to render on scroll
+const SCROLL_THRESHOLD = 200; // Load 200px before the bottom
 
 type SearchUserCheckboxProps<T extends string[]> = {
   state: T;
@@ -11,34 +15,45 @@ type SearchUserCheckboxProps<T extends string[]> = {
 };
 
 function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserCheckboxProps<T>): ReactNode {
-  const [allUsers, setAllUsers] = useState<IUser[]>([]);
-  const [searchedUsers, setSearchedUsers] = useState<IUser[]>([]);
+  const { data: allFetchedUsers = [], isLoading } = useUsers();
 
-  const { data } = useUsers();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
+
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+
+    // If no data or search term is short, return all data
+    if (!allFetchedUsers.length || term.length < 2) {
+      return allFetchedUsers;
+    }
+
+    // Otherwise, filter based on the search term
+    return allFetchedUsers.filter((user) => user.name.toLowerCase().includes(term));
+  }, [allFetchedUsers, searchTerm]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const users = data;
-      if (users?.data?.length) {
-        const userData = users.data;
-        setAllUsers([...userData]);
-        setSearchedUsers([...userData]);
-      }
-    };
+    setVisibleCount(INITIAL_LOAD_COUNT);
+  }, [filteredUsers.length]);
 
-    fetchUsers();
-  }, [data]);
+  const searchUsers = useCallback((s: string): void => {
+    setSearchTerm(s);
+  }, []);
 
-  const searchUsers = useCallback(
-    (s: string): void => {
-      if (s.length >= 2) {
-        const filteredUsers = allUsers.filter((user) => user.name.toLowerCase().includes(s.toLowerCase()));
-        setSearchedUsers(filteredUsers);
-      } else {
-        setSearchedUsers([...allUsers]);
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const container = e.currentTarget;
+
+      const scrollPosition = container.scrollTop + container.clientHeight;
+      const contentHeight = container.scrollHeight;
+
+      const hasMoreToRender = visibleCount < filteredUsers.length;
+
+      if (scrollPosition >= contentHeight - SCROLL_THRESHOLD && hasMoreToRender) {
+        setVisibleCount((prevCount) => Math.min(prevCount + LOAD_MORE_COUNT, filteredUsers.length));
       }
     },
-    [allUsers],
+    [visibleCount, filteredUsers.length],
   );
 
   const handleCheckboxChange = useCallback(
@@ -52,8 +67,8 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
     [state, setState],
   );
 
-  const sortedUsers = useMemo(() => {
-    return [...searchedUsers].sort((a, b) => {
+  const visibleAndSortedUsers = useMemo(() => {
+    const sorted = [...filteredUsers].sort((a, b) => {
       const aChecked = state.includes(a.email);
       const bChecked = state.includes(b.email);
 
@@ -64,13 +79,22 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
       // If both are either checked or unchecked, sort by name
       return a.name.localeCompare(b.name);
     });
-  }, [searchedUsers, state]);
+
+    return sorted.slice(0, visibleCount);
+  }, [filteredUsers, state, visibleCount]);
+
+  const hasMoreToRender = visibleCount < filteredUsers.length;
 
   return (
     <div className="u-sv3">
       <SearchBox className="filter-search" onChange={searchUsers} />
-      <div className="u-sv3 p-filter__group">
-        {sortedUsers.map((user) => (
+
+      {isLoading && <Spinner text="Loading all users..." />}
+
+      {!isLoading && filteredUsers.length === 0 && <div>No users found.</div>}
+
+      <div className="u-sv3 p-filter__group" onScroll={handleScroll}>
+        {visibleAndSortedUsers.map((user) => (
           <Input
             checked={state.includes(user.email)}
             key={user.id}
@@ -79,6 +103,12 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
             type="checkbox"
           />
         ))}
+
+        {!isLoading && hasMoreToRender && <Spinner text="Loading more users..." />}
+
+        {!isLoading && !hasMoreToRender && filteredUsers.length > 0 && (
+          <small className="u-text--muted">End of list ({filteredUsers.length} total users).</small>
+        )}
       </div>
     </div>
   );

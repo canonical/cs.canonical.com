@@ -3,10 +3,10 @@ import { useQuery } from "react-query";
 
 import { UsersServices } from "@/services/api/services/users";
 import type { IApiBasicError, IUseQueryHookRest } from "@/services/api/types/query";
-import type { IUsersResponse } from "@/services/api/types/users";
+import type { IUser } from "@/services/api/types/users";
 
-export function useUsers(): IUseQueryHookRest<IUsersResponse> {
-  const result = useQuery<IUsersResponse, IApiBasicError>({
+export function useUsers(): IUseQueryHookRest<IUser[]> {
+  const result = useQuery<IUser[], IApiBasicError>({
     queryKey: ["users"],
     queryFn: () => UsersServices.getUsers(""),
   });

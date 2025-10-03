@@ -3,13 +3,13 @@ import { useCallback, type ReactNode } from "react";
 import type { IReporterProps } from "./Reporter.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
-import { useUsersRequest } from "@/hooks/useUsersRequest";
+import { useUsers } from "@/services/api/hooks/users";
 import { type IUser } from "@/services/api/types/users";
 import { useStore } from "@/store";
 
 const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
   const user = useStore((state) => state.user);
-  const { options, setOptions, handleChange } = useUsersRequest();
+  const { data, isLoading } = useUsers();
 
   const handleRemoveReporter = useCallback(
     () => () => {
@@ -20,19 +20,18 @@ const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
 
   const handleSelectReporter = useCallback(
     (option: IUser) => {
-      setOptions([]);
       setReporter(option);
     },
-    [setOptions, setReporter],
+    [setReporter],
   );
 
   return (
     <CustomSearchAndFilter<IUser>
       label="Reporter"
-      onChange={handleChange}
+      loading={!!isLoading}
       onRemove={handleRemoveReporter}
       onSelect={handleSelectReporter}
-      options={options}
+      options={data || []}
       placeholder="Select a reporter"
       selectedOptions={reporter ? [reporter] : []}
     />

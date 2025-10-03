@@ -5,13 +5,13 @@ import type { IReviewersProps } from "./types";
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import config from "@/config";
-import { useUsersRequest } from "@/hooks/useUsersRequest";
+import { useUsers } from "@/services/api/hooks/users";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
 const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
-  const { options, setOptions, handleChange } = useUsersRequest();
+  const { data, isLoading } = useUsers();
 
   useEffect(() => {
     if (page) setCurrentReviewers(page.reviewers);
@@ -41,21 +41,20 @@ const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
             page.reviewers = newReviewers;
           });
         }
-        setOptions([]);
         setCurrentReviewers(newReviewers);
         if (onSelectReviewers) onSelectReviewers(newReviewers);
       }
     },
-    [page, currentReviewers, setOptions, onSelectReviewers],
+    [page, currentReviewers, onSelectReviewers],
   );
 
   return (
     <CustomSearchAndFilter<IUser>
       label={<IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Reviewers" />}
-      onChange={handleChange}
+      loading={!!isLoading}
       onRemove={handleRemoveReviewer}
       onSelect={selectReviewer}
-      options={options}
+      options={data || []}
       placeholder="Select reviewers"
       selectedOptions={currentReviewers}
     />
