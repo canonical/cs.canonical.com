@@ -13,16 +13,17 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   onSelect,
   indexKey = "id",
   labelKey = "name",
+  loading = false,
 }: ICustomSearchAndFilterProps<T>): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
-
+  const [data, setData] = useState<T[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setDropdownHidden(!options.length);
-    setContainerExpanded(!!options.length);
-  }, [options]);
+    setDropdownHidden(!inputRef.current?.value);
+    setContainerExpanded(!!data.length);
+  }, [data, inputRef.current?.value]);
 
   const handleSelect = useCallback(
     (option: T) => () => {
@@ -48,6 +49,12 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
     event.preventDefault();
   }, []);
 
+  function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.value.length < 3) return;
+    if (onChange) return onChange(event);
+    setData(options.filter((option) => option[labelKey].toLowerCase().includes(event.target.value.toLowerCase())));
+  }
+
   return (
     <div className="p-search-and-filter">
       <p className="p-text--small-caps" id="owner-input">
@@ -62,7 +69,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
         {selectedOptions?.map(
           (option) =>
             option && (
-              <span className="p-chip" key={indexKey}>
+              <span className="p-chip" key={option[indexKey]}>
                 <span className="p-chip__value">{option[labelKey]}</span>
                 <button className="p-chip__dismiss" onClick={onRemove(option)}>
                   Dismiss
@@ -78,7 +85,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
             id="search"
             name="search"
             onBlur={handleInputBlur}
-            onChange={onChange}
+            onChange={onInputChange}
             placeholder={placeholder}
             ref={inputRef}
             type="search"
@@ -88,8 +95,14 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
       <div aria-hidden={dropdownHidden} className="p-search-and-filter__panel">
         <div className="p-filter-panel-section">
           <div aria-expanded="false" className="p-filter-panel-section__chips">
-            {options.map((option) => (
-              <button className="p-chip" onClick={handleSelect(option)} onMouseDown={handleOptionMouseDown}>
+            {loading && <p>Loading...</p>}
+            {data.map((option) => (
+              <button
+                className="p-chip"
+                key={option[indexKey]}
+                onClick={handleSelect(option)}
+                onMouseDown={handleOptionMouseDown}
+              >
                 <span className="p-chip__value">{option[labelKey]}</span>
               </button>
             ))}

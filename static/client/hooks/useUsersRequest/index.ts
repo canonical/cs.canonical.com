@@ -16,8 +16,8 @@ export const useUsersRequest = (): IUseUsersRequest => {
     const { value } = event.target;
     if (value.length >= 2) {
       const users = await debouncedRequest(value);
-      if (users?.data?.length) {
-        setOptions(users.data);
+      if (users?.length) {
+        setOptions(users);
       }
     } else {
       setOptions([]);
