@@ -1,4 +1,4 @@
-celery==5.4.0
+celery==5.5.3
 django-openid-auth==0.17
 Flask-Cors==6.0.1
 Flask-Migrate==4.1.0
