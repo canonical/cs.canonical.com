@@ -12,6 +12,6 @@ multiprocess==0.70.18
 psycopg2-binary==2.9.10
 pytest==8.3.4
 PyYAML==6.0.3
-requests==2.32.4
+requests==2.32.5
 redis[hiredis]==5.2.1
 python-slugify==8.0.4
