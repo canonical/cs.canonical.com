@@ -7,7 +7,42 @@ on:
     branches:
       - main
 jobs:
+  setup-and-build:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js with Caching
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "yarn"
+
+      - name: Install node dependencies
+        # This will be fast on subsequent runs due to caching
+        run: yarn --frozen-lockfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image and save as artifact
+        # Build the application image once
+        run: |
+          DOCKER_BUILDKIT=1 docker build --tag websites-content-system .
+          # Save the built image to a tar file
+          docker save websites-content-system -o app-image.tar
+
+      - name: Upload application image artifact
+        # The artifact is downloaded and loaded by the test jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-image
+          path: app-image.tar
+          retention-days: 1
   run-playwright:
+    needs: [setup-and-build]
     timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
@@ -39,10 +74,21 @@ jobs:
           --health-start-period 80s
     steps:
       - uses: actions/checkout@v4
-      - name: Install node dependencies
-        run: yarn
-      - name: Build image
-        run: DOCKER_BUILDKIT=1 docker build --tag websites-content-system .
+      - name: Download application image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-image
+          path: /tmp/
+
+      - name: Load application image
+        run: docker load -i /tmp/app-image.tar
+      - name: Set up Node.js with Cache restore
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "yarn"
+      - name: Restore and Prepare Dependencies
+        run: yarn --frozen-lockfile
       - name: Run image
         env:
           DISABLE_SSO: True
@@ -112,8 +158,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: "yarn"
       - name: Install dependencies
-        run: yarn
+        run: yarn --frozen-lockfile
 
       - name: Download blob reports from GitHub Actions Artifacts
         uses: actions/download-artifact@v4
