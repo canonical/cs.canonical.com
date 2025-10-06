@@ -1,7 +1,7 @@
 import { api } from "@/services/api";
-import type { IUser, IUsersResponse } from "@/services/api/types/users";
+import type { IUser } from "@/services/api/types/users";
 
-export const getUsers = async (username: string): Promise<IUsersResponse["data"]> => {
+export const getUsers = async (username: string): Promise<IUser[]> => {
   return api.users.getUsers(username);
 };
 

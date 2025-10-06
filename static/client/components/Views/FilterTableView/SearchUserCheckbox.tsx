@@ -2,12 +2,9 @@ import React, { useState, memo, useCallback, useMemo, type ReactNode, useEffect 
 
 import { SearchBox, Input, Spinner } from "@canonical/react-components";
 
+import config from "@/config";
 import { useUsers } from "@/services/api/hooks/users";
 import type { IUser } from "@/services/api/types/users";
-
-const INITIAL_LOAD_COUNT = 50; // Number of users to render initially
-const LOAD_MORE_COUNT = 50; // Number of additional users to render on scroll
-const SCROLL_THRESHOLD = 200; // Load 200px before the bottom
 
 type SearchUserCheckboxProps<T extends string[]> = {
   state: T;
@@ -18,7 +15,7 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
   const { data: allFetchedUsers = [], isLoading } = useUsers();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
+  const [visibleCount, setVisibleCount] = useState(config.infiniteScroll.initialLoadCount);
 
   const filteredUsers = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -33,7 +30,7 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
   }, [allFetchedUsers, searchTerm]);
 
   useEffect(() => {
-    setVisibleCount(INITIAL_LOAD_COUNT);
+    setVisibleCount(config.infiniteScroll.initialLoadCount);
   }, [filteredUsers.length]);
 
   const searchUsers = useCallback((s: string): void => {
@@ -49,8 +46,8 @@ function SearchUserCheckbox<T extends string[]>({ state, setState }: SearchUserC
 
       const hasMoreToRender = visibleCount < filteredUsers.length;
 
-      if (scrollPosition >= contentHeight - SCROLL_THRESHOLD && hasMoreToRender) {
-        setVisibleCount((prevCount) => Math.min(prevCount + LOAD_MORE_COUNT, filteredUsers.length));
+      if (scrollPosition >= contentHeight - config.infiniteScroll.scrollThreshold && hasMoreToRender) {
+        setVisibleCount((prevCount) => Math.min(prevCount + config.infiniteScroll.loadMoreCount, filteredUsers.length));
       }
     },
     [visibleCount, filteredUsers.length],

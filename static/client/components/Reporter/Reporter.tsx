@@ -9,7 +9,7 @@ import { useStore } from "@/store";
 
 const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
   const user = useStore((state) => state.user);
-  const { data, isLoading } = useUsers();
+  const { data = [], isLoading } = useUsers();
 
   const handleRemoveReporter = useCallback(
     () => () => {
@@ -31,7 +31,7 @@ const Reporter = ({ reporter, setReporter }: IReporterProps): ReactNode => {
       loading={!!isLoading}
       onRemove={handleRemoveReporter}
       onSelect={handleSelectReporter}
-      options={data || []}
+      options={data}
       placeholder="Select a reporter"
       selectedOptions={reporter ? [reporter] : []}
     />

@@ -12,7 +12,7 @@ import { type IUser } from "@/services/api/types/users";
 
 const Owner = ({ page, onSelectOwner }: IOwnerProps): ReactNode => {
   const [currentOwner, setCurrentOwner] = useState<IUser | null>(null);
-  const { data, isLoading } = useUsers();
+  const { data = [], isLoading } = useUsers();
 
   useEffect(() => {
     let owner = null;
@@ -57,7 +57,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerProps): ReactNode => {
       loading={!!isLoading}
       onRemove={handleRemoveOwner}
       onSelect={selectOwner}
-      options={data || []}
+      options={data}
       placeholder="Select an owner"
       selectedOptions={currentOwner ? [currentOwner] : []}
     />

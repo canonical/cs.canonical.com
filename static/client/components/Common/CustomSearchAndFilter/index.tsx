@@ -5,8 +5,8 @@ import type { ICustomSearchAndFilterProps } from "./types";
 
 const CustomSearchAndFilter = <T extends Record<string, any>>({
   label,
-  options,
-  selectedOptions,
+  options = [],
+  selectedOptions = [],
   placeholder,
   onChange,
   onRemove,
@@ -17,13 +17,13 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
 }: ICustomSearchAndFilterProps<T>): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
-  const [data, setData] = useState<T[]>([]);
+  const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDropdownHidden(!inputRef.current?.value);
-    setContainerExpanded(!!data.length);
-  }, [data, inputRef.current?.value]);
+    setContainerExpanded(!!filteredOptions.length);
+  }, [filteredOptions, inputRef.current?.value]);
 
   const handleSelect = useCallback(
     (option: T) => () => {
@@ -52,7 +52,9 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.target.value.length < 3) return;
     if (onChange) return onChange(event);
-    setData(options.filter((option) => option[labelKey].toLowerCase().includes(event.target.value.toLowerCase())));
+    setFilteredOptions(
+      options.filter((option) => option[labelKey].toLowerCase().includes(event.target.value.toLowerCase())),
+    );
   }
 
   return (
@@ -96,7 +98,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
         <div className="p-filter-panel-section">
           <div aria-expanded="false" className="p-filter-panel-section__chips">
             {loading && <p>Loading...</p>}
-            {data.map((option) => (
+            {filteredOptions.map((option) => (
               <button
                 className="p-chip"
                 key={option[indexKey]}

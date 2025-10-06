@@ -11,7 +11,7 @@ import { type IUser } from "@/services/api/types/users";
 
 const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
-  const { data, isLoading } = useUsers();
+  const { data = [], isLoading } = useUsers();
 
   useEffect(() => {
     if (page) setCurrentReviewers(page.reviewers);
@@ -54,7 +54,7 @@ const Reviewers = ({ page, onSelectReviewers }: IReviewersProps): ReactNode => {
       loading={!!isLoading}
       onRemove={handleRemoveReviewer}
       onSelect={selectReviewer}
-      options={data || []}
+      options={data}
       placeholder="Select reviewers"
       selectedOptions={currentReviewers}
     />
