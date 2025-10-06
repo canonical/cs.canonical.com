@@ -84,13 +84,14 @@ jobs:
           --network host \
           websites-content-system & sleep 3
           curl --head --fail --retry-delay 1 --retry 50 --retry-connrefused http://localhost
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+
+      - name: Run playwright image
+        run: docker run -d --add-host=hostmachine:host-gateway -p 3000:3000 --init --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.50.1-noble /bin/sh -c "npx -y playwright@1.50.1 run-server --port 3000 --host 0.0.0.0" & sleep 30
       - name: Run Playwright tests
         env:
           JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
         run: |
-          JIRA_REPORTER_ID="$JIRA_REPORTER_ID" yarn playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob
+          PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ JIRA_REPORTER_ID="$JIRA_REPORTER_ID" BASE_URL=http://hostmachine PORT=80 yarn playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob
 
       - name: Upload blob report to GitHub Actions Artifacts
         if: ${{ !cancelled() }}
@@ -107,26 +108,26 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: yarn
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: yarn
 
-    - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: all-blob-reports
-        pattern: blob-report-*
-        merge-multiple: true
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
 
-    - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - name: Merge into HTML Report
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-    - name: Upload HTML report
-      uses: actions/upload-artifact@v4
-      with:
-        name: html-report--attempt-${{ github.run_attempt }}
-        path: playwright-report
-        retention-days: 14
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report--attempt-${{ github.run_attempt }}
+          path: playwright-report
+          retention-days: 14
