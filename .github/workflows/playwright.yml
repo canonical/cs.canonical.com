@@ -86,7 +86,7 @@ jobs:
           curl --head --fail --retry-delay 1 --retry 50 --retry-connrefused http://localhost
 
       - name: Run playwright image
-        run: docker run -d --add-host=hostmachine:host-gateway -p 3000:3000 --init --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.50.1-noble /bin/sh -c "npx -y playwright@1.50.1 run-server --port 3000 --host 0.0.0.0" & sleep 30
+        run: docker run -d --add-host=hostmachine:host-gateway -p 3000:3000 --init --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.50.1-noble /bin/sh -c "npx -y playwright@1.50.1 run-server --port 3000 --host 0.0.0.0" & sleep 60
       - name: Run Playwright tests
         env:
           JIRA_REPORTER_ID: ${{ secrets.JIRA_REPORTER_ID }}
