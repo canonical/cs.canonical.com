@@ -7,7 +7,3 @@ export interface IUser {
   team: string;
   role: string;
 }
-
-export interface IUsersResponse {
-  data: IUser[];
-}

@@ -47,6 +47,11 @@ const config = {
   ghLink: (project: string) => `https://github.com/canonical/${project}/tree/main/templates`,
   copyStyleGuideLink: "https://docs.google.com/document/d/1AX-kSNztuAmShEoohe8L3LNLRnSKF7I0qkZGNeoGOok/edit?tab=t.0",
   jiraTaskLink: "https://warthogs.atlassian.net/browse/",
+  infiniteScroll: {
+    initialLoadCount: 50,
+    loadMoreCount: 50,
+    scrollThreshold: 200,
+  },
 };
 
 export default config;

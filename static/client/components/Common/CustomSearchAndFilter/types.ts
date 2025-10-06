@@ -5,9 +5,10 @@ export interface ICustomSearchAndFilterProps<T> {
   options: T[];
   selectedOptions: T[];
   placeholder: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onRemove: (option?: T) => () => void;
   onSelect: (option: T) => void;
   indexKey?: string;
   labelKey?: string;
+  loading?: boolean;
 }
