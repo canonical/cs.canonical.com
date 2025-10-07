@@ -8,7 +8,16 @@ import yaml
 from flask import Flask
 
 from webapp import create_app
-from webapp.models import Asset, JiraTask, JIRATaskStatus, JiraTaskType, Project, Webpage, WebpageStatus, db
+from webapp.models import (
+    Asset,
+    JiraTask,
+    JIRATaskStatus,
+    JiraTaskType,
+    Project,
+    Webpage,
+    WebpageStatus,
+    db,
+)
 from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
 from webapp.tasks import register_task
@@ -65,7 +74,6 @@ def update_jira_statuses() -> None:
         jira_tasks = JiraTask.query.all()
 
         if jira_tasks:
-            # Use set for O(1) lookup performance instead of list with O(n) lookup
             project_ids = set()
 
             # Collect all webpage_ids to batch load webpages
@@ -78,9 +86,6 @@ def update_jira_statuses() -> None:
                 webpages = Webpage.query.filter(
                     Webpage.id.in_(webpage_ids)).all()
                 webpages_dict = {webpage.id: webpage for webpage in webpages}
-
-            # Batch collect all Jira IDs for potential future optimization
-            jira_ids = [task.jira_id for task in jira_tasks]
 
             for task in jira_tasks:
                 response = jira.get_issue_statuses(task.jira_id)
@@ -98,13 +103,18 @@ def update_jira_statuses() -> None:
                         old_status != JIRATaskStatus.REJECTED and
                             new_status == JIRATaskStatus.REJECTED):
 
-                        # Update webpage status from TO_DELETE to AVAILABLE when removal request is rejected
-                        if webpage and webpage.status == WebpageStatus.TO_DELETE:
+                        # Update webpage status from TO_DELETE to AVAILABLE
+                        # when removal request is rejected
+                        if (webpage and
+                                webpage.status == WebpageStatus.TO_DELETE):
                             webpage.status = WebpageStatus.AVAILABLE
                             app.logger.info(
-                                f"Updated webpage {webpage.id} status from TO_DELETE to AVAILABLE due to rejected removal request")
+                                f"Updated webpage {webpage.id} status from "
+                                "TO_DELETE to AVAILABLE due to rejected "
+                                "removal request"
+                            )
 
-                    # Collect project IDs for cache invalidation (using the pre-loaded webpage)
+                    # Collect project IDs for cache invalidation
                     if webpage and webpage.project_id:
                         project_ids.add(webpage.project_id)
 
