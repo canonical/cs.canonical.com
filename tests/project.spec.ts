@@ -9,7 +9,7 @@ let apiContext: APIRequestContext;
 test.describe("Test project actions", () => {
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
-      baseURL: `${config.BASE_URL}`,
+      baseURL: `http://localhost:${process.env.PORT}`,
     });
   });
 
