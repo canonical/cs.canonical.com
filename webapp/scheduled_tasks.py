@@ -78,7 +78,8 @@ def update_jira_statuses() -> None:
 
             # Collect all webpage_ids to batch load webpages
             webpage_ids = {
-                task.webpage_id for task in jira_tasks if task.webpage_id}
+                task.webpage_id for task in jira_tasks if task.webpage_id
+            }
 
             # Batch load all webpages in a single query
             webpages_dict = {}
