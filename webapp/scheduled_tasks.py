@@ -8,7 +8,16 @@ import yaml
 from flask import Flask
 
 from webapp import create_app
-from webapp.models import Asset, JiraTask, Project, Webpage, db
+from webapp.models import (
+    Asset,
+    JiraTask,
+    JIRATaskStatus,
+    JiraTaskType,
+    Project,
+    Webpage,
+    WebpageStatus,
+    db,
+)
 from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
 from webapp.tasks import register_task
@@ -60,27 +69,66 @@ def update_jira_statuses() -> None:
         if not jira:
             app.logger.error("JIRA configuration not found")
             return
+
+        # Fetch all JiraTasks
         jira_tasks = JiraTask.query.all()
+
         if jira_tasks:
-            project_ids = []
+            project_ids = set()
+
+            # Collect all webpage_ids to batch load webpages
+            webpage_ids = {
+                task.webpage_id for task in jira_tasks if task.webpage_id
+            }
+
+            # Batch load all webpages in a single query
+            webpages_dict = {}
+            if webpage_ids:
+                webpages = Webpage.query.filter(
+                    Webpage.id.in_(webpage_ids)).all()
+                webpages_dict = {webpage.id: webpage for webpage in webpages}
+
             for task in jira_tasks:
                 response = jira.get_issue_statuses(task.jira_id)
-                if task.status != response["fields"]["status"]["name"].upper():
-                    task.status = response["fields"]["status"]["name"].upper()
-                    # get the project id from the webpage that corresponds to
-                    # the Jira task (will be needed to invalidate the cache)
-                    webpage = Webpage.query.filter_by(
-                        id=task.webpage_id,
-                    ).first()
-                    if webpage and webpage.project_id not in project_ids:
-                        project_ids.append(webpage.project_id)
+                new_status = response["fields"]["status"]["name"].upper()
+
+                if task.status != new_status:
+                    old_status = task.status
+                    task.status = new_status
+
+                    # Get webpage from the pre-loaded dictionary
+                    webpage = webpages_dict.get(task.webpage_id)
+
+                    # Handle webpage status sync for removal requests
+                    if (task.request_type == JiraTaskType.PAGE_REMOVAL and
+                        old_status != JIRATaskStatus.REJECTED and
+                            new_status == JIRATaskStatus.REJECTED):
+
+                        # Update webpage status from TO_DELETE to AVAILABLE
+                        # when removal request is rejected
+                        if (webpage and
+                                webpage.status == WebpageStatus.TO_DELETE):
+                            webpage.status = WebpageStatus.AVAILABLE
+                            app.logger.info(
+                                f"Updated webpage {webpage.id} status from "
+                                "TO_DELETE to AVAILABLE due to rejected "
+                                "removal request"
+                            )
+
+                    # Collect project IDs for cache invalidation
+                    if webpage and webpage.project_id:
+                        project_ids.add(webpage.project_id)
+
             db.session.commit()
 
-            # invalidate the cache for all the project trees where Jira tasks
-            # have changed status
-            for project_id in project_ids:
-                project = Project.query.filter_by(id=project_id).first()
-                if project:
+            # Batch load all projects that need cache invalidation
+            if project_ids:
+                projects = Project.query.filter(
+                    Project.id.in_(project_ids)).all()
+
+                # Invalidate cache for all affected project trees
+                # where Jira tasks have changed status
+                for project in projects:
                     site_repository = SiteRepository(project.name, app)
                     # clean the cache for a new Jira task to appear in the tree
                     site_repository.invalidate_cache()
