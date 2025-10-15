@@ -74,6 +74,19 @@ config:
       type: string
       description: "GitHub organization to use for repositories"
       default: "https://github.com/canonical"
+    sites-maintenance-epic:
+      type: string
+      description: "JIRA epic to use for sites maintenance tasks"
+      default: ""
+    sites-maintenance-labels:
+      type: string
+      description: "Comma-separated list of JIRA labels to apply to maintenance tasks"
+      default: "sites_Maintenance"
+    sites-new-features-labels:
+      type: string
+      description: "Comma-separated list of JIRA labels to apply to new feature requests"
+      default: "sites_NewFeature"
+    
 
 requires:
   postgresql:

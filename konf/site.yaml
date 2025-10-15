@@ -62,6 +62,15 @@ env:
       key: google-private-key-id
       name: cs-canonical-com
 
+  - name: SITES_MAINTENANCE_EPIC
+    value: "WD-21938"
+
+  - name: SITES_MAINTENANCE_LABELS
+    value: "sites_Maintenance"
+
+  - name: SITES_NEW_FEATURES_LABELS
+    value: "sites_NewFeature"
+
 # Overrides for production
 production:
   replicas: 3
@@ -157,3 +166,12 @@ demo:
       secretKeyRef:
         key: jira-token
         name: cs-canonical-com
+
+    - name: SITES_MAINTENANCE_EPIC
+      value: "WD-21938"
+
+    - name: SITES_MAINTENANCE_LABELS
+      value: "sites_Maintenance"
+
+    - name: SITES_NEW_FEATURES_LABELS
+      value: "sites_NewFeature"

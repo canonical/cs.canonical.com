@@ -31,6 +31,8 @@ from webapp.schemas import (
     FindWebpageByCopydoc,
     PlaywrightCleanupReqBody,
     RemoveWebpageModel,
+    ReportBugModel,
+    RequestFeatureModel,
 )
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
@@ -455,3 +457,101 @@ def find_webpage_by_copydoc(copy_doc_link: str):
         return None, "Webpage by given copydoc not found", 404
 
     return webpage, None, 200
+
+
+@jira_blueprint.route("/report-bug", methods=["POST"])
+@validate()
+def report_bug(body: ReportBugModel):
+    """Create a bug task on Jira
+
+    Args:
+        body (ReportBugModel): The model containing the details of
+            the bug to be reported.
+
+    Returns:
+        Response: A JSON response indicating the result of the operation.
+    """
+    try:
+        jira = current_app.config["JIRA"]
+        user_id = get_or_create_user_id(body.reporter_struct)
+        reporter_jira_id = jira.get_reporter_jira_id(user_id)
+        issue = jira.create_task(
+            due_date=body.due_date,
+            reporter_jira_id=reporter_jira_id,
+            issue_type=jira.BUG,
+            description=body.description,
+            summary=f"{body.website} - {body.summary}",
+            parent=jira.sites_maintenance_epic,
+            labels=current_app.config["SITES_MAINTENANCE_LABELS"].split(","),
+        )
+
+        return jsonify({"issue": issue}), 200
+    except Exception as error:
+        current_app.logger.info(f"Failed to report a bug: {error}")
+        return (
+            jsonify(
+                {
+                    "error": "Bug report failed",
+                    "description": str(error),
+                }
+            ),
+            400,
+        )
+
+
+@jira_blueprint.route("/request-feature", methods=["POST"])
+@validate()
+def request_feature(body: RequestFeatureModel):
+    """Create a feature request epic on Jira
+
+    Args:
+        body (RequestFeatureModel): The model containing the details of
+            the feature request to be submitted.
+
+    Returns:
+        Response: A JSON response indicating the result of the operation.
+    """
+    try:
+        jira = current_app.config["JIRA"]
+        user_id = get_or_create_user_id(body.reporter_struct)
+        reporter_jira_id = jira.get_reporter_jira_id(user_id)
+        issue = jira.create_task(
+            summary=body.summary,
+            issue_type=jira.EPIC,
+            description=body.description,
+            due_date=body.due_date,
+            reporter_jira_id=reporter_jira_id,
+            labels=current_app.config["SITES_NEW_FEATURES_LABELS"].split(","),
+            parent=None,
+            custom_fields={
+                # Acceptance criteria field
+                "customfield_10614": {
+                    "content": [
+                        {
+                            "content": [
+                                {
+                                    "text": body.objective,
+                                    "type": "text",
+                                }
+                            ],
+                            "type": "paragraph",
+                        }
+                    ],
+                    "type": "doc",
+                    "version": 1,
+                },
+            },
+        )
+
+        return jsonify({"issue": issue}), 200
+    except Exception as error:
+        current_app.logger.info(f"Failed to submit feature request: {error}")
+        return (
+            jsonify(
+                {
+                    "error": "Feature request failed",
+                    "description": str(error),
+                }
+            ),
+            400,
+        )

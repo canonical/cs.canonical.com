@@ -93,3 +93,19 @@ class FindWebpageByCopydoc(BaseModel):
 class GetWebpageAssetsModel(BaseModel):
     webpage_url: str
     project_name: str
+
+
+class ReportBugModel(BaseModel):
+    due_date: str = ""
+    reporter_struct: object = {}
+    description: str = ""
+    summary: str = ""
+    website: str = ""
+
+
+class RequestFeatureModel(BaseModel):
+    due_date: str = ""
+    reporter_struct: object = {}
+    description: str = ""
+    summary: str = ""
+    objective: str = ""

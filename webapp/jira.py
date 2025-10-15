@@ -22,6 +22,7 @@ class Jira:
     }
     EPIC = "10000"
     SUBTASK = "10013"
+    BUG = "10015"
 
     def __init__(
         self,
@@ -30,6 +31,7 @@ class Jira:
         token: str,
         labels: str,
         copy_updates_epic: str,
+        sites_maintenance_epic: str,
     ):
         """
         Initialize the Jira object.
@@ -40,11 +42,14 @@ class Jira:
             token (str): The API token of the user.
             labels (str): The labels to be applied to the created issues.
             copy_updates_epic (str): The key of the epic to copy updates to.
+            sites_maintenance_epic (str): The key of the epic for sites
+                maintenance.
         """
         self.url = url
         self.auth = HTTPBasicAuth(email, token)
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
+        self.sites_maintenance_epic = sites_maintenance_epic
         self._connect()
 
     def __request__(
@@ -135,6 +140,8 @@ class Jira:
         parent: str,
         reporter_jira_id: str,
         due_date: datetime,
+        labels: list[str] = None,
+        custom_fields: dict = {},
     ):
         """
         Creates a task or subtask in Jira.
@@ -174,7 +181,7 @@ class Jira:
                 },
                 "summary": summary,
                 "issuetype": {"id": issue_type},
-                "labels": self.labels,
+                "labels": labels if (labels and len(labels)) else self.labels,
                 "reporter": {"id": reporter_jira_id},
                 "parent": parent,
                 "duedate": due_date,
@@ -185,6 +192,11 @@ class Jira:
             },
             "update": {},
         }
+
+        if custom_fields:
+            for key, value in custom_fields.items():
+                payload["fields"][key] = value
+
         return self.__request__(method="POST", path="issue", data=payload)
 
     def create_issue(
@@ -345,6 +357,7 @@ def init_jira(app):
             token=app.config["JIRA_TOKEN"],
             labels=app.config["JIRA_LABELS"].split(","),
             copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
+            sites_maintenance_epic=app.config.get("SITES_MAINTENANCE_EPIC"),
         )
     except Exception as error:
         app.logger.info(f"Unable to initialize jira: {error}")
