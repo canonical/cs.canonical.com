@@ -11,6 +11,8 @@ export const ENDPOINTS = {
   setProducts: "/api/set-product",
   crudProduct: "/api/product",
   getWebpageAssets: "/api/get-webpage-assets",
+  reportBug: "/api/report-bug",
+  requestFeature: "/api/request-feature",
 };
 
 export const REST_TYPES = {
