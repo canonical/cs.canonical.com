@@ -57,3 +57,10 @@ GOOGLE_CREDENTIALS = {
 FLASK_DEBUG = get_flask_env("FLASK_DEBUG", False)
 JIRA_REPORTER_ID = get_flask_env("JIRA_REPORTER_ID")
 DISABLE_SSO = get_flask_env("DISABLE_SSO", False)
+SITES_MAINTENANCE_EPIC = get_flask_env("SITES_MAINTENANCE_EPIC", "KAN-2")
+SITES_MAINTENANCE_LABELS = get_flask_env(
+    "SITES_MAINTENANCE_LABELS", "sites_Maintenance"
+)
+SITES_NEW_FEATURES_LABELS = get_flask_env(
+    "SITES_NEW_FEATURES_LABELS", "sites_NewFeature"
+)
