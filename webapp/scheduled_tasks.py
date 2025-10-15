@@ -85,7 +85,8 @@ def update_jira_statuses() -> None:
             webpages_dict = {}
             if webpage_ids:
                 webpages = Webpage.query.filter(
-                    Webpage.id.in_(webpage_ids)).all()
+                    Webpage.id.in_(webpage_ids)
+                ).all()
                 webpages_dict = {webpage.id: webpage for webpage in webpages}
 
             for task in jira_tasks:
@@ -100,14 +101,18 @@ def update_jira_statuses() -> None:
                     webpage = webpages_dict.get(task.webpage_id)
 
                     # Handle webpage status sync for removal requests
-                    if (task.request_type == JiraTaskType.PAGE_REMOVAL and
-                        old_status != JIRATaskStatus.REJECTED and
-                            new_status == JIRATaskStatus.REJECTED):
+                    if (
+                        task.request_type == JiraTaskType.PAGE_REMOVAL
+                        and old_status != JIRATaskStatus.REJECTED
+                        and new_status == JIRATaskStatus.REJECTED
+                    ):
 
                         # Update webpage status from TO_DELETE to AVAILABLE
                         # when removal request is rejected
-                        if (webpage and
-                                webpage.status == WebpageStatus.TO_DELETE):
+                        if (
+                            webpage
+                            and webpage.status == WebpageStatus.TO_DELETE
+                        ):
                             webpage.status = WebpageStatus.AVAILABLE
                             app.logger.info(
                                 f"Updated webpage {webpage.id} status from "
@@ -124,7 +129,8 @@ def update_jira_statuses() -> None:
             # Batch load all projects that need cache invalidation
             if project_ids:
                 projects = Project.query.filter(
-                    Project.id.in_(project_ids)).all()
+                    Project.id.in_(project_ids)
+                ).all()
 
                 # Invalidate cache for all affected project trees
                 # where Jira tasks have changed status
