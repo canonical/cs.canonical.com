@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 
-import { Button, NotificationConsumer } from "@canonical/react-components";
+import { Button } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
@@ -54,9 +54,6 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             <Outlet />
           </div>
         </main>
-        <div className="l-notification__container">
-          <NotificationConsumer />
-        </div>
       </div>
     </>
   );

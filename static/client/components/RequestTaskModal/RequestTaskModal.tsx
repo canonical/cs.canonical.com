@@ -1,7 +1,16 @@
 import { type ChangeEvent, useCallback, useMemo, useState, type ReactNode } from "react";
 import React from "react";
 
-import { Button, Input, Modal, RadioInput, Spinner, Textarea, Tooltip, useNotify } from "@canonical/react-components";
+import {
+  Button,
+  Input,
+  Modal,
+  RadioInput,
+  Spinner,
+  Textarea,
+  Tooltip,
+  useToastNotification,
+} from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
@@ -26,7 +35,7 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   const { refetch } = usePages(true);
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
   const navigate = useNavigate();
-  const notify = useNotify();
+  const notify = useToastNotification();
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDueDate(e.target.value);
