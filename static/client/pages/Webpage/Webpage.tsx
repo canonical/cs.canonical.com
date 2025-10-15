@@ -9,6 +9,7 @@ import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
 import Owner from "@/components/Owner";
 import Products from "@/components/Products";
+import ReportBugPanel from "@/components/ReportBugPanel";
 import RequestTaskModal from "@/components/RequestTaskModal";
 import Reviewers from "@/components/Reviewers";
 import WebpageAssets from "@/components/WebpageAssets";
@@ -121,6 +122,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
                 <i className="p-icon--external-link" />
               </Button>
             )}
+            <ReportBugPanel buttonLabel="Report a bug" project={page.project?.name} />
             <Button appearance="neutral" onClick={requestRemoval}>
               Request removal
             </Button>
