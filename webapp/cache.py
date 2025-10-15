@@ -179,8 +179,7 @@ class CacheFactory:
             return RedisCache(app)
         else:
             app.logger.info(
-                "Redis cache not available. "
-                "Using FileCache instead."
+                "Redis cache not available. Using FileCache instead."
             )
             return FileCache(app)
 
