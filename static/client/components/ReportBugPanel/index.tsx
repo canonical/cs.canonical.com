@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ActionButton, Button, Icon, Input, Select, SidePanel, Textarea, useNotify } from "@canonical/react-components";
+import {
+  ActionButton,
+  Button,
+  Icon,
+  Input,
+  Select,
+  SidePanel,
+  Textarea,
+  useToastNotification,
+} from "@canonical/react-components";
 
 import config from "@/config";
 import { JiraServices } from "@/services/api/services/jira";
@@ -8,7 +17,7 @@ import type { IReportBugResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
 
 const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
-  const notify = useNotify();
+  const notify = useToastNotification();
   const [isOpen, setIsOpen] = useState(false);
 
   const [website, setWebsite] = useState(project || config.allProjects[0]);
@@ -51,15 +60,8 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
       .then(({ data }: IReportBugResponse) => {
         togglePanel();
         notify.success(
-          <div>
-            {/* <p>A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.</p> */}
-            {/* <hr className="p-rule" /> */}
-            <div className="u-align--right">
-              <a href={`${config.jiraTaskLink}${data.issue?.key}`} rel="noreferrer" target="_blank">
-                View issue
-              </a>
-            </div>
-          </div>,
+          "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
+          [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
           "You have successfully reported a bug",
         );
       })

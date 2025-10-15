@@ -12,10 +12,10 @@
   }
 }
 
-.l-notification__container {
-  position: fixed;
-  right: 2rem;
-  top: 1rem;
-  z-index: 150;
-  max-width: 30rem;
+.toast-animate {
+  .toast-notification {
+    bottom: 1rem;
+    right: 1rem;
+    margin: 0 0;
+  }
 }

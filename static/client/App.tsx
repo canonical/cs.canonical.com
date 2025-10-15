@@ -1,4 +1,4 @@
-import { NotificationProvider } from "@canonical/react-components";
+import { ToastNotificationProvider } from "@canonical/react-components";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import "./App.scss";
@@ -14,9 +14,9 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <NotificationProvider>
+      <ToastNotificationProvider>
         <Main />
-      </NotificationProvider>
+      </ToastNotificationProvider>
     </QueryClientProvider>
   );
 };

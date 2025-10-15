@@ -1,6 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { ActionButton, Button, Icon, Input, SidePanel, Textarea, useNotify } from "@canonical/react-components";
+import {
+  ActionButton,
+  Button,
+  Icon,
+  Input,
+  SidePanel,
+  Textarea,
+  useToastNotification,
+} from "@canonical/react-components";
 
 import config from "@/config";
 import { JiraServices } from "@/services/api/services/jira";
@@ -8,7 +16,7 @@ import type { IRequestFeatureResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
 
 const RequestFeaturePanel = () => {
-  const notify = useNotify();
+  const notify = useToastNotification();
   const [isOpen, setIsOpen] = useState(false);
 
   const [dueDate, setDueDate] = useState<string>("");
@@ -46,15 +54,8 @@ const RequestFeaturePanel = () => {
       .then(({ data }: IRequestFeatureResponse) => {
         togglePanel();
         notify.success(
-          <div>
-            <p>A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.</p>
-            <hr className="p-rule" />
-            <div className="u-align--right">
-              <a href={`${config.jiraTaskLink}${data.issue?.key}`} rel="noreferrer" target="_blank">
-                View issue
-              </a>
-            </div>
-          </div>,
+          "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
+          [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
           "You have successfully submitted a feature request",
         );
       })

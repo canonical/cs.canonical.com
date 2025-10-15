@@ -1,6 +1,6 @@
 import { useCallback, useState, type ReactNode } from "react";
 
-import { Modal, Button, Input, useNotify, Spinner } from "@canonical/react-components";
+import { Modal, Button, Input, Spinner, useToastNotification } from "@canonical/react-components";
 import { useQueryClient } from "react-query";
 
 import { ProductsServices } from "@/services/api/services/products";
@@ -19,7 +19,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
   const [inputError, setInputError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const notify = useNotify();
+  const notify = useToastNotification();
   const handleAction = useCallback(async () => {
     setIsLoading(true);
     try {
