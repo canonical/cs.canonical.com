@@ -15,18 +15,20 @@ import config from "@/config";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IReportBugResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
+import { usePanelsStore } from "@/store/app";
 
 const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
   const notify = useToastNotification();
-  const [isOpen, setIsOpen] = useState(false);
-
+  const [reportBugPanelVisible, toggleReportBugPanel] = usePanelsStore((state) => [
+    state.reportBugPanelVisible,
+    state.toggleReportBugPanel,
+  ]);
   const [website, setWebsite] = useState(project || config.allProjects[0]);
   const [dueDate, setDueDate] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const user = useStore((state) => state.user);
   const [loading, setLoading] = useState(false);
-  const togglePanel = () => setIsOpen((prev) => !prev);
 
   const submitButtonEnabled = useMemo(
     () => website && dueDate && summary.trim().length > 0 && description.trim().length > 0 && !loading,
@@ -58,7 +60,7 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
       reporter_struct: user,
     })
       .then(({ data }: IReportBugResponse) => {
-        togglePanel();
+        toggleReportBugPanel();
         notify.success(
           "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
           [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
@@ -67,12 +69,12 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
       })
       .catch(onSubmitError)
       .finally(() => setLoading(false));
-  }, [description, dueDate, notify, onSubmitError, summary, user, website]);
+  }, [description, dueDate, notify, onSubmitError, summary, toggleReportBugPanel, user, website]);
 
   return (
     <>
-      <Button onClick={togglePanel}>{buttonLabel}</Button>
-      <SidePanel isOpen={isOpen} pinned>
+      <Button onClick={toggleReportBugPanel}>{buttonLabel}</Button>
+      <SidePanel isOpen={reportBugPanelVisible} pinned>
         <SidePanel.Sticky>
           <div className="p-section--shallow">
             <SidePanel.Header>
@@ -83,7 +85,7 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
                   aria-label="Close"
                   className="u-no-margin--bottom"
                   hasIcon
-                  onClick={togglePanel}
+                  onClick={toggleReportBugPanel}
                 >
                   <Icon name="close" />
                 </Button>

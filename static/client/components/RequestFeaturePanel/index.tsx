@@ -14,18 +14,20 @@ import config from "@/config";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IRequestFeatureResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
+import { usePanelsStore } from "@/store/app";
 
 const RequestFeaturePanel = () => {
   const notify = useToastNotification();
-  const [isOpen, setIsOpen] = useState(false);
-
+  const [requestFeaturePanelVisible, toggleRequestFeaturePanel] = usePanelsStore((state) => [
+    state.requestFeaturePanelVisible,
+    state.toggleRequestFeaturePanel,
+  ]);
   const [dueDate, setDueDate] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [objective, setObjective] = useState<string>("");
   const user = useStore((state) => state.user);
   const [loading, setLoading] = useState(false);
-  const togglePanel = () => setIsOpen((prev) => !prev);
 
   const submitButtonEnabled = useMemo(
     () =>
@@ -52,7 +54,7 @@ const RequestFeaturePanel = () => {
       reporter_struct: user,
     })
       .then(({ data }: IRequestFeatureResponse) => {
-        togglePanel();
+        toggleRequestFeaturePanel();
         notify.success(
           "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
           [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
@@ -61,12 +63,12 @@ const RequestFeaturePanel = () => {
       })
       .catch(onSubmitError)
       .finally(() => setLoading(false));
-  }, [description, dueDate, notify, objective, onSubmitError, summary, user]);
+  }, [description, dueDate, notify, objective, onSubmitError, summary, toggleRequestFeaturePanel, user]);
 
   return (
     <>
-      <Button onClick={togglePanel}>Request feature</Button>
-      <SidePanel isOpen={isOpen} pinned>
+      <Button onClick={toggleRequestFeaturePanel}>Request feature</Button>
+      <SidePanel isOpen={requestFeaturePanelVisible} pinned>
         <SidePanel.Sticky>
           <div className="p-section--shallow">
             <SidePanel.Header>
@@ -77,7 +79,7 @@ const RequestFeaturePanel = () => {
                   aria-label="Close"
                   className="u-no-margin--bottom"
                   hasIcon
-                  onClick={togglePanel}
+                  onClick={toggleRequestFeaturePanel}
                 >
                   <Icon name="close" />
                 </Button>

@@ -16,14 +16,16 @@ import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { useStore } from "@/store";
+import { usePanelsStore } from "@/store/app";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [editProductPanelOpen, setEditProductPanelOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
   );
   const [user] = useStore((state) => [state.user]);
+
+  const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
 
   const openCopyDoc = useCallback(() => {
     window.open(page.copy_doc_link);
@@ -58,10 +60,6 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
-  }, []);
-
-  const toggleEditProductPanelClose = useCallback(() => {
-    setEditProductPanelOpen((x) => !x);
   }, []);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
@@ -144,7 +142,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <div className="u-sv3" />
             <Products page={page} />
             {user.role === "admin" ? (
-              <Button appearance="link" onClick={toggleEditProductPanelClose}>
+              <Button appearance="link" onClick={toggleProductsPanel}>
                 Edit product tags
               </Button>
             ) : (
@@ -167,7 +165,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             webpage={page}
           />
         )}
-        <EditProductPanel isOpen={editProductPanelOpen} onClose={toggleEditProductPanelClose} />
+        <EditProductPanel />
       </div>
     </>
   );

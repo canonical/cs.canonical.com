@@ -17,3 +17,16 @@ export interface IViewsStore {
   expandedProject: string;
   setExpandedProject: (s: IViewsStore["expandedProject"]) => void;
 }
+
+export interface IPanelsStore {
+  productsPanelVisible: boolean;
+  reportBugPanelVisible: boolean;
+  requestFeaturePanelVisible: boolean;
+
+  togglePanel: (p: PanelKey) => void;
+  toggleProductsPanel: () => void;
+  toggleReportBugPanel: () => void;
+  toggleRequestFeaturePanel: () => void;
+}
+
+export type PanelKey = "productsPanelVisible" | "reportBugPanelVisible" | "requestFeaturePanelVisible";
