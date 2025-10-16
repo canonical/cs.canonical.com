@@ -9,13 +9,9 @@ import ProductActionModal from "./ProductActionModal";
 
 import { ProductsServices } from "@/services/api/services/products";
 import type { IProduct, IProductAction } from "@/services/api/types/products";
+import { usePanelsStore } from "@/store/app";
 
-interface EditProductPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode => {
+const EditProductPanel = (): ReactNode => {
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [action, setAction] = useState<IProductAction>(null);
   const [productActionModalOpen, setProductActionModalOpen] = useState(false);
@@ -23,13 +19,18 @@ const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode
   const toggleActionModal = useCallback(() => setProductActionModalOpen((prev) => !prev), []);
   const [products, setProducts] = useState<IProduct[]>([]);
 
+  const [productsPanelVisible, toggleProductsPanel] = usePanelsStore((state) => [
+    state.productsPanelVisible,
+    state.toggleProductsPanel,
+  ]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await ProductsServices.getProducts();
       setProducts(data?.data ?? []);
     };
-    if (isOpen) fetchProducts();
-  }, [isOpen]);
+    if (productsPanelVisible) fetchProducts();
+  }, [productsPanelVisible]);
 
   const openProductActionModal = useCallback((product: IProduct | null, action: IProductAction) => {
     setProductActionModalOpen(true);
@@ -42,18 +43,24 @@ const EditProductPanel = ({ isOpen, onClose }: EditProductPanelProps): ReactNode
       {productActionModalOpen && (
         <ProductActionModal
           action={action}
-          closeProductPanel={onClose}
+          closeProductPanel={toggleProductsPanel}
           onClose={toggleActionModal}
           product={selectedProduct}
         />
       )}
-      <SidePanel isOpen={isOpen} pinned>
+      <SidePanel isOpen={productsPanelVisible} pinned>
         <SidePanel.Sticky>
           <div className="p-section--shallow">
             <SidePanel.Header>
               <SidePanel.HeaderTitle>Edit product labels</SidePanel.HeaderTitle>
               <SidePanel.HeaderControls>
-                <Button appearance="base" aria-label="Close" className="u-no-margin--bottom" hasIcon onClick={onClose}>
+                <Button
+                  appearance="base"
+                  aria-label="Close"
+                  className="u-no-margin--bottom"
+                  hasIcon
+                  onClick={toggleProductsPanel}
+                >
                   <Icon name="close" />
                 </Button>
               </SidePanel.HeaderControls>
