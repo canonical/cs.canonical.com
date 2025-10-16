@@ -15,6 +15,21 @@ if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
   globalThis.TextDecoder = NodeTextDecoder;
 }
 
+// matchMedia is used by ToastNotificationProvider from canonical/react-components
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }),
+});
+
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
   cleanup();
