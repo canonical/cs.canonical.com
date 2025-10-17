@@ -10,8 +10,10 @@ import {
   Textarea,
   useToastNotification,
 } from "@canonical/react-components";
+import type { AxiosError } from "axios";
 
 import config from "@/config";
+import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IReportBugResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
@@ -42,7 +44,7 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
   }, [project]);
 
   const onSubmitError = useCallback(
-    (error: any) => {
+    (error: AxiosError<IBasicApiError>) => {
       if (error?.response?.data) {
         notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
       }
