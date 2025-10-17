@@ -16,21 +16,21 @@ const DashboardActions = (): ReactNode => {
     [reportBugPanelVisible, requestFeaturePanelVisible],
   );
   return (
-    <div className="grid-row--25-75">
+    <div className="grid-row--25-75 u-sv1">
       <div className="grid-col">
         <p className="p-text--small-caps">Quick actions</p>
       </div>
       <div className="grid-col">
         <div className="grid-row">
           <div className={`grid-col-${isSidePanelOpen ? "3" : "2"}`}>
-            <div className="p-card bug-report-card">
+            <div className="p-card bug-report-card u-no-padding--top u-no-padding--bottom">
               <h4>Report a bug</h4>
               <p>Report a bug encountered on or across our sites</p>
               <ReportBugPanel />
             </div>
           </div>
           <div className={`grid-col-${isSidePanelOpen ? "3" : "2"}`}>
-            <div className="p-card bug-report-card">
+            <div className="p-card bug-report-card u-no-padding--top u-no-padding--bottom">
               <h4>Request a feature</h4>
               <p>Request features like adding redirects or adding side cards</p>
               <RequestFeaturePanel />
