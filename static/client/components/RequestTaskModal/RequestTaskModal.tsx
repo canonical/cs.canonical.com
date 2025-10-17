@@ -11,6 +11,7 @@ import {
   Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
+import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
@@ -18,6 +19,7 @@ import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 import Reporter from "@/components/Reporter";
 import config from "@/config";
 import { usePages } from "@/services/api/hooks/pages";
+import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
@@ -86,7 +88,7 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   );
 
   const onSubmitError = useCallback(
-    (error: any) => {
+    (error: AxiosError<IBasicApiError>) => {
       if (error?.response?.data) {
         notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
       }

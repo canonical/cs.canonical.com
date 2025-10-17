@@ -21,3 +21,8 @@ export class BasicApiClass {
     return this.apiClient.callApi<T>(endpoint, method, params);
   }
 }
+
+export interface IBasicApiError {
+  error: string;
+  description: string;
+}
