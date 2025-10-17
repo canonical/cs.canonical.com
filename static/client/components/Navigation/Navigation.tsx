@@ -41,8 +41,13 @@ const Navigation = (): ReactNode => {
     (view: TView) => {
       setExpandedProject("");
       setView(view);
-      if ([VIEW_OWNED, VIEW_REVIEWED].includes(view)) navigate(`/app/views/${view}`);
-      if ([VIEW_TABLE, VIEW_TREE].includes(view)) navigate("/app");
+      if ([VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view)) {
+        navigate(`/app/views/${view}`);
+      }
+
+      if ([VIEW_TREE].includes(view)) {
+        navigate("/app");
+      }
     },
     [navigate, setExpandedProject, setView],
   );
@@ -78,6 +83,7 @@ const Navigation = (): ReactNode => {
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
               <div>
+                <hr className="p-rule u-hide--small" />
                 <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
                   <React.Fragment key=".0">
                     <i className="p-icon--plus" /> <span>Request new page</span>
@@ -85,11 +91,10 @@ const Navigation = (): ReactNode => {
                 </Button>
               </div>
             </div>
-            <hr className="p-rule" />
             <div className="p-panel__content">
               <ul className="u-no-margin--left u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${location.pathname === "/app" && view !== VIEW_TREE && "is-active"}`}
+                  className={`p-side-navigation__link ${location.pathname === "/app/views/table" && view !== VIEW_TREE && "is-active"}`}
                   onClick={() => changeView(VIEW_TABLE)}
                 >
                   <span className="u-has-icon">

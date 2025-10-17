@@ -25,13 +25,13 @@
     .p-panel__header {
       display: block;
       padding-left: 0;
+      padding-right: 0;
 
       .l-site-selector,
       .l-site-selector__label,
       .l-new-webpage-button {
-        @media (max-width: $breakpoint-small) {
-          margin-top: 2rem;
-        }
+        margin-top: 1rem;
+
         @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
           visibility: hidden;
         }
@@ -59,7 +59,7 @@
   
       @media (min-width: $breakpoint-small) {
         display: flex;
-        margin-bottom: 50px;
+        margin-bottom: 20px;
       }
     }
 
@@ -84,7 +84,7 @@
     .p-panel__content {
       max-height: calc(100vh - 540px);
       overflow: auto;
-      margin-bottom: 2rem;
+      padding: 0;
 
     }
 
@@ -110,7 +110,7 @@
     }
 
     li.p-side-navigation__link {
-      padding: 0.8rem 1rem;
+      padding: 0.4rem 0.5rem;
       cursor: pointer;
     }
   }
