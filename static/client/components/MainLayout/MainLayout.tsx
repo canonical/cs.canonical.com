@@ -28,10 +28,10 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
       <div className="l-application" id="l-application">
         <Navigation />
         <main className="l-main">
-          <div className="grid-row--50-50">
+          <div className="grid-row--50-50 p-section--shallow">
             <div className="grid-col">
               {location.pathname.includes("/webpage") && view !== VIEW_TREE && (
-                <Button hasIcon onClick={goPrev}>
+                <Button className={"u-no-margin--bottom"} hasIcon onClick={goPrev}>
                   <React.Fragment key=".0">
                     <i className="p-icon--chevron-left" /> <span>Back</span>
                   </React.Fragment>
@@ -41,15 +41,10 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             <div className="grid-col">
               <Search />
             </div>
+            <hr className="p-rule" />
           </div>
-          <hr />
           <div className="grid-row">
-            {location.pathname === "/app" && (
-              <>
-                <h2>All pages</h2>
-                <FilterTableView />
-              </>
-            )}
+            {location.pathname === "/app" && <FilterTableView />}
             {children}
             <Outlet />
           </div>

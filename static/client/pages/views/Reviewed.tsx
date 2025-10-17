@@ -29,7 +29,6 @@ const Reviewed: React.FC = () => {
 
   return (
     <div className="l-reviwed-view-page">
-      <h2>Reviewed by me</h2>
       <FilterTableView />
     </div>
   );

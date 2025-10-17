@@ -90,6 +90,7 @@ const FilterandSearch = (): ReactNode => {
             onChange={handleSearchChange}
             onClear={clearSearch}
             onSearch={applySearch}
+            placeholder="Search by URL"
             value={searchQuery}
           />
         </div>

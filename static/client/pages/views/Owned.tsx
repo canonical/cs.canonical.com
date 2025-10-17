@@ -29,7 +29,6 @@ const Owned: React.FC = () => {
 
   return (
     <div className="l-owned-view-page">
-      <h2>Owned by me</h2>
       <FilterTableView />
     </div>
   );

@@ -66,7 +66,7 @@ const Search = (): ReactNode => {
         disabled={!(data?.length && data[0])}
         onBlur={handleInputBlur}
         onChange={handleChange}
-        placeholder="Search a webpage"
+        placeholder="Search by page title or URL"
         ref={searchRef}
       />
       <div className="l-search-container">
