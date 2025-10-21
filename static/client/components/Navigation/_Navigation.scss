@@ -111,13 +111,13 @@
       .p-side-navigation__link {
         cursor: pointer;
         justify-content: flex-start;
-        padding: 4px 4px 8px 0;
+        padding: 4px 4px 8px 4px;
         width: 100%;
       }
     }
 
     li.p-side-navigation__link {
-      padding: 4px 0;
+      padding: 4px;
       cursor: pointer;
     }
   }
