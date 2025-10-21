@@ -10,7 +10,7 @@ interface NavigationBannerProps {
 
 const NavigationBanner = ({ children }: NavigationBannerProps): ReactNode => {
   const location = useLocation();
-  const homepageLink = { url: "/", label: "Homepage" };
+  const homepageLink = { url: "/app", label: "Homepage" };
   return (
     <>
       <Link
