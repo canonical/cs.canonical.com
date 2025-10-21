@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastNotificationProvider>
+      <ToastNotificationProvider autoDismissDelay={0}>
         <Main />
       </ToastNotificationProvider>
     </QueryClientProvider>
