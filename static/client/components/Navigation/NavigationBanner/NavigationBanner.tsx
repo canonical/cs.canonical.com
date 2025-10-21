@@ -1,8 +1,10 @@
-import { type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { isSelected } from "@/components/Navigation/utils";
+import { VIEW_TABLE } from "@/config";
+import { useViewsStore } from "@/store/views";
 
 interface NavigationBannerProps {
   children?: React.ReactNode;
@@ -11,12 +13,24 @@ interface NavigationBannerProps {
 const NavigationBanner = ({ children }: NavigationBannerProps): ReactNode => {
   const location = useLocation();
   const homepageLink = { url: "/app", label: "Homepage" };
+  const navigate = useNavigate();
+  const setView = useViewsStore((state) => state.setView);
+
+  const handleNavigation = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      event.preventDefault();
+      setView(VIEW_TABLE);
+      navigate(homepageLink.url);
+    },
+    [homepageLink.url, navigate, setView],
+  );
   return (
     <>
       <Link
         aria-current={isSelected(location.pathname, homepageLink)}
         aria-label={homepageLink.label}
         className="p-panel__logo"
+        onClick={handleNavigation}
         to={homepageLink.url}
       >
         <img
