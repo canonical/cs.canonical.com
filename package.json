@@ -21,7 +21,7 @@
     "format-python": "black --line-length 79 webapp tests"
   },
   "dependencies": {
-    "@canonical/react-components": "2.16.1",
+    "@canonical/react-components": "3.5.0",
     "axios": "1.12.2",
     "classnames": "2.5.1",
     "formik": "2.4.6",
