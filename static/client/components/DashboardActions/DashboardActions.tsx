@@ -16,7 +16,8 @@ const DashboardActions = (): ReactNode => {
     [reportBugPanelVisible, requestFeaturePanelVisible],
   );
   return (
-    <div className="grid-row--25-75 u-sv1">
+    <div className="grid-row--25-75">
+      <hr className="p-rule" />
       <div className="grid-col">
         <p className="p-text--small-caps">Quick actions</p>
       </div>

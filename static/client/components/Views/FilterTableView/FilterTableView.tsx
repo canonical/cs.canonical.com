@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 
 import FilterandSearch from "./FilterandSearch";
 
-import DashboardActions from "@/components/DashboardActions";
 import TableView from "@/components/Views/TableView";
 import { VIEW_OWNED, VIEW_REVIEWED } from "@/config";
 import { useViewsStore } from "@/store/views";
@@ -25,20 +24,11 @@ const FilterTableView = (): ReactNode => {
     }
   }, [location.pathname, view]);
 
-  const showQuickActions = useMemo(() => {
-    return location.pathname === "/app";
-  }, [location.pathname]);
   return (
     <>
-      {showQuickActions && (
-        <>
-          <DashboardActions />
-          <hr className="p-rule" />
-        </>
-      )}
-
       <h2>{viewTitle}</h2>
       <FilterandSearch />
+      <hr className="p-rule" />
       <TableView />
     </>
   );
