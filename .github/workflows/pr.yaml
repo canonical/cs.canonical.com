@@ -1,4 +1,4 @@
-name: "Check PR Title"
+name: "Verify Pull Request Git Conventions"
 
 on:
   pull_request:
