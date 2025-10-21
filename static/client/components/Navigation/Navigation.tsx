@@ -83,6 +83,7 @@ const Navigation = (): ReactNode => {
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
               <div>
+                <hr className="p-rule u-hide--small" />
                 <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
                   <React.Fragment key=".0">
                     <i className="p-icon--plus" /> <span>Request new page</span>
@@ -90,7 +91,6 @@ const Navigation = (): ReactNode => {
                 </Button>
               </div>
             </div>
-            <hr className="p-rule" />
             <div className="p-panel__content">
               <ul className="u-no-margin--left u-no-padding">
                 <li
