@@ -14,7 +14,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     setFilter({
       owners: [user.email],
-      reviewers: [],
+      reviewers: [user.email],
       products: [],
       query: "",
     });

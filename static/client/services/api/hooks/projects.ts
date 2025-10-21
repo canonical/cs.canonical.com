@@ -31,8 +31,14 @@ export function useProjects() {
         }
 
         if (filter.reviewers?.length) {
-          condition =
-            condition && filter.reviewers.some((reviewer) => child.reviewers?.some((rev) => rev.email === reviewer));
+          // in case there are both owners and reviewers filters, we want an OR condition between them
+          if (filter.owners?.length) {
+            condition =
+              condition || filter.reviewers.some((reviewer) => child.reviewers?.some((rev) => rev.email === reviewer));
+          } else {
+            condition =
+              condition && filter.reviewers.some((reviewer) => child.reviewers?.some((rev) => rev.email === reviewer));
+          }
         }
 
         if (filter.products?.length) {
