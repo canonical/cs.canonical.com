@@ -92,7 +92,7 @@ const Navigation = (): ReactNode => {
               </div>
             </div>
             <div className="p-panel__content">
-              <ul className="u-no-margin--left u-no-padding">
+              <ul className="u-no-margin u-no-padding">
                 <li
                   className={`p-side-navigation__link ${location.pathname === "/app/views/table" && view !== VIEW_TREE && "is-active"}`}
                   onClick={() => changeView(VIEW_TABLE)}
@@ -121,7 +121,7 @@ const Navigation = (): ReactNode => {
             </div>
             <div className="p-panel__views">
               <hr className="p-rule" />
-              <p className="p-muted-heading u-text--muted">Quick views</p>
+              <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
               <ul className="u-no-margin u-no-padding">
                 <li
                   className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
@@ -144,17 +144,21 @@ const Navigation = (): ReactNode => {
               </ul>
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
-              <div className="u-no-margin u-truncate p-side-navigation__label">
-                <span>{user?.name}</span>
-              </div>
-              <div className="p-text--small u-text--muted u-truncate p-side-navigation__label">
-                <span>{user?.email}</span>
-              </div>
               <hr className="p-rule" />
-              <Button appearance="base" className="p-side-navigation__link" onClick={logout}>
-                <i className="p-icon--logout is-light p-side-navigation__icon" />
-                <span className="p-side-navigation__label">Log out</span>
-              </Button>
+              {user?.name && (
+                <div className="u-no-margin u-truncate p-side-navigation__label">
+                  <span className="u-has-icon">
+                    <i className="p-icon--user" />
+                    {user.name}
+                  </span>
+                </div>
+              )}
+              <div className="p-side-navigation__link" onClick={logout} role="button">
+                <span className="u-has-icon">
+                  <i className="p-icon--logout is-light" />
+                  Log out
+                </span>
+              </div>
             </div>
           </div>
         </div>
