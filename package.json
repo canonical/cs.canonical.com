@@ -18,7 +18,8 @@
     "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'",
     "dev": "vite",
     "lint-python": "flake8 webapp tests && black --check --line-length 79 webapp tests",
-    "format-python": "black --line-length 79 webapp tests"
+    "format-python": "black --line-length 79 webapp tests",
+    "prepare": "husky"
   },
   "dependencies": {
     "@canonical/react-components": "3.5.0",
@@ -34,6 +35,8 @@
   },
   "devDependencies": {
     "@canonical/typescript-config-react": "0.10.0-experimental.4",
+    "@commitlint/cli": "20.1.0",
+    "@commitlint/config-conventional": "20.0.0",
     "@playwright/test": "1.50.1",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
@@ -56,8 +59,10 @@
     "eslint-plugin-no-relative-import-paths": "1.6.1",
     "eslint-plugin-prettier": "5.2.3",
     "eslint-plugin-react": "7.37.5",
+    "husky": "9.1.7",
     "jsdom": "21.1.2",
     "npm-package-json-lint": "8.0.0",
+    "pinst": "3.0.0",
     "postcss": "8.5.6",
     "postcss-cli": "10.1.0",
     "prettier": "3.4.2",
