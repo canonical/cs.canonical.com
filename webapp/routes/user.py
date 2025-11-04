@@ -1,4 +1,5 @@
-from flask import Blueprint, current_app, jsonify, request, session
+from flask import Blueprint, current_app, jsonify, session
+from flask_pydantic import validate
 import os
 
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
@@ -10,6 +11,7 @@ from webapp.models import (
     db,
     get_or_create,
 )
+from webapp.schemas import SetOwnerModel, SetReviewersModel
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 
@@ -41,15 +43,14 @@ def get_users(username: str = None):
 
 @user_blueprint.route("/set-reviewers", methods=["POST"])
 @login_required
-def set_reviewers():
-    data = request.get_json()
-
-    users = data.get("user_structs")
-    webpage_id = data.get("webpage_id")
+@validate()
+def set_reviewers(body: SetReviewersModel):
+    users = body.user_structs
+    webpage_id = body.webpage_id
 
     user_ids = []
     for user in users:
-        user_ids.append(get_or_create_user_id(user))
+        user_ids.append(get_or_create_user_id(user.model_dump()))
 
     # Remove all existing reviewers for the webpage
     existing_reviewers = Reviewer.query.filter_by(webpage_id=webpage_id).all()
@@ -64,7 +65,13 @@ def set_reviewers():
         )
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
+    if not webpage:
+        return jsonify({"error": "Webpage not found"}), 404
+
     project = Project.query.filter_by(id=webpage.project_id).first()
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
     site_repository = SiteRepository(project.name, current_app)
     # clean the cache for a the new reviewers to appear in the tree
     site_repository.invalidate_cache()
@@ -74,23 +81,27 @@ def set_reviewers():
 
 @user_blueprint.route("/set-owner", methods=["POST"])
 @login_required
-def set_owner():
-    data = request.get_json()
-
-    user = data.get("user_struct")
-    webpage_id = data.get("webpage_id")
-    user_id = get_or_create_user_id(user)
+@validate()
+def set_owner(body: SetOwnerModel):
+    user = body.user_struct
+    webpage_id = body.webpage_id
+    user_id = get_or_create_user_id(user.model_dump())
 
     # Set owner_id of the webpage to the user_id
     webpage = Webpage.query.filter_by(id=webpage_id).first()
-    if webpage:
-        webpage.owner_id = user_id
-        db.session.commit()
+    if not webpage:
+        return jsonify({"error": "Webpage not found"}), 404
 
-        project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(project.name, current_app)
-        # clean the cache for a new owner to appear in the tree
-        site_repository.invalidate_cache()
+    webpage.owner_id = user_id
+    db.session.commit()
+
+    project = Project.query.filter_by(id=webpage.project_id).first()
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
+    site_repository = SiteRepository(project.name, current_app)
+    # clean the cache for a new owner to appear in the tree
+    site_repository.invalidate_cache()
 
     return jsonify({"message": "Successfully set owner"}), 200
 

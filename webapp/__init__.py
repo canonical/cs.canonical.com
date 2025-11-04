@@ -3,6 +3,9 @@ import os
 
 import flask
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -24,11 +27,22 @@ def create_app():
     )
     app.config.from_pyfile(filename="settings.py")
 
-    # Allow CORS in development mode
+    # Allow CORS in development mode with specific origins
     if os.getenv("FLASK_DEBUG"):
-        CORS(app, origins=["*"])
+        CORS(app, origins=["http://localhost:5173", "http://localhost:8104"])
     else:
-        CORS(app, origins=["login.ubuntu.com"])
+        CORS(app, origins=["https://login.ubuntu.com"])
+
+    # Initialize CSRF protection
+    CSRFProtect(app)
+
+    # Initialize rate limiting
+    Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+    )
 
     app.context_processor(base_context)
 

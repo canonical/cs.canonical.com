@@ -109,3 +109,13 @@ class RequestFeatureModel(BaseModel):
     description: str = ""
     summary: str = ""
     objective: str = ""
+
+
+class SetReviewersModel(BaseModel):
+    user_structs: List[UserModel]
+    webpage_id: int
+
+
+class SetOwnerModel(BaseModel):
+    user_struct: UserModel
+    webpage_id: int

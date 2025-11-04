@@ -1,6 +1,7 @@
 import re
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, abort
 from flask_pydantic import validate
+import os
 
 from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
@@ -338,6 +339,10 @@ def invalidate_cache(webpage: Webpage):
 @login_required
 @validate()
 def playwright_cleanup(body: PlaywrightCleanupReqBody):
+    # Only allow this endpoint in debug/test mode
+    if not os.getenv("FLASK_DEBUG"):
+        abort(404)
+
     jira = current_app.config["JIRA"]
     jira_tasks = body.jira_tasks
 

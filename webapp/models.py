@@ -25,7 +25,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.orm.session import Session
 
 with open("data/data.yaml") as file:
-    data = yaml.load(file, Loader=yaml.FullLoader)
+    data = yaml.safe_load(file)
 
 
 class Base(DeclarativeBase):
