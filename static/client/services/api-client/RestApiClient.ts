@@ -23,17 +23,31 @@ export class RestApiClient extends ApiClient {
     this.timeout = 5 * 60 * 1000;
   }
 
+  private getCsrfToken(): string | null {
+    // Read CSRF token from meta tag
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    return metaTag ? metaTag.getAttribute("content") : null;
+  }
+
   callApi<T>(endpoint: string, method: (typeof REST_TYPES)[keyof typeof REST_TYPES], params?: any): Promise<T> {
+    const csrfToken = this.getCsrfToken();
+    const headers = { ...this.headers };
+
+    // Add CSRF token to headers for state-changing methods
+    if (csrfToken && ["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase())) {
+      headers["X-CSRFToken"] = csrfToken;
+    }
+
     const instance = axios.create({
       baseURL: this.basePath,
-      headers: this.headers,
+      headers: headers,
       timeout: this.timeout,
     });
 
     return instance({
       method,
       url: endpoint,
-      withCredentials: false,
+      withCredentials: true, // Changed to true to send cookies with requests
       ...(params ? { data: params } : {}),
     });
   }

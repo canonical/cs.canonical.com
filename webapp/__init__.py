@@ -29,9 +29,17 @@ def create_app():
 
     # Allow CORS in development mode with specific origins
     if os.getenv("FLASK_DEBUG"):
-        CORS(app, origins=["http://localhost:5173", "http://localhost:8104"])
+        CORS(
+            app,
+            origins=["http://localhost:5173", "http://localhost:8104"],
+            supports_credentials=True,
+        )
     else:
-        CORS(app, origins=["https://login.ubuntu.com"])
+        CORS(
+            app,
+            origins=["https://login.ubuntu.com"],
+            supports_credentials=True,
+        )
 
     # Initialize CSRF protection
     CSRFProtect(app)

@@ -64,3 +64,13 @@ SITES_MAINTENANCE_LABELS = get_flask_env(
 SITES_NEW_FEATURES_LABELS = get_flask_env(
     "SITES_NEW_FEATURES_LABELS", "sites_NewFeature"
 )
+
+# CSRF Protection Configuration
+WTF_CSRF_ENABLED = True
+WTF_CSRF_TIME_LIMIT = None  # No time limit for token validity
+WTF_CSRF_SSL_STRICT = not FLASK_DEBUG  # Enforce HTTPS in production
+WTF_CSRF_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
+# Use session cookie for CSRF token instead of generating per-form tokens
+SESSION_COOKIE_SECURE = not FLASK_DEBUG  # HTTPS only in production
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
