@@ -42,7 +42,8 @@ def create_app():
         )
 
     # Initialize CSRF protection
-    CSRFProtect(app)
+    csrf = CSRFProtect(app)
+    app.config["CSRF"] = csrf
 
     # Initialize rate limiting
     Limiter(

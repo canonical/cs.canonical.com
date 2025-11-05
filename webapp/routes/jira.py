@@ -1,5 +1,5 @@
 import re
-from flask import Blueprint, current_app, jsonify, abort
+from flask import Blueprint, current_app, jsonify, abort, request, g
 from flask_pydantic import validate
 import os
 
@@ -39,6 +39,13 @@ from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 
 jira_blueprint = Blueprint("jira", __name__, url_prefix="/api")
+
+
+@jira_blueprint.before_request
+def skip_csrf_for_playwright_cleanup():
+    """Skip CSRF validation for playwright-cleanup endpoint"""
+    if request.endpoint == "jira.playwright_cleanup":
+        g._csrf_disabled = True
 
 
 @jira_blueprint.route("/request-changes", methods=["POST"])
