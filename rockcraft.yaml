@@ -1,6 +1,6 @@
 name: cs-canonical-com
 base: ubuntu@22.04
-version: "0.1"
+version: "0.0.1"
 summary: This is a portal tailored to managing content on our websites
 description: |
   It's useful for:
