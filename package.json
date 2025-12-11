@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/canonical/cs.canonical.com"
+    "url": "git@github.com:canonical/cs.canonical.com.git"
   },
   "author": "Canonical Webteam",
   "license": "MIT",
