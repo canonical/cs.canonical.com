@@ -159,6 +159,12 @@ jobs:
       CHARM_BUILD_NAME: cs-canonical-com-${{ needs.prepare-version.outputs.new_release_git_tag }}.charm
       ROCK_BUILD_NAME: cs-canonical-com-${{ needs.prepare-version.outputs.new_release_git_tag }}.rock
     steps:
+      - name: Generate GitHub App Token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GIT_APP_ID }}
+          private-key: ${{ secrets.GIT_APP_PRIVATE_KEY }}
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
@@ -181,6 +187,38 @@ jobs:
           branch: ${{ env.TARGET_BRANCH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update versions across all files
+        id: update-versions
+        run: |
+          set +e
+          ./scripts/update-version.sh "${{ needs.prepare-version.outputs.new_release_version }}"
+          STATUS=$?
+          if [ "$STATUS" -eq 0 ]; then
+            echo "files_updated=true" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" -eq 2 ]; then
+            echo "files_updated=false" >> $GITHUB_OUTPUT
+          else
+            exit $STATUS
+          fi
+
+      - name: Commit and push version updates
+        if: steps.update-versions.outputs.files_updated == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+          RELEASE_BOT_LOGIN: "cs-canonical-com-ci-release[bot]"
+          RELEASE_BOT_ID: "245156291"
+        run: |
+          # Configure git to use the GitHub App token
+          # Get the bot's details from https://api.github.com/users/{bot_name}
+
+          git config --global user.name ${RELEASE_BOT_LOGIN}
+          git config --global user.email "${RELEASE_BOT_ID}+${RELEASE_BOT_LOGIN}@users.noreply.github.com"
+
+          # Add and commit changes
+          git add package.json rockcraft.yaml charm/src/charm.py
+          git commit -m "chore(release): update version to ${{ needs.prepare-version.outputs.new_release_git_tag }} [skip ci]"
+          git push origin ${{ github.ref_name }}
 
       - name: Display release summary
         if: needs.prepare-version.outputs.new_release_published == 'true'
