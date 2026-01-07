@@ -197,6 +197,8 @@ Please make sure you have the following pre-requisites installed and available o
 - [Docker](https://www.docker.com/products/docker-desktop/)
 - [TaskFile](https://taskfile.dev/docs/installation)
 - [yarn](https://www.npmjs.com/package/yarn)
+- [dotrun](https://github.com/canonical/dotrun)
+- [yq](https://github.com/mikefarah/yq)
 
 Install project dependencies
 
