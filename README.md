@@ -190,7 +190,52 @@ If any container was exited due to any reason, view its logs using:
 $ docker compose logs {service_name}
 ```
 
-### Running Locally
+### Running with TaskFile
+
+Please make sure you have the following pre-requisites installed and available on your system.
+
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [TaskFile](https://taskfile.dev/docs/installation)
+- [yarn](https://www.npmjs.com/package/yarn)
+- [dotrun](https://github.com/canonical/dotrun)
+- [yq](https://github.com/mikefarah/yq)
+
+Install project dependencies
+
+```bash
+yarn
+```
+
+Run the project using
+
+```bash
+task
+```
+
+It will automatically start all the services required by the application on appropriate ports. These services are:
+
+  - PostgreSQL container (on port 5432)
+  - Redis container (on port 6379)
+  - HMR dev server (on port 5173)
+  - Content System application (on port 8104)
+
+When running TaskFile, please make sure those ports are open and available, without any processes running on them.
+
+Stop the project using
+
+```bash
+task stop
+```
+
+This will stop all the docker containers, but not the terminals. Please close the terminal processes yourself for cleaner shutdown.
+
+To delete the stopped containers, run
+
+```bash
+task cleanup
+```
+
+### Running Manually
 
 #### Cache and Database
 

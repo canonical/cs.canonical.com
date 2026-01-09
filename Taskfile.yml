@@ -1,0 +1,154 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+tasks:
+  run-application:
+    desc: Runs the application
+    dotenv: [".env", ".env.local"]
+    vars:
+      POSTGRES_HOST:
+        sh: docker inspect cs-canonical-postgres | jq -r '.[0].NetworkSettings.IPAddress'
+      REDIS_HOST:
+        sh: docker inspect cs-canonical-redis | jq -r '.[0].NetworkSettings.IPAddress'
+    cmds:
+      - dotrun -e PORT=8104 -e REDIS_HOST={{.REDIS_HOST}} -e POSTGRES_HOST={{.POSTGRES_HOST}}
+
+  run-devserver:
+    desc: Runs the HMR dev server
+    cmds:
+      - yarn install
+      - yarn dev
+
+  run-docker-containers:
+    desc: Runs the Docker containers
+    silent: true
+    cmds:
+      - |
+        # Start or create postgres container
+        if docker ps -a --format '{{.Names}}' | grep -q "cs-canonical-postgres"; then
+          if docker ps --format '{{.Names}}' | grep -q "cs-canonical-postgres"; then
+            echo "PostgreSQL container already running"
+          else
+            echo "Starting existing PostgreSQL container..."
+            docker start cs-canonical-postgres
+          fi
+        else
+          echo "Creating new PostgreSQL container..."
+          docker run -d --name cs-canonical-postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres -v postgres_data:/var/lib/postgresql/data postgres
+        fi
+      - |
+        # Start or create redis container
+        if docker ps -a --format '{{.Names}}' | grep -q "cs-canonical-redis"; then
+          if docker ps --format '{{.Names}}' | grep -q "cs-canonical-redis"; then
+            echo "Redis container already running"
+          else
+            echo "Starting existing Redis container..."
+            docker start cs-canonical-redis
+          fi
+        else
+          echo "Creating new Redis container..."
+          docker run -d --name cs-canonical-redis -p 6379:6379 redis
+        fi
+
+  default:
+    desc: Run content system project
+    cmds:
+      - task: run-docker-containers
+      - task: start-devserver-terminal
+      - sleep 2
+      - task: start-application-terminal
+      - echo "Services started in separate terminals."
+
+  start-devserver-terminal:
+    desc: Start dev server in tmux session
+    silent: true
+    cmds:
+      - |
+        if command -v tmux > /dev/null; then
+          # Kill existing session if it exists
+          tmux kill-session -t cs-devserver 2>/dev/null || true
+          # Create new session and run dev server
+          tmux new-session -d -s cs-devserver -c "{{.ROOT_DIR}}" "task run-devserver"
+          echo "Dev server started in tmux session 'cs-devserver'"
+          echo "To view: tmux attach -t cs-devserver"
+        elif command -v gnome-terminal > /dev/null; then
+          gnome-terminal --title="CS Dev Server" -- bash -c "cd {{.ROOT_DIR}}; task run-devserver"
+        elif command -v konsole > /dev/null; then
+          konsole --title "CS Dev Server" -e bash -c "cd {{.ROOT_DIR}}; task run-devserver"
+        elif command -v xfce4-terminal > /dev/null; then
+          xfce4-terminal --title="CS Dev Server" -e "bash -c 'cd {{.ROOT_DIR}}; task run-devserver'"
+        else
+          echo "No supported terminal found. Run 'task run-devserver' manually in a separate terminal."
+        fi
+
+  start-application-terminal:
+    desc: Start application in tmux session
+    silent: true
+    cmds:
+      - |
+        if command -v tmux > /dev/null; then
+          # Kill existing session if it exists
+          tmux kill-session -t cs-application 2>/dev/null || true
+          # Create new session and run application
+          tmux new-session -d -s cs-application -c "{{.ROOT_DIR}}" "$SHELL -l -c 'task run-application'"
+          echo "Application started in tmux session 'cs-application'"
+          echo "To view: tmux attach -t cs-application"
+        elif command -v gnome-terminal > /dev/null; then
+          gnome-terminal --title="CS App" -- bash -c "cd {{.ROOT_DIR}}; task run-application"
+        elif command -v konsole > /dev/null; then
+          konsole --title "CS App" -e bash -c "cd {{.ROOT_DIR}}; task run-application"
+        elif command -v xfce4-terminal > /dev/null; then
+          xfce4-terminal --title="CS App" -e "bash -c 'cd {{.ROOT_DIR}}; task run-application'"
+        else
+          echo "No supported terminal found. Run 'task run-application' manually in a separate terminal."
+        fi
+
+  stop:
+    desc: Stop all services and containers
+    silent: true
+    cmds:
+      - echo "Stopping Docker containers..."
+      - docker stop cs-canonical-postgres 2>/dev/null || echo "No cs-canonical-postgres container running"
+      - docker stop cs-canonical-redis 2>/dev/null || echo "No cs-canonical-redis container running"
+      - echo "Stopping dotrun containers..."
+      - docker stop $(docker ps -q --filter "name=dotrun-cs-canonical-com") 2>/dev/null || echo "No dotrun containers running"
+      - echo "Stopping tmux sessions..."
+      - tmux kill-session -t cs-devserver 2>/dev/null || echo "No cs-devserver tmux session running"
+      - tmux kill-session -t cs-application 2>/dev/null || echo "No cs-application tmux session running"
+      - echo "All containers and sessions stopped."
+
+  cleanup:
+    desc: Stop services and remove Docker containers
+    silent: true
+    cmds:
+      - task: stop
+      - echo "Removing Docker containers..."
+      - docker rm cs-canonical-postgres 2>/dev/null || echo "No cs-canonical-postgres container to remove"
+      - docker rm cs-canonical-redis 2>/dev/null || echo "No cs-canonical-redis container to remove"
+      - docker rm $(docker ps -aq --filter "name=dotrun-cs-canonical-com") 2>/dev/null || echo "No dotrun containers to remove"
+      - echo "Cleanup complete."
+
+  logs:
+    desc: View tmux session logs
+    cmds:
+      - |
+        echo "Available log commands:"
+        echo "  task logs:dev     - Attach to dev server tmux session"
+        echo "  task logs:app     - Attach to application tmux session"
+        echo "  task logs:list    - List all tmux sessions"
+
+  logs:dev:
+    desc: Attach to dev server tmux session
+    cmds:
+      - tmux attach -t cs-devserver || echo "No cs-devserver session found. Is it running?"
+
+  logs:app:
+    desc: Attach to application tmux session
+    cmds:
+      - tmux attach -t cs-application || echo "No cs-application session found. Is it running?"
+
+  logs:list:
+    desc: List all tmux sessions
+    cmds:
+      - tmux list-sessions || echo "No tmux sessions found"
