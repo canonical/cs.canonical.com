@@ -1,7 +1,7 @@
 [project]
 name = "cs-canonical-com"
 version = "0.0.1"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 
 [tool.ruff]
 # Set the maximum line length to 79.
