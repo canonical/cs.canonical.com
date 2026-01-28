@@ -168,7 +168,10 @@ class TestGitHubAPIBase:
     def test_request_does_not_mutate_instance_headers(
         self, github_base, mock_requests
     ):
-        """Test that calling _request with raw=True doesn't change instance headers."""
+        """
+        Test that calling _request with raw=True doesn't change 
+        the instance headers.
+        """
         original_accept = github_base.headers["Accept"]
         github_base._request("GET", "test/url", raw=True)
         assert github_base.headers["Accept"] == original_accept
