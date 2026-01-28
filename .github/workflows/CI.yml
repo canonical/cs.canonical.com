@@ -30,8 +30,8 @@ jobs:
         run: yarn install
       - run: yarn lint
 
-  test:
-    name: Test
+  test-js:
+    name: Test JS
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,7 +51,25 @@ jobs:
       - name: Install
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
-      - run: yarn test
+      - run: yarn test-js
+
+  test-python:
+    name: Test Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run tests
+        run: pytest webapp/tests
 
   build:
     name: Build
