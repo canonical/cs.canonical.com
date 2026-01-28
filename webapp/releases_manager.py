@@ -120,7 +120,7 @@ class ReleasesGitHubClient(GitHubAPIBase):
         """Fetches the releases.yaml file from GitHub.
 
         Args:
-            ref: Branch, tag, or commit SHA to fetch from.  
+            ref: Branch, tag, or commit SHA to fetch from.
         Returns:
             The raw YAML content as a string.
         """
