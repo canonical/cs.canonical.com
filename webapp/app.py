@@ -10,6 +10,7 @@ from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
 from webapp.routes.webpage import webpage_blueprint
 from webapp.routes.misc import misc_blueprint
+from webapp.routes.releases import releases_blueprint
 from webapp.scheduled_tasks import init_scheduled_tasks
 from webapp.sso import login_required
 
@@ -29,6 +30,7 @@ app.register_blueprint(jira_blueprint)
 app.register_blueprint(product_blueprint)
 app.register_blueprint(webpage_blueprint)
 app.register_blueprint(misc_blueprint)
+app.register_blueprint(releases_blueprint)
 
 
 # Client-side routes
