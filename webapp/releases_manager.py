@@ -18,7 +18,7 @@ class ReleaseYamlParser:
         )
 
     def _construct_custom_tag(self, loader, tag_suffix, node):
-        """Extacts custom tagged fields from YAML nodes."""
+        """Extracts custom tagged fields from YAML nodes."""
         tag_name = node.tag.lstrip('!')
         
         if node.id == 'scalar':

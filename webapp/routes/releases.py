@@ -28,7 +28,7 @@ def get_releases_yaml():
         )
 
     response = Response(
-        response = json.dumps(data, sort_keys=False, indent=4),
+        response=json.dumps(data, sort_keys=False, indent=4),
         status=200,
         mimetype="application/json",
     )
