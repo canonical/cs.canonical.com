@@ -2,12 +2,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from webapp.releases_manager import (
-    GitHubAPIBase,
+    ReleasesGitHubAPI,
     ReleaseYamlParser,
     ReleasesGitHubClient,
-    ReleasesGitHubError,
     ReleasesService,
 )
+from webapp.github import GithubError
 
 SIMPLE_YAML = """
 release:
@@ -119,14 +119,14 @@ class TestReleaseYamlParser:
         assert keys == ["first", "second", "third", "fourth"]
 
 
-class TestGitHubAPIBase:
-    """Tests for GitHubAPIBase class."""
+class TestReleasesGitHubAPI:
+    """Tests for ReleasesGitHubAPI class."""
 
     @pytest.fixture
     def github_base(self):
-        """Create a GitHubAPIBase instance for each test."""
-        with patch("webapp.releases_manager.GH_TOKEN", "test-token"):
-            return GitHubAPIBase()
+        """Create a ReleasesGitHubAPI instance for each test."""
+        with patch("webapp.github.GH_TOKEN", "test-token"):
+            return ReleasesGitHubAPI()
 
     def test_request_success_json(self, github_base, mock_requests):
         """Test successful JSON response."""
@@ -155,11 +155,11 @@ class TestGitHubAPIBase:
         assert headers["Accept"] == "application/vnd.github+json"
 
     def test_request_failure_raises_error(self, github_base, mock_requests):
-        """Test that non-200 response raises ReleasesGitHubError."""
+        """Test that non-200 response raises GithubError."""
         mock_requests["response"].status_code = 404
         mock_requests["response"].text = "Not Found"
 
-        with pytest.raises(ReleasesGitHubError) as exc_info:
+        with pytest.raises(GithubError) as exc_info:
             github_base._request("GET", "test/url")
 
         assert "404" in str(exc_info.value)
@@ -183,7 +183,7 @@ class TestReleasesGitHubClient:
     @pytest.fixture
     def github_client(self):
         """Create a ReleasesGitHubClient instance for each test."""
-        with patch("webapp.releases_manager.GH_TOKEN", "test-token"):
+        with patch("webapp.github.GH_TOKEN", "test-token"):
             return ReleasesGitHubClient()
 
     def test_fetch_releases_yaml_builds_correct_url(
@@ -247,7 +247,7 @@ class TestReleasesService:
             },
         }
 
-        with patch("webapp.releases_manager.GH_TOKEN", "test-token"):
+        with patch("webapp.github.GH_TOKEN", "test-token"):
             with patch.object(
                 ReleasesGitHubClient,
                 "fetch_releases_yaml",
@@ -260,7 +260,7 @@ class TestReleasesService:
 
     def test_get_releases_data_calls_github_client(self):
         """Test that get_releases_data uses the github client."""
-        with patch("webapp.releases_manager.GH_TOKEN", "test-token"):
+        with patch("webapp.github.GH_TOKEN", "test-token"):
             with patch.object(
                 ReleasesGitHubClient,
                 "fetch_releases_yaml",

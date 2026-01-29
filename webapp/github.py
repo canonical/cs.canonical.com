@@ -34,35 +34,36 @@ class GithubError(Exception):
     """Exception raised for errors in the GitHub class."""
 
 
-class GitHub:
+class GitHubBase:
     logger = logger
 
-    def __init__(self, app: Flask) -> None:
-        """Initialize the Github object."""
-        self.REPOSITORY_PATH = Path(BASE_DIR) / "repositories"
-        token = GH_TOKEN
+    def __init__(self) -> None:
+        """Initialize the GithubBase object."""
         self.headers = {
-            "Accept": "application/vnd.github.raw+json",
-            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {GH_TOKEN}",
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        self.cache = app.config["CACHE"]
 
-    def __request__(
+    def _request(
         self,
         method: str,
         url: str,
         data: dict | None = None,
         params: dict | None = None,
         blob=False,
+        raw: bool = False,
     ) -> bytes | dict:
         req_data = json.dumps(data) if data else data
+        headers = self.headers.copy()
+        if raw:
+            headers["Accept"] = "application/vnd.github.raw+json"
 
         response = requests.request(
             method,
             GITHUB_API_URL + url,
             data=req_data,
-            headers=self.headers,
+            headers=headers,
             params=params,
             timeout=10,
         )
@@ -71,7 +72,7 @@ class GitHub:
             return response.content
 
         if response.status_code == 200:
-            return response.json()
+            return response.text if raw else response.json()
 
         err = (
             "Failed to make a request to GitHub. Status code:"
@@ -79,6 +80,15 @@ class GitHub:
             f" {response.status_code}. Response: {response.text}",
         )
         raise GithubError(err)
+
+
+class RepositoryGitHubAPI(GitHubBase):
+    """GitHub API interactions for repository management."""
+
+    def __init__(self, app: Flask) -> None:
+        super().__init__()
+        self.REPOSITORY_PATH = Path(BASE_DIR) / "repositories"
+        self.cache = app.config["CACHE"]
 
     def clone_repository(self, repository: str):
         """Clone repository into a duplicate folder, then replace the original.
@@ -161,4 +171,9 @@ class GitHub:
 
 
 def init_github(app: flask.Flask) -> None:
-    app.config["github"] = GitHub(app)
+    app.config["github"] = RepositoryGitHubAPI(app)
+
+
+class ReleasesGitHubAPI(GitHubBase):
+    def __init__(self):
+        super().__init__()

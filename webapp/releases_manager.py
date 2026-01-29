@@ -4,16 +4,12 @@ import requests
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from webapp.settings import GH_TOKEN
+from webapp.github import ReleasesGitHubAPI
 
 GITHUB_API_URL = "https://api.github.com/"
 RELEASES_REPO = "canonical/ubuntu.com"
 # RELEASES_FILE_PATH = "releases.yaml"
 RELEASES_FILE_PATH = "_TEST_releases.yaml"  # Temporary for testing
-
-
-class ReleasesGitHubError(Exception):
-    """Exception raised for errors in the GitHubAPIBase class."""
 
 
 class TaggedField:
@@ -68,47 +64,7 @@ class ReleaseYamlParser:
         return self._serialize_node(data)
 
 
-class GitHubAPIBase:
-    def __init__(self):
-        self.headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {GH_TOKEN}",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-
-    def _request(
-        self,
-        method: str,
-        url: str,
-        data: dict | None = None,
-        params: dict | None = None,
-        raw: bool = False,
-    ) -> dict | str:
-        req_data = json.dumps(data) if data else None
-        headers = self.headers.copy()
-        # We want YAML content as raw text, so modify Accept header
-        if raw:
-            headers["Accept"] = "application/vnd.github.raw+json"
-
-        response = requests.request(
-            method,
-            GITHUB_API_URL + url,
-            data=req_data,
-            headers=headers,
-            params=params,
-            timeout=10,
-        )
-
-        if response.status_code == 200:
-            return response.text if raw else response.json()
-
-        raise ReleasesGitHubError(
-            f"GitHub API request failed: {method} {url} "
-            f"Status: {response.status_code}. Response: {response.text}"
-        )
-
-
-class ReleasesGitHubClient(GitHubAPIBase):
+class ReleasesGitHubClient(ReleasesGitHubAPI):
     """GitHub Client for releases.yaml related operations"""
 
     def __init__(self):
