@@ -85,7 +85,7 @@ jobs:
           pip install pytest
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
 
         run: pytest webapp/tests
 
