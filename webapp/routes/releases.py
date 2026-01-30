@@ -3,7 +3,8 @@ import json
 from flask import Blueprint, Response
 from ruamel.yaml import YAMLError
 
-from webapp.releases_manager import ReleasesService, ReleasesGitHubError
+from webapp.releases_manager import ReleasesService
+from webapp.github import GithubError
 from webapp.sso import login_required
 
 releases_blueprint = Blueprint("releases", __name__, url_prefix="/api")
@@ -18,10 +19,13 @@ def get_releases_yaml():
     try:
         service = ReleasesService()
         data = service.get_releases_data()
-    except (YAMLError, ReleasesGitHubError) as e:
+    except (YAMLError, GithubError) as e:
         return Response(
             response=json.dumps(
-                {"error": "Failed to fetch releases", "details": str(e)}
+                {
+                    "error": "Failed to fetch releases",
+                    "details": str(e.message),
+                }
             ),
             status=500,
         )

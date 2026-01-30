@@ -169,7 +169,7 @@ class TestReleasesGitHubAPI:
         self, github_base, mock_requests
     ):
         """
-        Test that calling _request with raw=True doesn't change 
+        Test that calling _request with raw=True doesn't change
         the instance headers.
         """
         original_accept = github_base.headers["Accept"]

@@ -5,6 +5,7 @@ import pytest
 from webapp import create_app
 from webapp.gdrive import GoogleDriveClient
 
+
 class MockService(GoogleDriveClient):
     """
     Mock Google sdk service calls:

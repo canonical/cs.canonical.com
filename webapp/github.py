@@ -31,7 +31,16 @@ MAX_RETRIES = 5
 
 
 class GithubError(Exception):
-    """Exception raised for errors in the GitHub class."""
+    """Exception raised for errors in the GitHub class.
+
+    Args:
+        message (str, optional): Custon error message.
+        status_code (int, optional): HTTP status code.
+    """
+
+    def __init__(self, message=None, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class GitHubBase:
@@ -74,12 +83,12 @@ class GitHubBase:
         if response.status_code == 200:
             return response.text if raw else response.json()
 
-        err = (
+        message = (
             "Failed to make a request to GitHub. Status code:"
             f" {url} {method} {data} {params}"
-            f" {response.status_code}. Response: {response.text}",
+            f" {response.status_code}. Response: {response.text}"
         )
-        raise GithubError(err)
+        raise GithubError(message, status_code=response.status_code)
 
 
 class RepositoryGitHubAPI(GitHubBase):
