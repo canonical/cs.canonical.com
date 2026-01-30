@@ -92,11 +92,7 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
                 pass
 
         yaml_content = self._request("GET", url, params={"ref": ref}, raw=True)
-        status = {
-            "pr": pr,
-            "pr_exists": pr is not None,
-        }
-
+        status = {"pr": pr, "pr_exists": pr is not None, "branch": ref}
         return yaml_content, status
 
     def fetch_releases_pr(self) -> dict | None:
