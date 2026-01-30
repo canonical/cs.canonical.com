@@ -24,7 +24,7 @@ def get_releases_yaml():
             response=json.dumps(
                 {
                     "error": "Failed to fetch releases",
-                    "details": str(e.message),
+                    "details": str(e),
                 }
             ),
             status=500,

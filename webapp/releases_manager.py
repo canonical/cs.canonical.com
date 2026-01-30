@@ -105,7 +105,8 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         If there are none it is an empty list.
 
         Returns:
-            The PR status data as a dictionary.
+            dict: The PR status data as a dictionary.
+            None: If no matching PR exists.
         """
         url = f"repos/{self.repo}/pulls"
         params = {"head": f"canonical:{RELEASES_BRANCH_NAME}", "state": "open"}
@@ -124,9 +125,7 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         url = f"repos/{self.repo}/branches/{RELEASES_BRANCH_NAME}"
         try:
             response = self._request("GET", url)
-
-            if response:
-                return response
+            return response
         except GithubError as e:
             if e.status_code == 404:
                 return None

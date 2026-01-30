@@ -34,7 +34,7 @@ class GithubError(Exception):
     """Exception raised for errors in the GitHub class.
 
     Args:
-        message (str, optional): Custon error message.
+        message (str, optional): Custom error message.
         status_code (int, optional): HTTP status code.
     """
 
@@ -62,7 +62,7 @@ class GitHubBase:
         params: dict | None = None,
         blob=False,
         raw: bool = False,
-    ) -> bytes | dict:
+    ) -> bytes | dict | str:
         req_data = json.dumps(data) if data else data
         headers = self.headers.copy()
         if raw:
