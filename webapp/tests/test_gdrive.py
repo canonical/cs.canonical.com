@@ -4,7 +4,6 @@ import pytest
 
 from webapp import create_app
 from webapp.gdrive import GoogleDriveClient
-from webapp.tests import webpage
 
 class MockService(GoogleDriveClient):
     """
