@@ -80,10 +80,10 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
                 - pr_exists: Boolean indicating if a PR exists
         """
         url = f"repos/{self.repo}/contents/{self.file_path}"
-        pr = self.fetch_releases_pr_status()
+        pr = self.fetch_releases_pr()
         ref = "main"
 
-        branch_exists = pr or self.fetch_releases_branch_status()
+        branch_exists = pr or self.fetch_releases_branch()
         if branch_exists:
             ref = RELEASES_BRANCH_NAME
             if not pr:
@@ -99,7 +99,7 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
 
         return yaml_content, status
 
-    def fetch_releases_pr_status(self) -> dict | None:
+    def fetch_releases_pr(self) -> dict | None:
         """Fetches the status of the releases pull request.
         When fetching PR it returns a list of matching PRs.
         If there are none it is an empty list.
@@ -114,7 +114,7 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         if response:
             return response[0]  # Return the first matching PR
 
-    def fetch_releases_branch_status(self) -> dict | None:
+    def fetch_releases_branch(self) -> dict | None:
         """Fetches the status of the releases branch.
 
         Returns:
