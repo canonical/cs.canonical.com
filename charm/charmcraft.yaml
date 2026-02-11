@@ -86,6 +86,14 @@ config:
       type: string
       description: "Comma-separated list of JIRA labels to apply to new feature requests"
       default: "sites_NewFeature"
+    cs-auth-token:
+      type: string
+      description: "Token for authenticating with the CS API"
+      default: "token"
+    bau-bot-webhook-url:
+      type: string
+      description: "Webhook URL for the BAU bot to send notifications"
+      default: "webhook_url"
     
 
 requires:

@@ -348,6 +348,20 @@ class Jira:
             method="PUT", path=f"issue/{jira_id}", data=payload
         )
 
+    def get_issue_assignee(self, jira_id: str):
+        """Get the assignee of a Jira issue.
+
+        Args:
+            jira_id (str): The ID of the Jira issue.
+
+        Returns:
+            dict: The assignee of the Jira issue.
+        """
+        return self.__request__(
+            method="GET",
+            path=f"issue/{jira_id}?fields=assignee",
+        )
+
 
 def init_jira(app):
     try:

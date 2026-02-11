@@ -64,3 +64,5 @@ SITES_MAINTENANCE_LABELS = get_flask_env(
 SITES_NEW_FEATURES_LABELS = get_flask_env(
     "SITES_NEW_FEATURES_LABELS", "sites_NewFeature"
 )
+CS_AUTH_TOKEN = get_flask_env("CS_AUTH_TOKEN")
+BAU_BOT_WEBHOOK_URL = get_flask_env("BAU_BOT_WEBHOOK_URL")

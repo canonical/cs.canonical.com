@@ -109,3 +109,7 @@ class RequestFeatureModel(BaseModel):
     description: str = ""
     summary: str = ""
     objective: str = ""
+
+
+class NotifyBAUModel(BaseModel):
+    jira_task_id: str
