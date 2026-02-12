@@ -135,6 +135,7 @@ class User(db.Model, DateTimeMixin):
     hrc_id: int = Column(Integer)
     job_title: str = Column(String)
     role: str = Column(String)
+    mattermost: str = Column(String, nullable=True)
 
     webpages = relationship("Webpage", back_populates="owner")
     reviewers = relationship("Reviewer", back_populates="user")

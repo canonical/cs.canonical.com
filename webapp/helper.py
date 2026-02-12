@@ -13,7 +13,7 @@ class RequestType(Enum):
     NEW_WEBPAGE = 2
 
 
-def get_or_create_user_id(user):
+def get_or_create_user_id(user, return_object=False):
     # If user does not exist, create a new user in the "users" table
     user_email = user.get("email")
     user_exists = User.query.filter_by(email=user_email).first()
@@ -28,9 +28,10 @@ def get_or_create_user_id(user):
             job_title=user.get("jobTitle"),
             hrc_id=user.get("id"),
             role=user.get("role"),
+            mattermost=user.get("mattermost"),
         )
 
-    return user_exists.id
+    return user_exists.id if not return_object else user_exists
 
 
 def create_jira_task(app, body):
@@ -259,6 +260,7 @@ def get_user_from_directory_by_key(key, value):
                     team
                     department
                     jobTitle
+                    mattermost
                 }
             }
             """
@@ -272,6 +274,7 @@ def get_user_from_directory_by_key(key, value):
                 team
                 department
                 jobTitle
+                mattermost
             }}
         }}
         """
