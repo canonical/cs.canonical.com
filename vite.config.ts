@@ -8,6 +8,13 @@ config({ path: "./.env" });
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    watch: {
+      ignored: ["**/node_modules/**", "**/dist/**", "**/build/**", "repositories/**"],
+    },
+  },
   build: {
     lib: {
       entry: "./static/client/main.tsx",
