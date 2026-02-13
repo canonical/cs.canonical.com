@@ -24,7 +24,7 @@ PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
-REDIS_HOST=valkey
+REDIS_HOST=redis
 REDIS_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
 REPO_ORG=https://github.com/canonical
@@ -46,120 +46,27 @@ GOOGLE_PRIVATE_KEY_ID=privatekeyid
 
 - Make sure you have a valid <code>GOOGLE_PRIVATE_KEY</code> and <code>GOOGLE_PRIVATE_KEY_ID</code> specified in the .env. The base64 decoder parses these keys and throws error if invalid.
 
-### Adding/updating environment variables
 
-If you need to add a new environment variable, or modify an existing one(either name or value), there are a few things to consider:
+### Running with Taskfile
 
-- If you are developing locally, add/update the variable only in `.env.local` or `.env` file.
+Please make sure you are running the latest version of 
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker compose](https://docs.docker.com/compose/install/)
+- [Taskfile](https://taskfile.dev/docs/installation)
 
-- Make sure you have reflected the change in the sample `.env` file in the project, as well as in the sample env contents specified in this README.md file, for reference.
-
-#### Adding new environment variable on production
-
-If the value for this variable is not confidential, you can add it directly to the `konf/site.yaml` like so:
-
-```
-  - name: JIRA_LABELS
-    value: "sites_BAU"
-```
-
-Else if the value is confidential, you need to first create a secret on the kubernetes cluster, and then specify it in the `konf/site.yaml`. Make sure you have the valid kubeconfig file for the cluster.
-
-1. Create the secret
+Starting the project with all it's services is as simple as
 
 ```bash
-$ kubectl create secret generic <secret-name> -n production with key1=supersecret and key2=supsecret
+task
 ```
 
-Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
-
-2. Verify the newly created secret
+You can stop the project using
 
 ```bash
-$ kubectl describe secret <secret-name> -n production
-```
+task stop
+````
 
-Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
-
-3. Add the secret ref to `konf/site.yaml` file.
-
-```
-  - name: <env variable name>
-    secretKeyRef:
-      key: key1
-      name: <secret-name>
-
-  - name: <env variable name>
-    secretKeyRef:
-      key: key2
-      name: <secret-name>
-```
-
-Make sure to replace `<env variable name>` with the name of env variables that your application is expecting. For example, `JIRA_TOKEN` or `COPYDOC_TEMPLATE_ID`
-
-Also, Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
-
-#### Update existing environment variable on production
-
-To update an existing environment variable, either name or value
-
-1. Export the secret into a yaml file
-
-```bash
-$ kubectl get secret <secret-name> -n production -o yaml > secret.yaml
-```
-
-Make sure to replace `<secret-name>` with the actual name of the secret. For example, `cs-canonical-com`.
-
-2. Open the `secret.yaml` file and make your changes in the `key:value` pairs within the `data` section.
-
-3. If you are updating the values of the keys, make sure to use base64 encoded values. To get a base64 encoded value, use
-
-```bash
-$ echo -n "your-value" | base64
-```
-
-4. Apply the updated secret back to the cluster
-
-```bash
-$ kubectl apply -f secret.yaml
-```
-
-5. Re-deploy the deployment that uses this secret
-
-```bash
-$ kubectl rollout restart deployment <deployment-name> -n production
-```
-
-Use the relevant deployment name, for example, cs-canonical-com.
-
-#### Additional Notes
-
-If you want to confirm if the deployment is using correct environment variables
-
-- Find the deployment
-
-```bash
-$ kubectl get deployments -n production
-```
-
-- View deployment details
-
-```bash
-$ kubectl describe deployment <deployment-name> -n production
-```
-
-- You can also edit the deployment directly to update environment variables.
-
-```bash
-$ kubectl edit deployment <deployment_name> -n production
-```
-
-- Verify the update using
-
-```bash
-$ kubectl get deployments -n production | grep -i <variable_name>
-```
+Please checkout [Taskfile.yml](/Taskfile.yml) for all available commands
 
 ### Running with docker
 

@@ -58,10 +58,10 @@ services:
       - "5173:5173"
     healthcheck:
       test: ["CMD-SHELL", "nc -z 0.0.0.0 5173 || exit 1"]
-      interval: 3s
-      timeout: 5s
+      interval: 5s
+      timeout: 10s
       retries: 20
-      start_period: 30s
+      start_period: 40s
     command: sh -c "yarn install && yarn dev --host 0.0.0.0"
 
 volumes:
