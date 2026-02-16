@@ -22,3 +22,35 @@ tasks:
     desc: "Rebuild the project. Only run this if you have made changes to the Docker related files (Dockerfile, docker-compose.yaml)."
     cmds:
       - docker compose up -d --build
+
+  build:
+    desc: "Build the project"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn build
+
+  lint:
+    desc: "Run linters"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn lint
+      - task: lint-python
+
+  lint-python:
+    desc: "Run Python linters"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn lint-python
+
+  format-python:
+    desc: "Format Python code"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn format-python
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn test
+
+  test-e2e:
+    desc: "Run playwright e2e tests"
+    cmds:
+      - docker exec cscanonicalcom-web-1 yarn playwright install
+      - docker exec cscanonicalcom-web-1 yarn test-e2e
