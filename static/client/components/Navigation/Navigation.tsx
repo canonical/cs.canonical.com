@@ -5,12 +5,10 @@ import classNames from "classnames";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import NavigationBanner from "./NavigationBanner";
-import NavigationItems from "./NavigationItems";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
-import SiteSelector from "@/components/SiteSelector";
-import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
-import { useProjects } from "@/services/api/hooks/projects";
+import Search from "@/components/Search";
+import { VIEW_OWNED, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -26,22 +24,16 @@ const Navigation = (): ReactNode => {
     state.setView,
     state.setExpandedProject,
   ]);
-  const { data: projects, isLoading } = useProjects();
-
   const logout = useCallback(() => {
     setUser({} as IUser);
     window.open("/logout", "_self");
   }, [setUser]);
 
-  const handleNewPageClick = useCallback(() => {
-    navigate("/app/new-webpage");
-  }, [navigate]);
-
   const changeView = useCallback(
     (view: TView) => {
       setExpandedProject("");
       setView(view);
-      if ([VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view)) {
+      if ([VIEW_OWNED, VIEW_TABLE].includes(view)) {
         navigate(`/app/views/${view}`);
       }
 
@@ -63,7 +55,7 @@ const Navigation = (): ReactNode => {
   return (
     <>
       <header className="l-navigation-bar">
-        <div className="p-panel is-dark">
+        <div className="p-panel is-paper">
           <div className="p-panel__header">
             <NavigationBanner />
             <div className="p-panel__controls u-nudge-down--small">
@@ -76,87 +68,63 @@ const Navigation = (): ReactNode => {
       </header>
       <nav aria-label="main" className={classNames("l-navigation", { "is-collapsed": isCollapsed })} role="navigation">
         <div className="l-navigation__drawer">
-          <div className="p-panel is-dark">
+          <div className="p-panel is-paper">
             <div className="p-panel__header is-sticky">
               <NavigationBanner />
               <div className="l-navigation__controls">
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
-              <div>
-                <hr className="p-rule u-hide--small" />
-                <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
-                  <React.Fragment key=".0">
-                    <i className="p-icon--plus" /> <span>Request new page</span>
-                  </React.Fragment>
-                </Button>
-              </div>
             </div>
             <div className="p-panel__content">
+              <div className="p-panel__content-search">
+                <hr className="p-rule" />
+                <p className="p-text--small-caps">Search pages</p>
+                <Search />
+                <hr className="p-rule" />
+              </div>
               <ul className="u-no-margin u-no-padding">
-                <li
-                  className={`p-side-navigation__link ${location.pathname === "/app/views/table" && view !== VIEW_TREE && "is-active"}`}
-                  onClick={() => changeView(VIEW_TABLE)}
-                >
-                  <span className="u-has-icon">
-                    <i className="p-icon--switcher-dashboard is-dark" />
-                    Table view
-                  </span>
-                </li>
                 <li
                   className={`p-side-navigation__link ${isViewActive(VIEW_TREE) && "is-active"}`}
                   onClick={() => changeView(VIEW_TREE)}
                 >
                   <span className="u-has-icon">
-                    <i className="p-icon--switcher-environments is-dark" />
-                    Tree view
+                    <i className="p-icon--home" />
+                    Main menu
                   </span>
                 </li>
-              </ul>
-              {isViewActive(VIEW_TREE) && (
-                <>
-                  <SiteSelector />
-                  {!(isLoading || !projects.length) && <NavigationItems />}
-                </>
-              )}
-            </div>
-            <div className="p-panel__views">
-              <hr className="p-rule" />
-              <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
-              <ul className="u-no-margin u-no-padding">
                 <li
                   className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
                   onClick={() => changeView(VIEW_OWNED)}
                 >
                   <span className="u-has-icon">
-                    <i className="p-icon--user" />
-                    Owned by me
+                    <i className="p-icon--file" />
+                    Your pages
                   </span>
                 </li>
                 <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_REVIEWED) && "is-active"}`}
-                  onClick={() => changeView(VIEW_REVIEWED)}
+                  className={`p-side-navigation__link ${isViewActive(VIEW_TABLE) && "is-active"}`}
+                  onClick={() => changeView(VIEW_TABLE)}
                 >
                   <span className="u-has-icon">
                     <i className="p-icon--show" />
-                    Reviewed by me
+                    Full site view
                   </span>
                 </li>
               </ul>
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
-              <hr className="p-rule" />
               {user?.name && (
-                <div className="u-no-margin u-truncate p-side-navigation__label">
+                <div className="u-truncate p-side-navigation__link">
                   <span className="u-has-icon">
-                    <i className="p-icon--user" />
-                    {user.name}
+                    <i className="p-icon--profile" />
+                    <span className="p-side-navigation__label">{user.name}</span>
                   </span>
                 </div>
               )}
               <div className="p-side-navigation__link" onClick={logout} role="button">
                 <span className="u-has-icon">
-                  <i className="p-icon--logout is-light" />
-                  Log out
+                  <i className="p-icon--logout" />
+                  <span className="p-side-navigation__label">Log out</span>
                 </span>
               </div>
             </div>

@@ -1095,10 +1095,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@canonical/react-components@3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@canonical/react-components/-/react-components-3.5.0.tgz#6a1fa5fd85bb916f6e38dee66e215d62323d3df5"
-  integrity sha512-Z8v3t+u4RFFm+BqHec6G2ZL1YnCW351pIlQNuvG334UcOl/e58r4jaWUBHJJ6IWiBnIXnbjKMslyNTdEh6uASw==
+"@canonical/react-components@3.9.0":
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/@canonical/react-components/-/react-components-3.9.0.tgz#90be4574d6f3a8e8240d90ac16a869fe4bb32e4b"
+  integrity sha512-F9Tk/hBhkIYwJ1ePbjX8mTigfeTtHPF+1reAnu6dOSPHOwN3ehIJZDzAtXFQbXB41D0fSwujJ+JZA/gKrPUJZQ==
   dependencies:
     "@types/jest" "29.5.14"
     "@types/node" "20.17.19"
@@ -7526,10 +7526,10 @@ validate-npm-package-name@^5.0.1:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
-vanilla-framework@4.30.0:
-  version "4.30.0"
-  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.30.0.tgz#165195e32cbfee1506eccb6d550bf1241304a971"
-  integrity sha512-76bFHDNcmRboRD01RcM0CEDcU+gDd8rCMJe2SFF9MJcVeRG/5nla5nBBgT+30dc/ASQOrs3Fiz5kmAT/AQlhFw==
+vanilla-framework@4.41.0:
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.41.0.tgz#bc981035c536bd6cca5b6f3ded2abad679231499"
+  integrity sha512-UMCb+1+kfSoMFmXwwfjR/oyliojQ6pjOsBYwSRN6HgNtL14KhQc0VECYnv4YlkNTAJqQLR7VFwq95aXJrSrJSw==
 
 verbalize@^0.1.2:
   version "0.1.2"
