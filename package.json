@@ -22,7 +22,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@canonical/react-components": "3.5.0",
+    "@canonical/react-components": "3.9.0",
     "axios": "1.12.2",
     "classnames": "2.5.1",
     "formik": "2.4.6",
@@ -30,7 +30,7 @@
     "react-dom": "19.0.0",
     "react-query": "3.39.3",
     "react-router-dom": "6.29.0",
-    "vanilla-framework": "4.30.0",
+    "vanilla-framework": "4.41.0",
     "zustand": "4.5.7"
   },
   "devDependencies": {

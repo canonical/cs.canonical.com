@@ -1,137 +1,117 @@
 .l-navigation-bar {
   .p-panel__logo {
-    display: flex;
     margin: 0;
 
     @media (min-width: $breakpoint-small) {
       display: none;
     }
 
-    @media (max-width: $breakpoint-small) {
-      .l-logo__collapsed {
-        display: none;
-      }
+    .l-logo__collapsed {
+      display: none;
     }
   }
 }
 
 .l-navigation {
+  // Keep sidebar content (e.g. search dropdown) from being clipped
+  overflow: visible !important;
+
+  @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
+    overflow: hidden !important;
+  }
+
   .p-panel {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    padding: 0 16px;
+  }
 
-    .p-panel__header {
-      display: block;
-      padding-left: 0;
-      padding-right: 0;
-
-      .l-site-selector,
-      .l-site-selector__label,
-      .l-new-webpage-button {
-        margin-bottom: 12px;
-        margin-top: 4px;
-
-        @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
-          visibility: hidden;
-        }
-      }
-
-      .l-logo__collapsed {
-        left: 0;
-        position: absolute;
-        top: 0;
-
-        @media (min-width: $breakpoint-large) {
-          display: none;
-        }
-
-        :global(.l-navigation):hover &,
-        :global(.l-navigation):focus-within & {
-          display: none;
-        }
-      }
-    }
+  .p-panel__header {
+    padding-left: 16px;
+    padding-right: 16px;
 
     .p-panel__logo {
-      display: none;
       margin: 0;
   
       @media (min-width: $breakpoint-small) {
         display: flex;
+        flex: 0 0 auto;
         margin-bottom: 12px;
       }
     }
-
+    
     .l-navigation__controls,
     .l-navigation__controls > span {
       display: flex;
-      margin-bottom: 20px;
+      flex: 1 1 auto;
+      margin: 0;
       position: relative;
-      width: 100%;
-
-      @media (min-width: $breakpoint-small) {
-        display: none;
-      }
 
       .l-navigation-collapse-toggle {
         position: absolute;
         right: 0;
-        top: 20px;
+        top: 10px;
+      }
+
+      @media (min-width: $breakpoint-small) {
+        display: none;
       }
     }
 
-    .p-panel__content {
-      margin-bottom: 16px;
-      max-height: calc(100vh - 540px);
-      overflow: auto;
-      padding: 0;
-    }
+    .l-logo__collapsed {
+      display: none;
+      left: 1.3rem;
+      position: absolute;
+      top: 0;
 
-    .p-panel__views {
-      .l-sidebar-section-title {
-        margin-bottom: 8px;
-        padding-top: 0;
-      }
-    }
-
-    .p-panel__content,
-    .p-panel__views {
       @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
-        visibility: hidden;
+        display: block;
       }
-    }
-
-    .p-panel__footer {
-      margin-top: auto;
-      padding-bottom: 16px;
-      padding-top: 20px;
-
-      .p-side-navigation__link {
-        cursor: pointer;
-        justify-content: flex-start;
-        padding: 4px 4px 8px 4px;
-        width: 100%;
-      }
-    }
-
-    li.p-side-navigation__link {
-      padding: 4px;
-      padding-left: 0.5rem;
-      cursor: pointer;
     }
   }
 
-  &:hover {
+  .p-panel__content {
+    overflow: visible;
+    flex: 1 1 auto;
+
     @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
-      .p-panel__content,
-      .p-panel__views,
-      .p-panel__header .l-site-selector,
-      .p-panel__header .l-site-selector__label,
-      .p-panel__header .l-new-webpage-button {
-        visibility: visible;
-      }
+      display: none;
+    }
+
+    .p-panel__content-search {
+      padding: 0 16px;
+    }
+  }
+
+  .p-panel__footer {
+    margin-top: auto;
+    padding-bottom: 16px;
+    padding-top: 20px;
+
+    @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
+      padding-left: 0.5rem;
+    }
+  }
+
+  .p-side-navigation__link {
+    padding: 4px;
+    padding-left: 16px;
+    cursor: pointer;
+  }
+
+  &:hover,
+  &:focus-within {
+    overflow: visible !important;
+
+    .l-logo__collapsed {
+      display :none;
+    }
+
+    .p-panel__content {
+      display: block;
+    }
+
+    .p-panel__footer {
+      padding-left: 0;
     }
   }
 }
