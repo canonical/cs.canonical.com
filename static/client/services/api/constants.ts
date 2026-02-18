@@ -13,6 +13,8 @@ export const ENDPOINTS = {
   getWebpageAssets: "/api/get-webpage-assets",
   reportBug: "/api/report-bug",
   requestFeature: "/api/request-feature",
+  getReleases: "/api/get-releases",
+  submitRelease: "/api/submit-release",
 };
 
 export const REST_TYPES = {
