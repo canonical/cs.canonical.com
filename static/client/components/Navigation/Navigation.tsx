@@ -121,6 +121,16 @@ const Navigation = (): ReactNode => {
             </div>
             <div className="p-panel__views">
               <hr className="p-rule" />
+              <li
+                className={`p-side-navigation__link ${location.pathname === "/app/releases" ? "is-active" : ""}`}
+                onClick={() => navigate("/app/releases")}
+              >
+                <span className="u-has-icon">
+                  <i className="p-icon--repository is-dark" />
+                  Releases
+                </span>
+              </li>
+              <hr className="p-rule" />
               <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
               <ul className="u-no-margin u-no-padding">
                 <li
