@@ -1,15 +1,4 @@
 /**
- * Converts a snake_case string to Title Case.
- * e.g. "iso_download_size" → "Iso Download Size"
- */
-export function snakeCaseToTitle(key: string): string {
-  return key
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-/**
  * Deep equality check for two values.
  */
 export function deepEqual(a: unknown, b: unknown): boolean {

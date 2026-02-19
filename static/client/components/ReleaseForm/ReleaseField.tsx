@@ -4,7 +4,7 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-import { deepEqual, snakeCaseToTitle } from "./utils";
+import { deepEqual } from "./utils";
 
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
@@ -16,14 +16,9 @@ interface IReleaseFieldProps {
   onChange: (newValue: ReleaseFieldValue) => void;
 }
 
-const ReleaseField = ({
-  fieldKey,
-  value,
-  originalValue,
-  onChange,
-}: IReleaseFieldProps): ReactNode => {
+const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFieldProps): ReactNode => {
   const isDirty = !deepEqual(value, originalValue);
-  const label = snakeCaseToTitle(fieldKey);
+  const label = fieldKey;
 
   const handleTaggedFieldChange = useCallback(
     (newInnerValue: unknown) => {
@@ -51,11 +46,7 @@ const ReleaseField = ({
             <span className="p-chip__value">{value.type}</span>
           </span>
         </div>
-        <TaggedFieldInput
-          onChange={handleTaggedFieldChange}
-          type={value.type}
-          value={value.value}
-        />
+        <TaggedFieldInput onChange={handleTaggedFieldChange} type={value.type} value={value.value} />
       </div>
     );
   }
@@ -67,12 +58,7 @@ const ReleaseField = ({
           "is-dirty": isDirty,
         })}
       >
-        <Input
-          label={label}
-          onChange={(e) => onChange(e.target.value)}
-          type="text"
-          value={value}
-        />
+        <Input label={label} onChange={(e) => onChange(e.target.value)} type="text" value={value} />
       </div>
     );
   }
@@ -84,12 +70,7 @@ const ReleaseField = ({
           "is-dirty": isDirty,
         })}
       >
-        <Input
-          label={label}
-          onChange={(e) => onChange(Number(e.target.value))}
-          type="number"
-          value={value}
-        />
+        <Input label={label} onChange={(e) => onChange(Number(e.target.value))} type="number" value={value} />
       </div>
     );
   }

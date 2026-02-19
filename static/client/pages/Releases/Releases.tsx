@@ -28,9 +28,7 @@ const Releases = (): ReactNode => {
           <h1>Release management</h1>
           <div className="p-notification--negative">
             <div className="p-notification__content">
-              <p className="p-notification__message">
-                Failed to load releases data: {error.detail || error.title}
-              </p>
+              <p className="p-notification__message">Failed to load releases data: {error.detail || error.title}</p>
             </div>
           </div>
         </div>
@@ -52,10 +50,7 @@ const Releases = (): ReactNode => {
   if (showForm) {
     return (
       <div className="p-section">
-        <ReleaseForm
-          onCancel={hideForm}
-          releases={data.releases}
-        />
+        <ReleaseForm onCancel={hideForm} releases={data.releases} />
       </div>
     );
   }
@@ -66,9 +61,7 @@ const Releases = (): ReactNode => {
     <div className="p-section">
       <div className="grid-row">
         <h1>Release management</h1>
-        <p className="u-text--muted">
-          Manage releases data from releases.yaml.
-        </p>
+        <p className="u-text--muted">Manage releases data from releases.yaml.</p>
       </div>
       <hr className="p-rule" />
 
@@ -81,9 +74,7 @@ const Releases = (): ReactNode => {
             </span>
             {status.pr && (
               <a
-                href={String(
-                  (status.pr as Record<string, unknown>).html_url ?? "#",
-                )}
+                href={String((status.pr as Record<string, unknown>).html_url ?? "#")}
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -104,9 +95,7 @@ const Releases = (): ReactNode => {
         <p className="p-text--small-caps">Current releases</p>
         <div className="l-releases__summary-grid">
           {Object.entries(releases)
-            .filter(
-              ([key]) => key !== "checksums",
-            )
+            .filter(([key]) => key !== "checksums")
             .map(([key, category]) => {
               if (!isRecord(category)) return null;
               const version =
@@ -118,15 +107,13 @@ const Releases = (): ReactNode => {
 
               return (
                 <div className="l-releases__summary-card" key={key}>
-                  <p className="p-text--small-caps u-no-margin--bottom">
-                    {key.replace(/_/g, " ")}
-                  </p>
-                  {name && <p className="u-no-margin--bottom"><strong>{name}</strong></p>}
-                  {version && (
-                    <p className="u-text--muted u-no-margin--bottom">
-                      v{version}
+                  <p className="p-text--small-caps u-no-margin--bottom">{key.replace(/_/g, " ")}</p>
+                  {name && (
+                    <p className="u-no-margin--bottom">
+                      <strong>{name}</strong>
                     </p>
                   )}
+                  {version && <p className="u-text--muted u-no-margin--bottom">v{version}</p>}
                 </div>
               );
             })}
