@@ -6,11 +6,13 @@ services:
       - path: .env.local
         required: false
     ports:
-      - "${PORT}:80"
+      - "${PORT}:${PORT}"
     volumes:
       - .:/srv
       - /srv/.venv
       - /srv/node_modules
+    command: ["yarn", "start"]
+    entrypoint: []
     depends_on:
       redis:
         condition: service_healthy
