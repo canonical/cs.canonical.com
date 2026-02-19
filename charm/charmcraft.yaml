@@ -94,7 +94,18 @@ config:
       type: string
       description: "Webhook URL for the BAU bot to send notifications"
       default: "webhook_url"
-    
+    SSO_CLIENT_ID:
+      type: string
+      description: "SSO client ID for authentication"
+      default: "sso_client_id"
+    SSO_CLIENT_SECRET:
+      type: string
+      description: "SSO client secret for authentication"
+      default: "sso_client_secret"
+    OIDC_PROVIDER:
+      type: string
+      description: "OIDC provider for authentication"
+      default: "oidc_provider_url"
 
 requires:
   postgresql:
