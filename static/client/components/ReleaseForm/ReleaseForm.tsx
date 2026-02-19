@@ -5,39 +5,30 @@ import { useQueryClient } from "react-query";
 
 import ChecksumsSection from "./ChecksumsSection";
 import ReleaseField from "./ReleaseField";
-import { deepClone, deepEqual, snakeCaseToTitle } from "./utils";
+import { deepClone, deepEqual } from "./utils";
 
 import { ReleasesServices } from "@/services/api/services/releases";
 import type { IReleasesData, ReleaseFieldValue } from "@/services/api/types/releases";
-import { isRecord, isTaggedField } from "@/services/api/types/releases";
+import { isRecord } from "@/services/api/types/releases";
 
 interface IReleaseFormProps {
   releases: IReleasesData;
   onCancel: () => void;
 }
 
-function isChecksumData(
-  value: unknown,
-): value is Record<string, Record<string, string>> {
+function isChecksumData(value: unknown): value is Record<string, Record<string, string>> {
   if (!isRecord(value)) return false;
   const values = Object.values(value);
   return (
     values.length > 0 &&
-    values.every(
-      (v) =>
-        isRecord(v) &&
-        Object.values(v).every((innerV) => typeof innerV === "string"),
-    )
+    values.every((v) => isRecord(v) && Object.values(v).every((innerV) => typeof innerV === "string"))
   );
 }
 
 const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
-  const [formData, setFormData] = useState<IReleasesData>(() =>
-    deepClone(releases),
-  );
+  const [formData, setFormData] = useState<IReleasesData>(() => deepClone(releases));
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
-
 
   const dirtyCount = useMemo(() => {
     let count = 0;
@@ -45,7 +36,7 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
       const current = formData[categoryKey];
       const original = releases[categoryKey];
 
-      if (isRecord(current) && isRecord(original)) {  
+      if (isRecord(current) && isRecord(original)) {
         for (const fieldKey of Object.keys(current)) {
           if (!deepEqual(current[fieldKey], original[fieldKey])) {
             count++;
@@ -56,33 +47,22 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
     return count;
   }, [formData, releases]);
 
-  const handleFieldChange = useCallback(
-    (categoryKey: string, fieldKey: string, newValue: ReleaseFieldValue) => {
-      setFormData((prev) => {
-        const updated = deepClone(prev);
-        const category = updated[categoryKey];
-        if (isRecord(category)) {
-          (category as Record<string, ReleaseFieldValue>)[fieldKey] = newValue;
-        }
-        return updated;
-      });
-    },
-    [],
-  );
+  const handleFieldChange = useCallback((categoryKey: string, fieldKey: string, newValue: ReleaseFieldValue) => {
+    setFormData((prev) => {
+      const updated = deepClone(prev);
+      const category = updated[categoryKey];
+      if (isRecord(category)) {
+        (category as Record<string, ReleaseFieldValue>)[fieldKey] = newValue;
+      }
+      return updated;
+    });
+  }, []);
 
   const handleChecksumChange = useCallback(
-    (
-      categoryKey: string,
-      checksumCategory: string,
-      version: string,
-      value: string,
-    ) => {
+    (categoryKey: string, checksumCategory: string, version: string, value: string) => {
       setFormData((prev) => {
         const updated = deepClone(prev);
-        const checksums = updated[categoryKey] as Record<
-          string,
-          Record<string, string>
-        >;
+        const checksums = updated[categoryKey] as Record<string, Record<string, string>>;
         if (checksums[checksumCategory]) {
           checksums[checksumCategory][version] = value;
         }
@@ -99,74 +79,69 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
       await queryClient.invalidateQueries("releases");
       onCancel();
     } catch {
-      // Error handling — toast notification can be added here
+      // Error handling — notification can be added here
+      // to be implemented
     } finally {
       setIsLoading(false);
     }
   }, [formData, queryClient, onCancel]);
 
   const accordionSections = useMemo(() => {
-    return Object.entries(formData).map(([categoryKey, categoryData]) => {
-      const originalCategoryData = releases[categoryKey];
+    return Object.entries(formData)
+      .map(([categoryKey, categoryData]) => {
+        const originalCategoryData = releases[categoryKey];
 
-      // Checksums have a special nested structure
-      if (categoryKey === "checksums" && isChecksumData(categoryData)) {
-        return {
-          key: categoryKey,
-          title: snakeCaseToTitle(categoryKey),
-          content: (
-            <ChecksumsSection
-              data={categoryData}
-              onChange={(checksumCategory, version, value) =>
-                handleChecksumChange(
-                  categoryKey,
-                  checksumCategory,
-                  version,
-                  value,
-                )
-              }
-              originalData={
-                isChecksumData(originalCategoryData)
-                  ? originalCategoryData
-                  : ({} as Record<string, Record<string, string>>)
-              }
-            />
-          ),
-        };
-      }
+        // Checksums have a special nested structure
+        if (categoryKey === "checksums" && isChecksumData(categoryData)) {
+          return {
+            key: categoryKey,
+            title: categoryKey,
+            content: (
+              <ChecksumsSection
+                data={categoryData}
+                onChange={(checksumCategory, version, value) =>
+                  handleChecksumChange(categoryKey, checksumCategory, version, value)
+                }
+                originalData={
+                  isChecksumData(originalCategoryData)
+                    ? originalCategoryData
+                    : ({} as Record<string, Record<string, string>>)
+                }
+              />
+            ),
+          };
+        }
 
-      // Regular release category
-      if (isRecord(categoryData)) {
-        return {
-          key: categoryKey,
-          title: snakeCaseToTitle(categoryKey),
-          content: (
-            <div className="l-release-form__category">
-              {Object.entries(categoryData).map(([fieldKey, fieldValue]) => {
-                const originalFieldValue = isRecord(originalCategoryData)
-                  ? (originalCategoryData[fieldKey] as ReleaseFieldValue)
-                  : fieldValue as ReleaseFieldValue;
+        // Regular release category
+        if (isRecord(categoryData)) {
+          return {
+            key: categoryKey,
+            title: categoryKey,
+            content: (
+              <div className="l-release-form__category">
+                {Object.entries(categoryData).map(([fieldKey, fieldValue]) => {
+                  const originalFieldValue = isRecord(originalCategoryData)
+                    ? (originalCategoryData[fieldKey] as ReleaseFieldValue)
+                    : (fieldValue as ReleaseFieldValue);
 
+                  return (
+                    <ReleaseField
+                      fieldKey={fieldKey}
+                      key={fieldKey}
+                      onChange={(newValue) => handleFieldChange(categoryKey, fieldKey, newValue)}
+                      originalValue={originalFieldValue}
+                      value={fieldValue as ReleaseFieldValue}
+                    />
+                  );
+                })}
+              </div>
+            ),
+          };
+        }
 
-                return (
-                  <ReleaseField
-                    fieldKey={fieldKey}
-                    key={fieldKey}
-                    onChange={(newValue) =>
-                      handleFieldChange(categoryKey, fieldKey, newValue)
-                    }
-                    originalValue={originalFieldValue}
-                    value={fieldValue as ReleaseFieldValue}
-                  />
-                );
-              })}
-            </div>
-          ),
-        };
-      }
-
-      return null;
-    }).filter(Boolean) as { key: string; title: string; content: ReactNode }[];
+        return null;
+      })
+      .filter(Boolean) as { key: string; title: string; content: ReactNode }[];
   }, [formData, releases, handleFieldChange, handleChecksumChange]);
 
   return (
@@ -190,12 +165,7 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
       <hr className="p-rule" />
       <div className="l-release-form__actions">
         <Button onClick={onCancel}>Cancel</Button>
-        <ActionButton
-          appearance="positive"
-          disabled={dirtyCount === 0}
-          loading={isLoading}
-          onClick={handleSubmit}
-        >
+        <ActionButton appearance="positive" disabled={dirtyCount === 0} loading={isLoading} onClick={handleSubmit}>
           Submit Release
         </ActionButton>
       </div>

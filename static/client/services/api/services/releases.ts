@@ -1,7 +1,7 @@
 import { api } from "@/services/api";
 import type { IReleasesData, IReleasesResponse } from "@/services/api/types/releases";
 
-export const getReleases = async (): Promise<IReleasesResponse> => {
+export const getReleases = async (): Promise<{ data: IReleasesResponse }> => {
   return api.releases.getReleases();
 };
 
