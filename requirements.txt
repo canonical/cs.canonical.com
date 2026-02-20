@@ -17,3 +17,4 @@ redis[hiredis]==5.3.1
 python-slugify==8.0.4
 black==25.1.0
 flake8==7.1.1
+Authlib==1.6.6

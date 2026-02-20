@@ -66,3 +66,6 @@ SITES_NEW_FEATURES_LABELS = get_flask_env(
 )
 CS_AUTH_TOKEN = get_flask_env("CS_AUTH_TOKEN")
 BAU_BOT_WEBHOOK_URL = get_flask_env("BAU_BOT_WEBHOOK_URL")
+SSO_CLIENT_ID = get_flask_env("SSO_CLIENT_ID")
+SSO_CLIENT_SECRET = get_flask_env("SSO_CLIENT_SECRET")
+OIDC_PROVIDER = get_flask_env("OIDC_PROVIDER")

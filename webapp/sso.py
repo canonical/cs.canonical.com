@@ -2,11 +2,11 @@ import functools
 import os
 
 import flask
-from django_openid_auth.teams import TeamsRequest, TeamsResponse
-from flask_openid import OpenID
+from authlib.integrations.flask_client import OAuth
 
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import User, db
+import requests
 
 SSO_LOGIN_URL = "https://login.ubuntu.com"
 # private teams like canonical are not returned in response atm
@@ -23,60 +23,83 @@ SSO_TEAM = (
 DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
     "FLASK_DISABLE_SSO"
 )
+LAUNCHPAD_API_URL = "https://api.launchpad.net/1.0"
 
 
 def init_sso(app: flask.Flask):
-    open_id = OpenID(
-        store_factory=lambda: None,
-        safe_roots=[],
-        extension_responses=[TeamsResponse],
+
+    oauth = OAuth(app)
+
+    oauth.register(
+        "canonical",
+        client_id=app.config["SSO_CLIENT_ID"],
+        client_secret=app.config["SSO_CLIENT_SECRET"],
+        server_metadata_url=app.config["OIDC_PROVIDER"],
+        client_kwargs={
+            "token_endpoint_auth_method": "client_secret_post",
+            "scope": "openid profile email",
+        },
     )
 
-    @app.route("/login", methods=["GET", "POST"])
-    @open_id.loginhandler
+    @app.route("/login")
     def login():
         if DISABLE_SSO or "openid" in flask.session:
-            return flask.redirect(open_id.get_next_url())
+            return flask.redirect(flask.request.args.get("next") or "/app")
 
-        teams_request = TeamsRequest(query_membership=SSO_TEAM)
-        return open_id.try_login(
-            SSO_LOGIN_URL, ask_for=["email"], extensions=[teams_request]
+        redirect_uri = flask.url_for("oauth_callback", _external=True)
+        return oauth.canonical.authorize_redirect(redirect_uri)
+
+    @app.route("/auth/callback")
+    def oauth_callback():
+        token = oauth.canonical.authorize_access_token()
+        user = User.query.filter_by(email=token["userinfo"]["email"]).first()
+
+        if not user or not user.launchpad_id:
+            # fetch user record from directory
+            response = get_user_from_directory_by_key(
+                "email", token["userinfo"]["email"]
+            )
+            if response.status_code != 200:
+                flask.abort(404, description="User not found in directory.")
+            user_data = response.json().get("data", {}).get("employees", [])[0]
+            user = get_or_create_user_id(user_data, return_obj=True)
+
+            if not user.launchpad_id:
+                user.launchpad_id = user_data.get("launchpadId")
+                db.session.commit()
+
+        response = requests.get(
+            f"{LAUNCHPAD_API_URL}/~{user.launchpad_id}/super_teams",
         )
 
-    @open_id.after_login
-    def after_login(resp):
-        if not (set(SSO_TEAM) & set(resp.extensions["lp"].is_member)):
-            flask.abort(403)
+        if response.status_code != 200:
+            flask.abort(
+                403, description="Failed to fetch Launchpad team memberships."
+            )
+
+        memberships = response.json().get("entries", [])
+        teams = [team["name"] for team in memberships]
+        if not (set(SSO_TEAM) & set(teams)):
+            flask.abort(
+                403, description="User is not a member of the required team."
+            )
 
         # check if user is admin
-        role = (
-            "admin"
-            if SSO_ADMIN_TEAM in resp.extensions["lp"].is_member
-            else "user"
-        )
+        role = "admin" if SSO_ADMIN_TEAM in teams else "user"
 
-        # find the user in database
-        user = User.query.filter_by(email=resp.email).first()
+        # update user
         if user and user.role != role:
             user.role = role
             db.session.commit()
-        if not user:
-            # fetch user record from directory
-            response = get_user_from_directory_by_key("email", resp.email)
-
-            if response.status_code == 200:
-                user = response.json().get("data", {}).get("employees", [])[0]
-                user["role"] = role
-                # save user in users table
-                get_or_create_user_id(user)
 
         flask.session["openid"] = {
-            "identity_url": resp.identity_url,
-            "email": resp.email,
+            "identity_url": token["userinfo"]["iss"],
+            "email": token["userinfo"]["email"],
+            "fullname": token["userinfo"]["name"],
             "role": role,
         }
 
-        return flask.redirect(open_id.get_next_url())
+        return flask.redirect(flask.request.args.get("next") or "/app")
 
     @app.route("/logout")
     def logout():
