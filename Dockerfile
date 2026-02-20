@@ -23,8 +23,21 @@ RUN python3 -m venv .venv \
     && . .venv/bin/activate \
     && pip install --no-cache-dir -r requirements.txt
 
+ENV PATH="/srv/.venv/bin:$PATH"
+
+# Install Node.js and yarn for running lint and format commands
+RUN apt-get update && apt-get install --no-install-recommends --yes \
+    curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install --no-install-recommends --yes nodejs \
+    && npm install -g yarn \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install node dependencies (including devDependencies for linting tools)
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
+
 # Import code, build assets
-RUN rm -rf package.json yarn.lock vite.config.js requirements.txt
+RUN rm -rf requirements.txt
 COPY --from=build /srv/static/build /srv/static/build
 
 # Set build ID

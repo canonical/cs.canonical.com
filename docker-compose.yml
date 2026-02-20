@@ -2,16 +2,23 @@ services:
   web:
     build: .
     env_file:
-      - ".env.local"
-      - ".env"
+      - path: .env
+      - path: .env.local
+        required: false
     ports:
-      - "${PORT}:80"
+      - "${PORT}:${PORT}"
     volumes:
       - .:/srv
+      - /srv/.venv
+      - /srv/node_modules
+    command: ["yarn", "start"]
+    entrypoint: []
     depends_on:
       redis:
         condition: service_healthy
       postgres:
+        condition: service_healthy
+      hmr:
         condition: service_healthy
   redis:
     image: redis
@@ -40,9 +47,29 @@ services:
       start_period: 80s
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  hmr:
+    image: node:20-alpine
+    working_dir: /srv
+    env_file:
+      - path: .env
+      - path: .env.local
+        required: false
+    volumes:
+      - .:/srv
+      - hmr_node_modules:/srv/node_modules # Named volume
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 0.0.0.0 5173 || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+    command: sh -c "yarn install && yarn dev --host 0.0.0.0"
 
 volumes:
   cache:
     driver: local
   postgres_data:
     driver: local
+  hmr_node_modules:
