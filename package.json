@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@canonical/react-components": "3.5.0",
-    "axios": "1.12.2",
+    "axios": "1.13.5",
     "classnames": "2.5.1",
     "formik": "2.4.6",
     "react": "19.0.0",
