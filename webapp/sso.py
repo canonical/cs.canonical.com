@@ -6,7 +6,7 @@ from authlib.integrations.flask_client import OAuth
 
 from webapp.helper import get_or_create_user_id, get_user_from_directory_by_key
 from webapp.models import User, db
-from requests import request
+import requests
 
 SSO_LOGIN_URL = "https://login.ubuntu.com"
 # private teams like canonical are not returned in response atm
@@ -23,6 +23,7 @@ SSO_TEAM = (
 DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
     "FLASK_DISABLE_SSO"
 )
+LAUNCHPAD_API_URL = "https://api.launchpad.net/1.0"
 
 
 def init_sso(app: flask.Flask):
@@ -67,9 +68,8 @@ def init_sso(app: flask.Flask):
                 user.launchpad_id = user_data.get("launchpadId")
                 db.session.commit()
 
-        response = request(
-            "GET",
-            f"https://api.launchpad.net/1.0/~{user.launchpad_id}/super_teams",
+        response = requests.get(
+            f"{LAUNCHPAD_API_URL}/~{user.launchpad_id}/super_teams",
         )
 
         if response.status_code != 200:
@@ -96,6 +96,7 @@ def init_sso(app: flask.Flask):
             "identity_url": token["userinfo"]["iss"],
             "email": token["userinfo"]["email"],
             "fullname": token["userinfo"]["name"],
+            "role": role,
         }
 
         return flask.redirect(flask.request.args.get("next") or "/app")
