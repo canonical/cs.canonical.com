@@ -6,6 +6,7 @@ tasks:
   default:
     desc: "Start the project"
     cmds:
+      - mkdir -p node_modules .venv
       - docker compose up -d
 
   stop:

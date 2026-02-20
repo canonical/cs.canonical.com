@@ -347,3 +347,10 @@ This project also supports running with an in-memory mock server.
 It simulates backend API responses, allowing frontend development and integration, without requiring a live backend service. This is useful for rapid prototyping, testing error, handling, and developing features in isolation.
 
 For detailed usage instructions and advanced configuration options, refer to [MOCK_SERVER_USAGE.md](./MOCK_SERVER_USAGE.md) in this project.
+
+
+## Commits
+
+This project utilizes <a href="https://typicode.github.io/husky/">husky</a> to enforce <a href="https://www.conventionalcommits.org/en/v1.0.0/#summary">convential git commits</a>. 
+
+Make sure you have husky installed either locally in this repo (use `yarn install`) or globally (use `yarn global add husky`), before you start creating commits.
