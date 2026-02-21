@@ -1,5 +1,14 @@
+.l-search-box {
+  margin-bottom: 0.5rem;
+
+  .p-search-box__input {
+    padding-right: 2.1rem;
+  }
+}
+
 .l-search-container {
   position: relative;
+  width: 100%;
 
   .l-search-dropdown {
     background-color: white;
@@ -13,7 +22,8 @@
     padding: 0;
     position: absolute;
     top: -10px;
-    width: 100%;
+    min-width: 100%;
+    width: max-content;
     z-index: 10;
 
     .l-search-item {
