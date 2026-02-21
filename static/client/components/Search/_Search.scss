@@ -1,3 +1,11 @@
+.l-search-box {
+  margin-bottom: 0.5rem;
+
+  .p-search-box__input {
+    padding-right: 2.1rem;
+  }
+}
+
 .l-search-container {
   position: relative;
   width: 100%;
@@ -16,7 +24,6 @@
     top: -10px;
     min-width: 100%;
     width: max-content;
-    max-width: min(1000px, calc(100vw - 32px));
     z-index: 10;
 
     .l-search-item {
