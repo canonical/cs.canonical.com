@@ -4,7 +4,7 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-import { deepEqual } from "./utils";
+import { recurseEqual } from "./utils";
 
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
@@ -17,7 +17,7 @@ interface IReleaseFieldProps {
 }
 
 const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFieldProps): ReactNode => {
-  const isDirty = !deepEqual(value, originalValue);
+  const isDirty = !recurseEqual(value, originalValue);
   const label = fieldKey;
 
   const handleTaggedFieldChange = useCallback(

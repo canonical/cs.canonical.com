@@ -1,7 +1,7 @@
 /**
- * Deep equality check for two values.
+ * Recursive equality check for two values.
  */
-export function deepEqual(a: unknown, b: unknown): boolean {
+export function recurseEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a === null || b === null) return false;
   if (typeof a !== typeof b) return false;
@@ -14,7 +14,7 @@ export function deepEqual(a: unknown, b: unknown): boolean {
 
     if (aKeys.length !== bKeys.length) return false;
 
-    return aKeys.every((key) => deepEqual(aObj[key], bObj[key]));
+    return aKeys.every((key) => recurseEqual(aObj[key], bObj[key]));
   }
 
   return false;

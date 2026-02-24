@@ -3,7 +3,7 @@ import { type ReactNode, useCallback } from "react";
 import { Accordion, Textarea } from "@canonical/react-components";
 import classNames from "classnames";
 
-import { deepEqual } from "./utils";
+import { recurseEqual } from "./utils";
 
 interface IChecksumsSectionProps {
   data: Record<string, Record<string, string>>;
@@ -26,7 +26,7 @@ const ChecksumsSection = ({ data, originalData, onChange }: IChecksumsSectionPro
       <div className="l-release-form__checksums-category">
         {Object.entries(versions).map(([version, checksum]) => {
           const originalChecksum = originalData?.[category]?.[version];
-          const isDirty = !deepEqual(checksum, originalChecksum);
+          const isDirty = !recurseEqual(checksum, originalChecksum);
 
           return (
             <div
