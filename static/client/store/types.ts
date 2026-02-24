@@ -20,13 +20,19 @@ export interface IViewsStore {
 
 export interface IPanelsStore {
   productsPanelVisible: boolean;
+  copyUpdatePanelVisible: boolean;
   reportBugPanelVisible: boolean;
   requestFeaturePanelVisible: boolean;
 
   togglePanel: (p: PanelKey) => void;
   toggleProductsPanel: () => void;
+  toggleCopyUpdatePanel: () => void;
   toggleReportBugPanel: () => void;
   toggleRequestFeaturePanel: () => void;
 }
 
-export type PanelKey = "productsPanelVisible" | "reportBugPanelVisible" | "requestFeaturePanelVisible";
+export type PanelKey =
+  | "productsPanelVisible"
+  | "copyUpdatePanelVisible"
+  | "reportBugPanelVisible"
+  | "requestFeaturePanelVisible";

@@ -25,6 +25,9 @@
 @include vf-p-icon-switcher-environments;
 @include vf-p-icon-filter;
 @include vf-p-icon-repository;
+@include vf-p-icon-file;
+@include vf-p-icon-home;
+@include vf-p-icon-profile;
 
 // Utilities
 @include vf-u-align;
@@ -55,7 +58,7 @@
 
 .p-icon--logout {
   @extend %icon;
-  @include vf-icon-logout(#ffffff);
+  @include vf-icon-logout(#000000);
 }
 
 // allow SearchAndFilter component increase height when there are several options selected (in Reviewers)
@@ -90,6 +93,6 @@
   top: 100%;
 }
 
-.bug-report-card {
+.report-card {
   border-color: var(--vf-color-border-low-contrast);
 }

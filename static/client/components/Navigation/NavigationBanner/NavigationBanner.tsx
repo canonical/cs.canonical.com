@@ -36,7 +36,7 @@ const NavigationBanner = ({ children }: NavigationBannerProps): ReactNode => {
         <img
           alt=""
           className="is-fading-when-collapsed"
-          src="https://assets.ubuntu.com/v1/26e08531-content-system-logo.svg"
+          src="https://assets.ubuntu.com/v1/5b61782f-content_system_logo.png"
           width="175px"
         />
         <img

@@ -4,6 +4,7 @@ import type { IPanelsStore, PanelKey } from "./types";
 
 export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   productsPanelVisible: false,
+  copyUpdatePanelVisible: false,
   reportBugPanelVisible: false,
   requestFeaturePanelVisible: false,
 
@@ -14,6 +15,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
 
     const newState = {
       productsPanelVisible: false,
+      copyUpdatePanelVisible: false,
       reportBugPanelVisible: false,
       requestFeaturePanelVisible: false,
 
@@ -24,6 +26,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   },
 
   toggleProductsPanel: () => get().togglePanel("productsPanelVisible"),
+  toggleCopyUpdatePanel: () => get().togglePanel("copyUpdatePanelVisible"),
   toggleReportBugPanel: () => get().togglePanel("reportBugPanelVisible"),
   toggleRequestFeaturePanel: () => get().togglePanel("requestFeaturePanelVisible"),
 }));

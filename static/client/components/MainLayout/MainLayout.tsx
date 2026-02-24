@@ -4,7 +4,6 @@ import { Button } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
-import Search from "@/components/Search";
 import { VIEW_TREE } from "@/config";
 import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
@@ -35,9 +34,6 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
                 </React.Fragment>
               </Button>
             )}
-          </div>
-          <div className="grid-col">
-            <Search />
           </div>
         </div>
         <hr />
