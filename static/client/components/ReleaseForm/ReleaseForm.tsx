@@ -5,7 +5,7 @@ import { useQueryClient } from "react-query";
 
 import ChecksumsSection from "./ChecksumsSection";
 import ReleaseField from "./ReleaseField";
-import { deepClone, deepEqual } from "./utils";
+import { deepClone, recurseEqual } from "./utils";
 
 import { ReleasesServices } from "@/services/api/services/releases";
 import type { IReleasesData, ReleaseFieldValue } from "@/services/api/types/releases";
@@ -38,7 +38,7 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
 
       if (isRecord(current) && isRecord(original)) {
         for (const fieldKey of Object.keys(current)) {
-          if (!deepEqual(current[fieldKey], original[fieldKey])) {
+          if (!recurseEqual(current[fieldKey], original[fieldKey])) {
             count++;
           }
         }
