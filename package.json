@@ -29,7 +29,7 @@
     "formik": "2.4.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-query": "3.39.3",
+    "@tanstack/react-query": "4.0.5",
     "react-router-dom": "6.29.0",
     "vanilla-framework": "4.30.0",
     "zustand": "4.5.7"
