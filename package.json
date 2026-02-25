@@ -1,6 +1,6 @@
 {
   "name": "websites-content-system",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "repository": {
     "type": "git",
     "url": "git@github.com:canonical/cs.canonical.com.git"
