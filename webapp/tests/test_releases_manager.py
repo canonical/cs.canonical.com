@@ -378,6 +378,193 @@ class TestReleasesGitHubClient:
             assert "pr" in status
             assert "pr_exists" in status
 
+    def test_merge_base_into_release_success(
+        self, github_client, mock_requests
+    ):
+        """Test successful merge when branch exists."""
+        branch_data = {
+            "pr_name": "_releases_branch",
+            "commit": {"sha": "abc123"},
+        }
+        merge_response = {
+            "sha": "merge123",
+            "commit": {"message": "Merge main into _releases_branch"},
+        }
+        mock_requests["response"].json.return_value = merge_response
+        mock_requests["response"].status_code = 201
+
+        with patch.object(
+            github_client, "fetch_releases_branch", return_value=branch_data
+        ):
+            result = github_client.merge_base_into_release()
+
+        assert result["success"] is True
+        
+        # Verify the request was made with correct parameters
+        call_args = mock_requests["request"].call_args
+        assert call_args.args[0] == "POST"
+        assert "merges" in call_args.args[1]
+
+    def test_merge_base_into_release_returns_none_when_no_branch(
+        self, github_client
+    ):
+        """Test that merge returns None when branch doesn't exist."""
+        with patch.object(
+            github_client, "fetch_releases_branch", return_value=None
+        ):
+            result = github_client.merge_base_into_release()
+
+        assert result is None
+
+    def test_merge_base_into_release_handles_conflict(
+        self, github_client, mock_requests
+    ):
+        """Test merge returns error dict when conflict is detected (409)."""
+        branch_data = {
+            "pr_name": "_releases_branch",
+            "commit": {"sha": "abc123"},
+        }
+        mock_requests["response"].status_code = 409
+        mock_requests["response"].text = "Merge conflict"
+
+        with patch.object(
+            github_client, "fetch_releases_branch", return_value=branch_data
+        ):
+            result = github_client.merge_base_into_release()
+
+        assert result["success"] is False
+        assert "conflict" in result["error"].lower()
+
+    def test_merge_base_into_release_raises_on_other_errors(
+        self, github_client, mock_requests
+    ):
+        """Test that merge raises GithubError for non-409 errors."""
+        branch_data = {
+            "pr_name": "_releases_branch",
+            "commit": {"sha": "abc123"},
+        }
+        mock_requests["response"].status_code = 500
+        mock_requests["response"].text = "Internal Server Error"
+
+        with patch.object(
+            github_client, "fetch_releases_branch", return_value=branch_data
+        ):
+            with pytest.raises(GithubError):
+                github_client.merge_base_into_release()
+
+    def test_update_releases_yaml_success_with_existing_file(
+        self, github_client, mock_requests
+    ):
+        """Test successful update when file already exists."""
+        file_sha = "existing_sha_123"
+        new_content = "updated: yaml\ncontent: here"
+        commit_response = {
+            "content": {"sha": "new_sha_456"},
+            "commit": {"message": "Update releases.yaml"},
+        }
+        
+        # Mock two different responses for GET and PUT
+        get_response = MagicMock()
+        get_response.status_code = 200
+        get_response.json.return_value = {"sha": file_sha}
+        
+        put_response = MagicMock()
+        put_response.status_code = 200
+        put_response.json.return_value = commit_response
+
+        with patch.object(
+            github_client,
+            "_request",
+            side_effect=[get_response.json.return_value, commit_response],
+        ):
+            result = github_client.update_releases_yaml(new_content)
+
+        assert result == commit_response
+
+    def test_update_releases_yaml_success_with_new_file(
+        self, github_client, mock_requests
+    ):
+        """Test successful update when file doesn't exist (404)."""
+        new_content = "new: yaml\nfile: content"
+        commit_response = {
+            "content": {"sha": "new_sha_789"},
+            "commit": {"message": "Update releases.yaml"},
+        }
+
+        def mock_request_side_effect(method, url, **kwargs):
+            if method == "GET":
+                raise GithubError("Not found", 404)
+            return commit_response
+
+        with patch.object(
+            github_client, "_request", side_effect=mock_request_side_effect
+        ):
+            result = github_client.update_releases_yaml(new_content)
+
+        assert result == commit_response
+
+    def test_update_releases_yaml_uses_base64_encoding(
+        self, github_client, mock_requests
+    ):
+        """Test that content is base64 encoded before sending."""
+        import base64
+        
+        new_content = "test: content"
+        expected_encoded = base64.b64encode(
+            new_content.encode()
+        ).decode()
+
+        def capture_params(method, url, **kwargs):
+            if method == "PUT":
+                assert kwargs["data"]["content"] == expected_encoded
+            return {}
+
+        with patch.object(
+            github_client, "_request", side_effect=capture_params
+        ):
+            try:
+                github_client.update_releases_yaml(new_content)
+            except (KeyError, TypeError):
+                # Expected since we're not returning proper response
+                pass
+
+    def test_update_releases_yaml_targets_releases_branch(
+        self, github_client, mock_requests
+    ):
+        """Test that update targets the releases branch."""
+        commit_response = {"commit": {"sha": "abc"}}
+
+        def capture_params(method, url, **kwargs):
+            if method == "PUT":
+                assert kwargs["data"]["branch"] == "_releases_branch"
+            elif method == "GET":
+                assert kwargs["params"]["ref"] == "_releases_branch"
+                return {"sha": "existing_sha"}
+            return commit_response
+
+        with patch.object(
+            github_client, "_request", side_effect=capture_params
+        ):
+            github_client.update_releases_yaml("content")
+
+    def test_update_releases_yaml_raises_on_non_404_get_error(
+        self, github_client
+    ):
+        """Test that non-404 errors during GET are raised."""
+
+        def mock_request_side_effect(method, url, **kwargs):
+            if method == "GET":
+                raise GithubError("Unauthorized", 401)
+            return {}
+
+        with patch.object(
+            github_client, "_request", side_effect=mock_request_side_effect
+        ):
+            with pytest.raises(GithubError) as exc_info:
+                github_client.update_releases_yaml("content")
+            
+            assert exc_info.value.status_code == 401
+
 
 class TestReleasesService:
     """Tests for ReleasesService class."""
