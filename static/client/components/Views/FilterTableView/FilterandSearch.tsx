@@ -96,6 +96,7 @@ const FilterandSearch = (): ReactNode => {
         </div>
         <div className="grid-col">
           <ContextualMenu
+            className="p-filter-and-search-menu"
             closeOnEsc={true}
             closeOnOutsideClick={true}
             hasToggleIcon

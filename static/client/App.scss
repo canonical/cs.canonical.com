@@ -5,6 +5,8 @@
 @include vanilla;
 @include vf-base;
 
+@include vf-p-divider;
+
 // Patterns
 @include vf-p-grid;
 @include vf-p-headings;
@@ -95,4 +97,24 @@
 
 .report-card {
   border-color: var(--vf-color-border-low-contrast);
+}
+
+.p-tabs__list {
+  overflow-y: hidden;
+
+  .p-tabs__link {
+    border: none;
+  }
+}
+
+.p-contextual-menu__link {
+  border: 0;
+  clear: both;
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }

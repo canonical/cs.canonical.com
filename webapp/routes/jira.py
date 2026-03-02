@@ -1,5 +1,6 @@
 import re
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, request
+import flask
 from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
@@ -555,3 +556,42 @@ def request_feature(body: RequestFeatureModel):
             ),
             400,
         )
+
+
+@jira_blueprint.route("/tickets", methods=["GET"])
+@login_required
+def user_tickets():
+    page = request.values.get("page", type=int, default=1)
+    per_page = request.values.get("per_page", type=int, default=10)
+    type = request.values.get("type", type=str, default="active")
+
+    task_status = ""
+    if type not in ["active", "resolved"]:
+        type = "active"
+    if type == "active":
+        task_status = [
+            JIRATaskStatus.IN_PROGRESS,
+            JIRATaskStatus.BLOCKED,
+            JIRATaskStatus.TO_BE_DEPLOYED,
+            JIRATaskStatus.TRIAGED,
+            JIRATaskStatus.UNTRIAGED,
+            JIRATaskStatus.IN_REVIEW,
+        ]
+    elif type == "resolved":
+        task_status = [JIRATaskStatus.DONE, JIRATaskStatus.REJECTED]
+
+    tickets = JiraTask.query.filter(
+        JiraTask.user_id == flask.session["openid"]["id"],
+        JiraTask.status.in_(task_status),
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify(
+        {
+            "tickets": [ticket.to_dict() for ticket in tickets.items],
+            "page": page,
+            "page_size": per_page,
+            "total": tickets.total,
+            "total_pages": tickets.pages,
+        }
+    )
+
