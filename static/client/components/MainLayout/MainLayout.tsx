@@ -36,7 +36,6 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             )}
           </div>
         </div>
-        <hr />
         <div className="grid-row">
           {children}
           <Outlet />

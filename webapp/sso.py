@@ -97,6 +97,7 @@ def init_sso(app: flask.Flask):
             "email": token["userinfo"]["email"],
             "fullname": token["userinfo"]["name"],
             "role": role,
+            "id": user.id,
         }
 
         return flask.redirect(flask.request.args.get("next") or "/app")

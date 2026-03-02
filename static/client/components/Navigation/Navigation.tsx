@@ -8,7 +8,7 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import Search from "@/components/Search";
-import { VIEW_OWNED, VIEW_TABLE, VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -33,7 +33,7 @@ const Navigation = (): ReactNode => {
     (view: TView) => {
       setExpandedProject("");
       setView(view);
-      if ([VIEW_OWNED, VIEW_TABLE].includes(view)) {
+      if ([VIEW_OWNED, VIEW_TABLE, VIEW_REQUESTS].includes(view)) {
         navigate(`/app/views/${view}`);
       }
 
@@ -84,12 +84,21 @@ const Navigation = (): ReactNode => {
               </div>
               <ul className="u-no-margin u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_TREE) && "is-active"}`}
+                  className={`p-side-navigation__link ${(isViewActive(VIEW_TREE) || location.pathname === "/app") && "is-active"}`}
                   onClick={() => changeView(VIEW_TREE)}
                 >
                   <span className="u-has-icon">
                     <i className="p-icon--home" />
                     Main menu
+                  </span>
+                </li>
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_REQUESTS) && "is-active"}`}
+                  onClick={() => changeView(VIEW_REQUESTS)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--file" />
+                    Dashboard
                   </span>
                 </li>
                 <li

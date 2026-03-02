@@ -6,6 +6,14 @@ export const VIEW_OWNED = "owned";
 export const VIEW_REVIEWED = "reviewed";
 export const VIEW_TREE = "tree";
 export const VIEW_TABLE = "table";
+export const VIEW_REQUESTS = "requests";
+
+export const COPY_UPDATE = "Copy update";
+export const PAGE_REFRESH = "Page refresh";
+export const NEW_WEBPAGE = "New webpage";
+export const NEW_CASE_STUDY = "New case study";
+export const BUG_REPORT = "Bug report";
+export const NEW_FEATURE_REQUEST = "New feature request";
 
 const config = {
   allProjects: [
@@ -45,13 +53,20 @@ const config = {
     mode: "rest", // or "mock"
   },
   ghLink: (project: string) => `https://github.com/canonical/${project}/tree/main/templates`,
-  copyStyleGuideLink: "https://docs.google.com/document/d/1AX-kSNztuAmShEoohe8L3LNLRnSKF7I0qkZGNeoGOok/edit?tab=t.0",
+  copyStyleGuideLink:
+    "https://docs.google.com/document/d/1AX-kSNztuAmShEoohe8L3LNLRnSKF7I0qkZGNeoGOok/edit?tab=t.0#heading=h.utc4w4tdsldu",
   jiraTaskLink: "https://warthogs.atlassian.net/browse/",
   infiniteScroll: {
     initialLoadCount: 50,
     loadMoreCount: 50,
     scrollThreshold: 200,
   },
+  requestTypes: [COPY_UPDATE, PAGE_REFRESH, NEW_WEBPAGE, NEW_CASE_STUDY, BUG_REPORT, NEW_FEATURE_REQUEST],
+  copyDocTemplateLink:
+    "https://docs.google.com/document/d/1EPA_Ea8ShIvyftAc9oVxZYUIMHfAPFF6S5x6FOvLkwM/edit?tab=t.ly9ghy9ilvf#heading=h.krz2ku7u3755",
+  copyDocsFolderLink:
+    "https://drive.google.com/drive/folders/0B4s80tIYQW4BMjNiMGFmNzQtNDkxZC00YmQ0LWJiZWUtNTk2YThlY2MzZmJh?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto&resourcekey=0-L9UqvqfGkYl3-oZW0oX3Aw",
+  brandRequestsLink: "https://warthogs.atlassian.net/jira/software/c/projects/BRND/forms/form/direct/1/10013",
 };
 
 export default config;

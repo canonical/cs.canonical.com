@@ -5,6 +5,7 @@ import FilterTableView from "@/components/Views/FilterTableView";
 import Home from "@/pages/Home/Home";
 import NewWebpage from "@/pages/NewWebpage";
 import Owned from "@/pages/views/Owned";
+import Requests from "@/pages/views/Requests";
 import Reviewed from "@/pages/views/Reviewed";
 import { useAuth } from "@/services/api/hooks/auth";
 import { usePages } from "@/services/api/hooks/pages";
@@ -31,6 +32,7 @@ const Main = (): React.ReactNode => {
           <Route element={<MainLayout />}>
             <Route element={<Owned />} path="views/owned" />
             <Route element={<Reviewed />} path="views/reviewed" />
+            <Route element={<Requests />} path="views/requests" />
             <Route element={<FilterTableView />} path="views/table" />
             <Route element={<NewWebpage />} path="new-webpage" />
             {getDynamicRoutes()}

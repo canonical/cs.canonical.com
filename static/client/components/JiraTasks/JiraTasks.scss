@@ -1,0 +1,28 @@
+.p-jira-status-indicator {
+  border-radius: 50%;
+  display: inline-block;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  width: 0.5rem;
+  background-color: var(--vf-color-text-default);
+
+  &--information {
+    @extend .p-jira-status-indicator;
+    background-color: var(--vf-color-border-information);
+  }
+
+  &--positive {
+    @extend .p-jira-status-indicator;
+    background-color: var(--vf-color-border-positive);
+  }
+
+  &--negative {
+    @extend .p-jira-status-indicator;
+    background-color: var(--vf-color-border-negative);
+  }
+
+  &--caution {
+    @extend .p-jira-status-indicator;
+    background-color: var(--vf-color-border-caution);
+  }
+}

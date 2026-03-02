@@ -162,6 +162,7 @@ class JIRATaskStatus:
     TO_BE_DEPLOYED = "TO BE DEPLOYED"
     DONE = "DONE"
     REJECTED = "REJECTED"
+    IN_REVIEW = "IN REVIEW"
 
 
 class JiraTaskType:
@@ -183,6 +184,18 @@ class JiraTask(db.Model, DateTimeMixin):
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "jira_id": self.jira_id,
+            "webpage_id": self.webpage_id,
+            "user_id": self.user_id,
+            "status": self.status,
+            "summary": self.summary,
+            "request_type": self.request_type,
+            "created_at": self.created_at,
+        }
 
 
 class Product(db.Model, DateTimeMixin):
