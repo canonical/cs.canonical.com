@@ -83,7 +83,6 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
       if (error?.response?.data) {
-        console.log("🚀 ~ RequestTaskModal ~ error?.response?.data:", error?.response?.data);
         notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
       }
     },
