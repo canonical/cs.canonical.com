@@ -4,7 +4,7 @@ import { Button } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
-import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE } from "@/config";
 import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
 
