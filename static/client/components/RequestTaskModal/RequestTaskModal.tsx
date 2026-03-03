@@ -12,7 +12,6 @@ import {
   useToastNotification,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
@@ -33,10 +32,8 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   const [isLoading, setIsLoading] = useState(false);
   const user = useStore((state) => state.user);
   const [reporter, setReporter] = useState(user);
-  const [redirectUrl, setRedirectUrl] = useState("");
   const { refetch } = usePages(true);
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
-  const navigate = useNavigate();
   const notify = useToastNotification();
 
   const handleChangeDueDate = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -53,10 +50,6 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
 
   const handleDescrChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
-  }, []);
-
-  const handleChangeRedirectUrl = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setRedirectUrl(e.target.value);
   }, []);
 
   const handleTypeChange = useCallback(
@@ -90,6 +83,7 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
       if (error?.response?.data) {
+        console.log("🚀 ~ RequestTaskModal ~ error?.response?.data:", error?.response?.data);
         notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
       }
     },
@@ -103,64 +97,36 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   const handleSubmit = useCallback(() => {
     if (!webpage?.id) return;
     setIsLoading(true);
-    if (changeType === ChangeRequestType.PAGE_REMOVAL) {
-      PagesServices.requestRemoval({
-        due_date: dueDate,
-        webpage_id: webpage.id,
-        reporter_struct: reporter,
-        description: descr,
-        redirect_url: redirectUrl,
-        request_type: Object.keys(ChangeRequestType).find(
-          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType,
-        ) as string,
+    PagesServices.requestChanges({
+      due_date: dueDate as string,
+      webpage_id: webpage.id,
+      reporter_struct: reporter,
+      type: changeType,
+      summary,
+      description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
+      request_type: Object.keys(ChangeRequestType).find(
+        (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType,
+      ) as string,
+    })
+      .then(() => {
+        onClose();
+        const afterRefetch = () => {
+          window.location.reload();
+        };
+        onSubmitSuccess(afterRefetch);
       })
-        .then(() => {
-          const afterRefetch = () => {
-            if (webpage.status === PageStatus.NEW) {
-              navigate("/app", { replace: true });
-            } else {
-              window.location.reload();
-            }
-          };
-          onSubmitSuccess(afterRefetch);
-        })
-        .catch(onSubmitError)
-        .finally(onSubmitFinally);
-    } else {
-      PagesServices.requestChanges({
-        due_date: dueDate as string,
-        webpage_id: webpage.id,
-        reporter_struct: reporter,
-        type: changeType,
-        summary,
-        description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
-        request_type: Object.keys(ChangeRequestType).find(
-          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType,
-        ) as string,
-      })
-        .then(() => {
-          onClose();
-          const afterRefetch = () => {
-            window.location.reload();
-          };
-          onSubmitSuccess(afterRefetch);
-        })
-        .catch(onSubmitError)
-        .finally(onSubmitFinally);
-    }
+      .catch(onSubmitError)
+      .finally(onSubmitFinally);
   }, [
     webpage.id,
-    webpage.status,
     webpage.copy_doc_link,
     changeType,
     dueDate,
     reporter,
     descr,
-    redirectUrl,
     onSubmitError,
     onSubmitFinally,
     onSubmitSuccess,
-    navigate,
     summary,
     onClose,
   ]);
@@ -173,17 +139,14 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
         return "Submit changes for page refresh";
       case ChangeRequestType.NEW_WEBPAGE:
         return "Submit new page for publication";
-      case ChangeRequestType.PAGE_REMOVAL:
-        return "Submit request for page removal";
       default:
         return "Submit request";
     }
   }, [changeType]);
 
   const submitButtonEnabled = useMemo(
-    () =>
-      webpage.status !== PageStatus.NEW ? dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked) : true,
-    [webpage.status, dueDate, changeType, checked],
+    () => (webpage.status !== PageStatus.NEW ? dueDate && checked : true),
+    [webpage.status, dueDate, checked],
   );
 
   return (
@@ -258,36 +221,27 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
       <div className="u-sv3">
         <Reporter reporter={reporter} setReporter={setReporter} />
       </div>
-      {changeType === ChangeRequestType.PAGE_REMOVAL && webpage.status !== PageStatus.NEW && (
-        <Input label="Redirect to" onChange={handleChangeRedirectUrl} type="text" />
-      )}
-      {((webpage.status !== PageStatus.NEW && changeType === ChangeRequestType.PAGE_REMOVAL) ||
-        changeType !== ChangeRequestType.PAGE_REMOVAL ||
-        window.__E2E_TESTING__) && (
-        <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
-      )}
+      <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
-      {changeType !== ChangeRequestType.PAGE_REMOVAL && (
-        <Input
-          checked={checked}
-          label={
-            <span>
-              I have added all the content to the{" "}
-              <a href={webpage.copy_doc_link} rel="noreferrer" target="_blank">
-                copy doc
-              </a>
-              , and it is consistent with our{" "}
-              <a href={config.copyStyleGuideLink} rel="noreferrer" target="_blank">
-                copy style guides
-              </a>
-            </span>
-          }
-          onChange={handleChangeConsent}
-          required
-          type="checkbox"
-        />
-      )}
+      <Input
+        checked={checked}
+        label={
+          <span>
+            I have added all the content to the{" "}
+            <a href={webpage.copy_doc_link} rel="noreferrer" target="_blank">
+              copy doc
+            </a>
+            , and it is consistent with our{" "}
+            <a href={config.copyStyleGuideLink} rel="noreferrer" target="_blank">
+              copy style guides
+            </a>
+          </span>
+        }
+        onChange={handleChangeConsent}
+        required
+        type="checkbox"
+      />
     </Modal>
   );
 };
