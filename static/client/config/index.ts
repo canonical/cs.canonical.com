@@ -30,7 +30,7 @@ const config = {
   views: [VIEW_OWNED, VIEW_REVIEWED, VIEW_TREE, VIEW_TABLE] as TView[],
   tooltips: {
     ownerDef: "Owners request the page and must approve the page for it to go live.",
-    reviewerDef: "Reviewers can contribute to page content, but they can't approve the page to go live.",
+    reviewerDef: "Contributors can contribute to page content, but they can't approve the page to go live.",
     copyUpdates: [
       "Text changes to existing sections",
       "Adding a section that is a copy of an existing section, with different text",

@@ -22,7 +22,7 @@ function getStatusClass(status: string) {
   }
 }
 
-const JiraTasks = ({ tasks }: IJiraTasksProps): ReactNode => {
+const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
   return (
     <table>
       <thead>
@@ -51,6 +51,17 @@ const JiraTasks = ({ tasks }: IJiraTasksProps): ReactNode => {
             </td>
           </tr>
         ))}
+        {tasks.length === 0 && isWebPage && (
+          <tr>
+            <td colSpan={3}>
+              <p>
+                <strong className="u-text--muted">There are no related tickets for this page.</strong>
+                <br />
+                If this is incorrect, please contact the web team.
+              </p>
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

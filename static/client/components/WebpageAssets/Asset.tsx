@@ -21,34 +21,6 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
           src={isImgFile ? asset.url : "https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"}
         />
       </div>
-      <div className="asset-name u-truncate">
-        <b>{assetName}</b>
-      </div>
-      <div className="asset-type">
-        <p>
-          File type: <b>{asset.type}</b>
-        </p>
-      </div>
-      <div className="asset-cta">
-        <div className="p-cta-block">
-          <a
-            className="p-button--positive"
-            href={`${config.assetsManagerUrl}/details?file_path=${assetName}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            View
-          </a>
-          <a
-            className="p-button"
-            href={`${config.assetsManagerUrl}/update?file_path=${assetName}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Edit
-          </a>
-        </div>
-      </div>
     </>
   );
 };

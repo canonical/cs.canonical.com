@@ -1,30 +1,20 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
 
-import { Button } from "@canonical/react-components";
+import { Button, Chip } from "@canonical/react-components";
 
 import { type IWebpageProps } from "./Webpage.types";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
+import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
-import Owner from "@/components/Owner";
-import Products from "@/components/Products";
-import ReportBugPanel from "@/components/ReportBugPanel";
-import RequestTaskModal from "@/components/RequestTaskModal";
-import Reviewers from "@/components/Reviewers";
+import WebpageActions from "@/components/Webpage/WebpageActions";
 import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
-import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
-import { useStore } from "@/store";
+import { PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
-    ChangeRequestType.COPY_UPDATE,
-  );
-  const [user] = useStore((state) => [state.user]);
-
   const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
 
   const openCopyDoc = useCallback(() => {
@@ -43,128 +33,119 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
     }
   }, [page.children?.length, page.name, pageExtension, project]);
 
-  const createNewPage = useCallback(() => {
-    setChangeType(ChangeRequestType.NEW_WEBPAGE);
-    setModalOpen(true);
-  }, []);
-
-  const requestChanges = useCallback(() => {
-    setChangeType(ChangeRequestType.COPY_UPDATE);
-    setModalOpen(true);
-  }, []);
-
-  const requestRemoval = useCallback(() => {
-    setChangeType(ChangeRequestType.PAGE_REMOVAL);
-    setModalOpen(true);
-  }, []);
-
-  const handleModalClose = useCallback(() => {
-    setModalOpen(false);
-  }, []);
+  const openFigma = useCallback(() => {
+    window.open(page.figma_link);
+  }, [page]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
-  const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
-
-  // A page which was created from the content team's board on Jira
-  // must have a valid content_jira_id
-  const isContentBoardPage = useMemo(() => page.content_jira_id, [page]);
 
   return (
     <>
       <div className="l-webpage">
-        <div className="p-section--shallow">
-          <Breadcrumbs />
+        <div className="l-webpage__header grid-row--50-50">
+          <div className="grid-col">
+            <Breadcrumbs />
+          </div>
+          <div className="grid-col">
+            <WebpageActions page={page} />
+          </div>
         </div>
 
         {isNew ? (
           <h1>New page: {pageName}</h1>
         ) : (
-          <>
-            <h1 aria-labelledby="page-title" className="u-no-padding--top">
-              {page.title || "No title"}
-            </h1>
-          </>
+          <h4 aria-labelledby="page-title" className="u-no-padding--top">
+            {page.title || "No title"}
+            {page.status === PageStatus.TO_DELETE && (
+              <Chip
+                appearance="negative"
+                iconName="delete"
+                isInline
+                style={{ marginLeft: "8px" }}
+                value="Scheduled for removal"
+              />
+            )}
+          </h4>
         )}
-        <div>
-          {isNew ? (
-            <p>{`${project}${page.name}`}</p>
-          ) : (
-            <a href={`https://${project}${page.name}`} rel="noopener noreferrer" target="_blank">
-              {`${project}${page.name}`}&nbsp;
-              <i className="p-icon--external-link" />
-            </a>
-          )}
-        </div>
-        <div className="l-webpage--buttons">
-          <>
-            {isNew && !hasJiraTasks && !isContentBoardPage && (
-              <Button appearance="positive" onClick={createNewPage}>
-                Submit for publication...
-              </Button>
-            )}
-            {!isNew && (
-              <Button appearance="positive" onClick={requestChanges}>
-                Request changes
-              </Button>
-            )}
-            {page.copy_doc_link && (
-              <Button appearance="neutral" onClick={openCopyDoc}>
-                Edit copy doc&nbsp;
-                <i className="p-icon--external-link" />
-              </Button>
-            )}
-            {!isNew && (
-              <Button appearance="neutral" onClick={openGitHub}>
-                Inspect code on GitHub&nbsp;
-                <i className="p-icon--external-link" />
-              </Button>
-            )}
-            <ReportBugPanel buttonLabel="Report a bug" project={page.project?.name} />
-            <Button appearance="neutral" onClick={requestRemoval}>
-              Request removal
+
+        <section className="l-webpage__section">
+          <p className="p-text--small-caps">Tags</p>
+          <div className="l-webpage__tags">
+            {page.products.map((p) => {
+              return <Chip key={p.id} value={p.name} />;
+            })}
+            <Button appearance="base" onClick={toggleProductsPanel} small>
+              Edit tags
             </Button>
-          </>
-        </div>
-        <div className={isNew ? "grid-row" : "grid-row--50-50"}>
-          {!isNew && (
-            <div className="grid-col">
-              <p className="p-text--small-caps" id="page-descr">
-                Description
-              </p>
-              <p aria-labelledby="page-descr">{page.description || "-"}</p>
-            </div>
-          )}
+          </div>
+        </section>
+
+        <hr className="p-rule" />
+
+        <div className="grid-row--50-50">
           <div className="grid-col">
-            <Owner page={page} />
-            <div className="u-sv3" />
-            <Reviewers page={page} />
-            <div className="u-sv3" />
-            <Products page={page} />
-            {user.role === "admin" ? (
-              <Button appearance="link" onClick={toggleProductsPanel}>
-                Edit product tags
+            <div className="l-webpage__details-header">
+              <p className="p-text--small-caps">Page Details</p>
+              <Button appearance="base" hasIcon>
+                <i className="p-icon--edit" />
               </Button>
-            ) : (
-              <p>To edit product tags, please contact the Sites team.</p>
-            )}
+            </div>
+            <div className="l-webpage__details">
+              <div className="label u-text--muted">Published page</div>
+              <div className="value">
+                <a href={`https://${project}${page.url}`} rel="noopener noreferrer" target="_blank">
+                  View live page <i className="p-icon--external-link" />
+                </a>
+              </div>
+
+              <div className="label u-text--muted">
+                <IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />
+              </div>
+              <div className="value">{page.owner.name}</div>
+
+              <div className="label u-text--muted">
+                <IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Contributors" />
+              </div>
+              <div className="value">{page.reviewers.map((r) => r.name).join(", ")}</div>
+
+              <div className="label u-text--muted">Related links</div>
+              <div className="value">
+                <ul className="p-inline-list--middot">
+                  {page.copy_doc_link && (
+                    <li className="p-inline-list__item">
+                      <Button appearance="link" className="u-no-margin--bottom" onClick={openCopyDoc}>
+                        Copy doc <i className="p-icon--external-link" />
+                      </Button>
+                    </li>
+                  )}
+                  <li className="p-inline-list__item">
+                    <Button appearance="link" className="u-no-margin--bottom" onClick={openGitHub}>
+                      Github <i className="p-icon--external-link" />
+                    </Button>
+                  </li>
+                  {page.figma_link && (
+                    <li className="p-inline-list__item">
+                      <Button appearance="link" className="u-no-margin--bottom" onClick={openFigma}>
+                        Figma <i className="p-icon--external-link" />
+                      </Button>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
-        {page.jira_tasks?.length ? (
-          <div className="l-webpage--tasks grid-row">
-            <p className="p-text--small-caps">Related Jira Tickets</p>
-            <JiraTasks tasks={page.jira_tasks} />
-          </div>
-        ) : null}
+
+        <hr className="p-rule" />
+
         <WebpageAssets projectName={page.project?.name} url={page.url} />
-        {modalOpen && (
-          <RequestTaskModal
-            changeType={changeType}
-            onClose={handleModalClose}
-            onTypeChange={setChangeType}
-            webpage={page}
-          />
-        )}
+
+        <div className="l-webpage__tasks grid-row">
+          <p className="p-text--small-caps">Related Jira Tickets</p>
+          <JiraTasks isWebPage={true} tasks={page.jira_tasks} />
+        </div>
+
         <EditProductPanel />
       </div>
     </>
