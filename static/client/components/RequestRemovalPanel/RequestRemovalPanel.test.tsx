@@ -40,7 +40,20 @@ vi.mock("@/store", () => ({
   useStore: (selector: (state: any) => any) =>
     selector({
       user: mockUser,
-      selectedProject: { name: "test-project", templates: { id: 0, name: "/", children: [], status: "AVAILABLE", copy_doc_link: "", owner: mockUser, reviewers: [], jira_tasks: [], products: [] } },
+      selectedProject: {
+        name: "test-project",
+        templates: {
+          id: 0,
+          name: "/",
+          children: [],
+          status: "AVAILABLE",
+          copy_doc_link: "",
+          owner: mockUser,
+          reviewers: [],
+          jira_tasks: [],
+          products: [],
+        },
+      },
       setSelectedProject: vi.fn(),
     }),
 }));
@@ -64,9 +77,7 @@ const renderWithProviders = (children: ReactNode) => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        {children}
-      </MemoryRouter>
+      <MemoryRouter>{children}</MemoryRouter>
     </QueryClientProvider>,
   );
 };
@@ -84,9 +95,7 @@ describe("RequestRemovalPanel", () => {
   });
 
   it("shows redirect, due date, and description fields for non-NEW pages", () => {
-    renderWithProviders(
-      <RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />,
-    );
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />);
 
     expect(screen.getByText("Redirect to")).toBeInTheDocument();
     expect(screen.getByLabelText("Due date")).toBeInTheDocument();
@@ -94,27 +103,21 @@ describe("RequestRemovalPanel", () => {
   });
 
   it("does not render redirect field for NEW pages", () => {
-    renderWithProviders(
-      <RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW })} />,
-    );
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW })} />);
 
     expect(screen.queryByText("Redirect to")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Description")).toBeInTheDocument();
   });
 
   it("has submit button disabled when required fields are empty for non-NEW pages", () => {
-    renderWithProviders(
-      <RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />,
-    );
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />);
 
     const submitButton = screen.getByRole("button", { name: "Remove page" });
     expect(submitButton).toBeDisabled();
   });
 
   it("has submit button enabled for NEW pages without filling required fields", () => {
-    renderWithProviders(
-      <RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW })} />,
-    );
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW })} />);
 
     const submitButton = screen.getByRole("button", { name: "Remove page" });
     expect(submitButton).toBeEnabled();
@@ -123,9 +126,7 @@ describe("RequestRemovalPanel", () => {
   it("shows confirmation modal when submit button is clicked", async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(
-      <RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW, name: "/new-page" })} />,
-    );
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW, name: "/new-page" })} />);
 
     const submitButton = screen.getByRole("button", { name: "Remove page" });
     await user.click(submitButton);
