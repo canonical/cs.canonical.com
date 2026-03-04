@@ -28,7 +28,7 @@ vi.mock("@/services/api/services/pages", () => ({
 
 vi.mock("@/services/api/hooks/projects", () => ({
   useProjects: () => ({
-    data: [
+    unfilteredProjects: [
       {
         name: "canonical.com",
         templates: {

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import ReportBugPanel from "@/components/ReportBugPanel";
 import RequestFeaturePanel from "@/components/RequestFeaturePanel";
+import RequestRemovalDashboardPanel from "@/components/RequestRemovalDashboardPanel";
 
 const DashboardActions = (): ReactNode => {
   return (
@@ -19,6 +20,13 @@ const DashboardActions = (): ReactNode => {
           <h5>Request a feature</h5>
           <p>Request features like adding redirects or adding side cards</p>
           <RequestFeaturePanel />
+        </div>
+      </div>
+      <div className="grid-col-2">
+        <div className="p-card report-card">
+          <h5>Request page removal</h5>
+          <p>Request removal of a page from our website</p>
+          <RequestRemovalDashboardPanel />
         </div>
       </div>
     </div>
