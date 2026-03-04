@@ -139,7 +139,7 @@ class Jira:
         description: str,
         parent: str,
         reporter_jira_id: str,
-        due_date: datetime,
+        due_date: datetime = None,
         labels: list[str] = None,
         custom_fields: dict = {},
     ):
@@ -192,6 +192,9 @@ class Jira:
             },
             "update": {},
         }
+
+        if due_date is not None:
+            payload["fields"]["duedate"] = due_date
 
         if custom_fields:
             for key, value in custom_fields.items():

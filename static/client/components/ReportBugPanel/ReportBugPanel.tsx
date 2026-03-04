@@ -61,14 +61,21 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
       description,
       url,
       reporter_struct: user,
-      due_date: "",
     })
       .then(({ data }: IReportBugResponse) => {
         toggleReportBugPanel();
         setSuccessModalOpen(true);
         notify.success(
           "Please add attachments, such as schreenshots of the bug, to the Jira ticket.",
-          [{ label: "View on Jira", onClick: () => viewTicket(data.issue?.key) }],
+          [
+            {
+              label: "View on Jira",
+              onClick: () => {
+                viewTicket(data.issue?.key);
+                setSuccessModalOpen(false);
+              },
+            },
+          ],
           "You submitted a bug report",
         );
         setTicketId(data.issue?.key || "");

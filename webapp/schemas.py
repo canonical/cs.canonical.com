@@ -96,7 +96,6 @@ class GetWebpageAssetsModel(BaseModel):
 
 
 class ReportBugModel(BaseModel):
-    due_date: str = ""
     reporter_struct: object = {}
     description: str = ""
     summary: str = ""

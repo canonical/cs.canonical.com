@@ -1,5 +1,4 @@
 export interface IReportBugBody {
-  due_date: string;
   reporter_struct: object;
   description: string;
   summary: string;
