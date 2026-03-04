@@ -26,6 +26,58 @@ vi.mock("@/services/api/services/pages", () => ({
   },
 }));
 
+vi.mock("@/services/api/hooks/projects", () => ({
+  useProjects: () => ({
+    data: [
+      {
+        name: "canonical.com",
+        templates: {
+          id: 0,
+          name: "/",
+          children: [
+            {
+              id: 100,
+              name: "/cloud",
+              title: "Cloud Computing",
+              children: [],
+              status: "AVAILABLE",
+              copy_doc_link: "",
+              owner: {
+                id: 1,
+                name: "Test User",
+                email: "test@example.com",
+                jobTitle: "Engineer",
+                department: "Web",
+                team: "Web",
+                role: "user",
+              },
+              reviewers: [],
+              jira_tasks: [],
+              products: [],
+              project: { id: 1, name: "canonical.com", created_at: "", updated_at: "" },
+            },
+          ],
+          status: "AVAILABLE",
+          copy_doc_link: "",
+          owner: {
+            id: 1,
+            name: "Test User",
+            email: "test@example.com",
+            jobTitle: "Engineer",
+            department: "Web",
+            team: "Web",
+            role: "user",
+          },
+          reviewers: [],
+          jira_tasks: [],
+          products: [],
+        },
+      },
+    ],
+    isLoading: false,
+  }),
+}));
+
 const mockUser = {
   id: 1,
   name: "Test User",
@@ -91,29 +143,80 @@ describe("RequestRemovalPanel", () => {
   it("renders with the correct title", () => {
     renderWithProviders(<RequestRemovalPanel webpage={makeWebpage()} />);
 
-    expect(screen.getByText("Request page removal")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Remove page/ })).toBeInTheDocument();
   });
 
   it("shows redirect, due date, and description fields for non-NEW pages", () => {
     renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />);
 
-    expect(screen.getByText("Redirect to")).toBeInTheDocument();
-    expect(screen.getByLabelText("Due date")).toBeInTheDocument();
-    expect(screen.getByLabelText("Description")).toBeInTheDocument();
+    expect(screen.getByText("1. Assign a page to redirect to")).toBeInTheDocument();
+    expect(screen.getByLabelText("3. Request a preferred delivery date")).toBeInTheDocument();
+    expect(screen.getByLabelText("2. Add a description (optional)")).toBeInTheDocument();
   });
 
   it("does not render redirect field for NEW pages", () => {
     renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW })} />);
 
-    expect(screen.queryByText("Redirect to")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Description")).toBeInTheDocument();
+    expect(screen.queryByText("1. Assign a page to redirect to")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("2. Add a description (optional)")).toBeInTheDocument();
   });
 
-  it("has submit button disabled when required fields are empty for non-NEW pages", () => {
+  it("shows validation errors when required fields are empty for non-NEW pages", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />);
 
     const submitButton = screen.getByRole("button", { name: "Remove page" });
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toBeEnabled();
+
+    await user.click(submitButton);
+
+    const errorMessages = screen.getAllByText("This is a required field");
+    expect(errorMessages).toHaveLength(2);
+  });
+
+  it("clears redirect error when a redirect page is selected", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.AVAILABLE })} />);
+
+    const submitButton = screen.getByRole("button", { name: "Remove page" });
+    await user.click(submitButton);
+
+    expect(screen.getAllByText("This is a required field")).toHaveLength(2);
+
+    const searchInput = screen.getByPlaceholderText("Search by page title or URL");
+    await user.type(searchInput, "cloud");
+
+    const option = screen.getByText("canonical.com/cloud");
+    await user.click(option);
+
+    const errorMessages = screen.getAllByText("This is a required field");
+    expect(errorMessages).toHaveLength(1);
+  });
+
+  it("opens confirmation modal when all required fields are filled", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <RequestRemovalPanel
+        webpage={makeWebpage({
+          status: PageStatus.AVAILABLE,
+          name: "/test-page",
+          project: { id: 1, name: "canonical.com", created_at: "", updated_at: "" },
+        })}
+      />,
+    );
+
+    const searchInput = screen.getByPlaceholderText("Search by page title or URL");
+    await user.type(searchInput, "cloud");
+    const option = screen.getByText("canonical.com/cloud");
+    await user.click(option);
+
+    const dateInput = screen.getByLabelText("3. Request a preferred delivery date");
+    await user.type(dateInput, "2026-04-01");
+
+    const submitButton = screen.getByRole("button", { name: "Remove page" });
+    await user.click(submitButton);
+
+    expect(screen.getByText("Remove canonical.com/test-page?")).toBeInTheDocument();
   });
 
   it("has submit button enabled for NEW pages without filling required fields", () => {
@@ -126,13 +229,40 @@ describe("RequestRemovalPanel", () => {
   it("shows confirmation modal when submit button is clicked", async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage({ status: PageStatus.NEW, name: "/new-page" })} />);
+    renderWithProviders(
+      <RequestRemovalPanel
+        webpage={makeWebpage({
+          status: PageStatus.NEW,
+          name: "/new-page",
+          project: { id: 1, name: "canonical.com", created_at: "", updated_at: "" },
+        })}
+      />,
+    );
 
     const submitButton = screen.getByRole("button", { name: "Remove page" });
     await user.click(submitButton);
 
-    expect(screen.getByText("Confirm page removal")).toBeInTheDocument();
-    expect(screen.getByText(/Are you sure you want to request removal of/)).toBeInTheDocument();
-    expect(screen.getByText("/new-page")).toBeInTheDocument();
+    expect(screen.getByText("Remove canonical.com/new-page?")).toBeInTheDocument();
+    expect(screen.getByText(/Once it is removed from the website/)).toBeInTheDocument();
+  });
+
+  it("filters redirect options when searching by URL", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage()} />);
+
+    const searchInput = screen.getByPlaceholderText("Search by page title or URL");
+    await user.type(searchInput, "cloud");
+
+    expect(screen.getByText("canonical.com/cloud")).toBeInTheDocument();
+  });
+
+  it("filters redirect options when searching by title", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RequestRemovalPanel webpage={makeWebpage()} />);
+
+    const searchInput = screen.getByPlaceholderText("Search by page title or URL");
+    await user.type(searchInput, "Cloud Computing");
+
+    expect(screen.getByText("canonical.com/cloud")).toBeInTheDocument();
   });
 });

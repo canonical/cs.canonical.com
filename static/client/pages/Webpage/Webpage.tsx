@@ -66,8 +66,6 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
 
-  console.log("page >>>>>", page);
-
   return (
     <>
       <div className="l-webpage">

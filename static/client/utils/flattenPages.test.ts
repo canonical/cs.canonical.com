@@ -18,24 +18,27 @@ const makePage = (overrides: Partial<IPage>): IPage => ({
 });
 
 describe("flattenPages", () => {
-  it("returns an empty array for a page with no children", () => {
-    const root = makePage({ name: "/", children: [] });
-    expect(flattenPages(root)).toEqual([]);
+  it("includes the root page in results", () => {
+    const root = makePage({ id: 1, name: "/", children: [] });
+    const result = flattenPages(root);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("/");
   });
 
-  it("flattens a single level of children", () => {
+  it("includes root and flattens a single level of children", () => {
     const root = makePage({
+      id: 1,
       name: "/",
       children: [makePage({ name: "/about", title: "About" }), makePage({ name: "/contact", title: "Contact" })],
     });
     const result = flattenPages(root);
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe("/about");
-    expect(result[1].name).toBe("/contact");
+    expect(result).toHaveLength(3);
+    expect(result.map((p) => p.name)).toEqual(["/", "/about", "/contact"]);
   });
 
   it("flattens nested children recursively", () => {
     const root = makePage({
+      id: 1,
       name: "/",
       children: [
         makePage({
@@ -46,27 +49,52 @@ describe("flattenPages", () => {
       ],
     });
     const result = flattenPages(root);
-    expect(result).toHaveLength(2);
-    expect(result.map((p) => p.name)).toEqual(["/products", "/products/cloud"]);
+    expect(result).toHaveLength(3);
+    expect(result.map((p) => p.name)).toEqual(["/", "/products", "/products/cloud"]);
   });
 
   it("excludes pages with TO_DELETE status", () => {
     const root = makePage({
+      id: 1,
       name: "/",
       children: [makePage({ name: "/keep", status: "AVAILABLE" }), makePage({ name: "/remove", status: "TO_DELETE" })],
     });
     const result = flattenPages(root);
+    expect(result).toHaveLength(2);
+    expect(result.map((p) => p.name)).toEqual(["/", "/keep"]);
+  });
+
+  it("excludes root when it has TO_DELETE status", () => {
+    const root = makePage({
+      id: 1,
+      name: "/",
+      status: "TO_DELETE",
+      children: [makePage({ name: "/child", status: "AVAILABLE" })],
+    });
+    const result = flattenPages(root);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("/keep");
+    expect(result[0].name).toBe("/child");
   });
 
   it("excludes the current page by ID when excludeId is provided", () => {
     const root = makePage({
+      id: 1,
       name: "/",
       children: [makePage({ id: 10, name: "/self" }), makePage({ id: 20, name: "/other" })],
     });
     const result = flattenPages(root, 10);
+    expect(result).toHaveLength(2);
+    expect(result.map((p) => p.name)).toEqual(["/", "/other"]);
+  });
+
+  it("excludes root when its id matches excludeId", () => {
+    const root = makePage({
+      id: 5,
+      name: "/",
+      children: [makePage({ id: 10, name: "/child" })],
+    });
+    const result = flattenPages(root, 5);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("/other");
+    expect(result[0].name).toBe("/child");
   });
 });

@@ -14,11 +14,15 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   indexKey = "id",
   labelKey = "name",
   loading = false,
+  searchKeys,
+  renderOption,
+  error,
 }: ICustomSearchAndFilterProps<T>): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const effectiveSearchKeys = searchKeys ?? [labelKey];
 
   useEffect(() => {
     setDropdownHidden(!inputRef.current?.value);
@@ -52,13 +56,16 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.target.value.length < 3) return;
     if (onChange) return onChange(event);
+    const term = event.target.value.toLowerCase();
     setFilteredOptions(
-      options.filter((option) => option[labelKey].toLowerCase().includes(event.target.value.toLowerCase())),
+      options.filter((option) =>
+        effectiveSearchKeys.some((key) => option[key]?.toLowerCase().includes(term)),
+      ),
     );
   }
 
   return (
-    <div className="p-search-and-filter">
+    <div className={`p-search-and-filter${error ? " p-form-validation is-error" : ""}`}>
       <p className="p-text--small-caps" id="owner-input">
         {label}
       </p>
@@ -94,6 +101,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
           />
         </form>
       </div>
+      {error && <p className="p-form-validation__message">{error}</p>}
       <div aria-hidden={dropdownHidden} className="p-search-and-filter__panel">
         <div className="p-filter-panel-section">
           <div aria-expanded="false" className="p-filter-panel-section__chips">
@@ -105,7 +113,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
                 onClick={handleSelect(option)}
                 onMouseDown={handleOptionMouseDown}
               >
-                <span className="p-chip__value">{option[labelKey]}</span>
+                {renderOption ? renderOption(option) : <span className="p-chip__value">{option[labelKey]}</span>}
               </button>
             ))}
           </div>

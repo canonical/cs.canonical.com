@@ -18,14 +18,16 @@ import type { IRequestRemovalPanelProps } from "./RequestRemovalPanel.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import { usePages } from "@/services/api/hooks/pages";
+import { useProjects } from "@/services/api/hooks/projects";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
-import type { IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
 import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
 import { flattenPages } from "@/utils/flattenPages";
+
+type IUrlOption = { id: number; name: string; title: string };
 
 const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const notify = useToastNotification();
@@ -37,9 +39,11 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const selectedProject = useStore((state) => state.selectedProject);
   const setSelectedProject = useStore((state) => state.setSelectedProject);
 
+  const { data: projects } = useProjects();
+
   const { refetch } = usePages(true);
 
-  const [redirectPage, setRedirectPage] = useState<IPage | null>(null);
+  const [redirectPage, setRedirectPage] = useState<IUrlOption | null>(null);
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,16 +52,33 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const isNewPage = webpage.status === PageStatus.NEW;
 
   const pages = useMemo(() => {
-    if (!selectedProject?.templates) return [];
-    return flattenPages(selectedProject.templates, webpage.id);
-  }, [selectedProject?.templates, webpage.id]);
-  console.log("🚀 ~ RequestRemovalPanel ~ pages:", pages);
+    if (!projects?.length) return [];
+    return projects.flatMap((project) => {
+      if (!project?.templates) return [];
+      return flattenPages(project.templates, webpage.id);
+    });
+  }, [projects, webpage.id]);
 
-  const submitButtonEnabled = useMemo(() => {
-    if (loading) return false;
-    if (isNewPage) return true;
-    return !!dueDate && !!redirectPage;
-  }, [dueDate, isNewPage, loading, redirectPage]);
+  const [errors, setErrors] = useState<{ redirectPage?: string; dueDate?: string }>({});
+
+  const handleSubmitClick = useCallback(() => {
+    if (isNewPage) {
+      setShowConfirmation(true);
+      return;
+    }
+
+    const newErrors: { redirectPage?: string; dueDate?: string } = {};
+    if (!redirectPage) newErrors.redirectPage = "This is a required field";
+    if (!dueDate) newErrors.dueDate = "This is a required field";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setShowConfirmation(true);
+  }, [dueDate, isNewPage, redirectPage]);
 
   const handleRemoveRedirectPage = useCallback(
     () => () => {
@@ -66,8 +87,9 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
     [],
   );
 
-  const handleSelectRedirectPage = useCallback((option: IPage) => {
+  const handleSelectRedirectPage = useCallback((option: IUrlOption) => {
     setRedirectPage(option);
+    setErrors((prev) => ({ ...prev, redirectPage: undefined }));
   }, []);
 
   const onSubmitError = useCallback(
@@ -139,6 +161,21 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   ]);
 
   const fullPageUrl = webpage.project?.name ? `${webpage.project.name}${webpage.name}` : "";
+  const urlOptions: IUrlOption[] = pages.map((page) => ({
+    id: page.id as number,
+    name: page.project?.name ? page.project.name + page.name : page.name,
+    title: page.title || "",
+  }));
+
+  const renderRedirectOption = useCallback(
+    (option: IUrlOption) => (
+      <span className="p-chip__value">
+        <span>{option.name}</span>
+        {option.title && <span className="u-text--muted p-text--small"> — {option.title}</span>}
+      </span>
+    ),
+    [],
+  );
 
   return (
     <SidePanel isOpen={requestRemovalPanelVisible} overlay>
@@ -172,33 +209,38 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
           <strong>{fullPageUrl}</strong> will be permanently deleted from the website and the Content System.
         </p>
         {!isNewPage && (
-          <div className="u-sv1">
-            <CustomSearchAndFilter<IPage>
+          <div className="u-sv3">
+            <CustomSearchAndFilter<IUrlOption>
+              error={errors.redirectPage}
               indexKey="id"
               label="1. Assign a page to redirect to"
               labelKey="name"
               onRemove={handleRemoveRedirectPage}
               onSelect={handleSelectRedirectPage}
-              options={pages}
+              options={urlOptions}
               placeholder="Search by page title or URL"
+              renderOption={renderRedirectOption}
+              searchKeys={["name", "title"]}
               selectedOptions={redirectPage ? [redirectPage] : []}
             />
           </div>
         )}
         <Textarea
-          className="u-sv1"
           label="2. Add a description (optional)"
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Additional details or context"
-          rows={5}
+          rows={7}
         />
         {(!isNewPage || window.__E2E_TESTING__) && (
           <Input
             className="u-sv1"
+            error={errors.dueDate}
             label="3. Request a preferred delivery date"
             min={DatesServices.getNowStr()}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
+            onChange={(e) => {
+              setDueDate(e.target.value);
+              setErrors((prev) => ({ ...prev, dueDate: undefined }));
+            }}
             type="date"
           />
         )}
@@ -211,9 +253,9 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
           <Button onClick={toggleRequestRemovalPanel}>Cancel</Button>
           <ActionButton
             appearance="negative"
-            disabled={!submitButtonEnabled}
+            disabled={loading}
             loading={loading}
-            onClick={() => setShowConfirmation(true)}
+            onClick={handleSubmitClick}
           >
             Remove page
           </ActionButton>
