@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import type { IRequestRemovalPanelProps } from "./RequestRemovalPanel.types";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import config from "@/config";
 import { usePages } from "@/services/api/hooks/pages";
 import { useProjects } from "@/services/api/hooks/projects";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
@@ -28,6 +29,10 @@ import { usePanelsStore } from "@/store/app";
 import { flattenPages } from "@/utils/flattenPages";
 
 type IUrlOption = { id: number; name: string; title: string };
+
+function viewTicket(ticketId: string) {
+  window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
+}
 
 const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const notify = useToastNotification();
@@ -116,9 +121,23 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
         (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.PAGE_REMOVAL,
       ) as string,
     })
-      .then(() => {
+      .then((response) => {
+        console.log("🚀 ~ RequestRemovalPanel ~ response:", response);
         toggleRequestRemovalPanel();
-        notify.success("The page removal request has been submitted successfully.");
+        notify.success(
+          "The Content Team will review your request. Once removed, your page will not appear in the Content System.",
+          [
+            {
+              label: "View on Jira",
+              onClick: () => viewTicket(response.jira_task_id),
+            },
+            {
+              label: "View your requests",
+              onClick: () => navigate("/app/requests"),
+            },
+          ],
+          "You submitted a request to remove a page",
+        );
 
         const afterRefetch = () => {
           if (webpage.status === PageStatus.NEW) {
@@ -251,12 +270,7 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
       <SidePanel.Sticky position="bottom">
         <SidePanel.Footer className="u-align--right">
           <Button onClick={toggleRequestRemovalPanel}>Cancel</Button>
-          <ActionButton
-            appearance="negative"
-            disabled={loading}
-            loading={loading}
-            onClick={handleSubmitClick}
-          >
+          <ActionButton appearance="negative" disabled={loading} loading={loading} onClick={handleSubmitClick}>
             Remove page
           </ActionButton>
         </SidePanel.Footer>

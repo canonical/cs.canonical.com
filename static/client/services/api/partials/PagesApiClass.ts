@@ -39,7 +39,7 @@ export class PagesApiClass extends BasicApiClass {
     return this.callApi(ENDPOINTS.requestChanges, REST_TYPES.POST, body);
   }
 
-  public requestRemoval(body: IRequestRemoval): Promise<void> {
+  public requestRemoval(body: IRequestRemoval): Promise<{ jira_task_id: string }> {
     return this.callApi(ENDPOINTS.requestRemoval, REST_TYPES.POST, body);
   }
 
