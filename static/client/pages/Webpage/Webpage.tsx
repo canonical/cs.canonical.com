@@ -26,10 +26,8 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   );
   const [user] = useStore((state) => [state.user]);
 
-  const [toggleProductsPanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
-    state.toggleProductsPanel,
-    state.toggleRequestRemovalPanel,
-  ]);
+  const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
+  const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
 
   const openCopyDoc = useCallback(() => {
     window.open(page.copy_doc_link);
@@ -67,6 +65,8 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
+
+  console.log("page >>>>>", page);
 
   return (
     <>
