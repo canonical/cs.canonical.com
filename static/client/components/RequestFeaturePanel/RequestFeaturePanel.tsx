@@ -7,6 +7,7 @@ import {
   Input,
   SidePanel,
   Textarea,
+  Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
@@ -58,9 +59,9 @@ const RequestFeaturePanel = () => {
       .then(({ data }: IRequestFeatureResponse) => {
         toggleRequestFeaturePanel();
         notify.success(
-          "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
-          [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
-          "You have successfully submitted a feature request",
+          "The Sites Team will review your request. You can follow our progress on Jira or in your requests.",
+          [{ label: "View on Jira", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
+          "You submitted a feature request",
         );
       })
       .catch(onSubmitError)
@@ -70,46 +71,65 @@ const RequestFeaturePanel = () => {
   return (
     <>
       <Button onClick={toggleRequestFeaturePanel}>Request feature</Button>
-      <SidePanel isOpen={requestFeaturePanelVisible} pinned>
+      <SidePanel isOpen={requestFeaturePanelVisible}>
         <SidePanel.Sticky>
-          <div className="p-section--shallow">
-            <SidePanel.Header>
-              <SidePanel.HeaderTitle>Request a feature</SidePanel.HeaderTitle>
-              <SidePanel.HeaderControls>
-                <Button
-                  appearance="base"
-                  aria-label="Close"
-                  className="u-no-margin--bottom"
-                  hasIcon
-                  onClick={toggleRequestFeaturePanel}
-                >
-                  <Icon name="close" />
-                </Button>
-              </SidePanel.HeaderControls>
-            </SidePanel.Header>
-          </div>
+          <SidePanel.Header>
+            <SidePanel.HeaderTitle>
+              Request feature{" "}
+              <Tooltip
+                message="Request features such as adding redirects, or adding side cards"
+                position="btm-center"
+                zIndex={999}
+              >
+                <Icon name="information" />
+              </Tooltip>
+            </SidePanel.HeaderTitle>
+            <SidePanel.HeaderControls>
+              <Button
+                appearance="base"
+                aria-label="Close"
+                className="u-no-margin--bottom"
+                hasIcon
+                onClick={toggleRequestFeaturePanel}
+              >
+                <Icon name="close" />
+              </Button>
+            </SidePanel.HeaderControls>
+          </SidePanel.Header>
         </SidePanel.Sticky>
         <SidePanel.Content>
-          <Input label="Summary" onChange={(e) => setSummary(e.target.value)} required type="text" />
+          <p>
+            <strong>Add information about your feature and submit</strong>
+          </p>
+          <Input label="1. Name the feature" onChange={(e) => setSummary(e.target.value)} type="text" value={summary} />
           <Textarea
-            label="Description"
+            label="2. Add a detailed description"
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Please provide a detailed description of your request"
-            required
+            placeholder="Add details and context, such as the stakeholders and intended users"
             rows={5}
+            value={description}
           />
           <Textarea
-            label="Objective"
+            label="3. Explain your objective"
             onChange={(e) => setObjective(e.target.value)}
-            placeholder="Briefly explain the value of this request. Higher-impact items will be prioritized."
-            required
+            placeholder="Add supporting information, such as the added value from this feature"
             rows={5}
+            value={objective}
           />
-          <Input label="Due date" onChange={(e) => setDueDate(e.target.value)} required type="date" />
+          <Input
+            label="4. Request a preferred delivery date"
+            onChange={(e) => setDueDate(e.target.value)}
+            type="date"
+            value={dueDate}
+          />
+          <p className="u-text--muted p-text--small">
+            The sites team will review your request. If accepted, we will estimate a due date. Otherwise we will provide
+            a reason for rejecting in the Jira comments.
+          </p>
         </SidePanel.Content>
-        <SidePanel.Sticky position="bottom">
+        <SidePanel.Sticky>
           <SidePanel.Footer className="u-align--right">
-            <Button>Cancel</Button>
+            <Button onClick={toggleRequestFeaturePanel}>Cancel</Button>
             <ActionButton appearance="positive" disabled={!submitButtonEnabled} loading={loading} onClick={onSubmit}>
               Submit
             </ActionButton>

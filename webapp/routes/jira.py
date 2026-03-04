@@ -480,7 +480,7 @@ def report_bug(body: ReportBugModel):
             reporter_jira_id=reporter_jira_id,
             issue_type=jira.BUG,
             description=body.description,
-            summary=f"{body.website} - {body.summary}",
+            summary=f"{body.url} - {body.summary}",
             parent=jira.sites_maintenance_epic,
             labels=current_app.config["SITES_MAINTENANCE_LABELS"].split(","),
         )

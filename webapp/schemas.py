@@ -100,7 +100,7 @@ class ReportBugModel(BaseModel):
     reporter_struct: object = {}
     description: str = ""
     summary: str = ""
-    website: str = ""
+    url: str = ""
 
 
 class RequestFeatureModel(BaseModel):
