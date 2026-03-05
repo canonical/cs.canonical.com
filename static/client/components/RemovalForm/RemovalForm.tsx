@@ -26,6 +26,7 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
   const notify = useToastNotification();
   const navigate = useNavigate();
   const reporter = useStore((state) => state.user);
+  console.log("🚀 ~ RemovalForm ~ reporter:", reporter);
 
   const { unfilteredProjects: projects } = useProjects();
 
@@ -152,7 +153,7 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
       </p>
       {!isNewPage && (
         <div className="u-sv3">
-          <p>1. Assign a page to redirect to</p>
+          <p className="u-no-margin--bottom u-sv1">1. Assign a page to redirect to</p>
           <CustomSearchAndFilter<IUrlOption>
             error={errors.redirectPage}
             indexKey="id"

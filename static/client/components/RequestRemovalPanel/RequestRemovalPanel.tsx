@@ -79,7 +79,7 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
         <SidePanel.Footer className="u-align--right">
           <Button onClick={toggleRequestRemovalPanel}>Cancel</Button>
           <ActionButton
-            appearance="negative"
+            appearance="positive"
             disabled={formActions?.loading}
             loading={formActions?.loading}
             onClick={formActions?.onSubmit}

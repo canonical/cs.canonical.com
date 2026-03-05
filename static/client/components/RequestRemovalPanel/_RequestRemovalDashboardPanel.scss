@@ -1,5 +1,9 @@
 .side-panel {
   .p-panel__content {
-    overflow: auto !important;
+    overflow: visible;
+  }
+
+  .p-search-and-filter {
+    margin-bottom: 0.75rem;
   }
 }

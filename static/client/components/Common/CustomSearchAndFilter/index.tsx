@@ -3,6 +3,8 @@ import { type MouseEvent, useCallback, useEffect, useRef, useState, type ReactNo
 
 import type { ICustomSearchAndFilterProps } from "./types";
 
+import "./CustomSearchAndFilter.scss";
+
 const CustomSearchAndFilter = <T extends Record<string, any>>({
   label,
   options = [],
@@ -58,67 +60,68 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
     if (onChange) return onChange(event);
     const term = event.target.value.toLowerCase();
     setFilteredOptions(
-      options.filter((option) =>
-        effectiveSearchKeys.some((key) => option[key]?.toLowerCase().includes(term)),
-      ),
+      options.filter((option) => effectiveSearchKeys.some((key) => option[key]?.toLowerCase().includes(term))),
     );
   }
 
   return (
-    <div className={`p-search-and-filter${error ? " p-form-validation is-error" : ""}`}>
-      <p className="p-text--small-caps" id="owner-input">
-        {label}
-      </p>
-      <div
-        aria-expanded={containerExpanded}
-        className="p-search-and-filter__search-container"
-        data-active="true"
-        data-empty="true"
-      >
-        {selectedOptions?.map(
-          (option) =>
-            option && (
-              <span className="p-chip" key={option[indexKey]}>
-                <span className="p-chip__value">{option[labelKey]}</span>
-                <button className="p-chip__dismiss" onClick={onRemove(option)}>
-                  Dismiss
+    <div className={error ? "p-form-validation is-error" : ""}>
+      <div className="p-search-and-filter">
+        <p className="p-text--small-caps" id="owner-input">
+          {label}
+        </p>
+        <div
+          aria-expanded={containerExpanded}
+          className="p-search-and-filter__search-container"
+          data-active="true"
+          data-empty="true"
+        >
+          {selectedOptions?.map(
+            (option) =>
+              option && (
+                <span className="p-chip" key={option[indexKey]}>
+                  <span className="p-chip__value">{option[labelKey]}</span>
+                  <button className="p-chip__dismiss" onClick={onRemove(option)}>
+                    Dismiss
+                  </button>
+                </span>
+              ),
+          )}
+          <form className="p-search-and-filter__box" data-overflowing="false">
+            <input
+              aria-labelledby="owner-input"
+              autoComplete="off"
+              className="p-search-and-filter__input p-form-validation__input"
+              id="search"
+              name="search"
+              onBlur={handleInputBlur}
+              onChange={onInputChange}
+              placeholder={placeholder}
+              ref={inputRef}
+              type="search"
+            />
+          </form>
+        </div>
+
+        <div aria-hidden={dropdownHidden} className="p-search-and-filter__panel">
+          <div className="p-filter-panel-section">
+            <div aria-expanded="false" className="p-filter-panel-section__chips">
+              {loading && <p>Loading...</p>}
+              {filteredOptions.map((option) => (
+                <button
+                  className="p-chip"
+                  key={option[indexKey]}
+                  onClick={handleSelect(option)}
+                  onMouseDown={handleOptionMouseDown}
+                >
+                  {renderOption ? renderOption(option) : <span className="p-chip__value">{option[labelKey]}</span>}
                 </button>
-              </span>
-            ),
-        )}
-        <form className="p-search-and-filter__box" data-overflowing="false">
-          <input
-            aria-labelledby="owner-input"
-            autoComplete="off"
-            className="p-search-and-filter__input"
-            id="search"
-            name="search"
-            onBlur={handleInputBlur}
-            onChange={onInputChange}
-            placeholder={placeholder}
-            ref={inputRef}
-            type="search"
-          />
-        </form>
-      </div>
-      {error && <p className="p-form-validation__message">{error}</p>}
-      <div aria-hidden={dropdownHidden} className="p-search-and-filter__panel">
-        <div className="p-filter-panel-section">
-          <div aria-expanded="false" className="p-filter-panel-section__chips">
-            {loading && <p>Loading...</p>}
-            {filteredOptions.map((option) => (
-              <button
-                className="p-chip"
-                key={option[indexKey]}
-                onClick={handleSelect(option)}
-                onMouseDown={handleOptionMouseDown}
-              >
-                {renderOption ? renderOption(option) : <span className="p-chip__value">{option[labelKey]}</span>}
-              </button>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
+      {error && <p className="p-form-validation__message u-no-margin--top">{error}</p>}
     </div>
   );
 };

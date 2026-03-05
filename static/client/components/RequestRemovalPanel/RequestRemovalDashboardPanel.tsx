@@ -112,7 +112,7 @@ const RequestRemovalDashboardPanel = () => {
             <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={confirmedPage.page} />
           ) : (
             <>
-              <p className="p-heading--5">Choose the page you want to remove</p>
+              <p className="p-heading--5 u-no-margin--bottom u-sv1">Choose the page you want to remove</p>
               <CustomSearchAndFilter<IPageOption>
                 indexKey="id"
                 label=""
