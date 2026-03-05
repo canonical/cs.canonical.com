@@ -27,7 +27,7 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
   const navigate = useNavigate();
   const reporter = useStore((state) => state.user);
 
-  const { data: projects } = useProjects();
+  const { unfilteredProjects: projects } = useProjects();
 
   const [redirectPage, setRedirectPage] = useState<IUrlOption | null>(null);
   const [dueDate, setDueDate] = useState("");
@@ -107,12 +107,13 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
       ) as string,
     })
       .then((response) => {
+        console.log("🚀 ~ RemovalForm ~ response:", response);
         notify.success(
           "The Content Team will review your request. Once removed, your page will not appear in the Content System.",
           [
             {
               label: "View on Jira",
-              onClick: () => viewTicket(response.jira_task_id),
+              onClick: () => viewTicket(response.data.jira_task_id),
             },
             {
               label: "View your requests",

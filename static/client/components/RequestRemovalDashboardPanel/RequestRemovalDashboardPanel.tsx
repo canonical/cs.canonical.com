@@ -129,7 +129,7 @@ const RequestRemovalDashboardPanel = () => {
             <Button onClick={handleClose}>Cancel</Button>
             {isStep2 ? (
               <ActionButton
-                appearance="negative"
+                appearance="positive"
                 disabled={formActions?.loading}
                 loading={formActions?.loading}
                 onClick={formActions?.onSubmit}

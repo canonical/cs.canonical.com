@@ -23,29 +23,25 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
 
   const [formActions, setFormActions] = useState<{ onSubmit: () => void; loading: boolean } | null>(null);
 
-  const handleSuccess = useCallback(() => {
+  const handleSuccess = useCallback(async () => {
     toggleRequestRemovalPanel();
 
-    const afterRefetch = () => {
-      if (webpage.status === PageStatus.NEW) {
-        navigate("/app", { replace: true });
-      } else {
-        window.location.reload();
-      }
-    };
-
     if (refetch) {
-      refetch().then((data) => {
+      try {
+        const data = await refetch();
         if (data?.length) {
           const project = data.find((p) => p.data?.name === selectedProject?.name);
           if (project && project.data) {
             setSelectedProject(project.data);
           }
         }
-        afterRefetch();
-      });
-    } else {
-      afterRefetch();
+      } catch {
+        // silent fail — refetch error shouldn't block navigation
+      }
+    }
+
+    if (webpage.status === PageStatus.NEW) {
+      navigate("/app", { replace: true });
     }
   }, [navigate, refetch, selectedProject?.name, setSelectedProject, toggleRequestRemovalPanel, webpage.status]);
 
