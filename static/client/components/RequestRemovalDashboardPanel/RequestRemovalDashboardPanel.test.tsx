@@ -156,7 +156,7 @@ describe("RequestRemovalDashboardPanel", () => {
     expect(screen.getByLabelText("2. Add a description (optional)")).toBeInTheDocument();
   });
 
-  it("shows Back button in step 2", async () => {
+  it("shows Cancel and Remove page buttons in step 2", async () => {
     const user = userEvent.setup();
     renderWithProviders(<RequestRemovalDashboardPanel />);
 
@@ -164,10 +164,11 @@ describe("RequestRemovalDashboardPanel", () => {
     await user.type(searchInput, "cloud");
     await user.click(screen.getByText("canonical.com/cloud"));
 
-    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove page" })).toBeInTheDocument();
   });
 
-  it("goes back to step 1 when Back button is clicked", async () => {
+  it("closes the panel when Cancel is clicked in step 2", async () => {
     const user = userEvent.setup();
     renderWithProviders(<RequestRemovalDashboardPanel />);
 
@@ -178,10 +179,10 @@ describe("RequestRemovalDashboardPanel", () => {
     // Now in step 2
     expect(screen.getByText(/will be permanently deleted/)).toBeInTheDocument();
 
-    // Click Back
-    await user.click(screen.getByRole("button", { name: "Back" }));
+    // Click Cancel
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    // Back to step 1
-    expect(screen.getByText("Choose the page you want to remove")).toBeInTheDocument();
+    // Panel should close (store state updated)
+    expect(usePanelsStore.getState().requestRemovalDashboardPanelVisible).toBe(false);
   });
 });

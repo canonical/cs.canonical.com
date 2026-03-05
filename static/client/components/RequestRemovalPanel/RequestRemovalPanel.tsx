@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
-import { Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
+import { ActionButton, Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestRemovalPanelProps } from "./RequestRemovalPanel.types";
@@ -20,6 +20,8 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const setSelectedProject = useStore((state) => state.setSelectedProject);
 
   const { refetch } = usePages(true);
+
+  const [formActions, setFormActions] = useState<{ onSubmit: () => void; loading: boolean } | null>(null);
 
   const handleSuccess = useCallback(() => {
     toggleRequestRemovalPanel();
@@ -75,11 +77,19 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
         </SidePanel.Header>
       </SidePanel.Sticky>
       <SidePanel.Content>
-        <RemovalForm onSuccess={handleSuccess} webpage={webpage} />
+        <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={webpage} />
       </SidePanel.Content>
       <SidePanel.Sticky position="bottom">
         <SidePanel.Footer className="u-align--right">
           <Button onClick={toggleRequestRemovalPanel}>Cancel</Button>
+          <ActionButton
+            appearance="negative"
+            disabled={formActions?.loading}
+            loading={formActions?.loading}
+            onClick={formActions?.onSubmit}
+          >
+            Remove page
+          </ActionButton>
         </SidePanel.Footer>
       </SidePanel.Sticky>
     </SidePanel>

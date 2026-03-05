@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
+import { ActionButton, Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
 import RemovalForm from "@/components/RemovalForm";
@@ -20,6 +20,7 @@ const RequestRemovalDashboardPanel = () => {
   const { unfilteredProjects: projects } = useProjects();
 
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
+  const [formActions, setFormActions] = useState<{ onSubmit: () => void; loading: boolean } | null>(null);
 
   const allPages = useMemo(() => {
     if (!projects?.length) return [];
@@ -54,11 +55,8 @@ const RequestRemovalDashboardPanel = () => {
   const handleClose = useCallback(() => {
     togglePanel();
     setSelectedPage(null);
+    setFormActions(null);
   }, [togglePanel]);
-
-  const handleBack = useCallback(() => {
-    setSelectedPage(null);
-  }, []);
 
   const handleSuccess = useCallback(() => {
     handleClose();
@@ -107,7 +105,7 @@ const RequestRemovalDashboardPanel = () => {
         </SidePanel.Sticky>
         <SidePanel.Content>
           {isStep2 ? (
-            <RemovalForm onBack={handleBack} onSuccess={handleSuccess} webpage={selectedPage.page} />
+            <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={selectedPage.page} />
           ) : (
             <>
               <p>Choose the page you want to remove</p>
@@ -126,16 +124,25 @@ const RequestRemovalDashboardPanel = () => {
             </>
           )}
         </SidePanel.Content>
-        {!isStep2 && (
-          <SidePanel.Sticky position="bottom">
-            <SidePanel.Footer className="u-align--right">
-              <Button onClick={handleClose}>Cancel</Button>
+        <SidePanel.Sticky position="bottom">
+          <SidePanel.Footer className="u-align--right">
+            <Button onClick={handleClose}>Cancel</Button>
+            {isStep2 ? (
+              <ActionButton
+                appearance="negative"
+                disabled={formActions?.loading}
+                loading={formActions?.loading}
+                onClick={formActions?.onSubmit}
+              >
+                Remove page
+              </ActionButton>
+            ) : (
               <Button appearance="positive" disabled={!selectedPage} onClick={() => {}}>
                 Next
               </Button>
-            </SidePanel.Footer>
-          </SidePanel.Sticky>
-        )}
+            )}
+          </SidePanel.Footer>
+        </SidePanel.Sticky>
       </SidePanel>
     </>
   );

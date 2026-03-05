@@ -1,13 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  ActionButton,
-  Button,
-  ConfirmationModal,
-  Input,
-  Textarea,
-  useToastNotification,
-} from "@canonical/react-components";
+import { ConfirmationModal, Input, Textarea, useToastNotification } from "@canonical/react-components";
 import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -29,12 +22,12 @@ function viewTicket(ticketId: string) {
   window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
 }
 
-const RemovalForm = ({ webpage, onSuccess, onBack }: IRemovalFormProps) => {
+const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) => {
   const notify = useToastNotification();
   const navigate = useNavigate();
   const reporter = useStore((state) => state.user);
 
-  const { unfilteredProjects: projects } = useProjects();
+  const { data: projects } = useProjects();
 
   const [redirectPage, setRedirectPage] = useState<IUrlOption | null>(null);
   const [dueDate, setDueDate] = useState("");
@@ -72,6 +65,10 @@ const RemovalForm = ({ webpage, onSuccess, onBack }: IRemovalFormProps) => {
     setErrors({});
     setShowConfirmation(true);
   }, [dueDate, isNewPage, redirectPage]);
+
+  useEffect(() => {
+    onActionsReady({ onSubmit: handleSubmitClick, loading });
+  }, [handleSubmitClick, loading, onActionsReady]);
 
   const handleRemoveRedirectPage = useCallback(
     () => () => {
@@ -191,12 +188,6 @@ const RemovalForm = ({ webpage, onSuccess, onBack }: IRemovalFormProps) => {
       <p className="u-text--muted p-text--small">
         Page removals can be completed within 3 business days of your request
       </p>
-      <div className="u-align--right">
-        {onBack && <Button onClick={onBack}>Back</Button>}
-        <ActionButton appearance="negative" disabled={loading} loading={loading} onClick={handleSubmitClick}>
-          Remove page
-        </ActionButton>
-      </div>
       {showConfirmation && (
         <ConfirmationModal
           close={() => setShowConfirmation(false)}
