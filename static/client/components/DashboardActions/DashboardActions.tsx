@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import ReportBugPanel from "@/components/ReportBugPanel";
 import RequestFeaturePanel from "@/components/RequestFeaturePanel";
-import RequestRemovalDashboardPanel from "@/components/RequestRemovalDashboardPanel";
+import { RequestRemovalDashboardPanel } from "@/components/RequestRemovalPanel";
 
 const DashboardActions = (): ReactNode => {
   return (

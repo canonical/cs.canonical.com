@@ -152,10 +152,11 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
       </p>
       {!isNewPage && (
         <div className="u-sv3">
+          <p>1. Assign a page to redirect to</p>
           <CustomSearchAndFilter<IUrlOption>
             error={errors.redirectPage}
             indexKey="id"
-            label="1. Assign a page to redirect to"
+            label=""
             labelKey="name"
             onRemove={handleRemoveRedirectPage}
             onSelect={handleSelectRedirectPage}

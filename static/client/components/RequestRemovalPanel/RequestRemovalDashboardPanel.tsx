@@ -9,6 +9,8 @@ import type { IPage } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
 import { flattenPages } from "@/utils/flattenPages";
 
+import "./_RequestRemovalDashboardPanel.scss";
+
 type IPageOption = { id: number; name: string; title: string; page: IPage };
 
 const RequestRemovalDashboardPanel = () => {
@@ -110,7 +112,7 @@ const RequestRemovalDashboardPanel = () => {
             <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={confirmedPage.page} />
           ) : (
             <>
-              <p>Choose the page you want to remove</p>
+              <p className="p-heading--5">Choose the page you want to remove</p>
               <CustomSearchAndFilter<IPageOption>
                 indexKey="id"
                 label=""
