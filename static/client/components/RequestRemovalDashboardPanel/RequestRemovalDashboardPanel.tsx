@@ -21,6 +21,7 @@ const RequestRemovalDashboardPanel = () => {
 
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
   const [formActions, setFormActions] = useState<{ onSubmit: () => void; loading: boolean } | null>(null);
+  const [confirmedPage, setConfirmedPage] = useState<IPageOption | null>(null);
 
   const allPages = useMemo(() => {
     if (!projects?.length) return [];
@@ -55,6 +56,7 @@ const RequestRemovalDashboardPanel = () => {
   const handleClose = useCallback(() => {
     togglePanel();
     setSelectedPage(null);
+    setConfirmedPage(null);
     setFormActions(null);
   }, [togglePanel]);
 
@@ -72,7 +74,7 @@ const RequestRemovalDashboardPanel = () => {
     [],
   );
 
-  const isStep2 = selectedPage !== null;
+  const isStep2 = confirmedPage !== null;
 
   return (
     <>
@@ -105,7 +107,7 @@ const RequestRemovalDashboardPanel = () => {
         </SidePanel.Sticky>
         <SidePanel.Content>
           {isStep2 ? (
-            <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={selectedPage.page} />
+            <RemovalForm onActionsReady={setFormActions} onSuccess={handleSuccess} webpage={confirmedPage.page} />
           ) : (
             <>
               <p>Choose the page you want to remove</p>
@@ -137,7 +139,7 @@ const RequestRemovalDashboardPanel = () => {
                 Remove page
               </ActionButton>
             ) : (
-              <Button appearance="positive" disabled={!selectedPage} onClick={() => {}}>
+              <Button appearance="positive" disabled={!selectedPage} onClick={() => setConfirmedPage(selectedPage)}>
                 Next
               </Button>
             )}
