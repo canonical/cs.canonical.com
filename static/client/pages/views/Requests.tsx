@@ -54,10 +54,8 @@ const Requests: React.FC = () => {
 
   return (
     <div className="grid-row">
-      <div className="u-sv3">
-        <h4>Dashboard</h4>
-        <hr className="p-rule--muted" />
-      </div>
+      <h4 className="u-no-padding--top">Dashboard</h4>
+      <hr className="p-rule--muted" />
 
       <div className="grid-row p-divider">
         <div className="grid-col-4 p-divider__block">

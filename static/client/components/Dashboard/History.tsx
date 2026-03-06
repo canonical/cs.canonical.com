@@ -45,7 +45,7 @@ const RequestHistory = () => {
             <JiraTasks tasks={data.tickets} />
           </section>
 
-          <hr />
+          <hr className="p-rule" />
           <TablePagination
             currentPage={data.page}
             data={data.tickets}

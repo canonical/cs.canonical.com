@@ -25,7 +25,7 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
     <div className="l-application" id="l-application">
       <Navigation />
       <main className="l-main">
-        <div className="grid-row--50-50">
+        <div className="grid-row--50-50 u-no-padding">
           <div className="grid-col">
             {location.pathname.includes("/webpage") && [VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view) && (
               <Button hasIcon onClick={goPrev}>
@@ -36,7 +36,7 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             )}
           </div>
         </div>
-        <div className="grid-row">
+        <div className="grid-row u-no-padding">
           {children}
           <Outlet />
         </div>

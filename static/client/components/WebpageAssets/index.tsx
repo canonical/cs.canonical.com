@@ -36,9 +36,7 @@ const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url = "", projectName = "
           {assetsData.assets?.map((asset) => {
             return (
               <div className="grid-col" key={asset.id}>
-                <div className="p-section--shallow">
-                  <Asset asset={asset} />
-                </div>
+                <Asset asset={asset} />
               </div>
             );
           })}

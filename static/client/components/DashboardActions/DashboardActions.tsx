@@ -5,8 +5,8 @@ import RequestFeaturePanel from "@/components/RequestFeaturePanel";
 
 const DashboardActions = (): ReactNode => {
   return (
-    <div className="grid-row">
-      <h4 className="u-sv3">Main menu</h4>
+    <div className="grid-row u-no-padding">
+      <h4 className="u-sv3 u-no-padding--top">Main menu</h4>
       <div className="grid-col-2">
         <div className="p-card report-card">
           <h5>Report a bug</h5>
