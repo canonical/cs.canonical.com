@@ -3,7 +3,7 @@ import { useCallback, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { isSelected } from "@/components/Navigation/utils";
-import { VIEW_TABLE } from "@/config";
+import { VIEW_REQUESTS } from "@/config";
 import { useViewsStore } from "@/store/views";
 
 interface NavigationBannerProps {
@@ -19,7 +19,7 @@ const NavigationBanner = ({ children }: NavigationBannerProps): ReactNode => {
   const handleNavigation = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
       event.preventDefault();
-      setView(VIEW_TABLE);
+      setView(VIEW_REQUESTS);
       navigate(homepageLink.url);
     },
     [homepageLink.url, navigate, setView],

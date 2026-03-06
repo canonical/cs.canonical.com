@@ -33,11 +33,11 @@ const Navigation = (): ReactNode => {
     (view: TView) => {
       setExpandedProject("");
       setView(view);
-      if ([VIEW_OWNED, VIEW_TABLE, VIEW_REQUESTS].includes(view)) {
+      if ([VIEW_OWNED, VIEW_TABLE].includes(view)) {
         navigate(`/app/views/${view}`);
       }
 
-      if ([VIEW_TREE].includes(view)) {
+      if ([VIEW_TREE, VIEW_REQUESTS].includes(view)) {
         navigate("/app");
       }
     },
@@ -47,6 +47,7 @@ const Navigation = (): ReactNode => {
   const isViewActive = useCallback(
     (linkView: TView) => {
       if (view === VIEW_TREE) return linkView === view;
+      if (view === VIEW_REQUESTS) return linkView === view;
       return linkView === view && location.pathname === `/app/views/${linkView}`;
     },
     [location.pathname, view],
@@ -80,18 +81,9 @@ const Navigation = (): ReactNode => {
                 <hr className="p-rule" />
                 <p className="p-text--small-caps">Search pages</p>
                 <Search />
-                <hr className="p-rule" />
+                <hr className="p-rule u-sv3" />
               </div>
               <ul className="u-no-margin u-no-padding">
-                <li
-                  className={`p-side-navigation__link ${(isViewActive(VIEW_TREE) || location.pathname === "/app") && "is-active"}`}
-                  onClick={() => changeView(VIEW_TREE)}
-                >
-                  <span className="u-has-icon">
-                    <i className="p-icon--home" />
-                    Main menu
-                  </span>
-                </li>
                 <li
                   className={`p-side-navigation__link ${isViewActive(VIEW_REQUESTS) && "is-active"}`}
                   onClick={() => changeView(VIEW_REQUESTS)}
