@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { ActionButton, Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
 
-import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import PageSearchSelect from "@/components/Common/PageSearchSelect";
 import RemovalForm from "@/components/RemovalForm";
 import { useProjects } from "@/services/api/hooks/projects";
 import type { IPage } from "@/services/api/types/pages";
@@ -48,12 +48,9 @@ const RequestRemovalDashboardPanel = () => {
     setSelectedPage(option);
   }, []);
 
-  const handleRemovePage = useCallback(
-    () => () => {
-      setSelectedPage(null);
-    },
-    [],
-  );
+  const handleClearPage = useCallback(() => {
+    setSelectedPage(null);
+  }, []);
 
   const handleClose = useCallback(() => {
     togglePanel();
@@ -65,16 +62,6 @@ const RequestRemovalDashboardPanel = () => {
   const handleSuccess = useCallback(() => {
     handleClose();
   }, [handleClose]);
-
-  const renderPageOption = useCallback(
-    (option: IPageOption) => (
-      <span className="p-chip__value">
-        <span>{option.name}</span>
-        {option.title && <span className="u-text--muted p-text--small"> — {option.title}</span>}
-      </span>
-    ),
-    [],
-  );
 
   const isStep2 = confirmedPage !== null;
 
@@ -113,17 +100,12 @@ const RequestRemovalDashboardPanel = () => {
           ) : (
             <>
               <p className="p-heading--5 u-no-margin--bottom u-sv1">Choose the page you want to remove</p>
-              <CustomSearchAndFilter<IPageOption>
-                indexKey="id"
-                label=""
-                labelKey="name"
-                onRemove={handleRemovePage}
+              <PageSearchSelect<IPageOption>
+                onClear={handleClearPage}
                 onSelect={handleSelectPage}
                 options={pageOptions}
                 placeholder="Search by page title or URL"
-                renderOption={renderPageOption}
-                searchKeys={["name", "title"]}
-                selectedOptions={selectedPage ? [selectedPage] : []}
+                value={selectedPage}
               />
             </>
           )}

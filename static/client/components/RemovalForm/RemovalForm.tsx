@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import type { IRemovalFormProps } from "./RemovalForm.types";
 
-import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import PageSearchSelect from "@/components/Common/PageSearchSelect";
 import config from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
@@ -71,12 +71,9 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
     onActionsReady({ onSubmit: handleSubmitClick, loading });
   }, [handleSubmitClick, loading, onActionsReady]);
 
-  const handleRemoveRedirectPage = useCallback(
-    () => () => {
-      setRedirectPage(null);
-    },
-    [],
-  );
+  const handleClearRedirectPage = useCallback(() => {
+    setRedirectPage(null);
+  }, []);
 
   const handleSelectRedirectPage = useCallback((option: IUrlOption) => {
     setRedirectPage(option);
@@ -136,16 +133,6 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
     title: page.title || "",
   }));
 
-  const renderRedirectOption = useCallback(
-    (option: IUrlOption) => (
-      <span className="p-chip__value">
-        <span>{option.name}</span>
-        {option.title && <span className="u-text--muted p-text--small"> — {option.title}</span>}
-      </span>
-    ),
-    [],
-  );
-
   return (
     <>
       <p>
@@ -154,18 +141,13 @@ const RemovalForm = ({ webpage, onSuccess, onActionsReady }: IRemovalFormProps) 
       {!isNewPage && (
         <div className="u-sv3">
           <p className="u-no-margin--bottom u-sv1">1. Assign a page to redirect to</p>
-          <CustomSearchAndFilter<IUrlOption>
+          <PageSearchSelect<IUrlOption>
             error={errors.redirectPage}
-            indexKey="id"
-            label=""
-            labelKey="name"
-            onRemove={handleRemoveRedirectPage}
+            onClear={handleClearRedirectPage}
             onSelect={handleSelectRedirectPage}
             options={urlOptions}
             placeholder="Search by page title or URL"
-            renderOption={renderRedirectOption}
-            searchKeys={["name", "title"]}
-            selectedOptions={redirectPage ? [redirectPage] : []}
+            value={redirectPage}
           />
         </div>
       )}
