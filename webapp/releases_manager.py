@@ -145,7 +145,8 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         payload = {
             "base": RELEASES_BRANCH_NAME,
             "head": BASE_BRANCH_NAME,
-            "commit_message": f"Merge {BASE_BRANCH_NAME} into {RELEASES_BRANCH_NAME}",
+            "commit_message": f"Merge {BASE_BRANCH_NAME}"
+            f" into {RELEASES_BRANCH_NAME}",
         }
 
         try:
@@ -155,18 +156,21 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
             if e.status_code == 409:
                 return {
                     "success": False,
-                    "error": "Merge conflict detected. Please resolve conflicts manually.",
+                    "error": "Merge conflict detected."
+                    " Please resolve conflicts manually.",
                 }
             raise
 
     def update_releases_yaml(
         self, new_content: str, commit_message: str = "Update releases.yaml"
     ) -> dict:
-        """Update the releases.yaml file on the release branch and create a commit.
+        """Update the releases.yaml file on the release branch
+        and create a commit.
 
         Args:
             new_content: The new YAML content as a string.
-            commit_message: The commit message for the update. Defaults to "Update releases.yaml".
+            commit_message: The commit message for the update.
+            Defaults to "Update releases.yaml".
 
         Returns:
             dict: The commit response data.
@@ -240,7 +244,8 @@ class ReleasesService:
             A dictionary with the update status and any relevant information.
         """
 
-        # need to convert json content that we get from the parser back to yaml string before sending to github client
+        # need to convert json content that we get from the parser back
+        # to yaml string before sending to github client
         yaml_content = json_content
 
         try:
@@ -250,7 +255,8 @@ class ReleasesService:
                 # https://warthogs.atlassian.net/browse/WD-30487
                 return {
                     "success": False,
-                    "error": "Release branch does not exist. Please create it first.",
+                    "error": "Release branch does not exist. "
+                    "Please create it first.",
                 }
 
             # Merge base branch into release branch to ensure it's up to date
@@ -270,7 +276,8 @@ class ReleasesService:
                 # https://warthogs.atlassian.net/browse/WD-30487
                 return {
                     "success": True,
-                    "message": "File updated successfully. Please create a PR manually.",
+                    "message": "File updated successfully. "
+                    "Please create a PR manually.",
                     "commit": update_result,
                     "branch": RELEASES_BRANCH_NAME,
                 }
