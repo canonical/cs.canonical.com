@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import {
   ActionButton,
@@ -25,7 +25,7 @@ function viewTicket(ticketId: string) {
   window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
 }
 
-const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
+const ReportBugPanel = ({ buttonLabel = "Submit Report" }) => {
   const notify = useToastNotification();
   const [reportBugPanelVisible, toggleReportBugPanel] = usePanelsStore((state) => [
     state.reportBugPanelVisible,
@@ -37,10 +37,8 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
   const user = useStore((state) => state.user);
   const [loading, setLoading] = useState(false);
 
-  const submitButtonEnabled = useMemo(
-    () => url && summary.trim().length > 0 && description.trim().length > 0 && !loading,
-    [description, loading, summary, url],
-  );
+  const submitButtonEnabled =
+    url.trim().length > 0 && summary.trim().length > 0 && description.trim().length > 0 && !loading;
 
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [ticketId, setTicketId] = useState("");
@@ -66,7 +64,7 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
         toggleReportBugPanel();
         setSuccessModalOpen(true);
         notify.success(
-          "Please add attachments, such as schreenshots of the bug, to the Jira ticket.",
+          "Please add attachments, such as screenshots of the bug, to the Jira ticket.",
           [
             {
               label: "View on Jira",
@@ -132,7 +130,6 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
             className="u-sv1"
             label="3. Paste the page URL"
             onChange={(e) => setUrl(e.target.value)}
-            type="url"
             value={url}
           />
         </SidePanel.Content>
@@ -149,16 +146,12 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
       {successModalOpen && (
         <Modal
           buttonRow={
-            <>
-              <Button appearance="positive" hasIcon onClick={() => viewTicket(ticketId)}>
-                <React.Fragment key=".0">
-                  <span>View on Jira</span>
-                  <i className="p-icon--external-link is-dark" />
-                </React.Fragment>
-              </Button>
-            </>
+            <Button appearance="positive" hasIcon onClick={() => viewTicket(ticketId)}>
+              <span>View on Jira</span>
+              <i className="p-icon--external-link is-dark" />
+            </Button>
           }
-          className={"p-bug-report-modal"}
+          className="p-bug-report-modal"
           close={() => setSuccessModalOpen(false)}
           closeOnOutsideClick={false}
           title="Add attachments on Jira"
