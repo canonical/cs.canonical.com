@@ -399,7 +399,7 @@ class TestReleasesGitHubClient:
             result = github_client.merge_base_into_release()
 
         assert result["success"] is True
-        
+
         # Verify the request was made with correct parameters
         call_args = mock_requests["request"].call_args
         assert call_args.args[0] == "POST"
@@ -462,12 +462,12 @@ class TestReleasesGitHubClient:
             "content": {"sha": "new_sha_456"},
             "commit": {"message": "Update releases.yaml"},
         }
-        
+
         # Mock two different responses for GET and PUT
         get_response = MagicMock()
         get_response.status_code = 200
         get_response.json.return_value = {"sha": file_sha}
-        
+
         put_response = MagicMock()
         put_response.status_code = 200
         put_response.json.return_value = commit_response
@@ -508,11 +508,9 @@ class TestReleasesGitHubClient:
     ):
         """Test that content is base64 encoded before sending."""
         import base64
-        
+
         new_content = "test: content"
-        expected_encoded = base64.b64encode(
-            new_content.encode()
-        ).decode()
+        expected_encoded = base64.b64encode(new_content.encode()).decode()
 
         def capture_params(method, url, **kwargs):
             if method == "PUT":
@@ -562,7 +560,7 @@ class TestReleasesGitHubClient:
         ):
             with pytest.raises(GithubError) as exc_info:
                 github_client.update_releases_yaml("content")
-            
+
             assert exc_info.value.status_code == 401
 
 
