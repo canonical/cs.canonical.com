@@ -565,7 +565,7 @@ def user_tickets():
     per_page = request.values.get("per_page", type=int, default=10)
     type = request.values.get("type", type=str, default="active")
 
-    task_status = ""
+    task_status = []
     if type not in ["active", "resolved"]:
         type = "active"
     if type == "active":

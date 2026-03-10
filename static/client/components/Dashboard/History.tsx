@@ -25,7 +25,7 @@ const RequestHistory = () => {
 
   return (
     <div>
-      <h5 className="p-text--small-caps">Your requests</h5>
+      <h2 className="p-text--small-caps">Your requests</h2>
       <Tabs
         className={`is-sticky`}
         links={tabs.map((tab) => ({
@@ -45,17 +45,21 @@ const RequestHistory = () => {
             <JiraTasks tasks={data.tickets} />
           </section>
 
-          <hr className="p-rule" />
-          <TablePagination
-            currentPage={data.page}
-            data={data.tickets}
-            externallyControlled={true}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-            pageLimits={[10, 20, 30]}
-            pageSize={data.page_size}
-            totalItems={data.total}
-          />
+          {data.total > data.page_size && (
+            <>
+              <hr className="p-rule" />
+              <TablePagination
+                currentPage={data.page}
+                data={data.tickets}
+                externallyControlled={true}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                pageLimits={[10, 20, 30]}
+                pageSize={data.page_size}
+                totalItems={data.total}
+              />
+            </>
+          )}
         </>
       )}
     </div>

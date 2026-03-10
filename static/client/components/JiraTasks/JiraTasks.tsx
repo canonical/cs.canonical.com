@@ -29,7 +29,7 @@ const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
         <tr>
           <th colSpan={3}>Summary</th>
           <th>Request type</th>
-          <th>Status</th>
+          <th style={{ paddingLeft: "16px" }}>Status</th>
           <th>Date created</th>
           <th>Ticket id</th>
         </tr>
@@ -39,8 +39,7 @@ const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
           <tr>
             <td colSpan={3}>{task.summary}</td>
             <td>Copy update</td>
-            <td style={{ display: "flex", alignItems: "center" }}>
-              <span className={getStatusClass(task.status)}></span>
+            <td className={getStatusClass(task.status)}>
               {task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase()}
             </td>
             <td>{DatesServices.beatifyDate(task.created_at)}</td>

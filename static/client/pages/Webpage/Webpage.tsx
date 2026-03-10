@@ -53,9 +53,11 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
         </div>
 
         {isNew ? (
-          <h1>New page: {pageName}</h1>
+          <h1 aria-labelledby="page-title" className="u-no-padding--top p-heading--4">
+            New page: {pageName}
+          </h1>
         ) : (
-          <h4 aria-labelledby="page-title" className="u-no-padding--top">
+          <h1 aria-labelledby="page-title" className="u-no-padding--top p-heading--4">
             {page.title || "No title"}
             {page.status === PageStatus.TO_DELETE && (
               <Chip
@@ -66,11 +68,11 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
                 value="Scheduled for removal"
               />
             )}
-          </h4>
+          </h1>
         )}
 
         <section className="l-webpage__section">
-          <p className="p-text--small-caps">Tags</p>
+          <h2 className="p-text--small-caps">Tags</h2>
           <div className="l-webpage__tags">
             {page.products.map((p) => {
               return <Chip key={p.id} value={p.name} />;
@@ -86,7 +88,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
         <div className="grid-row--50-50">
           <div className="grid-col">
             <div className="l-webpage__details-header">
-              <p className="p-text--small-caps">Page Details</p>
+              <h2 className="p-text--small-caps">Page Details</h2>
               <Button appearance="base" hasIcon>
                 <i className="p-icon--edit" />
               </Button>
@@ -142,7 +144,8 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
         <WebpageAssets projectName={page.project?.name} url={page.url} />
 
         <div className="l-webpage__tasks grid-row">
-          <p className="p-text--small-caps">Related Jira Tickets</p>
+          <hr className="p-rule" />
+          <h2 className="p-text--small-caps">Related Jira Tickets</h2>
           <JiraTasks isWebPage={true} tasks={page.jira_tasks} />
         </div>
 

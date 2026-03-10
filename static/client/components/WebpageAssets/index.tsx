@@ -31,7 +31,7 @@ const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url = "", projectName = "
   return (
     <div id="webpage-assets">
       <section>
-        <p className="p-text--small-caps u-sv1">Assets used</p>
+        <h2 className="p-text--small-caps u-sv1">Assets used</h2>
         <div className="grid-row--25-25-25-25">
           {assetsData.assets?.map((asset) => {
             return (
@@ -55,7 +55,6 @@ const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url = "", projectName = "
           />
         )}
       </section>
-      <hr className="p-rule" />
     </div>
   );
 };

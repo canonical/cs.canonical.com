@@ -54,13 +54,13 @@ const Requests: React.FC = () => {
 
   return (
     <div className="grid-row">
-      <h4 className="u-no-padding--top">Dashboard</h4>
+      <h1 className="u-no-padding--top p-heading--4">Dashboard</h1>
       <hr className="p-rule--muted" />
 
       <div className="grid-row p-divider">
         <div className="grid-col-4 p-divider__block">
           <div className="grid-row--50-50">
-            <h5 className="p-text--small-caps">Sites requests</h5>
+            <h2 className="p-text--small-caps">Sites requests</h2>
             <div className="grid-col">
               <p>Start a request by choosing your request type from the dropdown</p>
               <ContextualMenu
@@ -86,14 +86,14 @@ const Requests: React.FC = () => {
           </div>
         </div>
         <div className="grid-col-2 p-divider__block">
-          <h5 className="p-text--small-caps">Copy doc template</h5>
+          <h2 className="p-text--small-caps">Copy doc template</h2>
           <p>Start creating content for a new webpage with a copy doc template.</p>
           <a href={config.copyDocTemplateLink}>
             Get copy doc template <i className="p-icon--external-link" />
           </a>
         </div>
         <div className="grid-col-2 p-divider__block">
-          <h5 className="p-text--small-caps">Resources</h5>
+          <h2 className="p-text--small-caps">Resources</h2>
           <List items={externalLinks} />
         </div>
       </div>
