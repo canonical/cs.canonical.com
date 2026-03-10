@@ -476,11 +476,10 @@ def report_bug(body: ReportBugModel):
         user_id = get_or_create_user_id(body.reporter_struct)
         reporter_jira_id = jira.get_reporter_jira_id(user_id)
         issue = jira.create_task(
-            due_date=body.due_date,
             reporter_jira_id=reporter_jira_id,
             issue_type=jira.BUG,
             description=body.description,
-            summary=f"{body.website} - {body.summary}",
+            summary=f"{body.url} - {body.summary}",
             parent=jira.sites_maintenance_epic,
             labels=current_app.config["SITES_MAINTENANCE_LABELS"].split(","),
         )

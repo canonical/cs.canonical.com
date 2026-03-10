@@ -120,7 +120,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
                 <i className="p-icon--external-link" />
               </Button>
             )}
-            <ReportBugPanel buttonLabel="Report a bug" project={page.project?.name} />
+            <ReportBugPanel buttonLabel="Report a bug" />
             <Button appearance="neutral" onClick={requestRemoval}>
               Request removal
             </Button>

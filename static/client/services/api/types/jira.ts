@@ -1,9 +1,8 @@
 export interface IReportBugBody {
-  due_date: string;
   reporter_struct: object;
   description: string;
   summary: string;
-  website: string;
+  url: string;
 }
 
 export interface IReportBugResponse {
