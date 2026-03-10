@@ -139,7 +139,7 @@ class Jira:
         description: str,
         parent: str,
         reporter_jira_id: str,
-        due_date: datetime,
+        due_date: datetime = None,
         labels: list[str] = None,
         custom_fields: dict = {},
     ):
@@ -153,7 +153,7 @@ class Jira:
             parent (str): The key of the parent issue. If None, the task will
                 be created without a parent.
             reporter_jira_id (str): The ID of the reporter of the task.
-            due_date (datetime): The due date of the task.
+            due_date (datetime): The due date of the task (Optional).
 
         Returns:
             dict: The response from the Jira API containing information about
@@ -184,7 +184,6 @@ class Jira:
                 "labels": labels if (labels and len(labels)) else self.labels,
                 "reporter": {"id": reporter_jira_id},
                 "parent": parent,
-                "duedate": due_date,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
                     {"id": "12655"},  # Sites Tribe
@@ -192,6 +191,9 @@ class Jira:
             },
             "update": {},
         }
+
+        if due_date is not None:
+            payload["fields"]["duedate"] = due_date
 
         if custom_fields:
             for key, value in custom_fields.items():

@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import {
   ActionButton,
   Button,
   Icon,
   Input,
-  Select,
+  Modal,
   SidePanel,
   Textarea,
+  Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
@@ -18,30 +19,29 @@ import { JiraServices } from "@/services/api/services/jira";
 import type { IReportBugResponse } from "@/services/api/types/jira";
 import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
+import "./_ReportBugPanel.scss";
 
-const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
+function viewTicket(ticketId: string) {
+  window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
+}
+
+const ReportBugPanel = ({ buttonLabel = "Submit Report" }) => {
   const notify = useToastNotification();
   const [reportBugPanelVisible, toggleReportBugPanel] = usePanelsStore((state) => [
     state.reportBugPanelVisible,
     state.toggleReportBugPanel,
   ]);
-  const [website, setWebsite] = useState(project || config.allProjects[0]);
-  const [dueDate, setDueDate] = useState<string>("");
+  const [url, setUrl] = useState("");
   const [summary, setSummary] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const user = useStore((state) => state.user);
   const [loading, setLoading] = useState(false);
 
-  const submitButtonEnabled = useMemo(
-    () => website && dueDate && summary.trim().length > 0 && description.trim().length > 0 && !loading,
-    [description, dueDate, loading, summary, website],
-  );
+  const submitButtonEnabled =
+    url.trim().length > 0 && summary.trim().length > 0 && description.trim().length > 0 && !loading;
 
-  useEffect(() => {
-    if (project) {
-      setWebsite(project);
-    }
-  }, [project]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [ticketId, setTicketId] = useState("");
 
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
@@ -57,72 +57,108 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report", project = "" }) => {
     JiraServices.reportBug({
       summary,
       description,
-      due_date: dueDate,
-      website,
+      url,
       reporter_struct: user,
     })
       .then(({ data }: IReportBugResponse) => {
         toggleReportBugPanel();
+        setSuccessModalOpen(true);
         notify.success(
-          "A member of the sites team will pick up the issue. Please follow our progress on the Jira ticket.",
-          [{ label: "View issue", onClick: () => window.open(`${config.jiraTaskLink}${data.issue?.key}`, "_blank") }],
-          "You have successfully reported a bug",
+          "Please add attachments, such as screenshots of the bug, to the Jira ticket.",
+          [
+            {
+              label: "View on Jira",
+              onClick: () => {
+                viewTicket(data.issue?.key);
+                setSuccessModalOpen(false);
+              },
+            },
+          ],
+          "You submitted a bug report",
         );
+        setTicketId(data.issue?.key || "");
       })
       .catch(onSubmitError)
       .finally(() => setLoading(false));
-  }, [description, dueDate, notify, onSubmitError, summary, toggleReportBugPanel, user, website]);
+  }, [description, notify, onSubmitError, summary, toggleReportBugPanel, user, url]);
 
   return (
     <>
       <Button onClick={toggleReportBugPanel}>{buttonLabel}</Button>
-      <SidePanel isOpen={reportBugPanelVisible} pinned>
+      <SidePanel isOpen={reportBugPanelVisible}>
         <SidePanel.Sticky>
-          <div className="p-section--shallow">
-            <SidePanel.Header>
-              <SidePanel.HeaderTitle>Report a bug</SidePanel.HeaderTitle>
-              <SidePanel.HeaderControls>
-                <Button
-                  appearance="base"
-                  aria-label="Close"
-                  className="u-no-margin--bottom"
-                  hasIcon
-                  onClick={toggleReportBugPanel}
-                >
-                  <Icon name="close" />
-                </Button>
-              </SidePanel.HeaderControls>
-            </SidePanel.Header>
-          </div>
+          <SidePanel.Header>
+            <SidePanel.HeaderTitle>
+              Report bug{" "}
+              <Tooltip message="Report a bug found on one of our websites" position="btm-center" zIndex={999}>
+                <Icon name="information" />
+              </Tooltip>
+            </SidePanel.HeaderTitle>
+            <SidePanel.HeaderControls>
+              <Button
+                appearance="base"
+                aria-label="Close"
+                className="u-no-margin--bottom"
+                hasIcon
+                onClick={toggleReportBugPanel}
+              >
+                <Icon name="close" />
+              </Button>
+            </SidePanel.HeaderControls>
+          </SidePanel.Header>
         </SidePanel.Sticky>
         <SidePanel.Content>
-          <Input label="Brief summary of bug" onChange={(e) => setSummary(e.target.value)} required type="text" />
+          <Input
+            aria-required
+            className="u-sv1"
+            label="1. Summarize the bug"
+            onChange={(e) => setSummary(e.target.value)}
+            type="text"
+            value={summary}
+          />
           <Textarea
-            label="Bug description"
+            aria-required
+            className="u-sv1"
+            label="2. Add a detailed description"
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Explain the bug in detail and the steps involved to recreate this problem"
-            required
+            placeholder="Add details, including steps to recreate the bug"
             rows={5}
+            value={description}
           />
-          <Select
-            label="Website link"
-            onChange={(e) => setWebsite(e.target.value)}
-            options={config.allProjects.map((p) => {
-              return { label: p, value: p };
-            })}
-            value={website}
+          <Input
+            aria-required
+            className="u-sv1"
+            label="3. Paste the page URL"
+            onChange={(e) => setUrl(e.target.value)}
+            value={url}
           />
-          <Input label="Due date" onChange={(e) => setDueDate(e.target.value)} required type="date" />
         </SidePanel.Content>
-        <SidePanel.Sticky position="bottom">
+        <SidePanel.Sticky>
           <SidePanel.Footer className="u-align--right">
-            <Button>Cancel</Button>
+            <Button onClick={toggleReportBugPanel}>Cancel</Button>
             <ActionButton appearance="positive" disabled={!submitButtonEnabled} loading={loading} onClick={onSubmit}>
               Submit
             </ActionButton>
           </SidePanel.Footer>
         </SidePanel.Sticky>
       </SidePanel>
+
+      {successModalOpen && (
+        <Modal
+          buttonRow={
+            <Button appearance="positive" hasIcon onClick={() => viewTicket(ticketId)}>
+              <span>View on Jira</span>
+              <i className="p-icon--external-link is-dark" />
+            </Button>
+          }
+          className="p-bug-report-modal"
+          close={() => setSuccessModalOpen(false)}
+          closeOnOutsideClick={false}
+          title="Add attachments on Jira"
+        >
+          <p>Please add relevant attachments, including screenshots, to the Jira ticket.</p>
+        </Modal>
+      )}
     </>
   );
 };
