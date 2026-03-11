@@ -8,7 +8,6 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   reportBugPanelVisible: false,
   requestFeaturePanelVisible: false,
   requestRemovalPanelVisible: false,
-  requestRemovalDashboardPanelVisible: false,
 
   togglePanel: (panelKey: PanelKey) => {
     const currentState = get();
@@ -21,7 +20,6 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
       reportBugPanelVisible: false,
       requestFeaturePanelVisible: false,
       requestRemovalPanelVisible: false,
-      requestRemovalDashboardPanelVisible: false,
 
       [panelKey]: !isCurrentlyVisible,
     };
@@ -34,5 +32,4 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   toggleReportBugPanel: () => get().togglePanel("reportBugPanelVisible"),
   toggleRequestFeaturePanel: () => get().togglePanel("requestFeaturePanelVisible"),
   toggleRequestRemovalPanel: () => get().togglePanel("requestRemovalPanelVisible"),
-  toggleRequestRemovalDashboardPanel: () => get().togglePanel("requestRemovalDashboardPanelVisible"),
 }));

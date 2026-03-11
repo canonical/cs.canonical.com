@@ -15,7 +15,7 @@ export function flattenPages(root: IPage, excludeId?: number): IPage[] {
   }
 
   function walk(page: IPage) {
-    for (const child of page.children) {
+    for (const child of page.children ?? []) {
       if (!shouldInclude(child)) continue;
       result.push(child);
       walk(child);

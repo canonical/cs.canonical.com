@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
 
+import { Button } from "@canonical/react-components";
+
 import ReportBugPanel from "@/components/ReportBugPanel";
 import RequestFeaturePanel from "@/components/RequestFeaturePanel";
-import { RequestRemovalDashboardPanel } from "@/components/RequestRemovalPanel";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
+import { usePanelsStore } from "@/store/app";
 
 const DashboardActions = (): ReactNode => {
+  const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
+
   return (
     <div className="grid-row u-no-padding">
       <h4 className="u-sv3 u-no-padding--top">Main menu</h4>
@@ -26,7 +31,8 @@ const DashboardActions = (): ReactNode => {
         <div className="p-card report-card">
           <h5>Request page removal</h5>
           <p>Request removal of a page from our website</p>
-          <RequestRemovalDashboardPanel />
+          <Button onClick={toggleRequestRemovalPanel}>Request removal</Button>
+          <RequestRemovalPanel />
         </div>
       </div>
     </div>

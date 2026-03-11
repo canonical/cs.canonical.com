@@ -7,8 +7,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
-import Search from "@/components/Search";
-import { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
+import NavigationSearch from "@/components/Navigation/NavigationSearch";
+import { VIEW_OWNED, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -80,8 +80,8 @@ const Navigation = (): ReactNode => {
               <div className="p-panel__content-search">
                 <hr className="p-rule" />
                 <p className="p-text--small-caps">Search pages</p>
-                <Search />
-                <hr className="p-rule u-sv3" />
+                <NavigationSearch />
+                <hr className="p-rule" />
               </div>
               <ul className="u-no-margin u-no-padding">
                 <li

@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent } from "react";
 
 export interface ICustomSearchAndFilterProps<T> {
   label: string | React.ReactNode;
@@ -11,7 +11,4 @@ export interface ICustomSearchAndFilterProps<T> {
   indexKey?: string;
   labelKey?: string;
   loading?: boolean;
-  searchKeys?: string[];
-  renderOption?: (option: T) => ReactNode;
-  error?: string;
 }
