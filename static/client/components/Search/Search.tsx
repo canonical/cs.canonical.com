@@ -7,7 +7,7 @@ import type { SearchProps } from "./Search.types";
 
 import "./_Search.scss";
 
-const PageSearch = <T extends Record<string, any>>({
+const Search = <T extends Record<string, any>>({
   options,
   value,
   onSelect,
@@ -113,4 +113,4 @@ const PageSearch = <T extends Record<string, any>>({
   );
 };
 
-export default PageSearch;
+export default Search;

@@ -9,7 +9,7 @@ import { useStore } from "@/store";
 
 import "./_NavigationSearch.scss";
 
-const Search = (): ReactNode => {
+const NavigationSearch = (): ReactNode => {
   const { data } = usePages();
   const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
@@ -43,4 +43,4 @@ const Search = (): ReactNode => {
   );
 };
 
-export default Search;
+export default NavigationSearch;

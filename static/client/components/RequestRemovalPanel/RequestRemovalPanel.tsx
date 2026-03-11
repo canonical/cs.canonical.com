@@ -41,25 +41,29 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
   const handleSuccess = useCallback(async () => {
     handleClose();
 
-    if (webpage) {
-      if (refetch) {
-        try {
-          const data = await refetch();
-          if (data?.length) {
-            const project = data.find((p) => p.data?.name === selectedProject?.name);
-            if (project && project.data) {
-              setSelectedProject(project.data);
-            }
+    // if (webpage) {
+    if (refetch) {
+      try {
+        const data = await refetch();
+        console.log("🚀 ~ RequestRemovalPanel ~ data:", data);
+        if (data?.length) {
+          const project = data.find((p) => {
+            return p.data?.name === selectedProject?.name;
+          });
+          console.log("🚀 ~ RequestRemovalPanel ~ data:", project);
+          if (project && project.data) {
+            setSelectedProject(project.data);
           }
-        } catch {
-          // silently handle refetch failure
         }
-      }
-
-      if (webpage.status === PageStatus.NEW) {
-        navigate("/app", { replace: true });
+      } catch {
+        // silently handle refetch failure
       }
     }
+
+    if (webpage && webpage.status === PageStatus.NEW) {
+      navigate("/app", { replace: true });
+    }
+    // }
   }, [handleClose, navigate, refetch, selectedProject?.name, setSelectedProject, webpage]);
 
   const activeWebpage = webpage ?? confirmedPage?.page;
