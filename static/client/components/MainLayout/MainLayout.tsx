@@ -3,6 +3,7 @@ import React, { type ReactNode } from "react";
 import { Button } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import AppPanels from "@/components/AppPanels";
 import Navigation from "@/components/Navigation";
 import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE } from "@/config";
 import { goBack } from "@/helpers/views";
@@ -41,6 +42,7 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
           <Outlet />
         </div>
       </main>
+      <AppPanels />
     </div>
   );
 };

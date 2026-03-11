@@ -593,4 +593,3 @@ def user_tickets():
             "total_pages": tickets.pages,
         }
     )
-
