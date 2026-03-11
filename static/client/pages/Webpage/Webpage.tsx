@@ -16,7 +16,6 @@ import { usePanelsStore } from "@/store/app";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
-  const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
 
   const openCopyDoc = useCallback(() => {
     window.open(page.copy_doc_link);
