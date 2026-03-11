@@ -48,7 +48,7 @@ const EditProductPanel = (): ReactNode => {
           product={selectedProduct}
         />
       )}
-      <SidePanel isOpen={productsPanelVisible} pinned>
+      <SidePanel isOpen={productsPanelVisible}>
         <SidePanel.Sticky>
           <div className="p-section--shallow">
             <SidePanel.Header>

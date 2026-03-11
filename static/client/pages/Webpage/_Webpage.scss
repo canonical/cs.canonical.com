@@ -1,6 +1,32 @@
 .l-webpage {
-  .l-webpage--buttons,
-  .l-webpage--tasks {
+  .l-webpage__buttons,
+  .l-webpage__tasks {
     margin-top: 20px;
+  }
+
+  .l-webpage__header,
+  .l-webpage__section {
+    padding-bottom: 16px;
+  }
+
+  .l-webpage__actions {
+    justify-self: flex-end;
+  }
+
+  .l-webpage__tags {
+    display: flex;
+    align-items: baseline;
+  }
+
+  .l-webpage__details {
+    display: grid;
+    column-gap: 24px;
+    row-gap: 8px;
+    grid-template-columns: max-content 1fr;
+  }
+
+  .l-webpage__details-header {
+    display: flex;
+    justify-content: space-between;
   }
 }

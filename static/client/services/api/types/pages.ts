@@ -38,6 +38,7 @@ export interface IPage {
   };
   ext?: string;
   content_jira_id?: string;
+  figma_link?: string;
 }
 
 export interface IPagesResponse {

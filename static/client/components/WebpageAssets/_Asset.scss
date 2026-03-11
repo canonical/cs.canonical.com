@@ -1,0 +1,18 @@
+.p-asset__image:hover {
+  .p-asset__external-link {
+    display: block;
+  }
+}
+
+.p-asset__external-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  background-color: transparent;
+  display: none;
+
+  &:hover {
+    background-color: var(--vf-color-background-neutral-default);
+  }
+}

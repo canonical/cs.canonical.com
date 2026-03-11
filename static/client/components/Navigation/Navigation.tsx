@@ -8,7 +8,7 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import Search from "@/components/Search";
-import { VIEW_OWNED, VIEW_TABLE, VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -37,7 +37,7 @@ const Navigation = (): ReactNode => {
         navigate(`/app/views/${view}`);
       }
 
-      if ([VIEW_TREE].includes(view)) {
+      if ([VIEW_TREE, VIEW_REQUESTS].includes(view)) {
         navigate("/app");
       }
     },
@@ -47,6 +47,7 @@ const Navigation = (): ReactNode => {
   const isViewActive = useCallback(
     (linkView: TView) => {
       if (view === VIEW_TREE) return linkView === view;
+      if (view === VIEW_REQUESTS) return linkView === view;
       return linkView === view && location.pathname === `/app/views/${linkView}`;
     },
     [location.pathname, view],
@@ -80,16 +81,16 @@ const Navigation = (): ReactNode => {
                 <hr className="p-rule" />
                 <p className="p-text--small-caps">Search pages</p>
                 <Search />
-                <hr className="p-rule" />
+                <hr className="p-rule u-sv3" />
               </div>
               <ul className="u-no-margin u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_TREE) && "is-active"}`}
-                  onClick={() => changeView(VIEW_TREE)}
+                  className={`p-side-navigation__link ${isViewActive(VIEW_REQUESTS) && "is-active"}`}
+                  onClick={() => changeView(VIEW_REQUESTS)}
                 >
                   <span className="u-has-icon">
-                    <i className="p-icon--home" />
-                    Main menu
+                    <i className="p-icon--file" />
+                    Dashboard
                   </span>
                 </li>
                 <li

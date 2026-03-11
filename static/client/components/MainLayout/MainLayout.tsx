@@ -3,8 +3,9 @@ import React, { type ReactNode } from "react";
 import { Button } from "@canonical/react-components";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import AppPanels from "@/components/AppPanels";
 import Navigation from "@/components/Navigation";
-import { VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE } from "@/config";
 import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
 
@@ -25,9 +26,9 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
     <div className="l-application" id="l-application">
       <Navigation />
       <main className="l-main">
-        <div className="grid-row--50-50">
+        <div className="grid-row--50-50 u-no-padding u-no-margin">
           <div className="grid-col">
-            {location.pathname.includes("/webpage") && view !== VIEW_TREE && (
+            {location.pathname.includes("/webpage") && [VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view) && (
               <Button hasIcon onClick={goPrev}>
                 <React.Fragment key=".0">
                   <i className="p-icon--chevron-left" /> <span>Back</span>
@@ -36,12 +37,12 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             )}
           </div>
         </div>
-        <hr />
-        <div className="grid-row">
+        <div className="grid-row u-no-padding u-no-margin">
           {children}
           <Outlet />
         </div>
       </main>
+      <AppPanels />
     </div>
   );
 };

@@ -84,7 +84,6 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report" }) => {
 
   return (
     <>
-      <Button onClick={toggleReportBugPanel}>{buttonLabel}</Button>
       <SidePanel isOpen={reportBugPanelVisible}>
         <SidePanel.Sticky>
           <SidePanel.Header>
@@ -130,6 +129,7 @@ const ReportBugPanel = ({ buttonLabel = "Submit Report" }) => {
             className="u-sv1"
             label="3. Paste the page URL"
             onChange={(e) => setUrl(e.target.value)}
+            type="url"
             value={url}
           />
         </SidePanel.Content>

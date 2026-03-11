@@ -1,16 +1,18 @@
 import React, { useMemo } from "react";
 
-import config from "@/config";
+import { Button, Tooltip } from "@canonical/react-components";
+
 import type { IAsset } from "@/services/api/types/assets";
+import "./_Asset.scss";
 
 const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
-  const assetName = useMemo(() => {
-    return asset.url.split("/v1/")[1];
-  }, [asset.url]);
-
   const isImgFile = useMemo(() => {
     return [".jpg", ".jpeg", ".png", ".gif", ".svg"].includes(asset.type.toLowerCase());
   }, [asset.type]);
+
+  const openAsset = () => {
+    return window.open(asset.url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <>
@@ -20,34 +22,17 @@ const Asset: React.FC<{ asset: IAsset }> = ({ asset }) => {
           className="p-image-container__image"
           src={isImgFile ? asset.url : "https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"}
         />
-      </div>
-      <div className="asset-name u-truncate">
-        <b>{assetName}</b>
-      </div>
-      <div className="asset-type">
-        <p>
-          File type: <b>{asset.type}</b>
-        </p>
-      </div>
-      <div className="asset-cta">
-        <div className="p-cta-block">
-          <a
-            className="p-button--positive"
-            href={`${config.assetsManagerUrl}/details?file_path=${assetName}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            View
+        <Button className="p-asset__external-link" hasIcon onClick={openAsset}>
+          <Tooltip message="View on asset manager" position="btm-left">
+            <i className="p-icon--external-link" />
+          </Tooltip>
+        </Button>
+
+        {/* <Tooltip message="Open in new tab" position="top-right">
+          <a className="p-asset__external-link" href={asset.url} rel="noopener noreferrer" target="_blank">
+            <Icon name="external-link" />
           </a>
-          <a
-            className="p-button"
-            href={`${config.assetsManagerUrl}/update?file_path=${assetName}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Edit
-          </a>
-        </div>
+        </Tooltip> */}
       </div>
     </>
   );

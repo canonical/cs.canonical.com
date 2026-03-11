@@ -70,7 +70,6 @@ const RequestFeaturePanel = () => {
 
   return (
     <>
-      <Button onClick={toggleRequestFeaturePanel}>Request feature</Button>
       <SidePanel isOpen={requestFeaturePanelVisible}>
         <SidePanel.Sticky>
           <SidePanel.Header>

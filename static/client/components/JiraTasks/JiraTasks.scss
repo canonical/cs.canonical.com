@@ -1,0 +1,37 @@
+.p-jira-status-indicator,
+.p-jira-status-indicator--information,
+.p-jira-status-indicator--positive,
+.p-jira-status-indicator--negative,
+.p-jira-status-indicator--caution {
+  position: relative;
+  padding-left: calc(0.5rem + 8px);
+
+  &::before {
+    content: "";
+    border-radius: 50%;
+    display: inline-block;
+    height: 0.5rem;
+    width: 0.5rem;
+    background-color: var(--vf-color-text-default);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.p-jira-status-indicator--information::before {
+  background-color: var(--vf-color-border-information);
+}
+
+.p-jira-status-indicator--positive::before {
+  background-color: var(--vf-color-border-positive);
+}
+
+.p-jira-status-indicator--negative::before {
+  background-color: var(--vf-color-border-negative);
+}
+
+.p-jira-status-indicator--caution::before {
+  background-color: var(--vf-color-border-caution);
+}

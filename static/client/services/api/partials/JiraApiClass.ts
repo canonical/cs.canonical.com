@@ -7,6 +7,7 @@ import type {
   IRequestFeatureBody,
   IRequestFeatureResponse,
 } from "@/services/api/types/jira";
+import type { IGetTicketsParams, IGetTicketsResponse } from "@/services/api/types/tickets";
 
 export class JiraApiClass extends BasicApiClass {
   public reportBug(body: IReportBugBody): Promise<IReportBugResponse> {
@@ -15,5 +16,12 @@ export class JiraApiClass extends BasicApiClass {
 
   public requestFeature(body: IRequestFeatureBody): Promise<IRequestFeatureResponse> {
     return this.callApi(ENDPOINTS.requestFeature, REST_TYPES.POST, body);
+  }
+
+  public getTickets(params: IGetTicketsParams): Promise<IGetTicketsResponse> {
+    return this.callApi(
+      `${ENDPOINTS.getTickets}?page=${params.page}&per_page=${params.per_page}&type=${params.type}`,
+      REST_TYPES.GET,
+    );
   }
 }
