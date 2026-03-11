@@ -8,7 +8,7 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import NavigationSearch from "@/components/Navigation/NavigationSearch";
-import { VIEW_OWNED, VIEW_TABLE, VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -81,7 +81,7 @@ const Navigation = (): ReactNode => {
                 <hr className="p-rule" />
                 <p className="p-text--small-caps">Search pages</p>
                 <NavigationSearch />
-                <hr className="p-rule" />
+                <hr className="p-rule u-sv3" />
               </div>
               <ul className="u-no-margin u-no-padding">
                 <li

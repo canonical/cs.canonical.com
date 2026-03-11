@@ -8,24 +8,13 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import EditProductPanel from "@/components/EditProductPanel/EditProductPanel";
 import JiraTasks from "@/components/JiraTasks";
-import Owner from "@/components/Owner";
-import Products from "@/components/Products";
-import ReportBugPanel from "@/components/ReportBugPanel";
-import RequestRemovalPanel from "@/components/RequestRemovalPanel";
-import RequestTaskModal from "@/components/RequestTaskModal";
-import Reviewers from "@/components/Reviewers";
+import WebpageActions from "@/components/Webpage/WebpageActions";
 import WebpageAssets from "@/components/WebpageAssets";
 import config from "@/config";
 import { PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
-    ChangeRequestType.COPY_UPDATE,
-  );
-  const [user] = useStore((state) => [state.user]);
-
   const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
   const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
 
@@ -45,23 +34,9 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
     }
   }, [page.children?.length, page.name, pageExtension, project]);
 
-  const createNewPage = useCallback(() => {
-    setChangeType(ChangeRequestType.NEW_WEBPAGE);
-    setModalOpen(true);
-  }, []);
-
-  const requestChanges = useCallback(() => {
-    setChangeType(ChangeRequestType.COPY_UPDATE);
-    setModalOpen(true);
-  }, []);
-
-  const requestRemoval = useCallback(() => {
-    toggleRequestRemovalPanel();
-  }, [toggleRequestRemovalPanel]);
-
-  const handleModalClose = useCallback(() => {
-    setModalOpen(false);
-  }, []);
+  const openFigma = useCallback(() => {
+    window.open(page.figma_link);
+  }, [page]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
@@ -168,15 +143,13 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
         <hr className="p-rule" />
 
         <WebpageAssets projectName={page.project?.name} url={page.url} />
-        {modalOpen && (
-          <RequestTaskModal
-            changeType={changeType}
-            onClose={handleModalClose}
-            onTypeChange={setChangeType}
-            webpage={page}
-          />
-        )}
-        <RequestRemovalPanel webpage={page} />
+
+        <div className="l-webpage__tasks grid-row">
+          <hr className="p-rule" />
+          <h2 className="p-text--small-caps">Related Jira Tickets</h2>
+          <JiraTasks isWebPage={true} tasks={page.jira_tasks} />
+        </div>
+
         <EditProductPanel />
       </div>
     </>
