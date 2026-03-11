@@ -3,6 +3,7 @@ import { ContextualMenu, List } from "@canonical/react-components";
 import RequestHistory from "@/components/Dashboard/History";
 import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE } from "@/config";
 import { usePanelsStore } from "@/store/app";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 
 const Requests: React.FC = () => {
   const externalLinks = [
@@ -77,6 +78,7 @@ const Requests: React.FC = () => {
                 toggleAppearance={"positive"}
                 toggleLabel="Start a request"
               />
+              <RequestRemovalPanel />
             </div>
             <div className="grid-col">
               <div className="p-image-container--3-2">
