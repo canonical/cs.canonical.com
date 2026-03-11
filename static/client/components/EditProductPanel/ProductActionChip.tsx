@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 
-import { Button, Icon } from "@canonical/react-components";
+import { Button, Icon, Input } from "@canonical/react-components";
 
 import type { IProduct } from "@/services/api/types/products";
 
@@ -8,13 +8,24 @@ type ProductActionChipProps = {
   product: IProduct;
   onEdit: () => void;
   onDelete: () => void;
+  onChipClick?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isAdmin?: boolean;
+  isSelected?: boolean;
 };
 
-const ProductActionChip = ({ product, onEdit, onDelete }: ProductActionChipProps): ReactNode => {
+const ProductActionChip = ({
+  product,
+  onEdit,
+  onDelete,
+  onChipClick,
+  isAdmin,
+  isSelected,
+}: ProductActionChipProps): ReactNode => {
   return (
-    <>
-      <div className="p-product-action-chip" data-id={product.id}>
-        <div> {product.name}</div>
+    <div className="p-product-action-chip" data-id={product.id}>
+      <Input checked={isSelected} id="checkExample12" label={product.name} onChange={onChipClick} type="checkbox" />
+
+      {isAdmin && (
         <div className="p-product-action-chip__actions u-align--right">
           <Button
             appearance="base"
@@ -35,8 +46,8 @@ const ProductActionChip = ({ product, onEdit, onDelete }: ProductActionChipProps
             <Icon name="delete" />
           </Button>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

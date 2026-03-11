@@ -49,6 +49,9 @@ def set_product(body: SetProductsModel):
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
 
+    if not webpage:
+        return jsonify({"error": "Webpage not found"}), 404
+
     if webpage:
         # Remove previous products that were set for the webpage
         existing_products = WebpageProduct.query.filter_by(

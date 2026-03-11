@@ -149,7 +149,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
           <JiraTasks isWebPage={true} tasks={page.jira_tasks} />
         </div>
 
-        <EditProductPanel />
+        <EditProductPanel page={page} />
       </div>
     </>
   );

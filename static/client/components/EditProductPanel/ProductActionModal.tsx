@@ -10,10 +10,9 @@ interface ProductActionModalProps {
   product: IProduct | null;
   onClose: () => void;
   action: IProductAction;
-  closeProductPanel: () => void;
 }
 
-const ProductActionModal = ({ product, onClose, action, closeProductPanel }: ProductActionModalProps): ReactNode => {
+const ProductActionModal = ({ product, onClose, action }: ProductActionModalProps): ReactNode => {
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(product?.name || "");
   const [inputError, setInputError] = useState<string | null>(null);
@@ -30,10 +29,8 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
       } else if (action === "add") {
         await ProductsServices.addProduct(newName);
       }
-
       await queryClient.invalidateQueries("products");
       onClose();
-      closeProductPanel();
       notify.success(
         `${action === "delete" ? product?.name : newName} was successfully ${
           action === "add" ? "created" : action === "edit" ? "updated" : "deleted"
@@ -44,7 +41,7 @@ const ProductActionModal = ({ product, onClose, action, closeProductPanel }: Pro
     } finally {
       setIsLoading(false);
     }
-  }, [action, product, queryClient, onClose, closeProductPanel, notify, newName]);
+  }, [action, product, queryClient, onClose, notify, newName]);
 
   let actionButton = null;
   let heading = "";
