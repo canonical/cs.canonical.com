@@ -1,9 +1,9 @@
 import { ContextualMenu, List } from "@canonical/react-components";
 
 import RequestHistory from "@/components/Dashboard/History";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE } from "@/config";
 import { usePanelsStore } from "@/store/app";
-import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 
 const Requests: React.FC = () => {
   const externalLinks = [
