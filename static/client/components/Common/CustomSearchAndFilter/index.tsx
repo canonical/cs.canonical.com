@@ -14,6 +14,8 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   indexKey = "id",
   labelKey = "name",
   loading = false,
+  showPanel = true,
+  resetOnClickOutside = true,
 }: ICustomSearchAndFilterProps<T>): ReactNode => {
   const [dropdownHidden, setDropdownHidden] = useState(true);
   const [containerExpanded, setContainerExpanded] = useState(false);
@@ -39,10 +41,11 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   const handleInputBlur = useCallback(() => {
     setDropdownHidden(true);
     setContainerExpanded(false);
+    if (!resetOnClickOutside) return;
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-  }, []);
+  }, [resetOnClickOutside]);
 
   // this callback is needed for handleSelect to have higher priority than handleInputBlur when selecting an option
   const handleOptionMouseDown = useCallback((event: MouseEvent<HTMLButtonElement>) => {
@@ -50,7 +53,6 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
   }, []);
 
   function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-    if (event.target.value.length < 3) return;
     if (onChange) return onChange(event);
     setFilteredOptions(
       options.filter((option) => option[labelKey].toLowerCase().includes(event.target.value.toLowerCase())),
@@ -73,7 +75,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
             option && (
               <span className="p-chip" key={option[indexKey]}>
                 <span className="p-chip__value">{option[labelKey]}</span>
-                <button className="p-chip__dismiss" onClick={onRemove(option)}>
+                <button className="p-chip__dismiss" onClick={() => onRemove(option)}>
                   Dismiss
                 </button>
               </span>
@@ -94,7 +96,7 @@ const CustomSearchAndFilter = <T extends Record<string, any>>({
           />
         </form>
       </div>
-      <div aria-hidden={dropdownHidden} className="p-search-and-filter__panel">
+      <div aria-hidden={dropdownHidden || !showPanel} className="p-search-and-filter__panel">
         <div className="p-filter-panel-section">
           <div aria-expanded="false" className="p-filter-panel-section__chips">
             {loading && <p>Loading...</p>}

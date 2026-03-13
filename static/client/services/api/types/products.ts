@@ -7,8 +7,10 @@ export interface IProductsResponse {
   data: IProduct[];
 }
 export interface ICRUDProductResponse {
-  message: string;
-  product: IProduct;
+  data: {
+    message: string;
+    product: IProduct;
+  };
 }
 
 export type IProductAction = "edit" | "delete" | "add" | null;

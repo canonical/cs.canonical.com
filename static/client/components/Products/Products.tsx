@@ -13,12 +13,12 @@ import type { IProduct } from "@/services/api/types/products";
 const Products = ({ page, onSelectProducts }: IProductsProps): ReactNode => {
   const [products, setProducts] = useState<MultiSelectItem[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<MultiSelectItem[]>([]);
-  const { data } = useProducts();
+  const { data = [] } = useProducts();
 
   useEffect(() => {
-    if (data?.data?.length) {
+    if (data.length) {
       setProducts(
-        data.data.map((p) => ({
+        data.map((p) => ({
           label: p.name,
           value: p.id,
         })),
@@ -39,7 +39,7 @@ const Products = ({ page, onSelectProducts }: IProductsProps): ReactNode => {
         page.products = items.map((p) => ({ name: p.label, id: p.value }) as IProduct);
         PagesServices.setProducts({
           webpage_id: page?.id,
-          product_ids: items.map((p) => p.value),
+          products: items.map((p) => ({ name: p.label, id: p.value }) as IProduct),
         } as ISetProducts);
       }
       if (onSelectProducts) onSelectProducts(items);

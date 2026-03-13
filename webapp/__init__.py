@@ -87,6 +87,8 @@ def set_cache_control_headers(response):
 
     if (
         flask.request.path.startswith("/_status")
+        or
+        flask.request.path.startswith("/api")
         or flask.request.path == "/app"
     ):
         # Our status endpoints need to be uncached
