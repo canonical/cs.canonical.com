@@ -1,0 +1,23 @@
+.request-removal-panel {
+  .p-panel__content {
+    overflow: visible;
+  }
+
+  .p-search-and-filter {
+    margin-bottom: 0.75rem;
+  }
+
+  .p-panel__title {
+    padding-bottom: 0.5rem;
+
+    .p-icon--information {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (min-width: $breakpoint-large) {
+    max-width: 30rem !important;
+    width: 30rem;
+  }
+}

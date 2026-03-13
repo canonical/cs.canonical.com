@@ -3,15 +3,19 @@ import React, { useCallback, useMemo, useState } from "react";
 
 import { Button, Tooltip } from "@canonical/react-components";
 
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import type { IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
+import { usePanelsStore } from "@/store/app";
 
 const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
   );
+
+  const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
 
@@ -23,11 +27,6 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
 
   const requestChanges = useCallback(() => {
     setChangeType(ChangeRequestType.COPY_UPDATE);
-    setModalOpen(true);
-  }, []);
-
-  const requestRemoval = useCallback(() => {
-    setChangeType(ChangeRequestType.PAGE_REMOVAL);
     setModalOpen(true);
   }, []);
 
@@ -72,7 +71,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
                 className="p-segmented-control__button"
                 disabled={allActionsDisabled}
                 hasIcon
-                onClick={requestRemoval}
+                onClick={toggleRequestRemovalPanel}
               >
                 <React.Fragment key=".0">
                   <i className="p-icon--delete" /> <span>Remove page</span>
@@ -99,6 +98,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
           webpage={page}
         />
       )}
+      <RequestRemovalPanel webpage={page} />
     </div>
   );
 };

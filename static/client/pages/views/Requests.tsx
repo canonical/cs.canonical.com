@@ -1,7 +1,8 @@
 import { ContextualMenu, List } from "@canonical/react-components";
 
 import RequestHistory from "@/components/Dashboard/History";
-import config, { BUG_REPORT, NEW_FEATURE_REQUEST } from "@/config";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
+import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE } from "@/config";
 import { usePanelsStore } from "@/store/app";
 
 const Requests: React.FC = () => {
@@ -36,9 +37,10 @@ const Requests: React.FC = () => {
     },
   ];
 
-  const [toggleRequestFeaturePanel, toggleReportBugPanel] = usePanelsStore((state) => [
+  const [toggleRequestFeaturePanel, toggleReportBugPanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.toggleRequestFeaturePanel,
     state.toggleReportBugPanel,
+    state.toggleRequestRemovalPanel,
   ]);
 
   function handleQuickAction(requestType: string) {
@@ -48,6 +50,9 @@ const Requests: React.FC = () => {
         break;
       case NEW_FEATURE_REQUEST:
         toggleRequestFeaturePanel();
+        break;
+      case REMOVE_PAGE:
+        toggleRequestRemovalPanel();
         break;
     }
   }
@@ -73,6 +78,7 @@ const Requests: React.FC = () => {
                 toggleAppearance={"positive"}
                 toggleLabel="Start a request"
               />
+              <RequestRemovalPanel />
             </div>
             <div className="grid-col">
               <div className="p-image-container--3-2">
