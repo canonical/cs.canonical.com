@@ -19,22 +19,20 @@ const options: TestOption[] = [
 describe("ComboSelect", () => {
   describe("single select", () => {
     it("renders with placeholder when no value", () => {
-      render(
-        <ComboSelect options={options} onSelect={vi.fn()} placeholder="Pick a user" value={null} />,
-      );
+      render(<ComboSelect onSelect={vi.fn()} options={options} placeholder="Pick a user" value={null} />);
       expect(screen.getByPlaceholderText("Pick a user")).toBeInTheDocument();
     });
 
     it("does not show dropdown when input has fewer than 3 characters", async () => {
       const user = userEvent.setup();
-      render(<ComboSelect options={options} onSelect={vi.fn()} value={null} />);
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
       await user.type(screen.getByRole("textbox"), "Al");
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     });
 
     it("filters and shows dropdown at 3+ characters", async () => {
       const user = userEvent.setup();
-      render(<ComboSelect options={options} onSelect={vi.fn()} value={null} />);
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
       await user.type(screen.getByRole("textbox"), "Ali");
       expect(screen.getByRole("listbox")).toBeInTheDocument();
       expect(screen.getAllByRole("option")).toHaveLength(2);
@@ -43,7 +41,7 @@ describe("ComboSelect", () => {
     it("selects an option and closes dropdown", async () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<ComboSelect options={options} onSelect={onSelect} value={null} />);
+      render(<ComboSelect onSelect={onSelect} options={options} value={null} />);
       await user.type(screen.getByRole("textbox"), "Ali");
       await user.click(screen.getAllByRole("option")[0]);
       expect(onSelect).toHaveBeenCalledWith(options[0]);
@@ -51,7 +49,7 @@ describe("ComboSelect", () => {
     });
 
     it("displays selected value label in input", () => {
-      render(<ComboSelect options={options} onSelect={vi.fn()} value={options[0]} />);
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={options[0]} />);
       expect(screen.getByRole("textbox")).toHaveValue("Alice Johnson");
     });
 
@@ -64,9 +62,7 @@ describe("ComboSelect", () => {
     });
 
     it("renders error state with message", () => {
-      render(
-        <ComboSelect error="Required field" onSelect={vi.fn()} options={options} value={null} />,
-      );
+      render(<ComboSelect error="Required field" onSelect={vi.fn()} options={options} value={null} />);
       expect(screen.getByText("Required field")).toBeInTheDocument();
     });
 
@@ -88,9 +84,7 @@ describe("ComboSelect", () => {
     });
 
     it("displays comma-separated labels for multiple selected values", () => {
-      render(
-        <ComboSelect multiple onSelect={vi.fn()} options={options} value={[options[0], options[1]]} />,
-      );
+      render(<ComboSelect multiple onSelect={vi.fn()} options={options} value={[options[0], options[1]]} />);
       expect(screen.getByRole("textbox")).toHaveValue("Alice Johnson, Bob Smith");
     });
 
