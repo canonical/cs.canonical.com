@@ -75,7 +75,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
           <h2 className="p-text--small-caps">Tags</h2>
           <div className="l-webpage__tags">
             {page.products.map((p) => {
-              return <Chip key={p.id} value={p.name} />;
+              return <Chip isReadOnly={true} key={p.id} value={p.name} />;
             })}
             <Button appearance="base" onClick={toggleProductsPanel} small>
               Edit tags
