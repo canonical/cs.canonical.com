@@ -78,18 +78,25 @@ def set_product(body: SetProductsModel):
             site_repository = SiteRepository(project.name, current_app)
             # clean the cache for a new product to appear in the tree
             site_repository.invalidate_cache()
-        
+
         except IntegrityError as e:
             db.session.rollback()
-            
-            # Check if the underlying cause is specifically a Foreign Key Violation
+
             if isinstance(e.orig, ForeignKeyViolation):
-                return jsonify({"error": f"Tag: {product['name']} does not exist."}), 400
+                return jsonify({
+                    "error": f"Tag: {product['name']} does not exist."
+                    }), 400
             else:
-                return jsonify({"error": "Integrity constraint violated. Please check the tags."}), 400
+                return jsonify({
+                    "error": (
+                        "Integrity constraint violated. Please check the tags."
+                    )
+                    }), 400
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+            return jsonify({
+                "error": f"An unexpected error occurred: {e}"
+            }), 500
 
     return jsonify({"message": "Successfully set product"}), 200
 

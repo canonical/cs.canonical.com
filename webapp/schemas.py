@@ -112,3 +112,11 @@ class RequestFeatureModel(BaseModel):
 
 class NotifyBAUModel(BaseModel):
     jira_task_id: str
+
+
+class UpdatePageDetailsModel(BaseModel):
+    owner_struct: object = {}
+    reviewer_structs: Optional[List[object]] = []
+    copydoc_link: Optional[str] = None
+    figma_link: Optional[str] = None
+    webpage_id: int
