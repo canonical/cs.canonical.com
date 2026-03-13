@@ -75,4 +75,34 @@ describe("ComboSelect", () => {
       expect(screen.getByRole("textbox")).toBeDisabled();
     });
   });
+
+  describe("multi select", () => {
+    it("selects multiple options and keeps dropdown open", async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<ComboSelect multiple onSelect={onSelect} options={options} value={[]} />);
+      await user.type(screen.getByRole("textbox"), "Ali");
+      await user.click(screen.getAllByRole("option")[0]);
+      expect(onSelect).toHaveBeenCalledWith([options[0]]);
+      expect(screen.getByRole("listbox")).toBeInTheDocument();
+    });
+
+    it("displays comma-separated labels for multiple selected values", () => {
+      render(
+        <ComboSelect multiple onSelect={vi.fn()} options={options} value={[options[0], options[1]]} />,
+      );
+      expect(screen.getByRole("textbox")).toHaveValue("Alice Johnson, Bob Smith");
+    });
+
+    it("deselects an already-selected option", async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<ComboSelect multiple onSelect={onSelect} options={options} value={[options[0]]} />);
+      const input = screen.getByRole("textbox");
+      await user.tripleClick(input);
+      await user.keyboard("Ali");
+      await user.click(screen.getAllByRole("option")[0]);
+      expect(onSelect).toHaveBeenCalledWith([]);
+    });
+  });
 });
