@@ -1,4 +1,4 @@
-import { type MouseEvent, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { type MouseEvent, type ReactNode, useCallback, useMemo, useState } from "react";
 
 import classNames from "classnames";
 
@@ -22,7 +22,6 @@ const ComboSelect = <T extends Record<string, any>>({
 }: ComboSelectProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const keysToSearch = useMemo(() => searchKeys ?? [labelKey], [searchKeys, labelKey]);
 
@@ -110,7 +109,6 @@ const ComboSelect = <T extends Record<string, any>>({
           onBlur={handleBlur}
           onChange={handleChange}
           placeholder={!value || (Array.isArray(value) && value.length === 0) ? placeholder : undefined}
-          ref={inputRef}
           type="text"
           value={displayValue}
         />
