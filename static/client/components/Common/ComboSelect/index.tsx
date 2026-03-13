@@ -80,7 +80,6 @@ const ComboSelect = <T extends Record<string, any>>({
           ? currentValue.filter((v) => v[indexKey] !== option[indexKey])
           : [...currentValue, option];
         onSelect(newValue);
-        setQuery("");
       } else {
         onSelect(option);
         setQuery("");
