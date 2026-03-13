@@ -39,7 +39,7 @@ const Products = ({ page, onSelectProducts }: IProductsProps): ReactNode => {
         page.products = items.map((p) => ({ name: p.label, id: p.value }) as IProduct);
         PagesServices.setProducts({
           webpage_id: page?.id,
-          product_ids: items.map((p) => p.value),
+          products: items.map((p) => ({ name: p.label, id: p.value }) as IProduct),
         } as ISetProducts);
       }
       if (onSelectProducts) onSelectProducts(items);

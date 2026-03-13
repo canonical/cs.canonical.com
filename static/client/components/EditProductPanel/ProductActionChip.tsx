@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 
 import { Button, Icon, Input } from "@canonical/react-components";
 
+import HighlightedSearchText from "@/components/Common/HighlightedSearchText";
 import type { IProduct } from "@/services/api/types/products";
 
 type ProductActionChipProps = {
@@ -11,6 +12,7 @@ type ProductActionChipProps = {
   onChipClick?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isAdmin?: boolean;
   isSelected?: boolean;
+  searchValue?: string;
 };
 
 const ProductActionChip = ({
@@ -20,10 +22,16 @@ const ProductActionChip = ({
   onChipClick,
   isAdmin,
   isSelected,
+  searchValue = "",
 }: ProductActionChipProps): ReactNode => {
   return (
     <div className="p-product-action-chip" data-id={product.id}>
-      <Input checked={isSelected} id="checkExample12" label={product.name} onChange={onChipClick} type="checkbox" />
+      <Input
+        checked={isSelected}
+        label={<HighlightedSearchText highlight={searchValue} text={product.name} />}
+        onChange={onChipClick}
+        type="checkbox"
+      />
 
       {isAdmin && (
         <div className="p-product-action-chip__actions u-align--right">

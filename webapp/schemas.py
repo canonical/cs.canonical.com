@@ -69,7 +69,7 @@ class CreatePageModel(BaseModel):
 
 class SetProductsModel(BaseModel):
     webpage_id: int
-    product_ids: List[int]
+    products: List[dict]
 
 
 class AddProductModel(BaseModel):

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { Button, SidePanel, Icon, List, useToastNotification } from "@canonical/react-components";
+import { useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
 
 import ProductActionChip from "./ProductActionChip";
@@ -39,6 +40,7 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
 
   const [selectedProducts, setSelectedProducts] = useState<IProduct[]>([]);
   const notify = useToastNotification();
+  const queryClient = useQueryClient();
 
   function onSearchTags(e: React.ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
@@ -62,12 +64,12 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
   }
 
   function onSave() {
-    page.products = selectedProducts.map((p) => ({ name: p.name, id: p.id }) as IProduct);
     PagesServices.setProducts({
       webpage_id: page.id as number,
-      product_ids: selectedProducts.map((p) => p.id),
+      products: selectedProducts,
     })
       .then(() => {
+        void queryClient.invalidateQueries("pages");
         notify.success("Products tags updated successfully.");
         toggleProductsPanel();
       })
@@ -96,6 +98,7 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
             onDelete={() => openProductActionModal(product, "delete")}
             onEdit={() => openProductActionModal(product, "edit")}
             product={product}
+            searchValue={search}
           />
         )),
     [products, search, isAdmin, selectedProducts],
@@ -104,7 +107,18 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
   return (
     <>
       {productActionModalOpen && (
-        <ProductActionModal action={action} onClose={toggleActionModal} product={selectedProduct} />
+        <ProductActionModal
+          action={action}
+          onClose={toggleActionModal}
+          onSuccess={(action, product, newName) => {
+            if (action === "delete" && product) {
+              setSelectedProducts((prev) => prev.filter((p) => p.id !== product.id));
+            } else if (action === "edit" && product) {
+              setSelectedProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, name: newName } : p)));
+            }
+          }}
+          product={selectedProduct}
+        />
       )}
       <SidePanel isOpen={productsPanelVisible}>
         <SidePanel.Sticky>
@@ -122,34 +136,34 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
               </Button>
             </SidePanel.HeaderControls>
           </SidePanel.Header>
+
+          <CustomSearchAndFilter<IProduct>
+            label=""
+            onChange={onSearchTags}
+            onRemove={onRemoveTag}
+            onSelect={() => {}}
+            options={products}
+            placeholder="Search"
+            resetOnClickOutside={false}
+            selectedOptions={selectedProducts}
+            showPanel={false}
+          />
+
+          {isAdmin ? (
+            <div className="u-align--right p-new-tag-button">
+              <Button appearance="base" hasIcon onClick={() => openProductActionModal(null, "add")}>
+                <i className="p-icon--plus" /> <span>Add new product tag</span>
+              </Button>
+            </div>
+          ) : (
+            <p className="p-new-tag-text u-no-padding--top">
+              To edit a product tag, please{" "}
+              <Link onClick={onRequestFeature} to="/app">
+                submit a feature request
+              </Link>
+            </p>
+          )}
         </SidePanel.Sticky>
-
-        <CustomSearchAndFilter<IProduct>
-          label=""
-          onChange={onSearchTags}
-          onRemove={onRemoveTag}
-          onSelect={() => {}}
-          options={products}
-          placeholder="Search"
-          resetOnClickOutside={false}
-          selectedOptions={selectedProducts}
-          showPanel={false}
-        />
-
-        {isAdmin ? (
-          <div className="u-align--right p-new-tag-button">
-            <Button appearance="base" hasIcon onClick={() => openProductActionModal(null, "add")}>
-              <i className="p-icon--plus" /> <span>Add new product tag</span>
-            </Button>
-          </div>
-        ) : (
-          <p className="p-new-tag-text">
-            To edit a product tag, please{" "}
-            <Link onClick={onRequestFeature} to="/app">
-              submit a feature request
-            </Link>
-          </p>
-        )}
 
         <SidePanel.Content className="u-no-padding p-side-panel--content">
           <List className="u-no-margin--bottom" divided={true} items={filteredProductItems} />

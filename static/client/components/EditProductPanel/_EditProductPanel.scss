@@ -1,7 +1,22 @@
+.side-panel {
+  display: flex;
+  flex-direction: column;
+
+  .sticky-wrapper {
+    flex-shrink: 0;
+  }
+
+  .sticky-wrapper--bottom {
+    top: unset;
+    margin-top: auto;
+  }
+}
+
 .p-side-panel--content {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 76%;
 
   .p-list--divided {
     .p-list__item {

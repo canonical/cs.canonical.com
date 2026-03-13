@@ -10,9 +10,10 @@ interface ProductActionModalProps {
   product: IProduct | null;
   onClose: () => void;
   action: IProductAction;
+  onSuccess?: (action: IProductAction, product: IProduct | null, newName: string) => void;
 }
 
-const ProductActionModal = ({ product, onClose, action }: ProductActionModalProps): ReactNode => {
+const ProductActionModal = ({ product, onClose, action, onSuccess }: ProductActionModalProps): ReactNode => {
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(product?.name || "");
   const [inputError, setInputError] = useState<string | null>(null);
@@ -30,6 +31,8 @@ const ProductActionModal = ({ product, onClose, action }: ProductActionModalProp
         await ProductsServices.addProduct(newName);
       }
       await queryClient.invalidateQueries("products");
+      await queryClient.invalidateQueries("pages");
+      onSuccess?.(action, product, newName);
       onClose();
       notify.success(
         `${action === "delete" ? product?.name : newName} was successfully ${
