@@ -1,0 +1,53 @@
+.p-combo-select {
+  position: relative;
+
+  .p-combo-select__input-wrapper {
+    position: relative;
+
+    .p-form__control {
+      padding-right: 2rem;
+    }
+
+    .p-combo-select__chevron {
+      color: var(--vf-color-text-muted);
+      pointer-events: none;
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+
+  .p-combo-select__dropdown {
+    background-color: var(--vf-color-background-default);
+    border: 1px solid var(--vf-color-border-default);
+    box-shadow: rgba(38, 57, 77, 0.4) 0px 20px 30px -10px;
+    left: 0;
+    list-style-type: none;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0;
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    z-index: 10;
+
+    .p-combo-select__item {
+      overflow: hidden;
+      padding: 0.5rem 1rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &:hover {
+        background-color: var(--vf-color-background-neutral-hover);
+        cursor: pointer;
+      }
+
+      &.is-selected {
+        background-color: var(--vf-color-background-neutral-default);
+        font-weight: bold;
+      }
+    }
+  }
+}
