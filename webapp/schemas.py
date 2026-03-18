@@ -116,6 +116,14 @@ class RequestFeatureModel(BaseModel):
     objective: str = ""
 
 
+class UpdatePageDetailsModel(BaseModel):
+    webpage_id: int
+    owner: Optional[UserModel] = None
+    reviewers: Optional[List[UserModel]] = None
+    copy_doc_link: Optional[str] = None
+    figma_link: Optional[str] = None
+
+
 class NotifyBAUModel(BaseModel):
     jira_task_id: str
 

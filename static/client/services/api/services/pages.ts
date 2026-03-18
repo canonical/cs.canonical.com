@@ -9,6 +9,7 @@ import type {
   IRequestChangesResponse,
   IRequestRemoval,
   ISetProducts,
+  IUpdatePageDetails,
 } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
@@ -34,6 +35,10 @@ export const requestChanges = async (body: IRequestChanges): Promise<IRequestCha
 
 export const requestRemoval = async (body: IRequestRemoval) => {
   return api.pages.requestRemoval(body);
+};
+
+export const updatePageDetails = async (body: IUpdatePageDetails): Promise<void> => {
+  return api.pages.updatePageDetails(body);
 };
 
 export const setProducts = async (body: ISetProducts) => {

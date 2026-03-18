@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -23,17 +23,18 @@ describe("ComboSelect", () => {
       expect(screen.getByPlaceholderText("Pick a user")).toBeInTheDocument();
     });
 
-    it("does not show dropdown when input has fewer than 3 characters", async () => {
+    it("shows all options when input is focused", async () => {
+      const user = userEvent.setup();
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
+      await user.click(screen.getByRole("textbox"));
+      expect(screen.getByRole("listbox")).toBeInTheDocument();
+      expect(screen.getAllByRole("option")).toHaveLength(4);
+    });
+
+    it("filters options as user types", async () => {
       const user = userEvent.setup();
       render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
       await user.type(screen.getByRole("textbox"), "Al");
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    });
-
-    it("filters and shows dropdown at 3+ characters", async () => {
-      const user = userEvent.setup();
-      render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
-      await user.type(screen.getByRole("textbox"), "Ali");
       expect(screen.getByRole("listbox")).toBeInTheDocument();
       expect(screen.getAllByRole("option")).toHaveLength(2);
     });
@@ -70,6 +71,26 @@ describe("ComboSelect", () => {
       render(<ComboSelect disabled onSelect={vi.fn()} options={options} value={null} />);
       expect(screen.getByRole("textbox")).toBeDisabled();
     });
+
+    it("selected items show tick icon", async () => {
+      const user = userEvent.setup();
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={options[0]} />);
+      await user.click(screen.getByRole("textbox"));
+      const selectedOption = screen.getByRole("option", { name: /Alice Johnson/ });
+      expect(within(selectedOption).getByTestId("tick-icon")).toBeInTheDocument();
+      const unselectedOption = screen.getByRole("option", { name: /Bob Smith/ });
+      expect(within(unselectedOption).queryByTestId("tick-icon")).not.toBeInTheDocument();
+    });
+
+    it("chevron button toggles dropdown", async () => {
+      const user = userEvent.setup();
+      render(<ComboSelect onSelect={vi.fn()} options={options} value={null} />);
+      const chevron = screen.getByRole("button", { name: "Toggle dropdown" });
+      await user.click(chevron);
+      expect(screen.getByRole("listbox")).toBeInTheDocument();
+      await user.click(chevron);
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
   });
 
   describe("multi select", () => {
@@ -77,24 +98,32 @@ describe("ComboSelect", () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
       render(<ComboSelect multiple onSelect={onSelect} options={options} value={[]} />);
-      await user.type(screen.getByRole("textbox"), "Ali");
+      await user.click(screen.getByRole("textbox"));
       await user.click(screen.getAllByRole("option")[0]);
       expect(onSelect).toHaveBeenCalledWith([options[0]]);
       expect(screen.getByRole("listbox")).toBeInTheDocument();
     });
 
-    it("displays comma-separated labels for multiple selected values", () => {
+    it("displays chips for multiple selected values", () => {
       render(<ComboSelect multiple onSelect={vi.fn()} options={options} value={[options[0], options[1]]} />);
-      expect(screen.getByRole("textbox")).toHaveValue("Alice Johnson, Bob Smith");
+      expect(screen.getByText("Alice Johnson")).toBeInTheDocument();
+      expect(screen.getByText("Bob Smith")).toBeInTheDocument();
+      expect(screen.getByRole("textbox")).toHaveValue("");
+    });
+
+    it("chip dismiss removes item from selection", async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<ComboSelect multiple onSelect={onSelect} options={options} value={[options[0], options[1]]} />);
+      await user.click(screen.getByRole("button", { name: "Remove Alice Johnson" }));
+      expect(onSelect).toHaveBeenCalledWith([options[1]]);
     });
 
     it("deselects an already-selected option", async () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
       render(<ComboSelect multiple onSelect={onSelect} options={options} value={[options[0]]} />);
-      const input = screen.getByRole("textbox");
-      await user.tripleClick(input);
-      await user.keyboard("Ali");
+      await user.click(screen.getByRole("textbox"));
       await user.click(screen.getAllByRole("option")[0]);
       expect(onSelect).toHaveBeenCalledWith([]);
     });

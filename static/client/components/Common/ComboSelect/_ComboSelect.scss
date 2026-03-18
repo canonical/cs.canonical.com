@@ -1,6 +1,13 @@
 .p-combo-select {
   position: relative;
 
+  .p-combo-select__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
   .p-combo-select__input-wrapper {
     position: relative;
 
@@ -9,12 +16,20 @@
     }
 
     .p-combo-select__chevron {
+      appearance: none;
+      background: none;
+      border: none;
       color: var(--vf-color-text-muted);
-      pointer-events: none;
+      cursor: pointer;
+      padding: 0;
       position: absolute;
       right: 0.5rem;
       top: 50%;
       transform: translateY(-50%);
+
+      &:disabled {
+        cursor: not-allowed;
+      }
     }
   }
 
@@ -34,9 +49,11 @@
     z-index: 10;
 
     .p-combo-select__item {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
       overflow: hidden;
       padding: 0.5rem 1rem;
-      text-overflow: ellipsis;
       white-space: nowrap;
 
       &:hover {
@@ -47,6 +64,11 @@
       &.is-selected {
         background-color: var(--vf-color-background-neutral-default);
         font-weight: bold;
+      }
+
+      .p-combo-select__item-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

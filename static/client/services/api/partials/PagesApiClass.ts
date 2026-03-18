@@ -10,6 +10,7 @@ import type {
   IRequestChanges,
   IRequestRemoval,
   ISetProducts,
+  IUpdatePageDetails,
 } from "@/services/api/types/pages";
 import { type IUser } from "@/services/api/types/users";
 
@@ -42,6 +43,10 @@ export class PagesApiClass extends BasicApiClass {
 
   public requestRemoval(body: IRequestRemoval): Promise<{ data: { jira_task_id: string } }> {
     return this.callApi(ENDPOINTS.requestRemoval, REST_TYPES.POST, body);
+  }
+
+  public updatePageDetails(body: IUpdatePageDetails): Promise<void> {
+    return this.callApi(ENDPOINTS.updatePageDetails, REST_TYPES.POST, body);
   }
 
   public setProducts(body: ISetProducts) {

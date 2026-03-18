@@ -30,12 +30,12 @@ const ComboSelect = <T extends Record<string, any>>({
   const displayValue = useMemo(() => {
     if (query) return query;
     if (!value) return "";
-    if (Array.isArray(value)) return value.map(getLabel).join(", ");
+    if (Array.isArray(value)) return "";
     return getLabel(value);
   }, [query, value, getLabel]);
 
   const filtered = useMemo(() => {
-    if (query.length < 3) return [];
+    if (!query) return options;
     const lowerQuery = query.toLowerCase();
     return options.filter((opt) =>
       keysToSearch.some((key) => {
@@ -61,7 +61,7 @@ const ComboSelect = <T extends Record<string, any>>({
         onClear?.();
       }
       setQuery(inputValue);
-      setIsOpen(inputValue.length >= 3);
+      setIsOpen(true);
     },
     [value, multiple, onClear],
   );
@@ -97,10 +97,48 @@ const ComboSelect = <T extends Record<string, any>>({
     e.preventDefault();
   }, []);
 
+  const handleChevronMouseDown = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const handleChipDismiss = useCallback(
+    (option: T) => {
+      if (!Array.isArray(value)) return;
+      const newValue = value.filter((v) => v[indexKey] !== option[indexKey]);
+      onSelect(newValue);
+    },
+    [value, indexKey, onSelect],
+  );
+
   const wrapperClassName = error ? "p-form-validation is-error" : undefined;
+
+  const hasChips = multiple && Array.isArray(value) && value.length > 0;
+  const showPlaceholder = (!value || (Array.isArray(value) && value.length === 0)) && !query;
 
   return (
     <div className={classNames("p-combo-select", wrapperClassName, className)}>
+      {hasChips && (
+        <div className="p-combo-select__chips">
+          {(value as T[]).map((item) => (
+            <span className="p-chip" key={String(item[indexKey])}>
+              <span className="p-chip__value">{getLabel(item)}</span>
+              <button
+                aria-label={`Remove ${getLabel(item)}`}
+                className="p-chip__dismiss"
+                onClick={() => handleChipDismiss(item)}
+                type="button"
+              >
+                <i className="p-icon--close" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
       <div className="p-combo-select__input-wrapper">
         <input
           autoComplete="off"
@@ -108,11 +146,21 @@ const ComboSelect = <T extends Record<string, any>>({
           disabled={disabled}
           onBlur={handleBlur}
           onChange={handleChange}
-          placeholder={!value || (Array.isArray(value) && value.length === 0) ? placeholder : undefined}
+          onFocus={handleFocus}
+          placeholder={showPlaceholder ? placeholder : undefined}
           type="text"
           value={displayValue}
         />
-        <span className="p-combo-select__chevron">▾</span>
+        <button
+          aria-label="Toggle dropdown"
+          className="p-combo-select__chevron"
+          disabled={disabled}
+          onMouseDown={handleChevronMouseDown}
+          tabIndex={-1}
+          type="button"
+        >
+          <i className="p-icon--chevron-down" />
+        </button>
       </div>
       {isOpen && filtered.length > 0 && (
         <ul className="p-combo-select__dropdown" role="listbox">
@@ -128,7 +176,8 @@ const ComboSelect = <T extends Record<string, any>>({
               onMouseDown={handleOptionMouseDown}
               role="option"
             >
-              {getLabel(option)}
+              <span className="p-combo-select__item-label">{getLabel(option)}</span>
+              {isSelected(option) && <i className="p-icon--task-outstanding" data-testid="tick-icon" />}
             </li>
           ))}
         </ul>

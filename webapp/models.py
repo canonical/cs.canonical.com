@@ -102,6 +102,7 @@ class Webpage(db.Model, DateTimeMixin):
     content_jira_id: str = Column(String, nullable=True)  # This field is used
     # to track which pages were created from the content team's board on Jira
     file_path: str = Column(String, nullable=True)
+    figma_link: str = Column(String, nullable=True)
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
