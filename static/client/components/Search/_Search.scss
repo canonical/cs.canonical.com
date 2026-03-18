@@ -1,37 +1,39 @@
-.l-search-box {
-  margin-bottom: 0.5rem;
-
-  .p-search-box__input {
-    padding-right: 2.1rem;
+.p-page-search-select {
+  &.is-error .p-search-box input {
+    background-color: var(--vf-color-background-negative-default);
+    border-bottom-color: var(--vf-color-border-negative);
   }
-}
 
-.l-search-container {
-  position: relative;
-  width: 100%;
+  .l-search-container {
+    position: relative;
+    width: 100%;
 
-  .l-search-dropdown {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
-    left: 0;
-    list-style-type: none;
-    margin: 0;
-    max-height: calc(100vh - 200px);
-    overflow: auto;
-    padding: 0;
-    position: absolute;
-    top: -10px;
-    min-width: 100%;
-    width: max-content;
-    z-index: 10;
+    .l-search-dropdown {
+      background-color: var(--vf-color-background-default);
+      border-radius: 10px;
+      box-shadow: rgba(38, 57, 77, 0.4) 0px 20px 30px -10px;
+      left: 0;
+      list-style-type: none;
+      margin: 0;
+      max-height: calc(100vh - 200px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0;
+      position: absolute;
+      top: 100%;
+      width: 100%;
+      z-index: 10;
 
-    .l-search-item {
-      padding: 5px 10px;
+      .l-search-item {
+        overflow: hidden;
+        padding: 5px 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-        cursor: pointer;
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+        }
       }
     }
   }

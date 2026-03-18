@@ -7,6 +7,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   copyUpdatePanelVisible: false,
   reportBugPanelVisible: false,
   requestFeaturePanelVisible: false,
+  requestRemovalPanelVisible: false,
 
   togglePanel: (panelKey: PanelKey) => {
     const currentState = get();
@@ -18,6 +19,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
       copyUpdatePanelVisible: false,
       reportBugPanelVisible: false,
       requestFeaturePanelVisible: false,
+      requestRemovalPanelVisible: false,
 
       [panelKey]: !isCurrentlyVisible,
     };
@@ -29,4 +31,5 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   toggleCopyUpdatePanel: () => get().togglePanel("copyUpdatePanelVisible"),
   toggleReportBugPanel: () => get().togglePanel("reportBugPanelVisible"),
   toggleRequestFeaturePanel: () => get().togglePanel("requestFeaturePanelVisible"),
+  toggleRequestRemovalPanel: () => get().togglePanel("requestRemovalPanelVisible"),
 }));

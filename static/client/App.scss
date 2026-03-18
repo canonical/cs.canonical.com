@@ -54,6 +54,7 @@
 @import "./components/Search/Search";
 @import "./pages/Webpage/Webpage";
 @import "./pages/NewWebpage/NewWebpage";
+@import "./components/RequestRemovalPanel/RequestRemovalPanel";
 @import "./components/EditProductPanel/EditProductPanel";
 
 @mixin vf-icon-logout($color) {
