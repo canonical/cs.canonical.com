@@ -5,6 +5,7 @@ import { Button, Tooltip } from "@canonical/react-components";
 
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import type { IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
@@ -14,20 +15,26 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
   );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
-
   const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
-
-  // A page which was created from the content team's board on Jira
-  // must have a valid content_jira_id
   const isContentBoardPage = useMemo(() => page.content_jira_id, [page]);
 
-  const requestChanges = useCallback(() => {
-    setChangeType(ChangeRequestType.COPY_UPDATE);
+  const requestPageRefresh = useCallback(() => {
+    setChangeType(ChangeRequestType.PAGE_REFRESH);
     setModalOpen(true);
+  }, []);
+
+  const requestCopyUpdate = useCallback(() => {
+    setChangeType(ChangeRequestType.COPY_UPDATE);
+    setSidebarOpen(true);
+  }, []);
+
+  const handleSidebarClose = useCallback(() => {
+    setSidebarOpen(false);
   }, []);
 
   const createNewPage = useCallback(() => {
@@ -47,21 +54,23 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
         <div aria-label="Juju technology" className="p-segmented-control__list" role="tablist">
           {!isNew && (
             <>
+              {/* Pointed directly to requestCopyUpdate */}
               <Button
                 className="p-segmented-control__button"
                 disabled={allActionsDisabled}
                 hasIcon
-                onClick={requestChanges}
+                onClick={requestCopyUpdate}
               >
                 <React.Fragment key=".0">
                   <i className="p-icon--file" /> <span>Copy update</span>
                 </React.Fragment>
               </Button>
+              {/* Pointed directly to requestPageRefresh */}
               <Button
                 className="p-segmented-control__button"
                 disabled={allActionsDisabled}
                 hasIcon
-                onClick={requestChanges}
+                onClick={requestPageRefresh}
               >
                 <React.Fragment key=".0">
                   <i className="p-icon--change-version" /> <span>Page refresh</span>
@@ -89,6 +98,14 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
           )}
         </div>
       </Tooltip>
+
+      {sidebarOpen && (
+        <RequestCopydocPanel
+          changeType={changeType}
+          onClose={handleSidebarClose}
+          webpage={page}
+        /> 
+      )}
 
       {modalOpen && (
         <RequestTaskModal
