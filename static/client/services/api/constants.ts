@@ -19,7 +19,7 @@ export const ENDPOINTS = {
   getJiraProjects: "/api/get-jira-projects",
   submitForContentReview: "/api/submit-for-content-review",
   getReleases: "/api/get-releases",
-  submitRelease: "/api/submit-release",
+  updateReleases: "/api/update-releases",
 };
 
 export const REST_TYPES = {
