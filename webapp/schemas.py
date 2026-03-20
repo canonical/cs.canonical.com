@@ -109,3 +109,8 @@ class RequestFeatureModel(BaseModel):
     description: str = ""
     summary: str = ""
     objective: str = ""
+
+
+class UpdateReleasesRequest(BaseModel):
+    releases: dict
+    commit_message: str = "Update releases.yaml"
