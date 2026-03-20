@@ -8,7 +8,7 @@ export class ReleasesApiClass extends BasicApiClass {
     return this.callApi<{ data: IReleasesResponse }>(ENDPOINTS.getReleases, REST_TYPES.GET);
   }
 
-  public submitRelease(data: IReleasesData): Promise<void> {
-    return this.callApi(ENDPOINTS.submitRelease, REST_TYPES.POST, { releases: data });
+  public updateReleases(data: IReleasesData, commitMessage: string): Promise<void> {
+    return this.callApi(ENDPOINTS.updateReleases, REST_TYPES.POST, { releases: data, commit_message: commitMessage });
   }
 }
