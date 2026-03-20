@@ -1,5 +1,13 @@
+import io
+import json
+import base64
+
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.scalarstring import (
+    DoubleQuotedScalarString,
+    SingleQuotedScalarString,
+)
 
 from webapp.github import ReleasesGitHubAPI, GithubError
 
@@ -13,9 +21,10 @@ BASE_BRANCH_NAME = "main"
 class TaggedField:
     """Wrapper class to hold data & tag information in memory."""
 
-    def __init__(self, value, tag_type):
+    def __init__(self, value, tag_type, style=None):
         self.value = value
         self.tag_type = tag_type
+        self.style = style  # Scalar quote style: '"', "'", or None (plain)
 
 
 class ReleaseYamlParser:
@@ -23,24 +32,30 @@ class ReleaseYamlParser:
 
     def __init__(self):
         self.yaml = YAML(typ="rt")
+        self.yaml.preserve_quotes = True
         self.yaml.constructor.add_multi_constructor(
             "", self._construct_custom_tag
+        )
+        self.yaml.representer.add_representer(
+            TaggedField, self._represent_tagged_field
         )
 
     def _construct_custom_tag(self, loader, tag_suffix, node) -> TaggedField:
         """Extracts custom tagged fields from YAML nodes."""
         tag_name = node.tag.lstrip("!")
+        style = None
 
         if node.id == "scalar":
             value = loader.construct_scalar(node)
+            style = node.style
         elif node.id == "mapping":
             maptyp = CommentedMap()
             loader.construct_mapping(node, maptyp, deep=True)
-            value = dict(maptyp)
+            value = maptyp
         else:
             value = None
 
-        return TaggedField(value, tag_name)
+        return TaggedField(value, tag_name, style=style)
 
     def _serialize_node(self, node) -> dict:
         """Transforms Python dicts into JSON compatible format recursively."""
@@ -60,6 +75,108 @@ class ReleaseYamlParser:
         """Reads YAML string, parses it, and serializes to JSON."""
         data = self.yaml.load(yaml_content)
         return self._serialize_node(data)
+
+    def _represent_tagged_field(self, dumper, data: TaggedField):
+        """Representer for TaggedField: emits
+        custom YAML tags (!date, !link, !image)."""
+
+        tag = f"!{data.tag_type}"
+        if isinstance(data.value, dict):
+            return dumper.represent_mapping(tag, data.value)
+        return dumper.represent_scalar(tag, str(data.value), style=data.style)
+
+    def _validate_yaml_structure(self, original_data: dict, yaml_str: str):
+        """Validates generated YAML by round-tripping it through parse_yaml
+        and comparing against the original data.
+
+        Raises:
+            ValueError: If the round-tripped data does not match the original.
+            YAMLError: If the generated YAML cannot be parsed.
+        """
+        roundtrip = self.parse_yaml(yaml_str)
+        if roundtrip != original_data:
+            raise ValueError(
+                "YAML round-trip validation failed: "
+                "generated YAML does not match the input data."
+            )
+
+    def _is_dynamic_scalar_map(self, d):
+        """True if all keys and values
+        are plain scalars (no nested structures).
+
+        Used to identify checksum data
+        """
+        return bool(d) and all(
+            not isinstance(k, (dict, TaggedField, CommentedMap))
+            and not isinstance(v, (dict, TaggedField, CommentedMap))
+            for k, v in d.items()
+        )
+
+    def _deep_merge(self, original, json_node: dict):
+        """Merges json_node changes onto a RT-loaded CommentedMap in place.
+
+        Leaf dicts (where all values are scalars, e.g. checksum sections) are
+        replaced wholesale — keys can be added, removed, or updated.
+        """
+
+        for key, original_value in original.items():
+            if key not in json_node:
+                continue
+
+            updated_value = json_node[key]
+
+            if isinstance(original_value, TaggedField):
+                if isinstance(original_value.value, (dict, TaggedField)):
+                    self._deep_merge(
+                        original_value.value, updated_value["value"]
+                    )
+                else:
+                    original_value.value = type(original_value.value)(
+                        updated_value["value"]
+                    )
+
+            elif isinstance(original_value, dict):
+                if self._is_dynamic_scalar_map(original_value):
+                    old_key_types = {str(k): type(k) for k in original_value}
+                    old_val_types = {
+                        str(k): type(v) for k, v in original_value.items()
+                    }
+                    original_value.clear()
+                    for k, v in updated_value.items():
+                        key_type = old_key_types.get(
+                            k, DoubleQuotedScalarString
+                        )
+                        val_type = old_val_types.get(
+                            k, DoubleQuotedScalarString
+                        )
+                        original_value[key_type(k)] = val_type(v)
+                else:
+                    self._deep_merge(original_value, updated_value)
+
+            elif isinstance(
+                original_value,
+                (DoubleQuotedScalarString, SingleQuotedScalarString, str, int),
+            ):
+                original[key] = type(original_value)(updated_value)
+
+    def merge_and_dump(self, original_yaml: str, json_content: str) -> str:
+        """
+        Merges changes from JSON content onto the original YAML structure
+        to preserve formatting and style
+
+        Raises:
+            ValueError: If round-trip validation fails.
+            YAMLError: If the generated YAML cannot
+            be parsed during validation.
+        """
+        data = json.loads(json_content)
+        original = self.yaml.load(original_yaml)
+        self._deep_merge(original, data)
+        stream = io.StringIO()
+        self.yaml.dump(original, stream)
+        yaml_str = stream.getvalue()
+        self._validate_yaml_structure(data, yaml_str)
+        return yaml_str
 
 
 class ReleasesGitHubClient(ReleasesGitHubAPI):
@@ -178,7 +295,6 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         Raises:
             GithubError: If the update operation fails.
         """
-        import base64
 
         url = f"repos/{self.repo}/contents/{self.file_path}"
 
@@ -197,17 +313,17 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         # Encode the new content in base64
         encoded_content = base64.b64encode(new_content.encode()).decode()
 
-        params = {
+        payload = {
             "message": commit_message,
             "content": encoded_content,
             "branch": RELEASES_BRANCH_NAME,
         }
 
         if file_sha:
-            params["sha"] = file_sha
+            payload["sha"] = file_sha
 
         # Update the file
-        response = self._request("PUT", url, data=params)
+        response = self._request("PUT", url, data=payload)
         return response
 
 
@@ -244,9 +360,11 @@ class ReleasesService:
             A dictionary with the update status and any relevant information.
         """
 
-        # need to convert json content that we get from the parser back
-        # to yaml string before sending to github client
-        yaml_content = json_content
+        original_yaml, _ = self.github_client.fetch_releases_yaml()
+        yaml_content = self.parser.merge_and_dump(original_yaml, json_content)
+
+        with open("debug_merged.yaml", "w") as f:
+            f.write(yaml_content)
 
         try:
             branch = self.github_client.fetch_releases_branch()
