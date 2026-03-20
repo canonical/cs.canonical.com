@@ -5,8 +5,8 @@ export const getReleases = async (): Promise<{ data: IReleasesResponse }> => {
   return api.releases.getReleases();
 };
 
-export const submitRelease = async (data: IReleasesData): Promise<void> => {
-  return api.releases.submitRelease(data);
+export const updateReleases = async (data: IReleasesData, commitMessage: string): Promise<void> => {
+  return api.releases.updateReleases(data, commitMessage);
 };
 
 export * as ReleasesServices from "./releases";

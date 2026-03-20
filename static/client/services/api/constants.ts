@@ -14,7 +14,7 @@ export const ENDPOINTS = {
   reportBug: "/api/report-bug",
   requestFeature: "/api/request-feature",
   getReleases: "/api/get-releases",
-  submitRelease: "/api/submit-release",
+  updateReleases: "/api/update-releases",
 };
 
 export const REST_TYPES = {
