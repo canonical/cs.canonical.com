@@ -80,7 +80,7 @@ class GitHubBase:
         if blob:
             return response.content
 
-        if response.status_code == 200:
+        if response.status_code in [200, 201, 204]:
             return response.text if raw else response.json()
 
         message = (
