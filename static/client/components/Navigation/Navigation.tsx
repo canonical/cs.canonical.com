@@ -224,6 +224,20 @@ const Navigation = (): ReactNode => {
                 </ul>
               )}
             </div>
+            <div className="p-panel__views">
+              <hr className="p-rule" />
+              <ul className="u-no-margin u-no-padding">
+                <li
+                  className={`p-side-navigation__link ${location.pathname === "/app/releases" ? "is-active" : ""}`}
+                  onClick={() => navigate("/app/releases")}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--repository is-dark" />
+                    Releases
+                  </span>
+                </li>
+              </ul>
+            </div>
             <div className="p-panel__footer p-side-navigation--icons">
               {user?.name && (
                 <div className="u-truncate p-side-navigation__link">

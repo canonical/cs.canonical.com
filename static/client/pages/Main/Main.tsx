@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import FullSiteView from "@/components/Views/FullSiteView";
 import NewWebpageRedirector from "@/pages/NewWebpage/NewWebpageRedirector";
+import Releases from "@/pages/Releases";
 import Owned from "@/pages/views/Owned";
 import Requests from "@/pages/views/Requests";
 import Reviewed from "@/pages/views/Reviewed";
@@ -33,6 +34,7 @@ const Main = (): React.ReactNode => {
             <Route element={<Reviewed />} path="views/reviewed" />
             <Route element={<FullSiteView />} path="views/table" />
             <Route element={<NewWebpageRedirector />} path="new-webpage" />
+            <Route element={<Releases />} path="releases" />
             {getDynamicRoutes()}
           </Route>
         </Route>
