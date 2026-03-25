@@ -5,7 +5,7 @@ from flask_pydantic import validate
 from ruamel.yaml import YAMLError
 
 from webapp.github import GithubError
-from webapp.releases_manager import ReleasesService
+from webapp.releases_manager import MergeConflictError, ReleasesService
 from webapp.schemas import UpdateReleasesRequest
 from webapp.sso import login_required
 
@@ -54,27 +54,18 @@ def update_releases_yaml(body: UpdateReleasesRequest):
             json.dumps(body.releases), body.commit_message
         )
     except (ValueError, YAMLError) as e:
-        return Response(
-            response=json.dumps(
-                {
-                    "error": "Invalid releases data",
-                    "details": str(e),
-                }
-            ),
-            status=400,
-            mimetype="application/json",
+        return (
+            jsonify({"message": "Invalid releases data", "details": str(e)}),
+            400,
         )
+    except MergeConflictError as e:
+        return jsonify({"message": str(e)}), 409
     except GithubError as e:
-        return Response(
-            response=json.dumps(
-                {
-                    "error": "Failed to update releases",
-                    "details": str(e),
-                }
+        return (
+            jsonify(
+                {"message": "Failed to update releases", "details": str(e)}
             ),
-            status=500,
-            mimetype="application/json",
+            500,
         )
 
-    status_code = 200 if result.get("success") else 400
-    return jsonify(result), status_code
+    return jsonify(result), 200

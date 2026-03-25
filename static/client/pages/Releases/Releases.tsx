@@ -74,7 +74,7 @@ const Releases = (): ReactNode => {
             </span>
             {status.pr && (
               <a
-                href={String((status.pr as Record<string, unknown>).html_url ?? "#")}
+                href={`https://ubuntu-com-${(status.pr as Record<string, unknown>).number}.demos.haus/`}
                 rel="noopener noreferrer"
                 target="_blank"
               >
