@@ -1,6 +1,7 @@
 import io
 import json
 import base64
+import logging
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -10,6 +11,19 @@ from ruamel.yaml.scalarstring import (
 )
 
 from webapp.github import ReleasesGitHubAPI, GithubError
+
+logger = logging.getLogger(__name__)
+
+
+class MergeConflictError(GithubError):
+    """Raised when merging base into the release branch produces a conflict."""
+
+    def __init__(self):
+        super().__init__(
+            "Merge conflict detected. Please resolve conflicts manually.",
+            status_code=409,
+        )
+
 
 RELEASES_REPO = "canonical/ubuntu.com"
 # RELEASES_FILE_PATH = "releases.yaml"
@@ -42,7 +56,7 @@ class ReleaseYamlParser:
 
     def _construct_custom_tag(self, loader, tag_suffix, node) -> TaggedField:
         """Extracts custom tagged fields from YAML nodes."""
-        tag_name = node.tag.lstrip("!")
+        tag_name = node.tag.removeprefix("!")
         style = None
 
         if node.id == "scalar":
@@ -73,6 +87,7 @@ class ReleaseYamlParser:
 
     def parse_yaml(self, yaml_content) -> dict:
         """Reads YAML string, parses it, and serializes to JSON."""
+        logger.debug("Parsing YAML content (%d bytes)", len(yaml_content))
         data = self.yaml.load(yaml_content)
         return self._serialize_node(data)
 
@@ -85,7 +100,7 @@ class ReleaseYamlParser:
             return dumper.represent_mapping(tag, data.value)
         return dumper.represent_scalar(tag, str(data.value), style=data.style)
 
-    def _validate_yaml_structure(self, original_data: dict, yaml_str: str):
+    def _validate_yaml_structure(self, expected_data: dict, yaml_str: str):
         """Validates generated YAML by round-tripping it through parse_yaml
         and comparing against the original data.
 
@@ -94,7 +109,8 @@ class ReleaseYamlParser:
             YAMLError: If the generated YAML cannot be parsed.
         """
         roundtrip = self.parse_yaml(yaml_str)
-        if roundtrip != original_data:
+        if roundtrip != expected_data:
+            logger.error("YAML round-trip validation failed")
             raise ValueError(
                 "YAML round-trip validation failed: "
                 "generated YAML does not match the input data."
@@ -170,12 +186,15 @@ class ReleaseYamlParser:
             be parsed during validation.
         """
         data = json.loads(json_content)
+
+        logger.debug("Merging JSON changes into YAML")
         original = self.yaml.load(original_yaml)
         self._deep_merge(original, data)
         stream = io.StringIO()
         self.yaml.dump(original, stream)
         yaml_str = stream.getvalue()
         self._validate_yaml_structure(data, yaml_str)
+        logger.debug("Merge and dump complete (%d bytes)", len(yaml_str))
         return yaml_str
 
 
@@ -207,8 +226,12 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
             if not pr:
                 # TODO: Create a PR for the orphaned branch
                 # https://warthogs.atlassian.net/browse/WD-32397
-                pass
+                logger.warning(
+                    "Release branch %s exists but has no open PR",
+                    RELEASES_BRANCH_NAME,
+                )
 
+        logger.info("Fetching releases YAML from branch: %s", ref)
         yaml_content = self._request("GET", url, params={"ref": ref}, raw=True)
         status = {"pr": pr, "pr_exists": pr is not None, "branch": ref}
         return yaml_content, status
@@ -227,7 +250,9 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         response = self._request("GET", url, params=params)
 
         if response:
+            logger.info("Found existing PR #%s", response[0]["number"])
             return response[0]  # Return the first matching PR
+        logger.debug("No open PR found for branch: %s", RELEASES_BRANCH_NAME)
 
     def fetch_releases_branch(self) -> dict | None:
         """Fetches the status of the releases branch.
@@ -239,24 +264,23 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         url = f"repos/{self.repo}/branches/{RELEASES_BRANCH_NAME}"
         try:
             response = self._request("GET", url)
+            logger.debug("Release branch exists: %s", RELEASES_BRANCH_NAME)
             return response
         except GithubError as e:
             if e.status_code == 404:
+                logger.debug(
+                    "Release branch does not exist: %s", RELEASES_BRANCH_NAME
+                )
                 return None
             raise
 
-    def merge_base_into_release(self) -> dict | None:
-        """Merge base branch into the release branch if there are no conflicts.
-
-        Returns:
-            dict: Result of merge operation.
-            None: If the branch does not exist.
+    def merge_base_into_release(self) -> None:
+        """Merge base branch into the release branch.
 
         Raises:
+            MergeConflictError: If there is a merge conflict.
             GithubError: If the merge operation fails for other reasons.
         """
-        if not self.fetch_releases_branch():
-            return None
 
         url = f"repos/{self.repo}/merges"
         payload = {
@@ -266,16 +290,20 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
             f" into {RELEASES_BRANCH_NAME}",
         }
 
+        logger.info(
+            "Merging %s into %s", BASE_BRANCH_NAME, RELEASES_BRANCH_NAME
+        )
         try:
-            response = self._request("POST", url, data=payload, raw=True)
-            return {"success": True, "merge": response}
+            self._request("POST", url, data=payload, raw=True)
+            logger.info("Merge complete")
         except GithubError as e:
             if e.status_code == 409:
-                return {
-                    "success": False,
-                    "error": "Merge conflict detected."
-                    " Please resolve conflicts manually.",
-                }
+                logger.warning(
+                    "Merge conflict detected between %s and %s",
+                    BASE_BRANCH_NAME,
+                    RELEASES_BRANCH_NAME,
+                )
+                raise MergeConflictError()
             raise
 
     def update_releases_yaml(
@@ -304,8 +332,13 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
                 "GET", url, params={"ref": RELEASES_BRANCH_NAME}
             )
             file_sha = current_file["sha"]
+            logger.debug("Existing file SHA: %s", file_sha)
         except GithubError as e:
             if e.status_code == 404:
+                logger.debug(
+                    "File not found on branch %s, will create it",
+                    RELEASES_BRANCH_NAME,
+                )
                 file_sha = None
             else:
                 raise
@@ -324,6 +357,58 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
 
         # Update the file
         response = self._request("PUT", url, data=payload)
+        return response
+
+    def _get_branch_sha(self, branch_name: str) -> str:
+        """Returns the latest commit SHA for the given branch.
+
+        Raises:
+            GithubError: If the branch does not exist or the request fails.
+        """
+        url = f"repos/{self.repo}/branches/{branch_name}"
+        response = self._request("GET", url)
+        return response["commit"]["sha"]
+
+    def create_releases_branch(self) -> dict:
+        """Creates the releases branch from the base branch.
+
+        Returns:
+            dict: The branch creation response data.
+        Raises:
+            GithubError: If the branch creation operation fails.
+        """
+        logger.info("Creating release branch: %s", RELEASES_BRANCH_NAME)
+        url = f"repos/{self.repo}/git/refs"
+        payload = {
+            "ref": f"refs/heads/{RELEASES_BRANCH_NAME}",
+            "sha": self._get_branch_sha(BASE_BRANCH_NAME),
+        }
+        response = self._request("POST", url, data=payload)
+        logger.info("Release branch created: %s", RELEASES_BRANCH_NAME)
+        return response
+
+    def create_releases_pr(self) -> dict:
+        """Creates a pull request for the releases branch.
+
+        Returns:
+            dict: The PR creation response data.
+        Raises:
+            GithubError: If the PR creation operation fails.
+        """
+        logger.info(
+            "Creating PR for branch: %s -> %s",
+            RELEASES_BRANCH_NAME,
+            BASE_BRANCH_NAME,
+        )
+        url = f"repos/{self.repo}/pulls"
+        payload = {
+            "title": "Update releases.yaml",
+            "head": RELEASES_BRANCH_NAME,
+            "base": BASE_BRANCH_NAME,
+            "body": "Automated update of releases.yaml",
+        }
+        response = self._request("POST", url, data=payload)
+        logger.info("PR created: #%s", response.get("number"))
         return response
 
 
@@ -360,60 +445,33 @@ class ReleasesService:
             A dictionary with the update status and any relevant information.
         """
 
-        original_yaml, _ = self.github_client.fetch_releases_yaml()
+        logger.info("Starting releases update workflow")
+        original_yaml, status = self.github_client.fetch_releases_yaml()
         yaml_content = self.parser.merge_and_dump(original_yaml, json_content)
-
-        with open("debug_merged.yaml", "w") as f:
-            f.write(yaml_content)
-
-        try:
-            branch = self.github_client.fetch_releases_branch()
-            if not branch:
-                # TODO: Create the branch from base branch if it doesn't exist
-                # https://warthogs.atlassian.net/browse/WD-30487
-                return {
-                    "success": False,
-                    "error": "Release branch does not exist. "
-                    "Please create it first.",
-                }
-
+        branch_exists = status["branch"] == RELEASES_BRANCH_NAME
+        if not branch_exists:
+            self.github_client.create_releases_branch()
+        else:
             # Merge base branch into release branch to ensure it's up to date
-            merge_result = self.github_client.merge_base_into_release()
-            if not merge_result.get("success"):
-                return merge_result
+            self.github_client.merge_base_into_release()
 
-            update_result = self.github_client.update_releases_yaml(
-                yaml_content, commit_message
-            )
+        update_result = self.github_client.update_releases_yaml(
+            yaml_content, commit_message
+        )
 
-            # Check if PR exists
-            pr = self.github_client.fetch_releases_pr()
+        pr = status["pr"] or self.github_client.create_releases_pr()
+        logger.info(
+            "Releases update complete. PR: #%s (%s)",
+            pr.get("number"),
+            pr.get("html_url"),
+        )
 
-            if not pr:
-                # TODO: Create PR automatically
-                # https://warthogs.atlassian.net/browse/WD-30487
-                return {
-                    "success": True,
-                    "message": "File updated successfully. "
-                    "Please create a PR manually.",
-                    "commit": update_result,
-                    "branch": RELEASES_BRANCH_NAME,
-                }
-
-            return {
-                "success": True,
-                "message": "releases.yaml updated successfully.",
-                "commit": update_result,
-                "pr": {
-                    "number": pr.get("number"),
-                    "url": pr.get("html_url"),
-                    "title": pr.get("title"),
-                },
-            }
-
-        except GithubError as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "status_code": e.status_code,
-            }
+        return {
+            "message": "releases.yaml updated successfully.",
+            "commit": update_result,
+            "pr": {
+                "number": pr.get("number"),
+                "url": pr.get("html_url"),
+                "title": pr.get("title"),
+            },
+        }
