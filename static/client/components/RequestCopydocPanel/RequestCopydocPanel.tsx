@@ -14,10 +14,8 @@ import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import config from "@/config";
 
-// --- Added Search Imports ---
 import PageSearch from "@/components/Search";
 import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
-// ----------------------------
 
 import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 import { usePages } from "@/services/api/hooks/pages";
@@ -38,15 +36,13 @@ const getBusinessDate = (daysToAdd: number) => {
   return date;
 };
 
-const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
+const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
   const [descr, setDescr] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // --- Added Search States ---
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
   const [confirmedPage, setConfirmedPage] = useState<IPageOption | null>(null);
   const pageOptions = usePageOptions();
-  // ---------------------------
 
   const user = useStore((state) => state.user);
   const { refetch } = usePages(true);
@@ -57,10 +53,9 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
   const dueDateObj = useMemo(() => getBusinessDate(3), []);
   const formattedDueDate = useMemo(() => dueDateObj.toLocaleDateString("en-GB"), [dueDateObj]);
 
-  // --- Derive Active Webpage ---
   const activeWebpage = webpage ?? confirmedPage?.page;
   const showForm = activeWebpage !== undefined;
-  // -----------------------------
+  // 
 
   const handleDescrChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
@@ -69,7 +64,6 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
   const handleClose = useCallback(() => {
     onClose();
     setDescr("");
-    // Clear search state on close
     setSelectedPage(null);
     setConfirmedPage(null);
   }, [onClose]);
@@ -120,7 +114,6 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
   const handleSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
-      // Ensure we are using activeWebpage
       if (!activeWebpage?.id) return;
       setIsLoading(true);
 
@@ -128,11 +121,11 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
         due_date: dueDateObj.toISOString().split("T")[0],
         webpage_id: activeWebpage.id,
         reporter_struct: user,
-        type: changeType,
+        type: ChangeRequestType.COPY_UPDATE,
         summary: "Copy update request",
         description: `Copy doc link: ${activeWebpage.copy_doc_link} \n${descr}`,
         request_type: Object.keys(ChangeRequestType).find(
-          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === changeType
+          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE
         ) as string,
       })
         .then((response) => {
@@ -158,7 +151,6 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
     [
       activeWebpage?.id,
       activeWebpage?.copy_doc_link,
-      changeType,
       dueDateObj,
       user,
       descr,
@@ -206,7 +198,6 @@ const RequestCopydocPanel = ({ changeType, isOpen, onClose, webpage }: IRequestC
               />
             </div>
             <p>Assigned due date: {formattedDueDate}</p>
-            {/* Fixed typo here: changed class to className */}
             <p className="u-text--muted p-text--small u-sv-2">
               Copy updates are applied within 3 business days of your request
             </p>

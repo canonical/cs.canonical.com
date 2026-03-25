@@ -4,5 +4,5 @@ export interface IRequestCopydocPanel {
   changeType: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
   isOpen: boolean;
   onClose: () => void;
-  webpage: IPage;
+  webpage?: IPage;
 }

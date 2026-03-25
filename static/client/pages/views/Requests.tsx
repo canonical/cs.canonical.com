@@ -89,8 +89,7 @@ const Requests: React.FC = () => {
               
               <RequestRemovalPanel />
               
-              <RequestCopydocPanel 
-                changeType={ChangeRequestType.COPY_UPDATE}
+              <RequestCopydocPanel
                 isOpen={isCopydocPanelOpen}
                 onClose={() => setIsCopydocPanelOpen(false)}
               />
