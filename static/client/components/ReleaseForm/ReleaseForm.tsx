@@ -75,7 +75,8 @@ const ReleaseForm = ({ releases, onCancel }: IReleaseFormProps): ReactNode => {
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
     try {
-      await ReleasesServices.updateReleases(formData, "Update releases.yaml via ReleaseForm");
+      const timestamp = new Date().toISOString();
+      await ReleasesServices.updateReleases(formData, `Update releases.yaml via ReleaseForm [${timestamp}]`);
       await queryClient.invalidateQueries("releases");
       onCancel();
     } catch {
