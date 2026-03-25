@@ -92,7 +92,7 @@ class ReleaseYamlParser:
         return self._serialize_node(data)
 
     def _represent_tagged_field(self, dumper, data: TaggedField):
-        """Representer for TaggedField: emits
+        """Representer for TaggedField: returns
         custom YAML tags (!date, !link, !image)."""
 
         tag = f"!{data.tag_type}"
