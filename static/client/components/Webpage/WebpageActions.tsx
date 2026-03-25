@@ -101,7 +101,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
 
       {sidebarOpen && (
         <RequestCopydocPanel
-          changeType={changeType}
+          isOpen={sidebarOpen}
           onClose={handleSidebarClose}
           webpage={page}
         /> 

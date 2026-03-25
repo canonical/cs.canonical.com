@@ -101,7 +101,7 @@ class Jira:
         # Try to get the user from the database
         if jira_reporter_id := request.headers.get("X-JIRA-REPORTER-ID"):
             return jira_reporter_id
-        user = db.session.query(User).filter_by(id=user_id).first()
+        user = db.session.query(User).filter_by(id=2).first()
         if not user:
             raise ValueError(f"User with ID {user_id} not found")
         # If the user already has a Jira account ID, return it
@@ -182,7 +182,7 @@ class Jira:
                 "summary": summary,
                 "issuetype": {"id": issue_type},
                 "labels": labels if (labels and len(labels)) else self.labels,
-                "reporter": {"id": reporter_jira_id},
+                # "reporter": {"id": reporter_jira_id},
                 "parent": parent,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
