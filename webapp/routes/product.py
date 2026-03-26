@@ -55,48 +55,48 @@ def set_product(body: SetProductsModel):
     if not webpage:
         return jsonify({"error": "Webpage not found"}), 404
 
-    if webpage:
-        try:
-            # Remove previous products that were set for the webpage
-            existing_products = WebpageProduct.query.filter_by(
-                webpage_id=webpage_id
+    try:
+        # Remove previous products that were set for the webpage
+        existing_products = WebpageProduct.query.filter_by(
+            webpage_id=webpage_id
+        ).all()
+        for p in existing_products:
+            db.session.delete(p)
+
+        # Set new products for the webpage
+        for product in products:
+            get_or_create(
+                db.session,
+                WebpageProduct,
+                webpage_id=webpage_id,
+                product_id=product["id"],
             )
-            for p in existing_products:
-                db.session.delete(p)
-            db.session.commit()
 
-            # Set new products for the webpage
-            for product in products:
-                get_or_create(
-                    db.session,
-                    WebpageProduct,
-                    webpage_id=webpage_id,
-                    product_id=product["id"],
-                )
+        db.session.commit()
 
-            project = Project.query.filter_by(id=webpage.project_id).first()
-            site_repository = SiteRepository(project.name, current_app)
-            # clean the cache for a new product to appear in the tree
-            site_repository.invalidate_cache()
+        project = Project.query.filter_by(id=webpage.project_id).first()
+        site_repository = SiteRepository(project.name, current_app)
+        # clean the cache for a new product to appear in the tree
+        site_repository.invalidate_cache()
 
-        except IntegrityError as e:
-            db.session.rollback()
+    except IntegrityError as e:
+        db.session.rollback()
 
-            if isinstance(e.orig, ForeignKeyViolation):
-                return jsonify({
-                    "error": f"Tag: {product['name']} does not exist."
-                    }), 400
-            else:
-                return jsonify({
-                    "error": (
-                        "Integrity constraint violated. Please check the tags."
-                    )
-                    }), 400
-        except Exception as e:
-            db.session.rollback()
+        if isinstance(e.orig, ForeignKeyViolation):
             return jsonify({
-                "error": f"An unexpected error occurred: {e}"
-            }), 500
+                "error": f"Tag: {product['name']} does not exist."
+                }), 400
+        else:
+            return jsonify({
+                "error": (
+                    "Integrity constraint violated. Please check the tags."
+                )
+                }), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "error": f"An unexpected error occurred: {e}"
+        }), 500
 
     return jsonify({"message": "Successfully set product"}), 200
 

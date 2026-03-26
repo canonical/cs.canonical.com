@@ -67,9 +67,14 @@ class CreatePageModel(BaseModel):
     content_jira_id: Optional[str] = None
 
 
+class ProductModel(BaseModel):
+    id: int
+    name: str
+
+
 class SetProductsModel(BaseModel):
     webpage_id: int
-    products: List[dict]
+    products: List[ProductModel]
 
 
 class AddProductModel(BaseModel):

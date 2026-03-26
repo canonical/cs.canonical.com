@@ -37,7 +37,7 @@ const ProductActionChip = ({
         <div className="p-product-action-chip__actions u-align--right">
           <Button
             appearance="base"
-            aria-label={`Delete ${product.name}`}
+            aria-label={`Edit ${product.name}`}
             className="p-product-action-chip__edit u-no-margin"
             hasIcon
             onClick={onEdit}

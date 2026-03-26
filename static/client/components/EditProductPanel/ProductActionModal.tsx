@@ -44,7 +44,7 @@ const ProductActionModal = ({ product, onClose, action, onSuccess }: ProductActi
     } finally {
       setIsLoading(false);
     }
-  }, [action, product, queryClient, onClose, notify, newName]);
+  }, [action, product, queryClient, onSuccess, newName, onClose, notify]);
 
   let actionButton = null;
   let heading = "";

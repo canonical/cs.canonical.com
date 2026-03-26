@@ -8,6 +8,7 @@ import ProductActionChip from "./ProductActionChip";
 import ProductActionModal from "./ProductActionModal";
 
 import CustomSearchAndFilter from "@/components/Common/CustomSearchAndFilter";
+import { parseError } from "@/helpers/requests";
 import { useProducts } from "@/services/api/hooks/products";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IPage } from "@/services/api/types/pages";
@@ -74,7 +75,8 @@ const EditProductPanel = ({ page }: { page: IPage }): ReactNode => {
         toggleProductsPanel();
       })
       .catch((error) => {
-        notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
+        const { message, description } = parseError(error);
+        notify.failure(message, null, <p>{description}</p>);
       });
   }
 
