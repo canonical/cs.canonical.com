@@ -8,6 +8,8 @@ import {
   SidePanel,
   Textarea,
   useToastNotification,
+  Tooltip,
+  Input,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
 
@@ -38,6 +40,8 @@ const getBusinessDate = (daysToAdd: number) => {
 
 const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
   const [descr, setDescr] = useState("");
+  const [newCopydocLink, setNewCopydocLink] = useState(""); 
+  const [linkError, setLinkError] = useState(false); 
   const [isLoading, setIsLoading] = useState(false);
   
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
@@ -55,15 +59,21 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
 
   const activeWebpage = webpage ?? confirmedPage?.page;
   const showForm = activeWebpage !== undefined;
-  // 
 
   const handleDescrChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
   }, []);
 
+  const handleLinkChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+    setNewCopydocLink(e.target.value);
+    setLinkError(false); 
+  }, []);
+
   const handleClose = useCallback(() => {
     onClose();
     setDescr("");
+    setNewCopydocLink("");
+    setLinkError(false);
     setSelectedPage(null);
     setConfirmedPage(null);
   }, [onClose]);
@@ -115,15 +125,26 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
     (e: FormEvent) => {
       e.preventDefault();
       if (!activeWebpage?.id) return;
+
+      const hasExistingLink = !!activeWebpage.copy_doc_link;
+      const linkToSubmit = hasExistingLink ? activeWebpage.copy_doc_link : newCopydocLink;
+
+      if (!hasExistingLink && !newCopydocLink.trim()) {
+        setLinkError(true);
+        return;
+      }
+
       setIsLoading(true);
+      const url = activeWebpage.project.name + activeWebpage.url
+      const requestSummary = hasExistingLink ? "Copy update request for " + url : "Add new copydoc for " + url;
 
       PagesServices.requestChanges({
         due_date: dueDateObj.toISOString().split("T")[0],
         webpage_id: activeWebpage.id,
         reporter_struct: user,
         type: ChangeRequestType.COPY_UPDATE,
-        summary: "Copy update request",
-        description: `Copy doc link: ${activeWebpage.copy_doc_link} \n${descr}`,
+        summary: requestSummary,
+        description: `Copy doc link: ${linkToSubmit} \n${descr}`,
         request_type: Object.keys(ChangeRequestType).find(
           (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE
         ) as string,
@@ -136,10 +157,6 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
                 label: "View on Jira",
                 onClick: () => viewTicket(response.data.jira_task_id),
               },
-              {
-                label: "View your requests",
-                onClick: () => navigate("/app"),
-              },
             ],
             "You submitted a copy update"
           );
@@ -151,6 +168,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
     [
       activeWebpage?.id,
       activeWebpage?.copy_doc_link,
+      newCopydocLink,
       dueDateObj,
       user,
       descr,
@@ -167,7 +185,22 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
     <SidePanel className="request-copydoc-panel" isOpen={isOpen} overlay>
       <SidePanel.Sticky>
         <SidePanel.Header>
-          <SidePanel.HeaderTitle className="u-no-padding--top">Request a copy update</SidePanel.HeaderTitle>
+          <SidePanel.HeaderTitle className="u-no-padding--top">
+            Request copy update 
+          <Tooltip 
+            zIndex={999}
+            message={
+              <div style={{ textAlign: "center" }}>
+                Edit text in a section, replace images, <br />
+                or copy a section
+              </div>
+            }
+          >
+            <div style={{ marginLeft: "8px" }}>
+              <Icon name="information"/>
+            </div>
+          </Tooltip>
+          </SidePanel.HeaderTitle>
           <SidePanel.HeaderControls className="u-no-padding--top">
             <Button appearance="base" aria-label="Close" className="u-no-margin--bottom" hasIcon onClick={handleClose}>
               <Icon name="close" />
@@ -183,12 +216,27 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
               <strong>Update your copy doc and submit</strong>
             </p>
             <div className="u-sv1">
-              <p className="u-sv-1">
-                1. Open the{" "}
-                <a href={activeWebpage.copy_doc_link} target="_blank" rel="noreferrer">
-                  copy doc of your page <Icon name="external-link" />
-                </a>
-              </p>
+              
+              {activeWebpage.copy_doc_link ? (
+                <p className="u-sv-1">
+                  1. Open the{" "}
+                  <a href={activeWebpage.copy_doc_link} target="_blank" rel="noreferrer">
+                    copy doc of your page <Icon name="external-link" />
+                  </a>
+                </p>
+              ) : (
+                <div className="u-sv-1">
+                  <Textarea
+                    label="1. Add a link to your copy doc"
+                    placeholder="Copy doc URL"
+                    value={newCopydocLink}
+                    onChange={handleLinkChange}
+                    error={linkError ? "This is a required field" : undefined}
+                    rows={1}
+                  />
+                </div>
+              )}
+
               <p className="u-sv-2">2. Edit your copy doc in 'Suggested' mode</p>
               <Textarea
                 label="3. Add a description (optional)"
@@ -209,7 +257,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
               onClear={() => setSelectedPage(null)}
               onSelect={setSelectedPage}
               options={pageOptions}
-              placeholder="Search by page title or URL"
+              placeholder="Search by page title URL"
               value={selectedPage}
             />
           </>
