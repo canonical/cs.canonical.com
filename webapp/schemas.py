@@ -67,9 +67,14 @@ class CreatePageModel(BaseModel):
     content_jira_id: Optional[str] = None
 
 
+class ProductModel(BaseModel):
+    id: int
+    name: str
+
+
 class SetProductsModel(BaseModel):
     webpage_id: int
-    product_ids: List[int]
+    products: List[ProductModel]
 
 
 class AddProductModel(BaseModel):
@@ -112,3 +117,11 @@ class RequestFeatureModel(BaseModel):
 
 class NotifyBAUModel(BaseModel):
     jira_task_id: str
+
+
+class UpdatePageDetailsModel(BaseModel):
+    owner_struct: object = {}
+    reviewer_structs: Optional[List[object]] = []
+    copydoc_link: Optional[str] = None
+    figma_link: Optional[str] = None
+    webpage_id: int
