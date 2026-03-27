@@ -6,6 +6,7 @@ from webapp.releases_manager import (
     ReleaseYamlParser,
     ReleasesGitHubClient,
     ReleasesService,
+    MergeConflictError,
 )
 from webapp.github import GithubError
 
@@ -190,7 +191,7 @@ class TestReleasesGitHubClient:
         self, github_client, mock_requests
     ):
         """Test that fetch_releases_pr returns PR data when a PR exists."""
-        pr_data = {"pr_id": 123, "title": "Release updates"}
+        pr_data = {"number": 123, "title": "Release updates"}
         mock_requests["response"].json.return_value = [pr_data]
 
         result = github_client.fetch_releases_pr()
@@ -382,23 +383,12 @@ class TestReleasesGitHubClient:
         self, github_client, mock_requests
     ):
         """Test successful merge when branch exists."""
-        branch_data = {
-            "pr_name": "_releases_branch",
-            "commit": {"sha": "abc123"},
-        }
-        merge_response = {
-            "sha": "merge123",
-            "commit": {"message": "Merge main into _releases_branch"},
-        }
-        mock_requests["response"].json.return_value = merge_response
+        mock_requests["response"].text = "ok"
         mock_requests["response"].status_code = 201
 
-        with patch.object(
-            github_client, "fetch_releases_branch", return_value=branch_data
-        ):
-            result = github_client.merge_base_into_release()
+        result = github_client.merge_base_into_release()
 
-        assert result["success"] is True
+        assert result is None
 
         # Verify the request was made with correct parameters
         call_args = mock_requests["request"].call_args
@@ -408,10 +398,8 @@ class TestReleasesGitHubClient:
     def test_merge_base_into_release_returns_none_when_no_branch(
         self, github_client
     ):
-        """Test that merge returns None when branch doesn't exist."""
-        with patch.object(
-            github_client, "fetch_releases_branch", return_value=None
-        ):
+        """Test that merge still runs without checking branch first."""
+        with patch.object(github_client, "_request", return_value="ok"):
             result = github_client.merge_base_into_release()
 
         assert result is None
@@ -419,21 +407,12 @@ class TestReleasesGitHubClient:
     def test_merge_base_into_release_handles_conflict(
         self, github_client, mock_requests
     ):
-        """Test merge returns error dict when conflict is detected (409)."""
-        branch_data = {
-            "pr_name": "_releases_branch",
-            "commit": {"sha": "abc123"},
-        }
+        """Test merge raises MergeConflictError when conflict is detected."""
         mock_requests["response"].status_code = 409
         mock_requests["response"].text = "Merge conflict"
 
-        with patch.object(
-            github_client, "fetch_releases_branch", return_value=branch_data
-        ):
-            result = github_client.merge_base_into_release()
-
-        assert result["success"] is False
-        assert "conflict" in result["error"].lower()
+        with pytest.raises(MergeConflictError):
+            github_client.merge_base_into_release()
 
     def test_merge_base_into_release_raises_on_other_errors(
         self, github_client, mock_requests

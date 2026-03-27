@@ -68,7 +68,14 @@ def mock_gdrive(monkeypatch):
     )
 
 
-def test_app_starts_without_gdrive():
+def test_app_starts_without_gdrive(monkeypatch):
+    def raise_build_error(*args, **kwargs):
+        raise ValueError("Invalid Google credentials")
+
+    monkeypatch.setattr(
+        "webapp.gdrive.GoogleDriveClient._build_service",
+        raise_build_error,
+    )
     app = create_app()
     assert "gdrive" not in app.config
 
