@@ -237,7 +237,7 @@ class Jira:
                 issue_type=self.EPIC,
                 description=description,
                 parent=None,
-                reporter_jira_id=reporter_jira_id,
+                # reporter_jira_id=reporter_jira_id,
                 due_date=due_date,
             )
 
