@@ -47,7 +47,7 @@ def get_releases_yaml():
     methods=["POST"],
 )
 @validate()
-# @login_required
+@login_required
 def update_releases_yaml(body: UpdateReleasesRequest):
     try:
         result = releases_service.update_releases_workflow(
