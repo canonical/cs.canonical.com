@@ -20,20 +20,40 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 }: MultiSelectPickerProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [committedValue, setCommittedValue] = useState<T[]>(value);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const displayRef = useRef<HTMLSpanElement>(null);
   const displayContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownOrderRef = useRef<T[]>([]);
+  const latestValueRef = useRef(value);
+  latestValueRef.current = value;
   const [visibleCount, setVisibleCount] = useState(value.length);
 
   const keysToSearch = useMemo(() => searchKeys ?? [labelKey], [searchKeys, labelKey]);
 
   const getLabel = useCallback((item: T): string => String(item[labelKey] ?? ""), [labelKey]);
 
+  // Sync committedValue when closed and value changes externally
+  useEffect(() => {
+    if (!isOpen) {
+      setCommittedValue(value);
+    }
+  }, [value, isOpen]);
+
   const sortedValue = useMemo(
-    () => [...value].sort((a, b) => getLabel(a).localeCompare(getLabel(b))),
-    [value, getLabel],
+    () => [...committedValue].sort((a, b) => getLabel(a).localeCompare(getLabel(b))),
+    [committedValue, getLabel],
   );
+
+  // Stable chip order while open: committed items (sorted) + newly added items appended
+  const displayChips = useMemo(() => {
+    const committedIds = new Set(committedValue.map((v) => v[indexKey]));
+    const kept = committedValue.filter((v) => value.some((sel) => sel[indexKey] === v[indexKey]));
+    const keptSorted = [...kept].sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
+    const added = value.filter((v) => !committedIds.has(v[indexKey]));
+    return [...keptSorted, ...added];
+  }, [value, committedValue, indexKey, getLabel]);
 
   // Compute how many names fit in the collapsed display
   useEffect(() => {
@@ -73,36 +93,35 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
   const overflowCount = sortedValue.length - visibleCount;
 
-  const filtered = useMemo(() => {
-    if (!query) return options;
-    const lowerQuery = query.toLowerCase();
-    return options.filter((opt) =>
-      keysToSearch.some((key) => {
-        const val = opt[key];
-        return typeof val === "string" && val.toLowerCase().includes(lowerQuery);
-      }),
-    );
-  }, [query, options, keysToSearch]);
-
-  // Sort dropdown: selected pinned to top, then unselected, each group alphabetical
-  const sortedDropdownOptions = useMemo(() => {
+  const snapshotDropdownOrder = useCallback(() => {
     const selected: T[] = [];
     const unselected: T[] = [];
-
-    for (const opt of filtered) {
+    for (const opt of options) {
       if (value.some((v) => v[indexKey] === opt[indexKey])) {
         selected.push(opt);
       } else {
         unselected.push(opt);
       }
     }
-
     const byLabel = (a: T, b: T) => getLabel(a).localeCompare(getLabel(b));
     selected.sort(byLabel);
     unselected.sort(byLabel);
+    dropdownOrderRef.current = [...selected, ...unselected];
+  }, [options, value, indexKey, getLabel]);
 
-    return [...selected, ...unselected];
-  }, [filtered, value, indexKey, getLabel]);
+  // Frozen dropdown order filtered by search query
+  const dropdownOptions = useMemo(() => {
+    const source = dropdownOrderRef.current;
+    if (!query) return source;
+    const lowerQuery = query.toLowerCase();
+    return source.filter((opt) =>
+      keysToSearch.some((key) => {
+        const val = opt[key];
+        return typeof val === "string" && val.toLowerCase().includes(lowerQuery);
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, keysToSearch, isOpen]);
 
   const isSelected = useCallback(
     (option: T): boolean => value.some((v) => v[indexKey] === option[indexKey]),
@@ -128,6 +147,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
     // If focus is moving to another element within the container, don't close
     if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+    setCommittedValue([...latestValueRef.current]);
     setIsOpen(false);
     setQuery("");
   }, []);
@@ -139,31 +159,34 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   const handleOptionClick = useCallback(
     (e: MouseEvent<HTMLLIElement>) => {
       const idx = Number(e.currentTarget.dataset.idx);
-      const option = sortedDropdownOptions[idx];
+      const option = dropdownOptions[idx];
       if (option) toggleOption(option);
     },
-    [sortedDropdownOptions, toggleOption],
+    [dropdownOptions, toggleOption],
   );
 
   const handleDisplayClick = useCallback(() => {
     if (disabled) return;
+    snapshotDropdownOrder();
     setIsOpen(true);
     requestAnimationFrame(() => inputRef.current?.focus());
-  }, [disabled]);
+  }, [disabled, snapshotDropdownOrder]);
 
   const handleChevronMouseDown = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       if (disabled) return;
       if (isOpen) {
+        setCommittedValue([...latestValueRef.current]);
         setIsOpen(false);
         setQuery("");
       } else {
+        snapshotDropdownOrder();
         setIsOpen(true);
         requestAnimationFrame(() => inputRef.current?.focus());
       }
     },
-    [disabled, isOpen],
+    [disabled, isOpen, snapshotDropdownOrder],
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +208,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
           data-active="true"
           data-empty={value.length === 0 ? "true" : "false"}
         >
-          {sortedValue.map((item) => (
+          {displayChips.map((item) => (
             <span className="p-chip" key={String(item[indexKey])}>
               <span className="p-chip__value">{getLabel(item)}</span>
               <button
@@ -254,7 +277,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
       {isOpen && (
         <ul className="p-multi-select-picker__dropdown" role="listbox">
-          {sortedDropdownOptions.map((option, idx) => (
+          {dropdownOptions.map((option, idx) => (
             <li
               aria-selected={isSelected(option)}
               className="p-multi-select-picker__option"

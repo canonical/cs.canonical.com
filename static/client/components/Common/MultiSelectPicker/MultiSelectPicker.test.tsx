@@ -122,4 +122,66 @@ describe("MultiSelectPicker", () => {
     expect(chips[0]).toHaveAccessibleName("Remove Alice Johnson");
     expect(chips[1]).toHaveAccessibleName("Remove Charlie Brown");
   });
+
+  it("chips append new selections at end while open", async () => {
+    const user = userEvent.setup();
+    let currentValue = [options[2]]; // Charlie Brown
+    const onSelect = vi.fn((newValue) => {
+      currentValue = newValue;
+    });
+    const { rerender } = render(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    // Open the picker
+    await user.click(screen.getByText(/Charlie Brown/));
+    // Select Alice Johnson (alphabetically before Charlie)
+    await user.click(screen.getByRole("option", { name: /Alice Johnson/ }));
+    // Rerender with updated value
+    rerender(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    const chips = screen.getAllByRole("button", { name: /Remove/ });
+    // Charlie was committed first, Alice was added after — Alice should appear at end
+    expect(chips[0]).toHaveAccessibleName("Remove Charlie Brown");
+    expect(chips[1]).toHaveAccessibleName("Remove Alice Johnson");
+  });
+
+  it("chips re-sort alphabetically on close and reopen", async () => {
+    const user = userEvent.setup();
+    let currentValue: TestOption[] = [];
+    const onSelect = vi.fn((newValue) => {
+      currentValue = newValue;
+    });
+    const { rerender } = render(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    // Open
+    await user.click(screen.getByText("Select..."));
+    // Select Charlie then Alice (non-alphabetical)
+    await user.click(screen.getByRole("option", { name: /Charlie Brown/ }));
+    rerender(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    await user.click(screen.getByRole("option", { name: /Alice Johnson/ }));
+    rerender(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    // Close via chevron
+    await user.click(screen.getByRole("button", { name: "Toggle dropdown" }));
+    rerender(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    // Reopen via chevron
+    await user.click(screen.getByRole("button", { name: "Toggle dropdown" }));
+    const chips = screen.getAllByRole("button", { name: /Remove/ });
+    // After close+reopen, chips should be alphabetical
+    expect(chips[0]).toHaveAccessibleName("Remove Alice Johnson");
+    expect(chips[1]).toHaveAccessibleName("Remove Charlie Brown");
+  });
+
+  it("dropdown order is frozen while open", async () => {
+    const user = userEvent.setup();
+    let currentValue = [options[0]]; // Alice Johnson selected
+    const onSelect = vi.fn((newValue) => {
+      currentValue = newValue;
+    });
+    const { rerender } = render(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    // Open
+    await user.click(screen.getByText(/Alice Johnson/));
+    const optsBefore = screen.getAllByRole("option").map((el) => el.textContent);
+    // Toggle Bob Smith (currently unselected)
+    await user.click(screen.getByRole("option", { name: /Bob Smith/ }));
+    rerender(<MultiSelectPicker onSelect={onSelect} options={options} value={currentValue} />);
+    const optsAfter = screen.getAllByRole("option").map((el) => el.textContent);
+    // Order should not change
+    expect(optsBefore).toEqual(optsAfter);
+  });
 });

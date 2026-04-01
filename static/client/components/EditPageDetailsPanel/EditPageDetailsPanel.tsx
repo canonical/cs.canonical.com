@@ -120,7 +120,7 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
 
         <div className="u-sv2">
           <label className="p-form__label" htmlFor="contributors-select">
-            Contributorzzz(s)
+            Contributor(s)
           </label>
           <MultiSelectPicker<IUser>
             indexKey="id"
@@ -143,7 +143,7 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
         </div>
 
         <div className="u-sv2">
-          <Input disabled label="GitHub URL" type="text" value={githubUrl} />
+          <Input label="GitHub URL" readOnly type="text" value={githubUrl} />
         </div>
 
         <div className="u-sv2">
