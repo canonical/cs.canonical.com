@@ -1,9 +1,7 @@
 export interface ComboSelectProps<T extends Record<string, any>> {
   options: T[];
-  value: T | T[] | null;
-  onSelect: (selected: T | T[] | null) => void;
-  onClear?: () => void;
-  multiple?: boolean;
+  value: T | null;
+  onSelect: (selected: T) => void;
   className?: string;
   disabled?: boolean;
   placeholder?: string;

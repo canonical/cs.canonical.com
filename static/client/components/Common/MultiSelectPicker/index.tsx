@@ -1,10 +1,14 @@
-import { type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, MouseEvent, ReactNode } from "react";
 
+import { Chip, Input, List } from "@canonical/react-components";
 import classNames from "classnames";
 
 import type { MultiSelectPickerProps } from "./MultiSelectPicker.types";
 
 import "./_MultiSelectPicker.scss";
+
+import HighlightedSearchText from "@/components/Common/HighlightedSearchText";
 
 const MultiSelectPicker = <T extends Record<string, any>>({
   options,
@@ -33,6 +37,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   const keysToSearch = useMemo(() => searchKeys ?? [labelKey], [searchKeys, labelKey]);
 
   const getLabel = useCallback((item: T): string => String(item[labelKey] ?? ""), [labelKey]);
+  const getKey = useCallback((item: T): string => String(item[indexKey]), [indexKey]);
 
   // Sync committedValue when closed and value changes externally
   useEffect(() => {
@@ -48,12 +53,12 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
   // Stable chip order while open: committed items (sorted) + newly added items appended
   const displayChips = useMemo(() => {
-    const committedIds = new Set(committedValue.map((v) => v[indexKey]));
-    const kept = committedValue.filter((v) => value.some((sel) => sel[indexKey] === v[indexKey]));
+    const committedIds = new Set(committedValue.map((v) => getKey(v)));
+    const kept = committedValue.filter((v) => value.some((sel) => getKey(sel) === getKey(v)));
     const keptSorted = [...kept].sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
-    const added = value.filter((v) => !committedIds.has(v[indexKey]));
+    const added = value.filter((v) => !committedIds.has(getKey(v)));
     return [...keptSorted, ...added];
-  }, [value, committedValue, indexKey, getLabel]);
+  }, [value, committedValue, getKey, getLabel]);
 
   // Compute how many names fit in the collapsed display
   useEffect(() => {
@@ -97,7 +102,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     const selected: T[] = [];
     const unselected: T[] = [];
     for (const opt of options) {
-      if (value.some((v) => v[indexKey] === opt[indexKey])) {
+      if (value.some((v) => getKey(v) === getKey(opt))) {
         selected.push(opt);
       } else {
         unselected.push(opt);
@@ -107,7 +112,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     selected.sort(byLabel);
     unselected.sort(byLabel);
     dropdownOrderRef.current = [...selected, ...unselected];
-  }, [options, value, indexKey, getLabel]);
+  }, [options, value, getKey, getLabel]);
 
   // Frozen dropdown order filtered by search query
   const dropdownOptions = useMemo(() => {
@@ -124,24 +129,24 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   }, [query, keysToSearch, isOpen]);
 
   const isSelected = useCallback(
-    (option: T): boolean => value.some((v) => v[indexKey] === option[indexKey]),
-    [value, indexKey],
+    (option: T): boolean => value.some((v) => getKey(v) === getKey(option)),
+    [value, getKey],
   );
 
   const toggleOption = useCallback(
     (option: T) => {
-      const alreadySelected = value.some((v) => v[indexKey] === option[indexKey]);
-      const newValue = alreadySelected ? value.filter((v) => v[indexKey] !== option[indexKey]) : [...value, option];
+      const alreadySelected = value.some((v) => getKey(v) === getKey(option));
+      const newValue = alreadySelected ? value.filter((v) => getKey(v) !== getKey(option)) : [...value, option];
       onSelect(newValue);
     },
-    [value, indexKey, onSelect],
+    [value, getKey, onSelect],
   );
 
   const handleChipDismiss = useCallback(
     (option: T) => {
-      onSelect(value.filter((v) => v[indexKey] !== option[indexKey]));
+      onSelect(value.filter((v) => getKey(v) !== getKey(option)));
     },
-    [value, indexKey, onSelect],
+    [value, getKey, onSelect],
   );
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
@@ -152,17 +157,16 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     setQuery("");
   }, []);
 
-  const handleOptionMouseDown = useCallback((e: MouseEvent<HTMLLIElement>) => {
-    e.preventDefault();
-  }, []);
-
   const handleOptionClick = useCallback(
-    (e: MouseEvent<HTMLLIElement>) => {
-      const idx = Number(e.currentTarget.dataset.idx);
-      const option = dropdownOptions[idx];
-      if (option) toggleOption(option);
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const idx = e.currentTarget.dataset.idx;
+      const option = dropdownOptions.find((opt) => getKey(opt) === idx);
+      if (option) {
+        toggleOption(option);
+        setQuery("");
+      }
     },
-    [dropdownOptions, toggleOption],
+    [dropdownOptions, getKey, toggleOption],
   );
 
   const handleDisplayClick = useCallback(() => {
@@ -195,6 +199,22 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
   const wrapperClassName = error ? "p-form-validation is-error" : undefined;
 
+  const dropdownItems = useMemo(
+    () =>
+      dropdownOptions.map((option) => (
+        <div className="p-multi-select-picker__option" key={getKey(option)}>
+          <Input
+            checked={isSelected(option)}
+            data-idx={getKey(option)}
+            label={<HighlightedSearchText highlight={query} text={getLabel(option)} />}
+            onChange={handleOptionClick}
+            type="checkbox"
+          />
+        </div>
+      )),
+    [dropdownOptions, getLabel, getKey, handleOptionClick, isSelected, query],
+  );
+
   return (
     <div
       className={classNames("p-search-and-filter p-multi-select-picker", wrapperClassName, className)}
@@ -209,22 +229,12 @@ const MultiSelectPicker = <T extends Record<string, any>>({
           data-empty={value.length === 0 ? "true" : "false"}
         >
           {displayChips.map((item) => (
-            <span className="p-chip" key={String(item[indexKey])}>
-              <span className="p-chip__value">{getLabel(item)}</span>
-              <button
-                aria-label={`Remove ${getLabel(item)}`}
-                className="p-chip__dismiss"
-                onClick={() => handleChipDismiss(item)}
-                type="button"
-              >
-                <i className="p-icon--close" />
-              </button>
-            </span>
+            <Chip isDense key={getKey(item)} onDismiss={() => handleChipDismiss(item)} value={getLabel(item)} />
           ))}
           <form className="p-search-and-filter__box" data-overflowing="false">
             <input
               autoComplete="off"
-              className="p-search-and-filter__input"
+              className="p-search-and-filter__input u-no-padding--left"
               onChange={handleSearchChange}
               placeholder={value.length === 0 ? placeholder : undefined}
               ref={inputRef}
@@ -276,28 +286,9 @@ const MultiSelectPicker = <T extends Record<string, any>>({
       )}
 
       {isOpen && (
-        <ul className="p-multi-select-picker__dropdown" role="listbox">
-          {dropdownOptions.map((option, idx) => (
-            <li
-              aria-selected={isSelected(option)}
-              className="p-multi-select-picker__option"
-              data-idx={idx}
-              key={String(option[indexKey])}
-              onClick={handleOptionClick}
-              onMouseDown={handleOptionMouseDown}
-              role="option"
-            >
-              <input
-                checked={isSelected(option)}
-                className="p-multi-select-picker__checkbox"
-                readOnly
-                tabIndex={-1}
-                type="checkbox"
-              />
-              <span className="p-multi-select-picker__option-label">{getLabel(option)}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="p-multi-select-picker__dropdown" onMouseDown={(e) => e.preventDefault()}>
+          <List className="u-no-margin--bottom" items={dropdownItems} />
+        </div>
       )}
 
       {error && <p className="p-form-validation__message">{error}</p>}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ActionButton, Button, Icon, Input, SidePanel } from "@canonical/react-components";
+import { ActionButton, Button, Icon, Input, SidePanel, useToastNotification } from "@canonical/react-components";
+import { useQueryClient } from "react-query";
 
 import ComboSelect from "@/components/Common/ComboSelect";
 import MultiSelectPicker from "@/components/Common/MultiSelectPicker";
@@ -14,14 +15,15 @@ import { usePanelsStore } from "@/store/app";
 interface EditPageDetailsPanelProps {
   page: IPage;
   project: string;
-  onSave: (updates: Partial<IPage>) => void;
 }
 
-const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelProps) => {
+const EditPageDetailsPanel = ({ page, project }: EditPageDetailsPanelProps) => {
   const [panelVisible, togglePanel] = usePanelsStore((state) => [
     state.editPageDetailsPanelVisible,
     state.toggleEditPageDetailsPanel,
   ]);
+  const notify = useToastNotification();
+  const queryClient = useQueryClient();
 
   const { data: users } = useUsers();
 
@@ -58,15 +60,6 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
 
     setLoading(true);
 
-    const updates: Partial<IPage> = {};
-    if (owner) updates.owner = owner;
-    if (reviewers) updates.reviewers = reviewers;
-    updates.copy_doc_link = copyDocLink;
-    updates.figma_link = figmaLink;
-
-    onSave(updates);
-    handleClose();
-
     // TODO: This is a temporary fix to handle the potential inconsistency in the job title field (jobTitle vs job_title) when updating page details. This should be removed once the API is consistent.
     // @ts-expect-error type inconsistency in API - jobTitle vs job_title
     if (owner) owner.jobTitle = owner.jobTitle || owner.job_title; // Handle potential inconsistency in job title field
@@ -83,10 +76,17 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
       reviewers,
       copy_doc_link: copyDocLink,
       figma_link: figmaLink,
-    }).catch(() => {
-      // Revert will happen on next page load
-    });
-  }, [page.id, owner, reviewers, copyDocLink, figmaLink, onSave, handleClose]);
+    })
+      .then(() => {
+        queryClient.invalidateQueries(["pages", project]);
+        notify.success("Your page details are updated.");
+        handleClose();
+      })
+      .catch(() => {
+        setLoading(false);
+        notify.failure("An error occurred!", "Failed to update page details. Please try again.");
+      });
+  }, [page.id, owner, reviewers, copyDocLink, figmaLink, project, queryClient, notify, handleClose]);
 
   return (
     <SidePanel isOpen={panelVisible} overlay>
@@ -106,13 +106,11 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
             Owner
           </label>
           <ComboSelect<IUser>
-            indexKey="id"
+            indexKey="email"
             labelKey="name"
-            multiple={false}
-            onClear={() => setOwner(null)}
-            onSelect={(selected) => setOwner(selected as IUser)}
+            onSelect={(selected) => setOwner(selected)}
             options={users ?? []}
-            placeholder="Search for an owner..."
+            placeholder={owner ? owner.name : "Search for an owner..."}
             searchKeys={["name", "email"]}
             value={owner}
           />
@@ -123,32 +121,21 @@ const EditPageDetailsPanel = ({ page, project, onSave }: EditPageDetailsPanelPro
             Contributor(s)
           </label>
           <MultiSelectPicker<IUser>
-            indexKey="id"
+            indexKey="email"
             labelKey="name"
             onSelect={(selected) => setReviewers(selected as IUser[])}
             options={users ?? []}
-            placeholder="Search for contributors..."
+            placeholder={reviewers.length ? reviewers.map((r) => r.name).join(", ") : "Search for contributors..."}
             searchKeys={["name", "email"]}
             value={reviewers}
           />
         </div>
 
-        <div className="u-sv2">
-          <Input
-            label="Copy doc URL"
-            onChange={(e) => setCopyDocLink(e.target.value)}
-            type="text"
-            value={copyDocLink}
-          />
-        </div>
+        <Input label="Copy doc URL" onChange={(e) => setCopyDocLink(e.target.value)} type="text" value={copyDocLink} />
 
-        <div className="u-sv2">
-          <Input label="GitHub URL" readOnly type="text" value={githubUrl} />
-        </div>
+        <Input label="GitHub URL" readOnly type="text" value={githubUrl} />
 
-        <div className="u-sv2">
-          <Input label="Figma URL" onChange={(e) => setFigmaLink(e.target.value)} type="text" value={figmaLink} />
-        </div>
+        <Input label="Figma URL" onChange={(e) => setFigmaLink(e.target.value)} type="text" value={figmaLink} />
       </SidePanel.Content>
       <SidePanel.Sticky>
         <SidePanel.Footer className="u-align--right">

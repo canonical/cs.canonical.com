@@ -1,15 +1,9 @@
 .p-combo-select {
   position: relative;
 
-  .p-combo-select__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
-  }
-
   .p-combo-select__input-wrapper {
     position: relative;
+    cursor: pointer;
 
     .p-form__control {
       padding-right: 2rem;
@@ -36,11 +30,14 @@
   .p-combo-select__dropdown {
     background-color: var(--vf-color-background-default);
     border: 1px solid var(--vf-color-border-default);
-    box-shadow: rgba(38, 57, 77, 0.4) 0px 20px 30px -10px;
+    box-shadow:
+      0 1px 1px 0 rgba(0, 0, 0, 0.15),
+      0 2px 2px -1px rgba(0, 0, 0, 0.15),
+      0 0 3px 0 rgba(0, 0, 0, 0.2);
     left: 0;
     list-style-type: none;
     margin: 0;
-    max-height: 300px;
+    max-height: 20rem;
     overflow-y: auto;
     padding: 0;
     position: absolute;
@@ -50,6 +47,7 @@
 
     .p-combo-select__item {
       align-items: center;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
       overflow: hidden;
@@ -57,13 +55,12 @@
       white-space: nowrap;
 
       &:hover {
-        background-color: var(--vf-color-background-neutral-hover);
-        cursor: pointer;
+        background-color: var(--vf-color-background-neutral-default);
       }
 
       &.is-selected {
-        background-color: var(--vf-color-background-neutral-default);
-        font-weight: bold;
+        background-color: var(--vf-color-background-alt);
+        // background-color: var(--vf-color-background-active);
       }
 
       .p-combo-select__item-label {
