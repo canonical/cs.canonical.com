@@ -12,11 +12,11 @@ type SearchProductCheckboxProps = {
 
 function SearchProductCheckbox({ state, setState }: SearchProductCheckboxProps): ReactNode {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const { data } = useProducts();
+  const { data = [] } = useProducts();
 
   useEffect(() => {
-    if (data?.data?.length) {
-      const productData = data.data.map((p) => ({ name: p.name, id: p.id }));
+    if (data.length) {
+      const productData = data.map((p) => ({ name: p.name, id: p.id }));
       setAllProducts(productData);
       setSearchedProducts(productData);
     }

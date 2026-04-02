@@ -91,5 +91,5 @@ export interface IRequestRemoval {
 
 export interface ISetProducts {
   webpage_id: number;
-  product_ids: number[];
+  products: IProduct[];
 }

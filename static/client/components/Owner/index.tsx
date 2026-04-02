@@ -29,14 +29,11 @@ const Owner = ({ page, onSelectOwner }: IOwnerProps): ReactNode => {
     if (onSelectOwner) onSelectOwner(owner);
   }, [onSelectOwner, page]);
 
-  const handleRemoveOwner = useCallback(
-    () => () => {
-      setCurrentOwner(null);
-      if (page?.id) PagesServices.setOwner({}, page.id);
-      if (onSelectOwner) onSelectOwner(null);
-    },
-    [page, onSelectOwner],
-  );
+  const handleRemoveOwner = useCallback(() => {
+    setCurrentOwner(null);
+    if (page?.id) PagesServices.setOwner({}, page.id);
+    if (onSelectOwner) onSelectOwner(null);
+  }, [page, onSelectOwner]);
 
   const selectOwner = useCallback(
     (option: IUser) => {
