@@ -3,9 +3,9 @@ import React, { useCallback, useMemo, useState } from "react";
 
 import { Button, Tooltip } from "@canonical/react-components";
 
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
-import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import type { IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
@@ -99,13 +99,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
         </div>
       </Tooltip>
 
-      {sidebarOpen && (
-        <RequestCopydocPanel
-          isOpen={sidebarOpen}
-          onClose={handleSidebarClose}
-          webpage={page}
-        /> 
-      )}
+      {sidebarOpen && <RequestCopydocPanel isOpen={sidebarOpen} onClose={handleSidebarClose} webpage={page} />}
 
       {modalOpen && (
         <RequestTaskModal

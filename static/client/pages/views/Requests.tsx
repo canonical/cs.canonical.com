@@ -1,11 +1,11 @@
 import { useState } from "react";
+
 import { ContextualMenu, List } from "@canonical/react-components";
 
 import RequestHistory from "@/components/Dashboard/History";
-import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestCopydocPanel from "@/components/RequestCopydocPanel";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE, COPY_UPDATE } from "@/config";
-import { ChangeRequestType } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
 
 const Requests: React.FC = () => {
@@ -86,14 +86,10 @@ const Requests: React.FC = () => {
                 toggleAppearance={"positive"}
                 toggleLabel="Start a request"
               />
-              
+
               <RequestRemovalPanel />
-              
-              <RequestCopydocPanel
-                isOpen={isCopydocPanelOpen}
-                onClose={() => setIsCopydocPanelOpen(false)}
-              />
-              
+
+              <RequestCopydocPanel isOpen={isCopydocPanelOpen} onClose={() => setIsCopydocPanelOpen(false)} />
             </div>
             <div className="grid-col">
               <div className="p-image-container--3-2">

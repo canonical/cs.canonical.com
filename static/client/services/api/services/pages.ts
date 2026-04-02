@@ -26,7 +26,7 @@ export const createPage = async (page: INewPage): Promise<INewPageResponse> => {
   return api.pages.createPage(page);
 };
 
-export const requestChanges = async (body: IRequestChanges): Promise<void> => {
+export const requestChanges = async (body: IRequestChanges): Promise<{ data: { jira_task_id: string } } | void> => {
   return api.pages.requestChanges(body);
 };
 

@@ -9,17 +9,15 @@ import {
   Textarea,
   useToastNotification,
   Tooltip,
-  Input,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
-
 import { useNavigate } from "react-router-dom";
-import config from "@/config";
-
-import PageSearch from "@/components/Search";
-import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 
 import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
+
+import PageSearch from "@/components/Search";
+import config from "@/config";
+import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 import { usePages } from "@/services/api/hooks/pages";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
@@ -40,10 +38,10 @@ const getBusinessDate = (daysToAdd: number) => {
 
 const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
   const [descr, setDescr] = useState("");
-  const [newCopydocLink, setNewCopydocLink] = useState(""); 
-  const [linkError, setLinkError] = useState(false); 
+  const [newCopydocLink, setNewCopydocLink] = useState("");
+  const [linkError, setLinkError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
   const [confirmedPage, setConfirmedPage] = useState<IPageOption | null>(null);
   const pageOptions = usePageOptions();
@@ -66,7 +64,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
 
   const handleLinkChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setNewCopydocLink(e.target.value);
-    setLinkError(false); 
+    setLinkError(false);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -114,7 +112,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
       }
     },
-    [notify]
+    [notify],
   );
 
   const onSubmitFinally = useCallback(() => {
@@ -135,7 +133,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       }
 
       setIsLoading(true);
-      const url = activeWebpage.project.name + activeWebpage.url
+      const url = (activeWebpage?.project?.name ?? "") + activeWebpage.url;
       const requestSummary = hasExistingLink ? "Copy update request for " + url : "Add new copydoc for " + url;
 
       PagesServices.requestChanges({
@@ -146,19 +144,20 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         summary: requestSummary,
         description: `Copy doc link: ${linkToSubmit} \n${descr}`,
         request_type: Object.keys(ChangeRequestType).find(
-          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE
+          (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE,
         ) as string,
       })
         .then((response) => {
+          const data = (response as { data: { jira_task_id: string } }).data;
           notify.success(
             "Your update will be applied within 3 business days. You can follow our progress on Jira or in your requests.",
             [
               {
                 label: "View on Jira",
-                onClick: () => viewTicket(response.data.jira_task_id),
+                onClick: () => viewTicket(data.jira_task_id),
               },
             ],
-            "You submitted a copy update"
+            "You submitted a copy update",
           );
           handleSuccess();
         })
@@ -177,8 +176,8 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       handleSuccess,
       notify,
       viewTicket,
-      navigate
-    ]
+      navigate,
+    ],
   );
 
   return (
@@ -186,20 +185,23 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       <SidePanel.Sticky>
         <SidePanel.Header>
           <SidePanel.HeaderTitle className="u-no-padding--top">
-            Request copy update 
-          <Tooltip 
-            zIndex={999}
-            message={
-              <div style={{ textAlign: "center" }}>
-                Edit text in a section, replace images, <br />
-                or copy a section
-              </div>
-            }
-          >
-            <div style={{ marginLeft: "8px" }}>
-              <Icon name="information"/>
-            </div>
-          </Tooltip>
+            Request copy update
+            <span style={{ marginLeft: "8px" }}>
+              <Tooltip
+                message={
+                  <div style={{ textAlign: "center" }}>
+                    Edit text in a section, replace images, <br />
+                    or copy a section
+                  </div>
+                }
+                position="btm-center"
+                zIndex={999}
+              >
+                <div>
+                  <Icon name="information" />
+                </div>
+              </Tooltip>
+            </span>
           </SidePanel.HeaderTitle>
           <SidePanel.HeaderControls className="u-no-padding--top">
             <Button appearance="base" aria-label="Close" className="u-no-margin--bottom" hasIcon onClick={handleClose}>
@@ -216,23 +218,22 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
               <strong>Update your copy doc and submit</strong>
             </p>
             <div className="u-sv1">
-              
               {activeWebpage.copy_doc_link ? (
                 <p className="u-sv-1">
                   1. Open the{" "}
-                  <a href={activeWebpage.copy_doc_link} target="_blank" rel="noreferrer">
+                  <a href={activeWebpage.copy_doc_link} rel="noreferrer" target="_blank">
                     copy doc of your page <Icon name="external-link" />
                   </a>
                 </p>
               ) : (
                 <div className="u-sv-1">
                   <Textarea
-                    label="1. Add a link to your copy doc"
-                    placeholder="Copy doc URL"
-                    value={newCopydocLink}
-                    onChange={handleLinkChange}
                     error={linkError ? "This is a required field" : undefined}
+                    label="1. Add a link to your copy doc"
+                    onChange={handleLinkChange}
+                    placeholder="Copy doc URL"
                     rows={1}
+                    value={newCopydocLink}
                   />
                 </div>
               )}

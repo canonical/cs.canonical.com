@@ -15,7 +15,6 @@ export function useTickets(
   });
 
   const error = result.error;
-  console.log(error)
   const data = result.data;
   const isLoading = result.isFetching || result.isLoading;
 

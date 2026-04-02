@@ -1,1 +1,1 @@
-export { default } from './RequestCopydocPanel'
+export { default } from "./RequestCopydocPanel";
