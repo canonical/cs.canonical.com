@@ -5,6 +5,7 @@ import type {
   INewPageResponse,
   IPagesResponse,
   IRequestChanges,
+  IRequestChangesResponse,
   IRequestRemoval,
   ISetProducts,
 } from "@/services/api/types/pages";
@@ -26,7 +27,7 @@ export const createPage = async (page: INewPage): Promise<INewPageResponse> => {
   return api.pages.createPage(page);
 };
 
-export const requestChanges = async (body: IRequestChanges): Promise<{ data: { jira_task_id: string } } | void> => {
+export const requestChanges = async (body: IRequestChanges): Promise<IRequestChangesResponse | void> => {
   return api.pages.requestChanges(body);
 };
 

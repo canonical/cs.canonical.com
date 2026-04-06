@@ -11,7 +11,6 @@ import {
   Tooltip,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
 
 import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 
@@ -23,6 +22,7 @@ import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { useStore } from "@/store";
+import { parseError } from "@/helpers/requests";
 
 const getBusinessDate = (daysToAdd: number) => {
   const date = new Date();
@@ -36,10 +36,12 @@ const getBusinessDate = (daysToAdd: number) => {
   return date;
 };
 
+const COPYDOC_URL_REGEX = /^https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+/;
+
 const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
   const [descr, setDescr] = useState("");
   const [newCopydocLink, setNewCopydocLink] = useState("");
-  const [linkError, setLinkError] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
@@ -50,7 +52,6 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   const { refetch } = usePages(true);
   const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
   const notify = useToastNotification();
-  const navigate = useNavigate();
 
   const dueDateObj = useMemo(() => getBusinessDate(3), []);
   const formattedDueDate = useMemo(() => dueDateObj.toLocaleDateString("en-GB"), [dueDateObj]);
@@ -58,27 +59,27 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   const activeWebpage = webpage ?? confirmedPage?.page;
   const showForm = activeWebpage !== undefined;
 
-  const handleDescrChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescrChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
-  }, []);
+  }
 
-  const handleLinkChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleLinkChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setNewCopydocLink(e.target.value);
-    setLinkError(false);
-  }, []);
+    setLinkError(null);
+  }
 
   const handleClose = useCallback(() => {
     onClose();
     setDescr("");
     setNewCopydocLink("");
-    setLinkError(false);
+    setLinkError(null);
     setSelectedPage(null);
     setConfirmedPage(null);
   }, [onClose]);
 
-  const viewTicket = useCallback((ticketId: string) => {
+  const viewTicket = (ticketId: string) => {
     window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
-  }, []);
+  }
 
   const handleSuccess = useCallback(async () => {
     handleClose();
@@ -99,18 +100,13 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
           // silently handle refetch failure
         }
       }
-
-      if (activeWebpage.status === PageStatus.NEW) {
-        navigate("/app", { replace: true });
-      }
     }
-  }, [handleClose, navigate, refetch, selectedProject?.name, setSelectedProject, activeWebpage]);
+  }, [handleClose, refetch, selectedProject?.name, setSelectedProject, activeWebpage]);
 
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
-      if (error?.response?.data) {
-        notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
-      }
+      const { message, description } = parseError(error)
+      notify.failure(message, null, <p>{description}</p>)
     },
     [notify],
   );
@@ -127,9 +123,16 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       const hasExistingLink = !!activeWebpage.copy_doc_link;
       const linkToSubmit = hasExistingLink ? activeWebpage.copy_doc_link : newCopydocLink;
 
-      if (!hasExistingLink && !newCopydocLink.trim()) {
-        setLinkError(true);
-        return;
+      if (!hasExistingLink) {
+        const trimmedLink = newCopydocLink.trim();
+        if (!trimmedLink) {
+          setLinkError("This is a required field");
+          return;
+        }
+        if (!COPYDOC_URL_REGEX.test(trimmedLink)) {
+          setLinkError("Please enter a valid Google Docs URL");
+          return;
+        }
       }
 
       setIsLoading(true);
@@ -148,7 +151,10 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         ) as string,
       })
         .then((response) => {
-          const data = (response as { data: { jira_task_id: string } }).data;
+          if (!response) return; 
+
+          const data = response.data; 
+          
           notify.success(
             "Your update will be applied within 3 business days. You can follow our progress on Jira or in your requests.",
             [
@@ -165,8 +171,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         .finally(onSubmitFinally);
     },
     [
-      activeWebpage?.id,
-      activeWebpage?.copy_doc_link,
+      activeWebpage,
       newCopydocLink,
       dueDateObj,
       user,
@@ -176,7 +181,6 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       handleSuccess,
       notify,
       viewTicket,
-      navigate,
     ],
   );
 
@@ -185,11 +189,13 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       <SidePanel.Sticky>
         <SidePanel.Header>
           <SidePanel.HeaderTitle className="u-no-padding--top">
-            Request copy update
-            <span style={{ marginLeft: "8px" }}>
+            <span className="p-panel__header-text">
+              Request copy update
+            </span>
+            <span>
               <Tooltip
                 message={
-                  <div style={{ textAlign: "center" }}>
+                  <div className="u-align-text--center">
                     Edit text in a section, replace images, <br />
                     or copy a section
                   </div>
@@ -228,7 +234,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
               ) : (
                 <div className="u-sv-1">
                   <Textarea
-                    error={linkError ? "This is a required field" : undefined}
+                    error={linkError || undefined}
                     label="1. Add a link to your copy doc"
                     onChange={handleLinkChange}
                     placeholder="Copy doc URL"

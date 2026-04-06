@@ -19,6 +19,7 @@ const Search = <T extends Record<string, any>>({
   indexKey = "id" as keyof T,
   labelKey = "name" as keyof T,
   titleKey = "title" as keyof T,
+  flag = "
   searchKeys,
 }: SearchProps<T>): ReactNode => {
   const [query, setQuery] = useState("");

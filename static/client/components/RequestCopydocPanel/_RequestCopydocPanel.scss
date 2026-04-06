@@ -16,6 +16,10 @@
     }
   }
 
+  .p-panel__header-text {
+    margin-right: 8px;
+  }
+
   @media (min-width: $breakpoint-large) {
     max-width: 30rem !important;
     width: 30rem;
