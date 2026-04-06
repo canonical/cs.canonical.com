@@ -19,8 +19,8 @@ const Search = <T extends Record<string, any>>({
   indexKey = "id" as keyof T,
   labelKey = "name" as keyof T,
   titleKey = "title" as keyof T,
-  flag = "
   searchKeys,
+  hideTitle = false,
 }: SearchProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -31,10 +31,15 @@ const Search = <T extends Record<string, any>>({
   const formatDisplay = useCallback(
     (option: T): string => {
       const name = String(option[labelKey] ?? "");
+      
+      if (hideTitle) {
+        return name;
+      }
+
       const title = option[titleKey] ? String(option[titleKey]) : "";
       return title ? `${name} - ${title}` : name;
     },
-    [labelKey, titleKey],
+    [labelKey, titleKey, hideTitle],
   );
 
   const filtered = useMemo(() => {

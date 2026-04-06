@@ -264,7 +264,8 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
               onClear={() => setSelectedPage(null)}
               onSelect={setSelectedPage}
               options={pageOptions}
-              placeholder="Search by page title URL"
+              hideTitle
+              placeholder="Search by page URL"
               value={selectedPage}
             />
           </>
