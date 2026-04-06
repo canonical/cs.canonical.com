@@ -31,7 +31,7 @@ const Search = <T extends Record<string, any>>({
   const formatDisplay = useCallback(
     (option: T): string => {
       const name = String(option[labelKey] ?? "");
-      
+
       if (hideTitle) {
         return name;
       }

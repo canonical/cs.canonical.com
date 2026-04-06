@@ -16,13 +16,13 @@ import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 
 import PageSearch from "@/components/Search";
 import config from "@/config";
+import { parseError } from "@/helpers/requests";
 import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 import { usePages } from "@/services/api/hooks/pages";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
-import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
+import { ChangeRequestType } from "@/services/api/types/pages";
 import { useStore } from "@/store";
-import { parseError } from "@/helpers/requests";
 
 const getBusinessDate = (daysToAdd: number) => {
   const date = new Date();
@@ -61,12 +61,12 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
 
   const handleDescrChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescr(e.target.value);
-  }
+  };
 
   const handleLinkChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setNewCopydocLink(e.target.value);
     setLinkError(null);
-  }
+  };
 
   const handleClose = useCallback(() => {
     onClose();
@@ -79,7 +79,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
 
   const viewTicket = (ticketId: string) => {
     window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
-  }
+  };
 
   const handleSuccess = useCallback(async () => {
     handleClose();
@@ -105,8 +105,8 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
 
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
-      const { message, description } = parseError(error)
-      notify.failure(message, null, <p>{description}</p>)
+      const { message, description } = parseError(error);
+      notify.failure(message, null, <p>{description}</p>);
     },
     [notify],
   );
@@ -151,20 +151,31 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         ) as string,
       })
         .then((response) => {
-          if (!response) return; 
+          if (!response) return;
 
-          const data = response.data; 
-          
+          const data = response.data;
+          const notificationActions = [
+            {
+              label: "View on Jira",
+              onClick: () => viewTicket(data.jira_task_id),
+            },
+          ];
+
+          if (window.location.pathname !== "/app") {
+            notificationActions.push({
+              label: "View your requests",
+              onClick: () => {
+                window.location.href = "/app";
+              },
+            });
+          }
+
           notify.success(
             "Your update will be applied within 3 business days. You can follow our progress on Jira or in your requests.",
-            [
-              {
-                label: "View on Jira",
-                onClick: () => viewTicket(data.jira_task_id),
-              },
-            ],
+            notificationActions,
             "You submitted a copy update",
           );
+
           handleSuccess();
         })
         .catch(onSubmitError)
@@ -189,9 +200,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       <SidePanel.Sticky>
         <SidePanel.Header>
           <SidePanel.HeaderTitle className="u-no-padding--top">
-            <span className="p-panel__header-text">
-              Request copy update
-            </span>
+            <span className="p-panel__header-text">Request copy update</span>
             <span>
               <Tooltip
                 message={
@@ -261,10 +270,10 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
           <>
             <p className="p-heading--5 u-no-margin--bottom u-sv1">Choose the page you want to update</p>
             <PageSearch<IPageOption>
+              hideTitle
               onClear={() => setSelectedPage(null)}
               onSelect={setSelectedPage}
               options={pageOptions}
-              hideTitle
               placeholder="Search by page URL"
               value={selectedPage}
             />
