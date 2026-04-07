@@ -35,14 +35,14 @@ const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
         </tr>
       </thead>
       <tbody>
-        {tasks.map((task) => (
+        {tasks?.map((task) => (
           <tr>
             <td colSpan={3}>{task.summary}</td>
             <td>Copy update</td>
             <td className={getStatusClass(task.status)}>
               {task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase()}
             </td>
-            <td>{DatesServices.beatifyDate(task.created_at)}</td>
+            <td>{DatesServices.beautifyDate(task.created_at)}</td>
             <td>
               <a href={`${config.jiraTaskLink}${task.jira_id}`} rel="noreferrer" target="_blank">
                 {task.jira_id}
@@ -50,7 +50,7 @@ const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
             </td>
           </tr>
         ))}
-        {tasks.length === 0 && isWebPage && (
+        {tasks?.length === 0 && isWebPage && (
           <tr>
             <td colSpan={3}>
               <p>

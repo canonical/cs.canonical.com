@@ -20,9 +20,10 @@
 
   .l-webpage__details {
     display: grid;
-    column-gap: 24px;
+    column-gap: 3rem;
     row-gap: 8px;
     grid-template-columns: max-content 1fr;
+    place-items: baseline;
   }
 
   .l-webpage__details-header {

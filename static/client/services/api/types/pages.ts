@@ -100,3 +100,14 @@ export interface ISetProducts {
   webpage_id: number;
   products: IProduct[];
 }
+
+export interface IPageStats {
+  data: {
+    last_updated: string;
+    readability_score: number;
+    accessibility_score: number;
+    link_count: number;
+    prohibited_words: string[];
+    copy_errors: number;
+  };
+}

@@ -1,12 +1,23 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
+import yaml
 from flask_pydantic import validate
+from pathlib import Path
 
-from webapp.models import Asset, Project, Webpage, WebpageAsset, db
+from webapp.models import (
+    Asset,
+    Project,
+    Webpage,
+    WebpageAsset,
+    db,
+)
 from webapp.schemas import GetWebpageAssetsModel
+from webapp.settings import BASE_DIR
 from webapp.sso import login_required
 
-
 webpage_blueprint = Blueprint("webpage", __name__, url_prefix="/api")
+
+with open(Path(BASE_DIR) / "data/sites.yaml", "r") as f:
+    sites = yaml.safe_load(f).get("sites", [])
 
 
 @webpage_blueprint.route("/get-webpage-assets", methods=["POST"])
@@ -54,3 +65,46 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
         ),
         200,
     )
+
+
+@webpage_blueprint.route("/get-webpage-stats", methods=["GET"])
+@login_required
+def get_page_stats():
+    project = request.args.get("project", type=str, default="").strip().lower()
+    if not project or project not in sites:
+        return jsonify({"error": "project is required"}), 400
+
+    webpage_url = request.args.get("url", type=str, default="").strip().lower()
+    if not webpage_url or webpage_url == "/":
+        webpage_url = ""
+
+    webpage = Webpage.query.filter_by(url=webpage_url).first()
+    if not webpage:
+        return jsonify({"error": "Webpage not found"}), 404
+
+    stats = current_app.config["CACHE"].get("PAGE_STATS_CACHE") or {}
+    stats_data = stats.get(project, {})
+    page_stats = stats_data.get(f"https://{project}{webpage_url or '/'}", {})
+
+    stats = {
+        "last_updated": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["last_updated"], "N/A"
+        ),
+        "readability_score": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["readability_score"], "N/A"
+        ),
+        "accessibility_score": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["accessibility_score"], "N/A"
+        ),
+        "link_count": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["link_count"], "N/A"
+        ),
+        "copy_errors": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["copy_errors"], "N/A"
+        ),
+        "prohibited_words": page_stats.get(
+            current_app.config["STATS_SCHEMA"]["prohibited_words"], "N/A"
+        ).split(", "),
+    }
+
+    return jsonify(stats), 200

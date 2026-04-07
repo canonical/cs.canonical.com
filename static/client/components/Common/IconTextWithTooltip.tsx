@@ -5,12 +5,12 @@ import { Tooltip } from "@canonical/react-components";
 interface IIconTextWithTooltipProps {
   text?: string;
   icon?: string;
-  message?: string;
+  message?: string | Array<string>;
 }
 
 const IconTextWithTooltip: React.FC<IIconTextWithTooltipProps> = ({ text, icon, message }) => {
   return (
-    <Tooltip message={message} zIndex={999}>
+    <Tooltip message={Array.isArray(message) ? message.join("\n") : message} zIndex={999}>
       <span className="u-has-icon">
         {text}&nbsp;
         {icon && <i className={`p-icon--${icon}`} />}

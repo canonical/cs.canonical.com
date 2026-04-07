@@ -69,3 +69,13 @@ BAU_BOT_WEBHOOK_URL = get_flask_env("BAU_BOT_WEBHOOK_URL")
 SSO_CLIENT_ID = get_flask_env("SSO_CLIENT_ID")
 SSO_CLIENT_SECRET = get_flask_env("SSO_CLIENT_SECRET")
 OIDC_PROVIDER = get_flask_env("OIDC_PROVIDER")
+PAGE_STATS_DOC = get_flask_env("PAGE_STATS_DOC")
+
+STATS_SCHEMA = {
+    "last_updated": "Last updated",
+    "readability_score": "Reading level",
+    "accessibility_score": "Accessibility score",
+    "link_count": "Link profile",
+    "copy_errors": "Copy style guide errors",
+    "prohibited_words": "Remove and replace these style guide errors",
+}

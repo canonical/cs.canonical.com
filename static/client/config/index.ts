@@ -39,6 +39,8 @@ const config = {
       "Replacing or removing logos or images",
     ],
     pageRefreshes: ["Changing or adding to the page layout", "Modifications that change the layout"],
+    readability: "Aim for a score of 7 on most pages.",
+    accessibility: "If your score is 89 or lower, there are likely quick fixes to improve accessibility.",
   },
   assetsManagerUrl: "https://assets.ubuntu.com/manager",
   api: {
