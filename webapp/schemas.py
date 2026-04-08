@@ -27,6 +27,7 @@ class ChangesRequestModel(BaseModel):
     description: str
     summary: str = ""
     request_type: str = ""
+    copy_doc_link: Optional[str] = None
 
 
 class RemoveWebpageModel(BaseModel):

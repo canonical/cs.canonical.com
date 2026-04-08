@@ -149,6 +149,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         request_type: Object.keys(ChangeRequestType).find(
           (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE,
         ) as string,
+          copy_doc_link: !hasExistingLink ? linkToSubmit : undefined, // <-- Add this line
       })
         .then((response) => {
           if (!response) return;

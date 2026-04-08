@@ -84,6 +84,7 @@ export interface IRequestChanges {
   summary?: string;
   description: string;
   request_type: string;
+  copy_doc_link?: string;
 }
 
 export interface IRequestRemoval {

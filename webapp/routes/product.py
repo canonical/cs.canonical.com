@@ -83,20 +83,24 @@ def set_product(body: SetProductsModel):
         db.session.rollback()
 
         if isinstance(e.orig, ForeignKeyViolation):
-            return jsonify({
-                "error": f"Tag: {product['name']} does not exist."
-                }), 400
+            return (
+                jsonify({"error": f"Tag: {product['name']} does not exist."}),
+                400,
+            )
         else:
-            return jsonify({
-                "error": (
-                    "Integrity constraint violated. Please check the tags."
-                )
-                }), 400
+            return (
+                jsonify(
+                    {
+                        "error": (
+                            "Integrity constraint violated. Please check the tags."
+                        )
+                    }
+                ),
+                400,
+            )
     except Exception as e:
         db.session.rollback()
-        return jsonify({
-            "error": f"An unexpected error occurred: {e}"
-        }), 500
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
     return jsonify({"message": "Successfully set product"}), 200
 

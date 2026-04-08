@@ -52,6 +52,12 @@ def request_changes(body: ChangesRequestModel):
 
         # clean the cache for a new Jira task to appear in the tree
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
+
+        # if a new copy_doc_link is supplied, add it to the page
+        if params.get("copy_doc_link") and not webpage.copy_doc_link:
+            webpage.copy_doc_link = params["copy_doc_link"]
+            db.session.commit()
+
         invalidate_cache(webpage)
     except Exception as e:
         return jsonify(str(e)), 500
