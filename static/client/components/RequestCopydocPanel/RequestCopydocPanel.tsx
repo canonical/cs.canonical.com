@@ -7,6 +7,7 @@ import {
   Icon,
   SidePanel,
   Textarea,
+  Input,
   useToastNotification,
   Tooltip,
 } from "@canonical/react-components";
@@ -63,7 +64,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
     setDescr(e.target.value);
   };
 
-  const handleLinkChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewCopydocLink(e.target.value);
     setLinkError(null);
   };
@@ -232,12 +233,13 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
                 </p>
               ) : (
                 <div className="u-sv-1">
-                  <Textarea
+                  <Input
                     error={linkError || undefined}
+                    id="copydoc-link-input"
                     label="1. Add a link to your copy doc"
                     onChange={handleLinkChange}
                     placeholder="Copy doc URL"
-                    rows={1}
+                    type="text"
                     value={newCopydocLink}
                   />
                 </div>
