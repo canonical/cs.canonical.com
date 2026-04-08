@@ -92,7 +92,8 @@ def set_product(body: SetProductsModel):
                 jsonify(
                     {
                         "error": (
-                            "Integrity constraint violated. Please check the tags."
+                            "Integrity constraint violated. Please check "
+                            "the tags."
                         )
                     }
                 ),

@@ -77,10 +77,6 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
     setConfirmedPage(null);
   }, [onClose]);
 
-  const viewTicket = (ticketId: string) => {
-    window.open(`${config.jiraTaskLink}${ticketId}`, "_blank");
-  };
-
   const handleSuccess = useCallback(async () => {
     handleClose();
 
@@ -149,16 +145,20 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         request_type: Object.keys(ChangeRequestType).find(
           (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE,
         ) as string,
-          copy_doc_link: !hasExistingLink ? linkToSubmit : undefined, // <-- Add this line
+        copy_doc_link: !hasExistingLink ? linkToSubmit : undefined,
       })
         .then((response) => {
           if (!response) return;
 
           const data = response.data;
+
+          // Wrap window.open in {} so it returns void instead of Window | null
           const notificationActions = [
             {
               label: "View on Jira",
-              onClick: () => viewTicket(data.jira_task_id),
+              onClick: () => {
+                window.open(`${config.jiraTaskLink}${data.jira_task_id}`, "_blank");
+              },
             },
           ];
 
@@ -182,18 +182,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         .catch(onSubmitError)
         .finally(onSubmitFinally);
     },
-    [
-      activeWebpage,
-      newCopydocLink,
-      dueDateObj,
-      user,
-      descr,
-      onSubmitError,
-      onSubmitFinally,
-      handleSuccess,
-      notify,
-      viewTicket,
-    ],
+    [activeWebpage, newCopydocLink, dueDateObj, user, descr, onSubmitError, onSubmitFinally, handleSuccess, notify],
   );
 
   return (
