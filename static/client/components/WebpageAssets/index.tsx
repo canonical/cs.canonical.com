@@ -29,33 +29,32 @@ const WebpageAssets: React.FC<WebpageAssetsProps> = ({ url = "", projectName = "
   if (!assetsData?.assets?.length) return null;
 
   return (
-    <div id="webpage-assets">
-      <section>
-        <h2 className="p-text--small-caps u-sv1">Assets used</h2>
-        <div className="grid-row--25-25-25-25">
-          {assetsData.assets?.map((asset) => {
-            return (
-              <div className="grid-col" key={asset.id}>
-                <Asset asset={asset} />
-              </div>
-            );
-          })}
-        </div>
-        {assetsData.total > assetsData.page_size && (
-          <TablePagination
-            currentPage={assetsData.page}
-            data={assetsData.assets}
-            description={`Showing ${Math.min(assetsData.page * assetsData.page_size, assetsData.total)} out of ${assetsData.total} assets`}
-            externallyControlled
-            onPageChange={paginate}
-            onPageSizeChange={handlePageSizeChange}
-            pageLimits={[4]}
-            pageSize={assetsData.page_size}
-            totalItems={assetsData.total}
-          />
-        )}
-      </section>
-    </div>
+    <section id="webpage-assets">
+      <hr className="p-rule" />
+      <h2 className="p-text--small-caps u-sv1">Assets used</h2>
+      <div className="grid-row--25-25-25-25">
+        {assetsData.assets?.map((asset) => {
+          return (
+            <div className="grid-col" key={asset.id}>
+              <Asset asset={asset} />
+            </div>
+          );
+        })}
+      </div>
+      {assetsData.total > assetsData.page_size && (
+        <TablePagination
+          currentPage={assetsData.page}
+          data={assetsData.assets}
+          description={`Showing ${Math.min(assetsData.page * assetsData.page_size, assetsData.total)} out of ${assetsData.total} assets`}
+          externallyControlled
+          onPageChange={paginate}
+          onPageSizeChange={handlePageSizeChange}
+          pageLimits={[4]}
+          pageSize={assetsData.page_size}
+          totalItems={assetsData.total}
+        />
+      )}
+    </section>
   );
 };
 

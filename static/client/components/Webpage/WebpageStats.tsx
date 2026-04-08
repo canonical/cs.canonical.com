@@ -20,13 +20,15 @@ const WebpageStats = ({ url, project }: IWebpageStatsProps) => {
 
         <div className="label u-text--muted">
           Readability score
-          <IconTextWithTooltip icon="information" message={config.tooltips.readability} />
+          {statsData.readability_score !== "N/A" && (
+            <IconTextWithTooltip icon="information" message={config.tooltips.readability} />
+          )}
         </div>
         <div className="value">{isLoading ? "Loading..." : statsData.readability_score}</div>
 
         <div className="label u-text--muted">
           Accessibility score
-          <IconTextWithTooltip icon="information" message={config.tooltips.accessibility} />
+          <IconTextWithTooltip icon="information" message={config.tooltips.accessibility} position="top-left" />
         </div>
         <div className="value">{isLoading ? "Loading..." : statsData.accessibility_score}</div>
 
@@ -35,7 +37,9 @@ const WebpageStats = ({ url, project }: IWebpageStatsProps) => {
 
         <div className="label u-text--muted">
           Prohibited words
-          <IconTextWithTooltip icon="information" message={isLoading ? "" : statsData.prohibited_words} />
+          {statsData.copy_errors > 0 && (
+            <IconTextWithTooltip icon="information" message={isLoading ? "" : statsData.prohibited_words} />
+          )}
         </div>
         <div className="value">{isLoading ? "Loading..." : statsData.copy_errors}</div>
       </div>

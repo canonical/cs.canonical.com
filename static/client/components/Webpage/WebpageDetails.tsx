@@ -27,7 +27,7 @@ const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
     <>
       <div className="l-webpage__details-header">
         <h2 className="p-text--small-caps">Page Details</h2>
-        <Button appearance="base" hasIcon>
+        <Button appearance="base" className="u-no-margin" hasIcon small>
           <i className="p-icon--edit" />
         </Button>
       </div>
@@ -40,18 +40,20 @@ const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
         </div>
 
         <div className="label u-text--muted">
-          <IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} text="Owner" />
+          Owner
+          <IconTextWithTooltip icon="information" message={config.tooltips.ownerDef} />
         </div>
         <div className="value">{page.owner.name}</div>
 
         <div className="label u-text--muted">
-          <IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} text="Contributors" />
+          Contributors
+          <IconTextWithTooltip icon="information" message={config.tooltips.reviewerDef} />
         </div>
         <div className="value">{page.reviewers.map((r) => r.name).join(", ")}</div>
 
         <div className="label u-text--muted">Related links</div>
         <div className="value">
-          <ul className="p-inline-list--middot">
+          <ul className="p-inline-list--middot u-no-margin">
             {page.copy_doc_link && (
               <li className="p-inline-list__item">
                 <Button appearance="link" className="u-no-margin--bottom" onClick={openCopyDoc}>

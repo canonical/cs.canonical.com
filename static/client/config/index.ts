@@ -40,7 +40,7 @@ const config = {
     ],
     pageRefreshes: ["Changing or adding to the page layout", "Modifications that change the layout"],
     readability: "Aim for a score of 7 on most pages.",
-    accessibility: "If your score is 89 or lower, there are likely quick fixes to improve accessibility.",
+    accessibility: "Improve accessibility with quick fixes for scores under 90",
   },
   assetsManagerUrl: "https://assets.ubuntu.com/manager",
   api: {

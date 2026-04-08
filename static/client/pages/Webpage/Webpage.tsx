@@ -64,18 +64,16 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
 
         <hr className="p-rule" />
 
-        <div className="grid-row--50-50 p-divider">
+        <div className="grid-row--50-50-on-large p-divider">
           <div className="grid-col p-divider__block">
             <WebpageDetails page={page} project={project} />
           </div>
-          {!isNew && !!page.url && (
+          {!isNew && (
             <div className="grid-col p-divider__block">
-              <WebpageStats project={project} url={page.url} />
+              <WebpageStats project={project} url={page.url as string} />
             </div>
           )}
         </div>
-
-        <hr className="p-rule" />
 
         <WebpageAssets projectName={page.project?.name} url={page.url} />
 

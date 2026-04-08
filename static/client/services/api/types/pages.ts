@@ -104,7 +104,7 @@ export interface ISetProducts {
 export interface IPageStats {
   data: {
     last_updated: string;
-    readability_score: number;
+    readability_score: string;
     accessibility_score: number;
     link_count: number;
     prohibited_words: string[];
