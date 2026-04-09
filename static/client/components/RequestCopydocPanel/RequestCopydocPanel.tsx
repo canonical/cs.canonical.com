@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from "@canonical/react-components";
 import type { AxiosError } from "axios";
+import { useQueryClient } from "react-query";
 
 import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 
@@ -44,6 +45,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   const [newCopydocLink, setNewCopydocLink] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const [selectedPage, setSelectedPage] = useState<IPageOption | null>(null);
   const [confirmedPage, setConfirmedPage] = useState<IPageOption | null>(null);
@@ -81,6 +83,13 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   const handleSuccess = useCallback(async () => {
     handleClose();
 
+    try {
+      // refresh the tickets cache
+      await queryClient.invalidateQueries("tickets");
+    } catch {
+      // silently handle cache refresh failure
+    }
+
     if (activeWebpage) {
       if (refetch) {
         try {
@@ -98,7 +107,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         }
       }
     }
-  }, [handleClose, refetch, selectedProject?.name, setSelectedProject, activeWebpage]);
+  }, [handleClose, refetch, selectedProject?.name, setSelectedProject, activeWebpage, queryClient]);
 
   const onSubmitError = useCallback(
     (error: AxiosError<IBasicApiError>) => {
@@ -118,7 +127,6 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
       if (!activeWebpage?.id) return;
 
       const hasExistingLink = !!activeWebpage.copy_doc_link;
-      const linkToSubmit = hasExistingLink ? activeWebpage.copy_doc_link : newCopydocLink;
 
       if (!hasExistingLink) {
         const trimmedLink = newCopydocLink.trim();
@@ -142,18 +150,17 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
         reporter_struct: user,
         type: ChangeRequestType.COPY_UPDATE,
         summary: requestSummary,
-        description: `Copy doc link: ${linkToSubmit} \n${descr}`,
+        description: `${descr}`,
         request_type: Object.keys(ChangeRequestType).find(
           (key) => ChangeRequestType[key as keyof typeof ChangeRequestType] === ChangeRequestType.COPY_UPDATE,
         ) as string,
-        copy_doc_link: !hasExistingLink ? linkToSubmit : undefined,
+        copy_doc_link: !hasExistingLink ? newCopydocLink : undefined,
       })
         .then((response) => {
           if (!response) return;
 
           const data = response.data;
 
-          // Wrap window.open in {} so it returns void instead of Window | null
           const notificationActions = [
             {
               label: "View on Jira",
