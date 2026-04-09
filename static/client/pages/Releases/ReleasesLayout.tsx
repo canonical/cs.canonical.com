@@ -1,0 +1,118 @@
+import { type ReactNode } from "react";
+
+import { Spinner, useToastNotification } from "@canonical/react-components";
+import { Outlet } from "react-router-dom";
+
+import ReleasesSecondaryNav from "./components/ReleasesSecondaryNav";
+import ReleasesStatusBar from "./components/ReleasesStatusBar";
+import { useReleaseFormState } from "./hooks/useReleaseFormState";
+
+import { useReleases } from "@/services/api/hooks/releases";
+import type { IReleasesResponse } from "@/services/api/types/releases";
+
+export interface IReleasesLayoutOutletContext {
+  data: IReleasesResponse;
+  formData: IReleasesResponse["releases"];
+  dirtyCount: number;
+  isLoading: boolean;
+  handleFieldChange: ReturnType<typeof useReleaseFormState>["handleFieldChange"];
+  handleChecksumChange: ReturnType<typeof useReleaseFormState>["handleChecksumChange"];
+  handleChecksumAdd: ReturnType<typeof useReleaseFormState>["handleChecksumAdd"];
+  handleChecksumDelete: ReturnType<typeof useReleaseFormState>["handleChecksumDelete"];
+  handleSubmit: ReturnType<typeof useReleaseFormState>["handleSubmit"];
+}
+
+interface IReleasesLayoutContentProps {
+  data: IReleasesResponse;
+}
+
+const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode => {
+  const notify = useToastNotification();
+
+  const {
+    dirtyCount,
+    formData,
+    handleChecksumAdd,
+    handleChecksumChange,
+    handleChecksumDelete,
+    handleFieldChange,
+    handleSubmit,
+    isLoading,
+  } = useReleaseFormState({
+    releases: data.releases,
+    onSubmitSuccess: () => { notify.success("Releases updated successfully."); },
+    onSubmitError: () => { notify.failure("Failed to submit changes. Please try again.", null, null); },
+  });
+
+  const outletContext: IReleasesLayoutOutletContext = {
+    data,
+    formData,
+    dirtyCount,
+    isLoading,
+    handleFieldChange,
+    handleChecksumChange,
+    handleChecksumAdd,
+    handleChecksumDelete,
+    handleSubmit,
+  };
+
+  return (
+    <div className="l-releases-layout">
+      <ReleasesSecondaryNav />
+      <div className="l-releases-layout__content p-section">
+        <ReleasesStatusBar
+          dirtyCount={dirtyCount}
+          isLoading={isLoading}
+          onSubmit={handleSubmit}
+          status={data.status}
+        />
+        <hr className="p-rule" />
+        <Outlet context={outletContext} />
+      </div>
+    </div>
+  );
+};
+
+const ReleasesLayout = (): ReactNode => {
+  const { data, error, isLoading } = useReleases();
+
+  if (isLoading) {
+    return (
+      <div className="p-section">
+        <div className="grid-row">
+          <Spinner text="Loading releases data..." />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-section">
+        <div className="grid-row">
+          <div className="p-notification--negative">
+            <div className="p-notification__content">
+              <p className="p-notification__message">
+                Failed to load releases data: {error.detail || error.title}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="p-section">
+        <div className="grid-row">
+          <p className="u-text--muted">No releases data available.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <ReleasesLayoutContent data={data} />;
+};
+
+export default ReleasesLayout;

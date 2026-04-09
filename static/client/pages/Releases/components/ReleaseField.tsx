@@ -4,7 +4,7 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-import { recurseEqual } from "./utils";
+import { recurseEqual } from "../utils";
 
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
@@ -14,11 +14,21 @@ interface IReleaseFieldProps {
   value: ReleaseFieldValue;
   originalValue: ReleaseFieldValue;
   onChange: (newValue: ReleaseFieldValue) => void;
+  showHelpText?: boolean;
 }
 
-const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFieldProps): ReactNode => {
+function formatHelpText(val: ReleaseFieldValue): string | null {
+  if (val === null || val === undefined) return null;
+  if (typeof val === "string") return val || null;
+  if (typeof val === "number") return String(val);
+  if (isTaggedField(val)) return val.value !== null && val.value !== undefined ? String(val.value) : null;
+  return null;
+}
+
+const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText = false }: IReleaseFieldProps): ReactNode => {
   const isDirty = !recurseEqual(value, originalValue);
   const label = fieldKey;
+  const helpText = showHelpText ? formatHelpText(originalValue) : null;
 
   const handleTaggedFieldChange = useCallback(
     (newInnerValue: unknown) => {
@@ -47,6 +57,11 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFiel
           </span>
         </div>
         <TaggedFieldInput onChange={handleTaggedFieldChange} type={value.type} value={value.value} />
+        {helpText && (
+          <p className="l-release-form__field-help u-no-margin--bottom">
+            Current: <span>{helpText}</span>
+          </p>
+        )}
       </div>
     );
   }
@@ -59,6 +74,11 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFiel
         })}
       >
         <Input label={label} onChange={(e) => onChange(e.target.value)} type="text" value={value} />
+        {helpText && (
+          <p className="l-release-form__field-help u-no-margin--bottom">
+            Current: <span>{helpText}</span>
+          </p>
+        )}
       </div>
     );
   }
@@ -71,6 +91,11 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange }: IReleaseFiel
         })}
       >
         <Input label={label} onChange={(e) => onChange(Number(e.target.value))} type="number" value={value} />
+        {helpText && (
+          <p className="l-release-form__field-help u-no-margin--bottom">
+            Current: <span>{helpText}</span>
+          </p>
+        )}
       </div>
     );
   }
