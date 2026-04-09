@@ -11,9 +11,10 @@ import { useViewsStore } from "@/store/views";
 
 interface IMainLayoutProps {
   children?: ReactNode;
+  showSearch?: boolean;
 }
 
-const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
+const MainLayout = ({ children, showSearch = true }: IMainLayoutProps): ReactNode => {
   const location = useLocation();
   const navigate = useNavigate();
   const view = useViewsStore((state) => state.view);
@@ -37,10 +38,10 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
             )}
           </div>
           <div className="grid-col">
-            <Search />
+            {showSearch && <Search />}
           </div>
         </div>
-        <hr />
+        {showSearch && <hr />}
         <div className="grid-row">
           {children}
           <Outlet />
