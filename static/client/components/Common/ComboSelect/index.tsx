@@ -15,11 +15,13 @@ const ComboSelect = <T extends Record<string, any>>({
   onSelect,
   className,
   disabled,
+  id,
   placeholder = "Select...",
   error,
   indexKey = "id" as keyof T,
   labelKey = "name" as keyof T,
   searchKeys,
+  maxVisible = 50,
 }: ComboSelectProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -89,27 +91,37 @@ const ComboSelect = <T extends Record<string, any>>({
 
   const wrapperClassName = error ? "p-form-validation is-error" : undefined;
 
-  const dropdownItems = useMemo(
-    () =>
-      filtered.map((option) => (
-        <li
-          aria-selected={isSelected(option)}
-          className={classNames("p-combo-select__item", {
-            "is-selected": isSelected(option),
-          })}
-          key={String(option[indexKey])}
-          onClick={() => handleSelect(option)}
-          onMouseDown={handleOptionMouseDown}
-          role="option"
-        >
-          <span className="p-combo-select__item-label">
-            <HighlightedSearchText highlight={query} text={getLabel(option)} />
-          </span>
-          {isSelected(option) && <Icon data-testid="tick-icon" name="task-outstanding" />}
-        </li>
-      )),
-    [filtered, getLabel, handleSelect, handleOptionMouseDown, indexKey, isSelected, query],
-  );
+  const visibleOptions = useMemo(() => filtered.slice(0, maxVisible), [filtered, maxVisible]);
+
+  const hiddenCount = filtered.length - visibleOptions.length;
+
+  const dropdownItems = useMemo(() => {
+    const items = visibleOptions.map((option) => (
+      <li
+        aria-selected={isSelected(option)}
+        className={classNames("p-combo-select__item", {
+          "is-selected": isSelected(option),
+        })}
+        key={String(option[indexKey])}
+        onClick={() => handleSelect(option)}
+        onMouseDown={handleOptionMouseDown}
+        role="option"
+      >
+        <span className="p-combo-select__item-label">
+          <HighlightedSearchText highlight={query} text={getLabel(option)} />
+        </span>
+        {isSelected(option) && <Icon data-testid="tick-icon" name="task-outstanding" />}
+      </li>
+    ));
+    if (hiddenCount > 0) {
+      items.push(
+        <li className="p-combo-select__item p-combo-select__more-hint" key="__more__">
+          <em>{hiddenCount} more — type to search</em>
+        </li>,
+      );
+    }
+    return items;
+  }, [visibleOptions, hiddenCount, getLabel, handleSelect, handleOptionMouseDown, indexKey, isSelected, query]);
 
   return (
     <div className={classNames("p-combo-select", wrapperClassName, className)}>
@@ -118,6 +130,7 @@ const ComboSelect = <T extends Record<string, any>>({
           autoComplete="off"
           className="p-form__control u-no-margin--bottom"
           disabled={disabled}
+          id={id}
           onBlur={handleBlur}
           onChange={handleChange}
           onFocus={handleFocus}

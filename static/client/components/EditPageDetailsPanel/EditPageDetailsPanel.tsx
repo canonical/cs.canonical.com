@@ -106,6 +106,7 @@ const EditPageDetailsPanel = ({ page, project }: EditPageDetailsPanelProps) => {
             Owner
           </label>
           <ComboSelect<IUser>
+            id="owner-select"
             indexKey="email"
             labelKey="name"
             onSelect={(selected) => setOwner(selected)}
@@ -121,6 +122,7 @@ const EditPageDetailsPanel = ({ page, project }: EditPageDetailsPanelProps) => {
             Contributor(s)
           </label>
           <MultiSelectPicker<IUser>
+            id="contributors-select"
             indexKey="email"
             labelKey="name"
             onSelect={(selected) => setReviewers(selected as IUser[])}

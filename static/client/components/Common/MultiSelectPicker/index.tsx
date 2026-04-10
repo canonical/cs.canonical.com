@@ -16,11 +16,13 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   onSelect,
   className,
   disabled = false,
+  id,
   placeholder = "Select...",
   error,
   indexKey = "id" as keyof T,
   labelKey = "name" as keyof T,
   searchKeys,
+  maxVisible = 50,
 }: MultiSelectPickerProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +48,8 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     }
   }, [value, isOpen]);
 
+  const selectedIds = useMemo(() => new Set(value.map((v) => getKey(v))), [value, getKey]);
+
   const sortedValue = useMemo(
     () => [...committedValue].sort((a, b) => getLabel(a).localeCompare(getLabel(b))),
     [committedValue, getLabel],
@@ -54,11 +58,11 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   // Stable chip order while open: committed items (sorted) + newly added items appended
   const displayChips = useMemo(() => {
     const committedIds = new Set(committedValue.map((v) => getKey(v)));
-    const kept = committedValue.filter((v) => value.some((sel) => getKey(sel) === getKey(v)));
+    const kept = committedValue.filter((v) => selectedIds.has(getKey(v)));
     const keptSorted = [...kept].sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
     const added = value.filter((v) => !committedIds.has(getKey(v)));
     return [...keptSorted, ...added];
-  }, [value, committedValue, getKey, getLabel]);
+  }, [value, committedValue, selectedIds, getKey, getLabel]);
 
   // Compute how many names fit in the collapsed display
   useEffect(() => {
@@ -102,7 +106,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     const selected: T[] = [];
     const unselected: T[] = [];
     for (const opt of options) {
-      if (value.some((v) => getKey(v) === getKey(opt))) {
+      if (selectedIds.has(getKey(opt))) {
         selected.push(opt);
       } else {
         unselected.push(opt);
@@ -112,7 +116,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     selected.sort(byLabel);
     unselected.sort(byLabel);
     dropdownOrderRef.current = [...selected, ...unselected];
-  }, [options, value, getKey, getLabel]);
+  }, [options, selectedIds, getKey, getLabel]);
 
   // Frozen dropdown order filtered by search query
   const dropdownOptions = useMemo(() => {
@@ -129,22 +133,24 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   }, [query, keysToSearch, isOpen]);
 
   const isSelected = useCallback(
-    (option: T): boolean => value.some((v) => getKey(v) === getKey(option)),
-    [value, getKey],
+    (option: T): boolean => selectedIds.has(getKey(option)),
+    [selectedIds, getKey],
   );
 
   const toggleOption = useCallback(
     (option: T) => {
-      const alreadySelected = value.some((v) => getKey(v) === getKey(option));
-      const newValue = alreadySelected ? value.filter((v) => getKey(v) !== getKey(option)) : [...value, option];
+      const optionKey = getKey(option);
+      const alreadySelected = selectedIds.has(optionKey);
+      const newValue = alreadySelected ? value.filter((v) => getKey(v) !== optionKey) : [...value, option];
       onSelect(newValue);
     },
-    [value, getKey, onSelect],
+    [value, getKey, selectedIds, onSelect],
   );
 
   const handleChipDismiss = useCallback(
     (option: T) => {
-      onSelect(value.filter((v) => getKey(v) !== getKey(option)));
+      const optionKey = getKey(option);
+      onSelect(value.filter((v) => getKey(v) !== optionKey));
     },
     [value, getKey, onSelect],
   );
@@ -157,16 +163,21 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     setQuery("");
   }, []);
 
+  const dropdownOptionsByKey = useMemo(
+    () => new Map(dropdownOptions.map((opt) => [getKey(opt), opt])),
+    [dropdownOptions, getKey],
+  );
+
   const handleOptionClick = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const idx = e.currentTarget.dataset.idx;
-      const option = dropdownOptions.find((opt) => getKey(opt) === idx);
+      const option = idx != null ? dropdownOptionsByKey.get(idx) : undefined;
       if (option) {
         toggleOption(option);
         setQuery("");
       }
     },
-    [dropdownOptions, getKey, toggleOption],
+    [dropdownOptionsByKey, toggleOption],
   );
 
   const handleDisplayClick = useCallback(() => {
@@ -199,9 +210,16 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
   const wrapperClassName = error ? "p-form-validation is-error" : undefined;
 
+  const visibleOptions = useMemo(
+    () => dropdownOptions.slice(0, maxVisible),
+    [dropdownOptions, maxVisible],
+  );
+
+  const hiddenCount = dropdownOptions.length - visibleOptions.length;
+
   const dropdownItems = useMemo(
-    () =>
-      dropdownOptions.map((option) => (
+    () => {
+      const items = visibleOptions.map((option) => (
         <div className="p-multi-select-picker__option" key={getKey(option)}>
           <Input
             checked={isSelected(option)}
@@ -211,8 +229,17 @@ const MultiSelectPicker = <T extends Record<string, any>>({
             type="checkbox"
           />
         </div>
-      )),
-    [dropdownOptions, getLabel, getKey, handleOptionClick, isSelected, query],
+      ));
+      if (hiddenCount > 0) {
+        items.push(
+          <div className="p-multi-select-picker__option p-multi-select-picker__more-hint" key="__more__">
+            <em>{hiddenCount} more — type to search</em>
+          </div>,
+        );
+      }
+      return items;
+    },
+    [visibleOptions, hiddenCount, getLabel, getKey, handleOptionClick, isSelected, query],
   );
 
   return (
@@ -235,6 +262,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
             <input
               autoComplete="off"
               className="p-search-and-filter__input u-no-padding--left"
+              id={id}
               onChange={handleSearchChange}
               placeholder={value.length === 0 ? placeholder : undefined}
               ref={inputRef}
