@@ -7,7 +7,7 @@ export function getNowStr(): string {
   return `${year}-${month}-${day}`;
 }
 
-export function beatifyDate(dateStr: string): string {
+export function beautifyDate(dateStr: string): string {
   const date = new Date(dateStr);
   const year = date.getFullYear();
   const month = date.toLocaleString("en-US", { month: "short" });

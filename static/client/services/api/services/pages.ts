@@ -4,6 +4,7 @@ import type {
   INewPage,
   INewPageResponse,
   IPagesResponse,
+  IPageStats,
   IRequestChanges,
   IRequestChangesResponse,
   IRequestRemoval,
@@ -41,6 +42,10 @@ export const setProducts = async (body: ISetProducts) => {
 
 export const getWebpageAssets = async (body: IGetWebpageAssets): Promise<IAssetsResponse> => {
   return api.pages.getWebpageAssets(body);
+};
+
+export const getWebpageStats = async (pageUrl: string, projectName: string): Promise<IPageStats> => {
+  return api.pages.getWebpageStats(pageUrl, projectName);
 };
 
 export * as PagesServices from "./pages";

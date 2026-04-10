@@ -6,6 +6,7 @@ import type {
   INewPage,
   INewPageResponse,
   IPagesResponse,
+  IPageStats,
   IRequestChanges,
   IRequestRemoval,
   ISetProducts,
@@ -52,5 +53,12 @@ export class PagesApiClass extends BasicApiClass {
       webpage_url: body.pageUrl,
       project_name: body.projectName,
     });
+  }
+
+  public getWebpageStats(pageUrl: string, projectName: string): Promise<IPageStats> {
+    return this.callApi(
+      `${ENDPOINTS.getWebpageStats}?url=${encodeURIComponent(pageUrl)}&project=${encodeURIComponent(projectName)}`,
+      REST_TYPES.GET,
+    );
   }
 }

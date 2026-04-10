@@ -20,9 +20,50 @@
 
   .l-webpage__details {
     display: grid;
-    column-gap: 24px;
+    column-gap: 3rem;
     row-gap: 8px;
     grid-template-columns: max-content 1fr;
+    grid-auto-rows: 24px;
+    align-items: center;
+
+    .label,
+    .value {
+      line-height: 24px;
+    }
+
+    .value {
+      // Reset any inner elements that add extra spacing
+      .p-inline-list--middot,
+      .p-inline-list {
+        margin: 0;
+        padding: 0;
+      }
+
+      .p-button--link {
+        margin: 0;
+        padding: 0;
+        height: auto;
+        line-height: inherit;
+      }
+    }
+
+    .label span {
+      display: inline-flex !important;
+      align-items: center;
+    }
+
+    .label .u-has-icon {
+      padding: 0;
+      margin: 0;
+      margin-left: 4px;
+
+      [class*="p-icon"] {
+        width: 16px;
+        height: 16px;
+        margin: 0 !important;
+        padding: 0;
+      }
+    }
   }
 
   .l-webpage__details-header {
