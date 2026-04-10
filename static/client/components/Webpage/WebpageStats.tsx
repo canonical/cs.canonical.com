@@ -37,7 +37,7 @@ const WebpageStats = ({ url, project }: IWebpageStatsProps) => {
 
         <div className="label u-text--muted">
           Prohibited words
-          {statsData.copy_errors > 0 && (
+          {typeof statsData.copy_errors === "number" && statsData.copy_errors > 0 && (
             <IconTextWithTooltip icon="information" message={isLoading ? "" : statsData.prohibited_words} />
           )}
         </div>

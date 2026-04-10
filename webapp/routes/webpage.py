@@ -70,21 +70,31 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
 @webpage_blueprint.route("/get-webpage-stats", methods=["GET"])
 @login_required
 def get_page_stats():
-    project = request.args.get("project", type=str, default="").strip().lower()
-    if not project or project not in sites:
-        return jsonify({"error": "project is required"}), 400
+    project_name = (
+        request.args.get("project", type=str, default="").strip().lower()
+    )
+    if not project_name or project_name not in sites:
+        return jsonify({"error": "Please provide a valid project"}), 400
+
+    project = Project.query.filter_by(name=project_name).first()
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
 
     webpage_url = request.args.get("url", type=str, default="").strip().lower()
     if not webpage_url or webpage_url == "/":
         webpage_url = ""
 
-    webpage = Webpage.query.filter_by(url=webpage_url).first()
+    webpage = Webpage.query.filter_by(
+        url=webpage_url, project_id=project.id
+    ).first()
     if not webpage:
         return jsonify({"error": "Webpage not found"}), 404
 
     stats = current_app.config["CACHE"].get("PAGE_STATS_CACHE") or {}
-    stats_data = stats.get(project, {})
-    page_stats = stats_data.get(f"https://{project}{webpage_url or '/'}", {})
+    stats_data = stats.get(project_name, {})
+    page_stats = stats_data.get(
+        f"https://{project_name}{webpage_url or '/'}", {}
+    )
 
     stats = {
         "last_updated": page_stats.get(

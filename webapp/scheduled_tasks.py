@@ -32,6 +32,8 @@ TASK_DELAY = int(os.getenv("TASK_DELAY", "30"))
 UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", "5"))
 # Default delay between runs for parsing webpage assets
 PARSE_ASSETS_DELAY = int(os.getenv("PARSE_ASSETS_DELAY", "1440"))
+# Default delay between runs for parsing webpage stats
+FETCH_STATS_DELAY = int(os.getenv("FETCH_STATS_DELAY", "2880"))
 
 
 @register_task(delay=TASK_DELAY)
@@ -236,7 +238,7 @@ def parse_webpage_assets() -> None:
         app.logger.info("Finished scheduled task: parse_webpage_assets")
 
 
-@register_task(delay=2880)
+@register_task(delay=FETCH_STATS_DELAY)
 def fetch_webpage_stats() -> None:
     """Fetch webpage stats and update the database."""
     app = create_app()
@@ -269,7 +271,7 @@ def fetch_webpage_stats() -> None:
             app.config["CACHE"].set("PAGE_STATS_CACHE", index_data)
         except Exception as e:
             app.logger.error(f"Error fetching webpage stats: {e}")
-    app.logger.info("Finished scheduled task: fetch_webpage_stats")
+        app.logger.info("Finished scheduled task: fetch_webpage_stats")
 
 
 def init_scheduled_tasks(app: Flask) -> None:

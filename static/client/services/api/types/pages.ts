@@ -105,9 +105,9 @@ export interface IPageStats {
   data: {
     last_updated: string;
     readability_score: string;
-    accessibility_score: number;
-    link_count: number;
-    prohibited_words: string[];
-    copy_errors: number;
+    accessibility_score: number | string;
+    link_count: number | string;
+    prohibited_words: string[] | string;
+    copy_errors: number | string;
   };
 }

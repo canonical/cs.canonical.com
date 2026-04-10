@@ -16,8 +16,8 @@ import { usePanelsStore } from "@/store/app";
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
-  const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
-  const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
+  const isNew = useMemo(() => page.status === PageStatus.NEW, [page.status]);
+  const pageName = useMemo(() => page.name.split("/").reverse()[0], [page.name]);
 
   return (
     <>
