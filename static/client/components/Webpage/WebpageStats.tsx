@@ -8,8 +8,17 @@ interface IWebpageStatsProps {
   project: string;
 }
 
+const EMPTY_STATS: IPageStats["data"] = {
+  last_updated: "N/A",
+  readability_score: "N/A",
+  accessibility_score: "N/A",
+  link_count: "N/A",
+  prohibited_words: "N/A",
+  copy_errors: "N/A",
+};
+
 const WebpageStats = ({ url, project }: IWebpageStatsProps) => {
-  const { data: statsData = {} as IPageStats["data"], isLoading } = useWebpageStats(url, project);
+  const { data: statsData = EMPTY_STATS, isLoading } = useWebpageStats(url, project);
 
   return (
     <>
