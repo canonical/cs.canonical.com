@@ -39,7 +39,8 @@ def update_page_details(body: UpdatePageDetailsModel):
 
     if body.reviewers is not None:
         existing_reviewers = Reviewer.query.filter_by(
-            webpage_id=body.webpage_id).all()
+            webpage_id=body.webpage_id
+        ).all()
         for reviewer in existing_reviewers:
             db.session.delete(reviewer)
         db.session.flush()
@@ -81,7 +82,8 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
         return jsonify({"error": "Project not found"}), 404
 
     webpage = Webpage.query.filter_by(
-        url=webpage_url, project_id=project.id).first()
+        url=webpage_url, project_id=project.id
+    ).first()
 
     if not webpage:
         return jsonify({"error": "Webpage not found"}), 404
@@ -117,8 +119,9 @@ def get_webpage_assets(body: GetWebpageAssetsModel):
 @webpage_blueprint.route("/get-webpage-stats", methods=["GET"])
 @login_required
 def get_page_stats():
-    project_name = request.args.get(
-        "project", type=str, default="").strip().lower()
+    project_name = (
+        request.args.get("project", type=str, default="").strip().lower()
+    )
     if not project_name or project_name not in sites:
         return jsonify({"error": "Please provide a valid project"}), 400
 
@@ -131,14 +134,16 @@ def get_page_stats():
         webpage_url = ""
 
     webpage = Webpage.query.filter_by(
-        url=webpage_url, project_id=project.id).first()
+        url=webpage_url, project_id=project.id
+    ).first()
     if not webpage:
         return jsonify({"error": "Webpage not found"}), 404
 
     stats = current_app.config["CACHE"].get("PAGE_STATS_CACHE") or {}
     stats_data = stats.get(project_name, {})
     page_stats = stats_data.get(
-        f"https://{project_name}{webpage_url or '/'}", {})
+        f"https://{project_name}{webpage_url or '/'}", {}
+    )
 
     stats = {
         "last_updated": page_stats.get(
