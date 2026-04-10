@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo } from "react";
 
-import { ActionButton, Button } from "@canonical/react-components";
+import { ActionButton, Button, Chip } from "@canonical/react-components";
 
 import type { IReleaseStatus } from "@/services/api/types/releases";
 
@@ -25,32 +25,32 @@ const ReleasesStatusBar = ({ status, dirtyCount, isLoading, onSubmit }: IRelease
   }, [status.pr]);
 
   const demoUrl = prNumber ? `https://ubuntu-com-${prNumber}.demos.haus/` : null;
+  const chipAppearance = status.pr_exists ? "information" : undefined;
+  const chipValue = status.pr_exists ? "In progress" : "Not started";
+
+  const openExternalLink = (url: string | null): void => {
+    if (!url) return;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="l-releases-layout__status-bar">
       <div className="l-releases-layout__status-title">
-        <h2 className="p-heading--4 u-no-margin--bottom">Releases</h2>
-        {status.pr_exists ? (
-          <span className="p-chip is-caution">
-            <span className="p-chip__value">In progress</span>
-          </span>
-        ) : (
-          <span className="p-chip">
-            <span className="p-chip__value">No release in progress</span>
-          </span>
-        )}
+        <h2 className="p-heading--4">Releases</h2>
+        <Chip className="u-no-margin--bottom l-releases-layout__sidebar-chip" value={chipValue} appearance={chipAppearance} />
       </div>
       <div className="l-releases-layout__status-actions">
-        <Button disabled={!prUrl} onClick={() => prUrl && window.open(prUrl, "_blank", "noopener,noreferrer")}>
+        <Button className="u-no-margin--bottom" disabled={!prUrl} onClick={() => openExternalLink(prUrl)}>
           View PR on GitHub
         </Button>
         <Button
+          className="u-no-margin--bottom"
           disabled={!demoUrl}
-          onClick={() => demoUrl && window.open(demoUrl, "_blank", "noopener,noreferrer")}
+          onClick={() => openExternalLink(demoUrl)}
         >
           View demo
         </Button>
-        <ActionButton appearance="positive" disabled={dirtyCount === 0} loading={isLoading} onClick={onSubmit}>
+        <ActionButton className="u-no-margin--bottom" appearance="positive" disabled={dirtyCount === 0} loading={isLoading} onClick={onSubmit}>
           Submit changes
         </ActionButton>
       </div>
