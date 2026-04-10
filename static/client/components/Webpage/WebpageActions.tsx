@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { Button, Tooltip } from "@canonical/react-components";
 
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import type { IPage } from "@/services/api/types/pages";
@@ -15,29 +16,34 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
     ChangeRequestType.COPY_UPDATE,
   );
 
-  const toggleRequestRemovalPanel = usePanelsStore((state) => state.toggleRequestRemovalPanel);
+  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
+    state.copyUpdatePanelVisible,
+    state.toggleCopyUpdatePanel,
+    state.toggleRequestRemovalPanel,
+  ]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
-
   const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
-
-  // A page which was created from the content team's board on Jira
-  // must have a valid content_jira_id
   const isContentBoardPage = useMemo(() => page.content_jira_id, [page]);
 
-  const requestChanges = useCallback(() => {
-    setChangeType(ChangeRequestType.COPY_UPDATE);
-    setModalOpen(true);
-  }, []);
+  const handleRequestChange = (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => {
+    setChangeType(type);
+    switch (type) {
+      case ChangeRequestType.COPY_UPDATE:
+        toggleCopyUpdatePanel();
+        break;
+      case ChangeRequestType.PAGE_REFRESH:
+      case ChangeRequestType.NEW_WEBPAGE:
+        setModalOpen(true);
+        break;
+      default:
+        break;
+    }
+  };
 
-  const createNewPage = useCallback(() => {
-    setChangeType(ChangeRequestType.NEW_WEBPAGE);
-    setModalOpen(true);
-  }, []);
-
-  const handleModalClose = useCallback(() => {
+  const handleModalClose = () => {
     setModalOpen(false);
-  }, []);
+  };
 
   const allActionsDisabled = useMemo(() => page.status === PageStatus.TO_DELETE, [page.status]);
 
@@ -51,7 +57,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
                 className="p-segmented-control__button"
                 disabled={allActionsDisabled}
                 hasIcon
-                onClick={requestChanges}
+                onClick={() => handleRequestChange(ChangeRequestType.COPY_UPDATE)}
               >
                 <React.Fragment key=".0">
                   <i className="p-icon--file" /> <span>Copy update</span>
@@ -61,7 +67,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
                 className="p-segmented-control__button"
                 disabled={allActionsDisabled}
                 hasIcon
-                onClick={requestChanges}
+                onClick={() => handleRequestChange(ChangeRequestType.PAGE_REFRESH)}
               >
                 <React.Fragment key=".0">
                   <i className="p-icon--change-version" /> <span>Page refresh</span>
@@ -81,7 +87,12 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
           )}
 
           {isNew && !hasJiraTasks && !isContentBoardPage && (
-            <Button appearance="positive" className="p-segmented-control__button" hasIcon onClick={createNewPage}>
+            <Button
+              appearance="positive"
+              className="p-segmented-control__button"
+              hasIcon
+              onClick={() => handleRequestChange(ChangeRequestType.NEW_WEBPAGE)}
+            >
               <React.Fragment key=".0">
                 <i className="p-icon--file is-dark" /> <span>Submit for content review</span>
               </React.Fragment>
@@ -89,6 +100,10 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
           )}
         </div>
       </Tooltip>
+
+      {copyUpdatePanelVisible && (
+        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={page} />
+      )}
 
       {modalOpen && (
         <RequestTaskModal

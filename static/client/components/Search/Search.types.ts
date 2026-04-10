@@ -11,4 +11,5 @@ export interface SearchProps<T extends Record<string, any>> {
   labelKey?: keyof T;
   titleKey?: keyof T;
   searchKeys?: (keyof T)[];
+  hideTitle?: boolean;
 }

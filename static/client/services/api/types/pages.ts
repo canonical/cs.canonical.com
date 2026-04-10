@@ -41,6 +41,12 @@ export interface IPage {
   figma_link?: string;
 }
 
+export interface IRequestChangesResponse {
+  data: {
+    jira_task_id: string;
+  };
+}
+
 export interface IPagesResponse {
   data: {
     name: string;
@@ -78,6 +84,7 @@ export interface IRequestChanges {
   summary?: string;
   description: string;
   request_type: string;
+  copy_doc_link?: string;
 }
 
 export interface IRequestRemoval {

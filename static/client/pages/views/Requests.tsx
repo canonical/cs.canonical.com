@@ -1,11 +1,16 @@
+import { useState } from "react";
+
 import { ContextualMenu, List } from "@canonical/react-components";
 
 import RequestHistory from "@/components/Dashboard/History";
+import RequestCopydocPanel from "@/components/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
-import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE } from "@/config";
+import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE, COPY_UPDATE } from "@/config";
 import { usePanelsStore } from "@/store/app";
 
 const Requests: React.FC = () => {
+  const [isCopydocPanelOpen, setIsCopydocPanelOpen] = useState(false);
+
   const externalLinks = [
     {
       content: (
@@ -54,6 +59,9 @@ const Requests: React.FC = () => {
       case REMOVE_PAGE:
         toggleRequestRemovalPanel();
         break;
+      case COPY_UPDATE:
+        setIsCopydocPanelOpen(true);
+        break;
     }
   }
 
@@ -78,7 +86,10 @@ const Requests: React.FC = () => {
                 toggleAppearance={"positive"}
                 toggleLabel="Start a request"
               />
+
               <RequestRemovalPanel />
+
+              <RequestCopydocPanel isOpen={isCopydocPanelOpen} onClose={() => setIsCopydocPanelOpen(false)} />
             </div>
             <div className="grid-col">
               <div className="p-image-container--3-2">
