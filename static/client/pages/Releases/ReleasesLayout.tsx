@@ -58,17 +58,24 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
 
   return (
     <div className="l-releases-layout">
-      <ReleasesSecondaryNav />
-      <div className="l-releases-layout__content p-section">
-        <ReleasesStatusBar
-          dirtyCount={dirtyCount}
-          isLoading={isLoading}
-          onSubmit={handleSubmit}
-          status={data.status}
-        />
-        <hr className="p-rule" />
-        <Outlet context={outletContext} />
+      <div className="grid-row">
+        <div className="grid-col-2">
+          <ReleasesSecondaryNav />
+        </div>
+        <div className="grid-col-6">
+          <div className="l-releases-layout__content p-section">
+            <ReleasesStatusBar
+              dirtyCount={dirtyCount}
+              isLoading={isLoading}
+              onSubmit={handleSubmit}
+              status={data.status}
+            />
+            <Outlet context={outletContext} />
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 };
