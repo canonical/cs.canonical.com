@@ -132,10 +132,7 @@ const MultiSelectPicker = <T extends Record<string, any>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, keysToSearch, isOpen]);
 
-  const isSelected = useCallback(
-    (option: T): boolean => selectedIds.has(getKey(option)),
-    [selectedIds, getKey],
-  );
+  const isSelected = useCallback((option: T): boolean => selectedIds.has(getKey(option)), [selectedIds, getKey]);
 
   const toggleOption = useCallback(
     (option: T) => {
@@ -210,37 +207,31 @@ const MultiSelectPicker = <T extends Record<string, any>>({
 
   const wrapperClassName = error ? "p-form-validation is-error" : undefined;
 
-  const visibleOptions = useMemo(
-    () => dropdownOptions.slice(0, maxVisible),
-    [dropdownOptions, maxVisible],
-  );
+  const visibleOptions = useMemo(() => dropdownOptions.slice(0, maxVisible), [dropdownOptions, maxVisible]);
 
   const hiddenCount = dropdownOptions.length - visibleOptions.length;
 
-  const dropdownItems = useMemo(
-    () => {
-      const items = visibleOptions.map((option) => (
-        <div className="p-multi-select-picker__option" key={getKey(option)}>
-          <Input
-            checked={isSelected(option)}
-            data-idx={getKey(option)}
-            label={<HighlightedSearchText highlight={query} text={getLabel(option)} />}
-            onChange={handleOptionClick}
-            type="checkbox"
-          />
-        </div>
-      ));
-      if (hiddenCount > 0) {
-        items.push(
-          <div className="p-multi-select-picker__option p-multi-select-picker__more-hint" key="__more__">
-            <em>{hiddenCount} more — type to search</em>
-          </div>,
-        );
-      }
-      return items;
-    },
-    [visibleOptions, hiddenCount, getLabel, getKey, handleOptionClick, isSelected, query],
-  );
+  const dropdownItems = useMemo(() => {
+    const items = visibleOptions.map((option) => (
+      <div className="p-multi-select-picker__option" key={getKey(option)}>
+        <Input
+          checked={isSelected(option)}
+          data-idx={getKey(option)}
+          label={<HighlightedSearchText highlight={query} text={getLabel(option)} />}
+          onChange={handleOptionClick}
+          type="checkbox"
+        />
+      </div>
+    ));
+    if (hiddenCount > 0) {
+      items.push(
+        <div className="p-multi-select-picker__option p-multi-select-picker__more-hint" key="__more__">
+          <em>{hiddenCount} more — type to search</em>
+        </div>,
+      );
+    }
+    return items;
+  }, [visibleOptions, hiddenCount, getLabel, getKey, handleOptionClick, isSelected, query]);
 
   return (
     <div
