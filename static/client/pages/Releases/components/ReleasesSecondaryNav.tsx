@@ -5,7 +5,8 @@ import { NavLink } from "react-router-dom";
 const ReleasesSecondaryNav = (): ReactNode => {
   return (
     <aside className="l-releases-layout__sidebar">
-      <p className="l-releases-layout__sidebar-title">Release manager</p>
+      <h2 className="l-releases-layout__sidebar-title p-heading--4">Release manager</h2>
+      <hr className="p-rule" />
       <ul className="l-releases-layout__nav-list">
         <li>
           <NavLink
