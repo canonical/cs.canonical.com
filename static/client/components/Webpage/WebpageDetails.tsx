@@ -1,8 +1,10 @@
 import { Button } from "@canonical/react-components";
 
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
+import EditPageDetailsPanel from "@/components/EditPageDetailsPanel";
 import config from "@/config";
 import type { IPage } from "@/services/api/types/pages";
+import { usePanelsStore } from "@/store/app";
 
 interface IWebpageDetailsProps {
   page: IPage;
@@ -11,6 +13,8 @@ interface IWebpageDetailsProps {
 
 const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
   const pageExtension = page.ext || ".html";
+
+  const toggleEditPageDetailsPanel = usePanelsStore((state) => state.toggleEditPageDetailsPanel);
 
   const openCopyDoc = () => window.open(page.copy_doc_link);
 
@@ -27,9 +31,10 @@ const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
     <>
       <div className="l-webpage__details-header">
         <h2 className="p-text--small-caps">Page Details</h2>
-        <Button appearance="base" className="u-no-margin" hasIcon small>
+        <Button appearance="base" className="u-no-margin" hasIcon onClick={toggleEditPageDetailsPanel} small>
           <i className="p-icon--edit" />
         </Button>
+        <EditPageDetailsPanel page={page} project={project} />
       </div>
       <div className="l-webpage__details">
         <div className="label u-text--muted">Published page</div>

@@ -96,6 +96,14 @@ export interface IRequestRemoval {
   request_type: string;
 }
 
+export interface IUpdatePageDetails {
+  webpage_id: number;
+  owner?: IUser;
+  reviewers?: IUser[];
+  copy_doc_link?: string;
+  figma_link?: string;
+}
+
 export interface ISetProducts {
   webpage_id: number;
   products: IProduct[];
