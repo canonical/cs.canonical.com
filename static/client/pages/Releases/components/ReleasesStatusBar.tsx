@@ -38,9 +38,9 @@ const ReleasesStatusBar = ({ status, dirtyCount, isLoading, onAddChecksum, onSub
     <div className="l-releases-layout__status-bar">
       <div className="grid-row">
 
-      <div className="l-releases-layout__status-title grid-col-1">
-        <h2 className="p-heading--4">Releases</h2>
-        <Chip className="u-no-margin--bottom l-releases-layout__sidebar-chip" value={chipValue} appearance={chipAppearance} />
+      <div className="l-releases-layout__status-title grid-col-2">
+        <h2 className="p-heading--4">{onAddChecksum ? "Checksums" : "Releases"}</h2>
+        <Chip className="l-releases-layout__status-chip" value={chipValue} appearance={chipAppearance} />
       </div>
       <div className="l-releases-layout__status-actions grid-col-2 grid-col-start-large-7">
         <Button className="u-no-margin" disabled={!prUrl} hasIcon onClick={() => openExternalLink(prUrl)}>

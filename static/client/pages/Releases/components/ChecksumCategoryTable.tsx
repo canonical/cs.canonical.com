@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 
 import { Button, Icon } from "@canonical/react-components";
+import { formatInputLabel } from "../utils";
 
 interface IChecksumCategoryTableProps {
   category: string;
@@ -35,7 +36,7 @@ const ChecksumCategoryTable = ({
           onClick={onToggle}
           type="button"
         >
-          {category}
+          {formatInputLabel(category)}
         </button>
       </div>
       <section
@@ -62,7 +63,7 @@ const ChecksumCategoryTable = ({
                     <Button
                       appearance="base"
                       aria-label={`Edit checksum for ${version}`}
-                      className="u-no-margin--bottom"
+                      className="u-no-margin"
                       dense
                       hasIcon
                       onClick={() => onEdit(version, hash)}
@@ -72,7 +73,7 @@ const ChecksumCategoryTable = ({
                     <Button
                       appearance="base"
                       aria-label={`Delete checksum for ${version}`}
-                      className="u-no-margin--bottom"
+                      className="u-no-margin"
                       dense
                       hasIcon
                       onClick={() => onDelete(version)}
