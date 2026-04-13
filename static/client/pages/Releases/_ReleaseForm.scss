@@ -25,12 +25,6 @@
     font-weight: 400;
   }
 
-  &__image-fields {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 1rem;
-  }
-
   &__category {
     display: flex;
     flex-direction: column;
