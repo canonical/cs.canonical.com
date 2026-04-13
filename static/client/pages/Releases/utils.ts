@@ -26,3 +26,9 @@ export function recurseEqual(a: unknown, b: unknown): boolean {
 export function deepClone<T>(obj: T): T {
   return structuredClone(obj);
 }
+
+export function formatInputLabel(label: string): string {
+  return label
+    .replace(/_/g, " ")
+    .replace(/^\w/, (char) => char.toUpperCase());
+}

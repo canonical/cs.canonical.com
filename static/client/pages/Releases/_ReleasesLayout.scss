@@ -15,7 +15,7 @@
 
   &__sidebar {
     width: 85%;
-    height: 1024px;
+    height: 100%;
     flex-shrink: 0;
     background: var(--vf-color-background-default, #fff);
     padding: 1rem 0 0.5rem;
@@ -30,10 +30,6 @@
   &__sidebar-title {
     padding: 0.25rem 1rem 0.75rem;
     margin: 0;
-  }
-
-  &__sidebar-chip {
-    margin-bottom: 0.6rem;
   }
 
   &__nav-list {
@@ -89,6 +85,10 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+  }
+  
+  &__status-chip {
+    margin-bottom: 0.6rem;
   }
 
   &__status-actions {
@@ -148,7 +148,7 @@
   &__col--action {
     width: 6rem;
     white-space: nowrap;
-    text-align: right;
+    text-align: center;
   }
 
   &__hash {

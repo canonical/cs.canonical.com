@@ -4,7 +4,7 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-import { recurseEqual } from "../utils";
+import { formatInputLabel, recurseEqual } from "../utils";
 
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
@@ -27,7 +27,7 @@ function formatHelpText(val: ReleaseFieldValue): string | null {
 
 const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText = false }: IReleaseFieldProps): ReactNode => {
   const isDirty = !recurseEqual(value, originalValue);
-  const label = fieldKey;
+  const label = formatInputLabel(fieldKey);
   const helpText = showHelpText ? formatHelpText(originalValue) : null;
 
   const handleTaggedFieldChange = useCallback(
@@ -51,8 +51,8 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText =
         })}
       >
         <div className="l-release-form__field-header">
-          <span className="l-release-form__field-label">{label}</span>
-          <span className="p-chip is-dense">
+          <span className="l-release-form__field-label">{formatInputLabel(label)}</span>
+          <span className="p-chip is-dense u-no-margin--bottom">
             <span className="p-chip__value">{value.type}</span>
           </span>
         </div>
@@ -73,7 +73,7 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText =
           "is-dirty": isDirty,
         })}
       >
-        <Input label={label} onChange={(e) => onChange(e.target.value)} type="text" value={value} />
+        <Input label={formatInputLabel(label)} onChange={(e) => onChange(e.target.value)} type="text" value={value} />
         {helpText && (
           <p className="l-release-form__field-help u-no-margin--bottom">
             Current: <span>{helpText}</span>
@@ -90,7 +90,7 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText =
           "is-dirty": isDirty,
         })}
       >
-        <Input label={label} onChange={(e) => onChange(Number(e.target.value))} type="number" value={value} />
+        <Input label={formatInputLabel(label)} onChange={(e) => onChange(Number(e.target.value))} type="number" value={value} />
         {helpText && (
           <p className="l-release-form__field-help u-no-margin--bottom">
             Current: <span>{helpText}</span>

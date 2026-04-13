@@ -22,22 +22,8 @@ const TaggedFieldInput = ({ value, type, onChange }: ITaggedFieldInputProps): Re
 
   if (type === "image" && isImageValue(value)) {
     return (
-      <div className="l-release-form__image-fields">
+      <div>
         <Input label="URL" onChange={(e) => handleImageChange("url", e.target.value)} type="url" value={value.url} />
-        <Input
-          label="Width"
-          min={0}
-          onChange={(e) => handleImageChange("width", Number(e.target.value))}
-          type="number"
-          value={value.width}
-        />
-        <Input
-          label="Height"
-          min={0}
-          onChange={(e) => handleImageChange("height", Number(e.target.value))}
-          type="number"
-          value={value.height}
-        />
       </div>
     );
   }
