@@ -8,10 +8,11 @@ interface IReleasesStatusBarProps {
   status: IReleaseStatus;
   dirtyCount: number;
   isLoading: boolean;
+  onAddChecksum?: () => void;
   onSubmit: () => void;
 }
 
-const ReleasesStatusBar = ({ status, dirtyCount, isLoading, onSubmit }: IReleasesStatusBarProps): ReactNode => {
+const ReleasesStatusBar = ({ status, dirtyCount, isLoading, onAddChecksum, onSubmit }: IReleasesStatusBarProps): ReactNode => {
   const prNumber = useMemo(() => {
     if (!status.pr) return null;
     const number = (status.pr as Record<string, unknown>).number;
@@ -35,25 +36,39 @@ const ReleasesStatusBar = ({ status, dirtyCount, isLoading, onSubmit }: IRelease
 
   return (
     <div className="l-releases-layout__status-bar">
-      <div className="l-releases-layout__status-title">
+      <div className="grid-row">
+
+      <div className="l-releases-layout__status-title grid-col-1">
         <h2 className="p-heading--4">Releases</h2>
         <Chip className="u-no-margin--bottom l-releases-layout__sidebar-chip" value={chipValue} appearance={chipAppearance} />
       </div>
-      <div className="l-releases-layout__status-actions">
-        <Button className="u-no-margin--bottom" disabled={!prUrl} onClick={() => openExternalLink(prUrl)}>
-          View PR on GitHub
+      <div className="l-releases-layout__status-actions grid-col-2 grid-col-start-large-7">
+        <Button className="u-no-margin" disabled={!prUrl} hasIcon onClick={() => openExternalLink(prUrl)}>
+          <i className="p-icon--show" />
+          {' '} <span>View PR on GitHub</span>
         </Button>
         <Button
-          className="u-no-margin--bottom"
+          className="u-no-margin"
           disabled={!demoUrl}
+          hasIcon
           onClick={() => openExternalLink(demoUrl)}
         >
+          <i className="p-icon--desktop" />
+          {' '}<span>
           View demo
+          </span>
         </Button>
-        <ActionButton className="u-no-margin--bottom" appearance="positive" disabled={dirtyCount === 0} loading={isLoading} onClick={onSubmit}>
-          Submit changes
+        <ActionButton className="u-no-margin" appearance="positive" disabled={dirtyCount === 0} loading={isLoading} onClick={onSubmit}>
+      <i className="p-icon--change-version" />
+          {'  '}<span>Submit changes</span>
         </ActionButton>
+        {onAddChecksum && (
+          <Button className="u-no-margin" hasIcon onClick={onAddChecksum}>
+            <i className="p-icon--plus" /> <span>Add checksum</span>
+          </Button>
+        )}
       </div>
+    </div>
     </div>
   );
 };

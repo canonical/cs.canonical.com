@@ -22,11 +22,17 @@ export interface IPanelsStore {
   productsPanelVisible: boolean;
   reportBugPanelVisible: boolean;
   requestFeaturePanelVisible: boolean;
+  addChecksumPanelVisible: boolean;
 
   togglePanel: (p: PanelKey) => void;
   toggleProductsPanel: () => void;
   toggleReportBugPanel: () => void;
   toggleRequestFeaturePanel: () => void;
+  toggleAddChecksumPanel: () => void;
 }
 
-export type PanelKey = "productsPanelVisible" | "reportBugPanelVisible" | "requestFeaturePanelVisible";
+export type PanelKey =
+  | "productsPanelVisible"
+  | "reportBugPanelVisible"
+  | "requestFeaturePanelVisible"
+  | "addChecksumPanelVisible";
