@@ -1,4 +1,4 @@
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -19,7 +19,12 @@ import { useViewsStore } from "@/store/views";
 const Navigation = (): ReactNode => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const isOnReleasesPage = location.pathname.startsWith("/app/releases");
+  const [isCollapsed, setIsCollapsed] = useState(isOnReleasesPage);
+
+  useEffect(() => {
+    setIsCollapsed(isOnReleasesPage);
+  }, [isOnReleasesPage]);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView, setExpandedProject] = useViewsStore((state) => [
     state.view,
@@ -123,7 +128,7 @@ const Navigation = (): ReactNode => {
               <hr className="p-rule" />
               <ul className="u-no-margin u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${location.pathname === "/app/releases" ? "is-active" : ""}`}
+                  className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
                   onClick={() => navigate("/app/releases")}
                 >
                   <span className="u-has-icon">

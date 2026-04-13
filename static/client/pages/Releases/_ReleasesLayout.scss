@@ -1,16 +1,26 @@
+
+// Override the default grid max-width so the releases page uses full width
+.grid-row:has(> .l-releases-layout) {
+  max-width: 100%;
+
+  .grid-row {
+    max-width: 100%;
+  }
+}
+
 .l-releases-layout {
   display: flex;
   min-height: 100%;
   margin: -20px;
 
   &__sidebar {
-    width: 100%;
+    width: 85%;
     height: 1024px;
     flex-shrink: 0;
     background: var(--vf-color-background-default, #fff);
-    border-right: 1px solid var(--vf-color-border-low-contrast);
     padding: 1rem 0 0.5rem;
     background-color: #EBEBEB;
+    color: var(--vf-color-text-default);
 
     hr {
       margin: 1rem 0rem 1rem 0rem;
@@ -39,6 +49,7 @@
     text-decoration: none;
     font-size: 0.875rem;
     border-left: 3px solid transparent;
+    text-decoration: none;
 
     &:hover {
       background: var(--vf-color-background-neutral-hover);
@@ -47,24 +58,31 @@
 
     &.is-active {
       border-left-color: var(--vf-color-brand);
-      font-weight: 600;
-      background: var(--vf-color-background-neutral-hover);
+      background: var(--vf-color-background-default);
+
+    }
+    &:visited {
+      color: var(--vf-color-text-default);
     }
   }
 
   &__content {
     flex: 1;
     min-width: 0;
-    padding-left: 2rem;
-    padding-right: 1rem;
   }
 
   &__status-bar {
     display: flex;
+    margin-left: -60px;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 0 0.5rem;
-    gap: 1rem;
+    padding: 1rem 0.5rem 0.5rem ;
+    gap: 0rem;
+    position: sticky;
+    top: -20px;
+    z-index: 10;
+    background: var(--vf-color-background-default, #fff);
+    box-shadow: 0 4px 6px -3px rgba(0, 0, 0, 0.1);
   }
 
   &__status-title {
@@ -76,7 +94,7 @@
   &__status-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0rem;
   }
 }
 
@@ -90,16 +108,6 @@
     span {
       font-weight: 400;
     }
-  }
-
-  &__section-heading {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--vf-color-text-muted, #666);
-    margin-bottom: 1rem;
-    margin-top: 0.5rem;
   }
 }
 
