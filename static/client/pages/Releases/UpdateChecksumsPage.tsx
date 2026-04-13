@@ -1,6 +1,5 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
-import { Button } from "@canonical/react-components";
 import { useOutletContext } from "react-router-dom";
 
 import type { IReleasesLayoutOutletContext } from "./ReleasesLayout";
@@ -11,7 +10,7 @@ import { isRecord } from "@/services/api/types/releases";
 import { usePanelsStore } from "@/store/app";
 
 const UpdateChecksumsPage = (): ReactNode => {
-  const { formData, handleChecksumAdd, handleChecksumDelete } = useOutletContext<IReleasesLayoutOutletContext>();
+  const { formData, handleChecksumAdd, handleChecksumDelete, registerAddChecksum } = useOutletContext<IReleasesLayoutOutletContext>();
 
   const [addChecksumPanelVisible, toggleAddChecksumPanel] = usePanelsStore((state) => [
     state.addChecksumPanelVisible,
@@ -32,6 +31,12 @@ const UpdateChecksumsPage = (): ReactNode => {
     setEditTarget(null);
     if (!addChecksumPanelVisible) toggleAddChecksumPanel();
   };
+
+  // Register the "Add checksum" handler so the status bar can trigger it
+  useEffect(() => {
+    registerAddChecksum(handleOpenAdd);
+    return () => registerAddChecksum(null);
+  });
 
   const handleOpenEdit = (category: string, version: string, hash: string) => {
     setEditTarget({ category, version, hash });
@@ -56,12 +61,7 @@ const UpdateChecksumsPage = (): ReactNode => {
   };
 
   return (
-    <div className="l-update-checksums">
-      <div className="l-update-checksums__toolbar">
-        <Button hasIcon onClick={handleOpenAdd}>
-          <i className="p-icon--plus" /> <span>Add checksum</span>
-        </Button>
-      </div>
+    <div className="l-update-checksums grid-row">
       {categories.length > 0 ? (
         <aside className="p-accordion">
           <ul className="p-accordion__list">

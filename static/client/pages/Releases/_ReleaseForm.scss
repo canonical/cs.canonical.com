@@ -1,13 +1,16 @@
 .l-release-form {
   &__field {
-    padding: 0.5rem;
+    padding: 0rem 0.5rem 0.5rem 0.5rem;
     border-left: 3px solid transparent;
-    margin-bottom: 0.5rem;
     transition: border-color 0.2s ease;
 
     &.is-dirty {
       border-left-color: #0066cc;
       background-color: rgba(0, 102, 204, 0.03);
+    }
+
+    input {
+      margin: 0 0 0.4rem 0;
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -46,6 +46,14 @@ const Navigation = (): ReactNode => {
   const drillBack = useCallback(() => {
     setNavState((prev) => ({ ...prev, mobileDrilledTo: "top" }));
   }, []);
+
+  const isOnReleasesPage = location.pathname.startsWith("/app/releases");
+
+  useEffect(() => {
+    if (isOnReleasesPage) {
+      collapse();
+    }
+  }, [isOnReleasesPage, collapse]);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView, setExpandedProject, activeProject, setActiveProject] = useViewsStore((state) => [
     state.view,
@@ -228,7 +236,7 @@ const Navigation = (): ReactNode => {
               <hr className="p-rule" />
               <ul className="u-no-margin u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${location.pathname === "/app/releases" ? "is-active" : ""}`}
+                  className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
                   onClick={() => navigate("/app/releases")}
                 >
                   <span className="u-has-icon">

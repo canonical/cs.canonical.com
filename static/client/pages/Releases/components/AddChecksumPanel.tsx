@@ -48,7 +48,7 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
   };
 
   return (
-    <SidePanel isOpen={addChecksumPanelVisible} pinned>
+    <SidePanel isOpen={addChecksumPanelVisible} overlay>
       <SidePanel.Sticky>
         <div className="p-section--shallow">
           <SidePanel.Header>
@@ -83,14 +83,17 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
               onChange={(e) => setVersion(e.target.value)}
               placeholder="25.10"
               value={version}
+              type="text"
+
             />
           </li>
           <li>
             <Input
               label="Add checksum"
               onChange={(e) => setHash(e.target.value)}
-              placeholder="Insert link"
+              placeholder="Insert value"
               value={hash}
+              type="text"
             />
           </li>
         </ol>

@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useCallback, useRef, useState } from "react";
 
 import { Spinner, useToastNotification } from "@canonical/react-components";
 import { Outlet } from "react-router-dom";
@@ -20,6 +20,7 @@ export interface IReleasesLayoutOutletContext {
   handleChecksumAdd: ReturnType<typeof useReleaseFormState>["handleChecksumAdd"];
   handleChecksumDelete: ReturnType<typeof useReleaseFormState>["handleChecksumDelete"];
   handleSubmit: ReturnType<typeof useReleaseFormState>["handleSubmit"];
+  registerAddChecksum: (cb: (() => void) | null) => void;
 }
 
 interface IReleasesLayoutContentProps {
@@ -28,6 +29,17 @@ interface IReleasesLayoutContentProps {
 
 const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode => {
   const notify = useToastNotification();
+  const addChecksumRef = useRef<(() => void) | null>(null);
+  const [hasAddChecksum, setHasAddChecksum] = useState(false);
+
+  const registerAddChecksum = useCallback((cb: (() => void) | null) => {
+    addChecksumRef.current = cb;
+    setHasAddChecksum(cb !== null);
+  }, []);
+
+  const handleAddChecksum = useCallback(() => {
+    addChecksumRef.current?.();
+  }, []);
 
   const {
     dirtyCount,
@@ -54,6 +66,7 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
     handleChecksumAdd,
     handleChecksumDelete,
     handleSubmit,
+    registerAddChecksum,
   };
 
   return (
@@ -67,6 +80,7 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
             <ReleasesStatusBar
               dirtyCount={dirtyCount}
               isLoading={isLoading}
+              onAddChecksum={hasAddChecksum ? handleAddChecksum : undefined}
               onSubmit={handleSubmit}
               status={data.status}
             />
