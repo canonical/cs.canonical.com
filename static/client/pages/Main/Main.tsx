@@ -40,7 +40,7 @@ const Main = (): React.ReactNode => {
           </Route>
           <Route element={<MainLayout showSearch={false} />}>
             <Route element={<ReleasesLayout />} path="releases">
-              <Route index element={<Navigate replace to="update" />} />
+              <Route element={<Navigate replace to="update" />} index />
               <Route element={<UpdateReleasesPage />} path="update" />
               <Route element={<UpdateChecksumsPage />} path="checksums" />
             </Route>
