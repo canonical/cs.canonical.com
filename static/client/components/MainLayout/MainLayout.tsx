@@ -37,9 +37,7 @@ const MainLayout = ({ children, showSearch = true }: IMainLayoutProps): ReactNod
               </Button>
             )}
           </div>
-          <div className="grid-col">
-            {showSearch && <Search />}
-          </div>
+          <div className="grid-col">{showSearch && <Search />}</div>
         </div>
         {showSearch && <hr />}
         <div className="grid-row">
