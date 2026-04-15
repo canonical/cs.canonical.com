@@ -28,7 +28,19 @@ export function deepClone<T>(obj: T): T {
 }
 
 export function formatInputLabel(label: string): string {
-  return label
-    .replace(/_/g, " ")
-    .replace(/^\w/, (char) => char.toUpperCase());
+  return label.replace(/_/g, " ").replace(/^\w/, (char) => char.toUpperCase());
+}
+
+export function formatSectionTitle(key: string): string {
+  return key.replace(/_/g, " ").toUpperCase();
+}
+
+export const RELEASES_PR_STATUS = {
+  inProgressLabel: "In progress",
+  notStartedLabel: "Not started",
+  inProgressAppearance: "information" as const,
+};
+
+export function getReleaseDemoUrl(prNumber: string | null): string | null {
+  return prNumber ? `https://ubuntu-com-${prNumber}.demos.haus/` : null;
 }

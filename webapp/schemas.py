@@ -131,7 +131,8 @@ class UpdatePageDetailsModel(BaseModel):
 
 class NotifyBAUModel(BaseModel):
     jira_task_id: str
-    
+
+
 class UpdateReleasesRequest(BaseModel):
     releases: dict
     commit_message: str = "Update releases.yaml"

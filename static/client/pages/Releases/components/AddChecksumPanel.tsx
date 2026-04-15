@@ -54,13 +54,7 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
           <SidePanel.Header>
             <SidePanel.HeaderTitle>{editTarget ? "Edit checksum" : "Add checksum"}</SidePanel.HeaderTitle>
             <SidePanel.HeaderControls>
-              <Button
-                appearance="base"
-                aria-label="Close"
-                className="u-no-margin--bottom"
-                hasIcon
-                onClick={onCancel}
-              >
+              <Button appearance="base" aria-label="Close" className="u-no-margin--bottom" hasIcon onClick={onCancel}>
                 <Icon name="close" />
               </Button>
             </SidePanel.HeaderControls>
@@ -82,9 +76,8 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
               label="Specify version"
               onChange={(e) => setVersion(e.target.value)}
               placeholder="25.10"
-              value={version}
               type="text"
-
+              value={version}
             />
           </li>
           <li>
@@ -92,8 +85,8 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
               label="Add checksum"
               onChange={(e) => setHash(e.target.value)}
               placeholder="Insert value"
-              value={hash}
               type="text"
+              value={hash}
             />
           </li>
         </ol>

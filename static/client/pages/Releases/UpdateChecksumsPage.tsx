@@ -10,7 +10,8 @@ import { isRecord } from "@/services/api/types/releases";
 import { usePanelsStore } from "@/store/app";
 
 const UpdateChecksumsPage = (): ReactNode => {
-  const { formData, handleChecksumAdd, handleChecksumDelete, registerAddChecksum } = useOutletContext<IReleasesLayoutOutletContext>();
+  const { formData, handleChecksumAdd, handleChecksumDelete, registerAddChecksum } =
+    useOutletContext<IReleasesLayoutOutletContext>();
 
   const [addChecksumPanelVisible, toggleAddChecksumPanel] = usePanelsStore((state) => [
     state.addChecksumPanelVisible,
@@ -67,9 +68,9 @@ const UpdateChecksumsPage = (): ReactNode => {
           <ul className="p-accordion__list">
             {categories.map((category) => (
               <ChecksumCategoryTable
-                key={category}
                 category={category}
                 isExpanded={expandedCategory === category}
+                key={category}
                 onDelete={(version) => handleChecksumDelete(category, version)}
                 onEdit={(version, hash) => handleOpenEdit(category, version, hash)}
                 onToggle={() => handleToggleCategory(category)}
@@ -81,12 +82,7 @@ const UpdateChecksumsPage = (): ReactNode => {
       ) : (
         <p className="u-text--muted">No checksum data available. Add a checksum to get started.</p>
       )}
-      <AddChecksumPanel
-        categories={categories}
-        editTarget={editTarget}
-        onCancel={handleCancel}
-        onSave={handleSave}
-      />
+      <AddChecksumPanel categories={categories} editTarget={editTarget} onCancel={handleCancel} onSave={handleSave} />
     </div>
   );
 };

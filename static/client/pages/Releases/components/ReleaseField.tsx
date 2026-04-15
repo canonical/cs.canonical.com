@@ -4,8 +4,8 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-import { formatInputLabel, recurseEqual } from "../utils";
 
+import { formatInputLabel, recurseEqual } from "@/pages/Releases/utils";
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
 
@@ -25,7 +25,13 @@ function formatHelpText(val: ReleaseFieldValue): string | null {
   return null;
 }
 
-const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText = false }: IReleaseFieldProps): ReactNode => {
+const ReleaseField = ({
+  fieldKey,
+  value,
+  originalValue,
+  onChange,
+  showHelpText = false,
+}: IReleaseFieldProps): ReactNode => {
   const isDirty = !recurseEqual(value, originalValue);
   const label = formatInputLabel(fieldKey);
   const helpText = showHelpText ? formatHelpText(originalValue) : null;
@@ -90,7 +96,12 @@ const ReleaseField = ({ fieldKey, value, originalValue, onChange, showHelpText =
           "is-dirty": isDirty,
         })}
       >
-        <Input label={formatInputLabel(label)} onChange={(e) => onChange(Number(e.target.value))} type="number" value={value} />
+        <Input
+          label={formatInputLabel(label)}
+          onChange={(e) => onChange(Number(e.target.value))}
+          type="number"
+          value={value}
+        />
         {helpText && (
           <p className="l-release-form__field-help u-no-margin--bottom">
             Current: <span>{helpText}</span>

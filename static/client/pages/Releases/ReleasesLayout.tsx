@@ -52,8 +52,12 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
     isLoading,
   } = useReleaseFormState({
     releases: data.releases,
-    onSubmitSuccess: () => { notify.success("Releases updated successfully."); },
-    onSubmitError: () => { notify.failure("Failed to submit changes. Please try again.", null, null); },
+    onSubmitSuccess: () => {
+      notify.success("Releases updated successfully.");
+    },
+    onSubmitError: () => {
+      notify.failure("Failed to submit changes. Please try again.", null, null);
+    },
   });
 
   const outletContext: IReleasesLayoutOutletContext = {
@@ -87,9 +91,7 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
             <Outlet context={outletContext} />
           </div>
         </div>
-
       </div>
-
     </div>
   );
 };
@@ -113,9 +115,7 @@ const ReleasesLayout = (): ReactNode => {
         <div className="grid-row">
           <div className="p-notification--negative">
             <div className="p-notification__content">
-              <p className="p-notification__message">
-                Failed to load releases data: {error.detail || error.title}
-              </p>
+              <p className="p-notification__message">Failed to load releases data: {error.detail || error.title}</p>
             </div>
           </div>
         </div>

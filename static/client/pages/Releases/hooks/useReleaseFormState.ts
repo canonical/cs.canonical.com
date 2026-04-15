@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useQueryClient } from "react-query";
 
-import { deepClone, recurseEqual } from "../utils";
+import { deepClone, recurseEqual } from "@/pages/Releases/utils";
 import { ReleasesServices } from "@/services/api/services/releases";
 import type { IReleasesData, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isRecord } from "@/services/api/types/releases";
@@ -30,7 +30,7 @@ export interface IUseReleaseFormStateResult {
 }
 
 const DEFAULT_COMMIT_MESSAGE = "Update releases.yaml via ReleaseForm";
-     
+
 export const useReleaseFormState = ({
   releases,
   onSubmitSuccess,
@@ -125,7 +125,7 @@ export const useReleaseFormState = ({
     setIsLoading(true);
     try {
       const timestamp = new Date().toISOString();
-      await ReleasesServices.updateReleases(formData, commitMessage+` [${timestamp}]`);
+      await ReleasesServices.updateReleases(formData, commitMessage + ` [${timestamp}]`);
       await queryClient.invalidateQueries("releases");
       await onSubmitSuccess?.();
     } catch (error) {

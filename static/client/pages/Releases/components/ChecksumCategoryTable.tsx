@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
 
 import { Button, Icon } from "@canonical/react-components";
-import { formatInputLabel } from "../utils";
+
+import { formatInputLabel } from "@/pages/Releases/utils";
 
 interface IChecksumCategoryTableProps {
   category: string;
@@ -39,12 +40,7 @@ const ChecksumCategoryTable = ({
           {formatInputLabel(category)}
         </button>
       </div>
-      <section
-        aria-hidden={!isExpanded}
-        aria-labelledby={tabId}
-        className="p-accordion__panel"
-        id={panelId}
-      >
+      <section aria-hidden={!isExpanded} aria-labelledby={tabId} className="p-accordion__panel" id={panelId}>
         <table className="p-table l-checksum-table__table">
           <thead>
             <tr>

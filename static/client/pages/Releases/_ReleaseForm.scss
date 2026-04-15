@@ -31,41 +31,4 @@
     gap: 0.25rem;
   }
 
-  &__checksums-category {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 1rem 0;
-  }
-}
-
-.l-releases {
-  &__status {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  &__summary {
-    margin-bottom: 1.5rem;
-  }
-
-  &__summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-
-  &__summary-card {
-    padding: 1rem;
-    border: 1px solid var(--vf-color-border-low-contrast);
-    border-radius: 0.25rem;
-  }
 }
