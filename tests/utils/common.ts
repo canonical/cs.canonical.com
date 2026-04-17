@@ -30,7 +30,7 @@ export async function removeWebpage(page: Page, JIRA_TASKS: string[]): Promise<v
 
 export async function selectTableView(page: Page): Promise<void> {
   const tableViewListItem = page.locator(".l-navigation__drawer .p-panel__content .p-side-navigation__link", {
-    hasText: /Table view/i,
+    hasText: /Full site view/i,
   });
   await tableViewListItem.click();
 
