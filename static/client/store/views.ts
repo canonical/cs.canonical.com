@@ -3,7 +3,7 @@ import { devtools, persist } from "zustand/middleware";
 
 import type { IViewsStore } from "./types";
 
-import { VIEW_TABLE } from "@/config";
+import config, { VIEW_TABLE } from "@/config";
 import type { IViewFilter, TView } from "@/services/api/types/views";
 
 export const useViewsStore = create<IViewsStore>()(
@@ -27,6 +27,8 @@ export const useViewsStore = create<IViewsStore>()(
           })),
         expandedProject: "",
         setExpandedProject: (s: string) => set({ expandedProject: s }),
+        selectedProject: config.allProjects[0],
+        setSelectedProject: (s: string) => set({ selectedProject: s }),
       }),
       {
         name: "viewsStore",
