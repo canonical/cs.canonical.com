@@ -30,10 +30,17 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
 const DEFAULT_PAGE_SIZE = 30;
 
+const HEADERS = [
+  { content: "URL", sortKey: "url" },
+  { content: "Title", sortKey: "title" },
+  { content: "Owner", sortKey: "owner" },
+  { content: "Status", sortKey: "status" },
+];
+
 const FullSiteView = (): ReactNode => {
   const navigate = useNavigate();
   const { data: projects, isLoading } = useProjects();
-  const selectedProject = useViewsStore((state) => state.selectedProject);
+  const activeProject = useViewsStore((state) => state.activeProject);
   const filter = useViewsStore((state) => state.filter);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,8 +48,8 @@ const FullSiteView = (): ReactNode => {
 
   // Find the selected project data
   const projectData = useMemo(
-    () => projects?.find((p) => p.name === selectedProject),
-    [projects, selectedProject],
+    () => projects?.find((p) => p.name === activeProject),
+    [projects, activeProject],
   );
 
   // Flatten all pages from the selected project
@@ -54,7 +61,7 @@ const FullSiteView = (): ReactNode => {
   // Reset to page 1 when project, filters, or page size change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedProject, filter, pageSize]);
+  }, [activeProject, filter, pageSize]);
 
   // Paginate
   const paginatedPages = useMemo(() => {
@@ -68,14 +75,6 @@ const FullSiteView = (): ReactNode => {
     },
     [navigate],
   );
-
-  // Build MainTable headers
-  const headers = [
-    { content: "URL", sortKey: "url" },
-    { content: "Title", sortKey: "title" },
-    { content: "Owner", sortKey: "owner" },
-    { content: "Status", sortKey: "status" },
-  ];
 
   // Build MainTable rows from paginated pages
   const rows = paginatedPages.map((page) => {
@@ -116,8 +115,8 @@ const FullSiteView = (): ReactNode => {
   });
 
   // Format project name for header (e.g. "canonical.com" -> "Canonical.com")
-  const projectDisplayName = selectedProject
-    ? selectedProject.charAt(0).toUpperCase() + selectedProject.slice(1)
+  const projectDisplayName = activeProject
+    ? activeProject.charAt(0).toUpperCase() + activeProject.slice(1)
     : "";
 
   return (
@@ -157,7 +156,7 @@ const FullSiteView = (): ReactNode => {
           <>
             <MainTable
               emptyStateMsg="No pages found."
-              headers={headers}
+              headers={HEADERS}
               rows={rows}
               sortable
             />

@@ -4,9 +4,9 @@ import config from "@/config";
 import { useViewsStore } from "@/store/views";
 
 const ProjectSidebar = (): ReactNode => {
-  const [selectedProject, setSelectedProject] = useViewsStore((state) => [
-    state.selectedProject,
-    state.setSelectedProject,
+  const [activeProject, setActiveProject] = useViewsStore((state) => [
+    state.activeProject,
+    state.setActiveProject,
   ]);
 
   return (
@@ -17,9 +17,9 @@ const ProjectSidebar = (): ReactNode => {
           <li className="p-side-navigation__item" key={project}>
             <button
               className={`p-side-navigation__link full-site-view__project-button ${
-                selectedProject === project ? "is-active" : ""
+                activeProject === project ? "is-active" : ""
               }`}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => setActiveProject(project)}
               type="button"
             >
               {project}
