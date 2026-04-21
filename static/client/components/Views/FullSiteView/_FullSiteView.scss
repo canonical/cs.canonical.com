@@ -8,11 +8,15 @@
 }
 
 .full-site-view__sidebar {
-  width: 220px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--vf-color-border-low-contrast);
-  padding: 1rem 0;
+  align-self: flex-start;
   background-color: var(--vf-color-background-alt);
+  flex-shrink: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  width: 220px;
 }
 
 .full-site-view__project-button {
