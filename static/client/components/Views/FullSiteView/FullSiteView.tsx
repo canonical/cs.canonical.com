@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { MainTable, Spinner, TablePagination } from "@canonical/react-components";
+import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
 import ProjectSidebar from "./ProjectSidebar";
 
 import FilterandSearch from "@/components/Views/FilterTableView/FilterandSearch";
-import { PageStatus, type IPage } from "@/services/api/types/pages";
 import { useProjects } from "@/services/api/hooks/projects";
+import { PageStatus, type IPage } from "@/services/api/types/pages";
 import { useViewsStore } from "@/store/views";
 
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
@@ -31,10 +32,11 @@ const PAGE_SIZE_OPTIONS = [10, 20, 30];
 const DEFAULT_PAGE_SIZE = 30;
 
 const HEADERS = [
-  { content: "URL", sortKey: "url" },
-  { content: "Title", sortKey: "title" },
-  { content: "Owner", sortKey: "owner" },
-  { content: "Status", sortKey: "status" },
+  { content: "URL", sortKey: "url", style: { width: "23.5%" } },
+  { content: "Title", sortKey: "title", style: { width: "23.5%" } },
+  { content: "Owner", sortKey: "owner", style: { width: "23.5%" } },
+  { content: "Status", sortKey: "status", style: { width: "17%" } },
+  { content: "Action", sortKey: "action", style: { width: "11%" } },
 ];
 
 const FullSiteView = (): ReactNode => {
@@ -47,10 +49,7 @@ const FullSiteView = (): ReactNode => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Find the selected project data
-  const projectData = useMemo(
-    () => projects?.find((p) => p.name === activeProject),
-    [projects, activeProject],
-  );
+  const projectData = useMemo(() => projects?.find((p) => p.name === activeProject), [projects, activeProject]);
 
   // Flatten all pages from the selected project
   const flatPages = useMemo(() => {
@@ -100,24 +99,25 @@ const FullSiteView = (): ReactNode => {
             </button>
           ),
         },
-        { content: page.title || "" },
+        { content: page.title?.startsWith("{{") ? "-" : page.title || "" },
         { content: ownerName },
         {
           content: (
             <span className="full-site-view__status">
-              <span className={`full-site-view__status-dot ${status.dotClass}`} />
+              <span className={classNames("full-site-view__status-dot", status.dotClass)} />
               {status.label}
             </span>
           ),
+        },
+        {
+          content: <span>...</span>,
         },
       ],
     };
   });
 
   // Format project name for header (e.g. "canonical.com" -> "Canonical.com")
-  const projectDisplayName = activeProject
-    ? activeProject.charAt(0).toUpperCase() + activeProject.slice(1)
-    : "";
+  const projectDisplayName = activeProject ? activeProject.charAt(0).toUpperCase() + activeProject.slice(1) : "";
 
   return (
     <div className="full-site-view">
@@ -127,40 +127,36 @@ const FullSiteView = (): ReactNode => {
 
         <div className="p-segmented-control">
           <div className="p-segmented-control__list" role="tablist">
-            <button
-              aria-selected="true"
-              className="p-segmented-control__button"
-              role="tab"
-              type="button"
-            >
+            <button aria-selected="true" className="p-segmented-control__button" role="tab" type="button">
               List view
             </button>
-            <button
-              aria-selected="false"
-              className="p-segmented-control__button"
-              role="tab"
-              type="button"
-              disabled
-            >
+            <button aria-selected="false" className="p-segmented-control__button" disabled role="tab" type="button">
               Tree view
             </button>
           </div>
         </div>
 
         <FilterandSearch />
-        <hr className="p-rule" />
 
         {isLoading && <Spinner text="Loading projects. Please wait." />}
 
         {!isLoading && (
           <>
-            <MainTable
-              emptyStateMsg="No pages found."
-              headers={HEADERS}
-              rows={rows}
-              sortable
-            />
-            {flatPages.length > pageSize && (
+            <TablePagination
+              // currentPage={currentPage}
+              data={rows}
+              // data={paginatedPages}
+              // externallyControlled
+              // onPageChange={setCurrentPage}
+              // onPageSizeChange={setPageSize}
+              pageLimits={PAGE_SIZE_OPTIONS}
+              // pageSize={pageSize}
+              // totalItems={flatPages.length}
+              position="below"
+            >
+              <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
+            </TablePagination>
+            {/* {flatPages.length > pageSize && (
               <TablePagination
                 currentPage={currentPage}
                 data={paginatedPages}
@@ -171,12 +167,7 @@ const FullSiteView = (): ReactNode => {
                 pageSize={pageSize}
                 totalItems={flatPages.length}
               />
-            )}
-            {flatPages.length > 0 && (
-              <p className="u-text--muted">
-                Showing {paginatedPages.length} out of {flatPages.length} pages
-              </p>
-            )}
+            )} */}
           </>
         )}
       </div>
