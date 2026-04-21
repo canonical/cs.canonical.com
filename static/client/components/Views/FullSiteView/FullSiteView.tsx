@@ -46,6 +46,7 @@ const FullSiteView = (): ReactNode => {
   const filter = useViewsStore((state) => state.filter);
 
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Find the selected project data
@@ -79,6 +80,7 @@ const FullSiteView = (): ReactNode => {
   const rows = paginatedPages.map((page) => {
     const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
     const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
+    const displayedTitle = page.title?.startsWith("{{") ? "-" : page.title || "";
 
     return {
       key: `${page.project?.name}${page.url}`,
@@ -90,6 +92,7 @@ const FullSiteView = (): ReactNode => {
       },
       columns: [
         {
+          className: "full-site-view__cell--wrap-anywhere",
           content: (
             <button
               className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
@@ -99,7 +102,10 @@ const FullSiteView = (): ReactNode => {
             </button>
           ),
         },
-        { content: page.title?.startsWith("{{") ? "-" : page.title || "" },
+        {
+          className: "full-site-view__cell--truncate",
+          content: <span title={displayedTitle}>{displayedTitle}</span>,
+        },
         { content: ownerName },
         {
           content: (

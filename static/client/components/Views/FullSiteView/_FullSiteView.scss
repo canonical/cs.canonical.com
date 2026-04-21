@@ -1,13 +1,18 @@
 .full-site-view {
   display: flex;
   min-height: 100%;
+
+  .p-form__group {
+    position: relative;
+  }
 }
 
 .full-site-view__sidebar {
   width: 220px;
   flex-shrink: 0;
   border-right: 1px solid var(--vf-color-border-low-contrast);
-  padding: 1rem;
+  padding: 1rem 0;
+  background-color: var(--vf-color-background-alt);
 }
 
 .full-site-view__project-button {
@@ -22,6 +27,9 @@
   &.is-active {
     border-left: 3px solid #000;
     font-weight: 400;
+    // TODO: find white bg color variable
+    background-color: var(--color-x-light);
+    background-color: $color-x-light;
   }
 }
 
@@ -55,4 +63,13 @@
   &--in-progress {
     background-color: #f99b11;
   }
+}
+
+.full-site-view__cell--wrap-anywhere {
+  word-break: break-all;
+}
+
+.full-site-view__cell--truncate {
+  max-width: 0;
+  white-space: nowrap;
 }

@@ -58,4 +58,26 @@ test.describe("Test Full Site View", () => {
     const expectedHeading = `${secondProjectName.charAt(0).toUpperCase()}${secondProjectName.slice(1)} pages`;
     await expect(page.getByRole("heading", { name: new RegExp(expectedHeading, "i") })).toBeVisible();
   });
+
+  test("title cells expose full title via native tooltip", async ({ page }) => {
+    await selectTableView(page);
+
+    const table = page.locator(".full-site-view__content table");
+    await expect(table).toBeVisible();
+
+    // First title cell whose span has a non-empty title. Tooltip must match
+    // the DOM text (textContent, not the visually clipped display).
+    const match = await page.evaluate(() => {
+      const spans = document.querySelectorAll<HTMLElement>(
+        ".full-site-view__content table tbody tr td:nth-child(2) span[title]",
+      );
+      for (const s of spans) {
+        const title = s.getAttribute("title") ?? "";
+        if (title.length > 0) return { title, text: (s.textContent ?? "").trim() };
+      }
+      return null;
+    });
+    expect(match).not.toBeNull();
+    expect(match!.title).toBe(match!.text);
+  });
 });
