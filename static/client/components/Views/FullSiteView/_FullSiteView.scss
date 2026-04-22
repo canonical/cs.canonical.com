@@ -13,10 +13,15 @@
   flex-shrink: 0;
   max-height: 100vh;
   overflow-y: auto;
-  padding: 1rem 0;
   position: sticky;
   top: 0;
   width: 220px;
+
+  .full-site-view__sidebar-title {
+    padding-bottom: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+  }
 }
 
 .full-site-view__project-button {

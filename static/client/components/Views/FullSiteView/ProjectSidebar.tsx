@@ -10,7 +10,7 @@ const ProjectSidebar = (): ReactNode => {
 
   return (
     <div className="full-site-view__sidebar">
-      <h3 className="p-text--small-caps u-no-margin--bottom">Full site view</h3>
+      <h3 className="p-heading--4 full-site-view__sidebar-title u-no-margin--bottom">Full site view</h3>
       <ul className="p-side-navigation__list u-no-margin u-no-padding">
         {config.allProjects.map((project) => (
           <li className="p-side-navigation__item" key={project}>

@@ -129,7 +129,9 @@ const FullSiteView = (): ReactNode => {
     <div className="full-site-view">
       <ProjectSidebar />
       <div className="full-site-view__content">
-        <h2>{projectDisplayName} pages</h2>
+        <h2 className="p-heading--4">{projectDisplayName} pages</h2>
+
+        <hr className="p-rule u-sv2" />
 
         <div className="p-segmented-control">
           <div className="p-segmented-control__list" role="tablist">
