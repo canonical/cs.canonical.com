@@ -1,6 +1,6 @@
 .full-site-view {
   display: flex;
-  min-height: 100%;
+  min-height: 100dvh;
 
   .p-form__group {
     position: relative;
@@ -9,18 +9,21 @@
 
 .full-site-view__sidebar {
   align-self: flex-start;
-  background-color: var(--vf-color-background-alt);
+  // TODO: find alt bg color variable
+  background-color: #ebebeb;
+  // background-color: var(--vf-color-background-alt);
   flex-shrink: 0;
   max-height: 100vh;
   overflow-y: auto;
   position: sticky;
   top: 0;
   width: 220px;
+  height: 100%;
 
   .full-site-view__sidebar-title {
     padding-bottom: 2.5rem;
-    padding-left: 1rem;
-    padding-right: 0.5rem;
+    padding-left: $sp-medium;
+    padding-right: $spv--small;
   }
 }
 
@@ -29,7 +32,7 @@
   border: none;
   cursor: pointer;
   display: block;
-  padding: 0.25rem 1.5rem 0.25rem 1rem;
+  padding: $sp-x-small $sp-large $sp-x-small $sp-medium;
   text-align: left;
   width: 100%;
 
@@ -44,7 +47,7 @@
 
 .full-site-view__content {
   flex: 1;
-  padding: 0 1.5rem;
+  padding: 0 $sp-large;
   min-width: 0;
 }
 
@@ -55,8 +58,8 @@
 }
 
 .full-site-view__status-dot {
-  width: 8px;
-  height: 8px;
+  width: $spv--small;
+  height: $spv--small;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
