@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { ContextualMenu, Icon, MainTable, Spinner, TablePagination } from "@canonical/react-components";
-import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
 import ProjectSidebar from "./ProjectSidebar";
 
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
+import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import FilterandSearch from "@/components/Views/FilterTableView/FilterandSearch";
 import { useProjects } from "@/services/api/hooks/projects";
-import { PageStatus, type IPage } from "@/services/api/types/pages";
+import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
+import { usePanelsStore } from "@/store/app";
 import { useViewsStore } from "@/store/views";
 
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
@@ -47,6 +50,17 @@ const FullSiteView = (): ReactNode => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
+  const [selectedChangeType, setSelectedChangeType] = useState<
+    (typeof ChangeRequestType)[keyof typeof ChangeRequestType]
+  >(ChangeRequestType.COPY_UPDATE);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
+    state.copyUpdatePanelVisible,
+    state.toggleCopyUpdatePanel,
+    state.toggleRequestRemovalPanel,
+  ]);
 
   // Find the selected project data
   const projectData = useMemo(() => projects?.find((p) => p.name === activeProject), [projects, activeProject]);
@@ -75,6 +89,55 @@ const FullSiteView = (): ReactNode => {
     },
     [navigate],
   );
+
+  const getMenuLinks = (page: IPage) => {
+    const isNew = page.status === PageStatus.NEW;
+    const allActionsDisabled = page.status === PageStatus.TO_DELETE;
+
+    if (!isNew) {
+      return [
+        {
+          children: (
+            <>
+              <i className="p-icon--file" /> <span>Copy update</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            toggleCopyUpdatePanel();
+          },
+        },
+        {
+          children: (
+            <>
+              <i className="p-icon--change-version" /> <span>Page refresh</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            setSelectedChangeType(ChangeRequestType.PAGE_REFRESH);
+            setModalOpen(true);
+          },
+        },
+        {
+          children: (
+            <>
+              <i className="p-icon--delete" /> <span>Remove page</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            toggleRequestRemovalPanel();
+          },
+        },
+      ];
+    }
+
+    return [];
+  };
 
   // Build MainTable rows from paginated pages
   const rows = paginatedPages.map((page) => {
@@ -119,18 +182,10 @@ const FullSiteView = (): ReactNode => {
           content: (
             <div className="u-align-text--center full-site-view__actions">
               <ContextualMenu
-                links={[
-                  {
-                    children: "Link 1",
-                    onClick: () => {},
-                  },
-                  {
-                    children: "Link 2",
-                    onClick: () => {},
-                  },
-                ]}
+                links={getMenuLinks(page)}
                 position="left"
                 toggleLabel={<Icon name="contextual-menu" />}
+                toggleProps={{ "aria-label": "Toggle menu" }}
               />
             </div>
           ),
@@ -194,6 +249,18 @@ const FullSiteView = (): ReactNode => {
           </div>
         )}
       </div>
+      {copyUpdatePanelVisible && selectedPage && (
+        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={selectedPage} />
+      )}
+      {modalOpen && selectedPage && (
+        <RequestTaskModal
+          changeType={selectedChangeType}
+          onClose={() => setModalOpen(false)}
+          onTypeChange={setSelectedChangeType}
+          webpage={selectedPage}
+        />
+      )}
+      <RequestRemovalPanel webpage={selectedPage ?? undefined} />
     </div>
   );
 };

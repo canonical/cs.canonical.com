@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -79,5 +80,50 @@ describe("FullSiteView", () => {
   it("renders the active project's page rows", () => {
     renderWith(makePage({ url: "/page-1" }));
     expect(screen.getByRole("button", { name: /\/page-1/ })).toBeInTheDocument();
+  });
+
+  it("opens the contextual menu for a non-NEW page and shows Copy update, Page refresh, Remove page", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ status: PageStatus.AVAILABLE }));
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+
+    expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /page refresh/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /remove page/i })).toBeInTheDocument();
+  });
+
+  it("clicking Copy update opens the copydoc panel for that row's page", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ name: "page-a", status: PageStatus.AVAILABLE }));
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /copy update/i }));
+
+    const panel = await screen.findByTestId("copydoc-panel");
+    expect(panel).toHaveAttribute("data-webpage", "page-a");
+  });
+
+  it("clicking Page refresh opens the task modal with PAGE_REFRESH for that row's page", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ name: "page-b", status: PageStatus.AVAILABLE }));
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page refresh/i }));
+
+    const modal = await screen.findByTestId("task-modal");
+    expect(modal).toHaveAttribute("data-webpage", "page-b");
+    expect(modal).toHaveAttribute("data-change-type", "1"); // ChangeRequestType.PAGE_REFRESH
+  });
+
+  it("clicking Remove page opens the removal panel for that row's page", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ name: "page-c", status: PageStatus.AVAILABLE }));
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /remove page/i }));
+
+    const panel = screen.getByTestId("removal-panel");
+    expect(panel).toHaveAttribute("data-webpage", "page-c");
   });
 });
