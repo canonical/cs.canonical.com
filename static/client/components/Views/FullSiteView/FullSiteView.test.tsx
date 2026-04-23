@@ -5,8 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FullSiteView from "./FullSiteView";
 
-import type { IPage, IPagesResponse } from "@/services/api/types/pages";
-import { PageStatus } from "@/services/api/types/pages";
+import { useProjects } from "@/services/api/hooks/projects";
+import { PageStatus, type IPage, type IPagesResponse } from "@/services/api/types/pages";
 import { useViewsStore } from "@/store/views";
 
 vi.mock("@/services/api/hooks/projects", () => ({
@@ -14,24 +14,18 @@ vi.mock("@/services/api/hooks/projects", () => ({
 }));
 
 vi.mock("@/components/RequestCopydocPanel/RequestCopydocPanel", () => ({
-  default: ({ webpage }: { webpage?: IPage }) => (
-    <div data-testid="copydoc-panel" data-webpage={webpage?.name ?? ""} />
-  ),
+  default: ({ webpage }: { webpage?: IPage }) => <div data-testid="copydoc-panel" data-webpage={webpage?.name ?? ""} />,
 }));
 
 vi.mock("@/components/RequestRemovalPanel", () => ({
-  default: ({ webpage }: { webpage?: IPage }) => (
-    <div data-testid="removal-panel" data-webpage={webpage?.name ?? ""} />
-  ),
+  default: ({ webpage }: { webpage?: IPage }) => <div data-testid="removal-panel" data-webpage={webpage?.name ?? ""} />,
 }));
 
 vi.mock("@/components/RequestTaskModal/RequestTaskModal", () => ({
   default: ({ webpage, changeType }: { webpage?: IPage; changeType?: number }) => (
-    <div data-testid="task-modal" data-webpage={webpage?.name ?? ""} data-change-type={changeType} />
+    <div data-change-type={changeType} data-testid="task-modal" data-webpage={webpage?.name ?? ""} />
   ),
 }));
-
-import { useProjects } from "@/services/api/hooks/projects";
 
 const makePage = (overrides: Partial<IPage> = {}): IPage => ({
   id: 1,
