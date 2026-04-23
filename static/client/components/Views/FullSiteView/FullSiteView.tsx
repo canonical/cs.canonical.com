@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { MainTable, Spinner, TablePagination } from "@canonical/react-components";
+import { ContextualMenu, Icon, MainTable, Spinner, TablePagination } from "@canonical/react-components";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
@@ -12,9 +12,9 @@ import { PageStatus, type IPage } from "@/services/api/types/pages";
 import { useViewsStore } from "@/store/views";
 
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
-  [PageStatus.AVAILABLE]: { label: "Live", dotClass: "full-site-view__status-dot--live" },
-  [PageStatus.TO_DELETE]: { label: "To be deleted", dotClass: "full-site-view__status-dot--to-be-deleted" },
-  [PageStatus.NEW]: { label: "In progress", dotClass: "full-site-view__status-dot--in-progress" },
+  [PageStatus.AVAILABLE]: { label: "Live", dotClass: "status-succeeded-small" },
+  [PageStatus.TO_DELETE]: { label: "To be deleted", dotClass: "status-failed-small" },
+  [PageStatus.NEW]: { label: "In progress", dotClass: "status-waiting-small" },
 };
 
 function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
@@ -29,14 +29,14 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
-const DEFAULT_PAGE_SIZE = 30;
+const DEFAULT_PAGE_SIZE = 10;
 
 const HEADERS = [
   { content: "URL", sortKey: "url", style: { width: "23.5%" } },
   { content: "Title", sortKey: "title", style: { width: "23.5%" } },
   { content: "Owner", sortKey: "owner", style: { width: "23.5%" } },
   { content: "Status", sortKey: "status", style: { width: "17%" } },
-  { content: "Action", sortKey: "action", style: { width: "11%" } },
+  { content: "Actions", sortKey: "action", style: { width: "12%" }, classNames: "u-align-text--center" },
 ];
 
 const FullSiteView = (): ReactNode => {
@@ -46,7 +46,6 @@ const FullSiteView = (): ReactNode => {
   const filter = useViewsStore((state) => state.filter);
 
   const [currentPage, setCurrentPage] = useState(1);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Find the selected project data
@@ -61,7 +60,8 @@ const FullSiteView = (): ReactNode => {
   // Reset to page 1 when project, filters, or page size change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeProject, filter, pageSize]);
+    setPageSize(DEFAULT_PAGE_SIZE);
+  }, [activeProject, filter]);
 
   // Paginate
   const paginatedPages = useMemo(() => {
@@ -110,13 +110,30 @@ const FullSiteView = (): ReactNode => {
         {
           content: (
             <span className="full-site-view__status">
-              <span className={classNames("full-site-view__status-dot", status.dotClass)} />
+              <Icon name={status.dotClass} />
               {status.label}
             </span>
           ),
         },
         {
-          content: <span>...</span>,
+          content: (
+            <div className="u-align-text--center full-site-view__actions">
+              <ContextualMenu
+                links={[
+                  {
+                    children: "Link 1",
+                    onClick: () => {},
+                  },
+                  {
+                    children: "Link 2",
+                    onClick: () => {},
+                  },
+                ]}
+                position="left"
+                toggleLabel={<Icon name="contextual-menu" />}
+              />
+            </div>
+          ),
         },
       ],
     };
@@ -125,58 +142,56 @@ const FullSiteView = (): ReactNode => {
   // Format project name for header (e.g. "canonical.com" -> "Canonical.com")
   const projectDisplayName = activeProject ? activeProject.charAt(0).toUpperCase() + activeProject.slice(1) : "";
 
+  const onPageSizeChange = (pageSize: number) => {
+    setCurrentPage(1);
+    setPageSize(pageSize);
+  };
+
   return (
     <div className="full-site-view">
       <ProjectSidebar />
       <div className="full-site-view__content">
-        <h2 className="p-heading--4">{projectDisplayName} pages</h2>
+        <div>
+          <h2 className="p-heading--4">{projectDisplayName} pages</h2>
 
-        <hr className="p-rule u-sv2" />
-
-        <div className="p-segmented-control">
-          <div className="p-segmented-control__list" role="tablist">
-            <button aria-selected="true" className="p-segmented-control__button" role="tab" type="button">
-              List view
-            </button>
-            <button aria-selected="false" className="p-segmented-control__button" disabled role="tab" type="button">
-              Tree view
-            </button>
+          <div className="u-sv2">
+            <hr className="p-rule" />
           </div>
+
+          <div className="p-segmented-control">
+            <div className="p-segmented-control__list" role="tablist">
+              <button aria-selected="true" className="p-segmented-control__button" role="tab" type="button">
+                List view
+              </button>
+              <button aria-selected="false" className="p-segmented-control__button" disabled role="tab" type="button">
+                Tree view
+              </button>
+            </div>
+          </div>
+
+          <FilterandSearch />
+
+          {isLoading && <Spinner text="Loading projects. Please wait." />}
+
+          {!isLoading && <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />}
         </div>
 
-        <FilterandSearch />
-
-        {isLoading && <Spinner text="Loading projects. Please wait." />}
-
         {!isLoading && (
-          <>
+          <div>
+            <hr className="p-rule" />
             <TablePagination
-              // currentPage={currentPage}
-              data={rows}
-              // data={paginatedPages}
-              // externallyControlled
-              // onPageChange={setCurrentPage}
-              // onPageSizeChange={setPageSize}
+              className="u-no-margin--top"
+              currentPage={currentPage}
+              data={paginatedPages}
+              externallyControlled
+              itemName="page"
+              onPageChange={setCurrentPage}
+              onPageSizeChange={onPageSizeChange}
               pageLimits={PAGE_SIZE_OPTIONS}
-              // pageSize={pageSize}
-              // totalItems={flatPages.length}
-              position="below"
-            >
-              <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
-            </TablePagination>
-            {/* {flatPages.length > pageSize && (
-              <TablePagination
-                currentPage={currentPage}
-                data={paginatedPages}
-                externallyControlled
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-                pageLimits={PAGE_SIZE_OPTIONS}
-                pageSize={pageSize}
-                totalItems={flatPages.length}
-              />
-            )} */}
-          </>
+              pageSize={pageSize}
+              totalItems={flatPages.length}
+            />
+          </div>
         )}
       </div>
     </div>

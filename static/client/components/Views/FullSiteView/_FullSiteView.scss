@@ -49,6 +49,9 @@
   flex: 1;
   padding: 0 $sp-large;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .full-site-view__status {
@@ -57,23 +60,12 @@
   gap: 0.4rem;
 }
 
-.full-site-view__status-dot {
-  width: $spv--small;
-  height: $spv--small;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-
-  &--live {
-    background-color: #0e8420;
-  }
-
-  &--to-be-deleted {
-    background-color: #c7162b;
-  }
-
-  &--in-progress {
-    background-color: #f99b11;
+.full-site-view__actions {
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
   }
 }
 
