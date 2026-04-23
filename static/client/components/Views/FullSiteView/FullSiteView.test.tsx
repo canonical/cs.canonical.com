@@ -126,4 +126,15 @@ describe("FullSiteView", () => {
     const panel = screen.getByTestId("removal-panel");
     expect(panel).toHaveAttribute("data-webpage", "page-c");
   });
+
+  it("renders all three menu items as disabled when the page is TO_DELETE", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ status: PageStatus.TO_DELETE }));
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+
+    expect(screen.getByRole("button", { name: /copy update/i })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /page refresh/i })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /remove page/i })).toHaveAttribute("aria-disabled", "true");
+  });
 });
