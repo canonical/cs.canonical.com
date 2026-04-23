@@ -137,4 +137,42 @@ describe("FullSiteView", () => {
     expect(screen.getByRole("button", { name: /page refresh/i })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: /remove page/i })).toHaveAttribute("aria-disabled", "true");
   });
+
+  it("shows only 'Submit for content review' for NEW pages without jira tasks or content_jira_id", async () => {
+    const user = userEvent.setup();
+    renderWith(
+      makePage({
+        name: "new-page",
+        status: PageStatus.NEW,
+        jira_tasks: [],
+        content_jira_id: undefined,
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+
+    expect(screen.getByRole("button", { name: /submit for content review/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /copy update/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /page refresh/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /remove page/i })).not.toBeInTheDocument();
+  });
+
+  it("clicking Submit for content review opens the task modal with NEW_WEBPAGE", async () => {
+    const user = userEvent.setup();
+    renderWith(
+      makePage({
+        name: "new-page",
+        status: PageStatus.NEW,
+        jira_tasks: [],
+        content_jira_id: undefined,
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /submit for content review/i }));
+
+    const modal = await screen.findByTestId("task-modal");
+    expect(modal).toHaveAttribute("data-webpage", "new-page");
+    expect(modal).toHaveAttribute("data-change-type", "2"); // ChangeRequestType.NEW_WEBPAGE
+  });
 });

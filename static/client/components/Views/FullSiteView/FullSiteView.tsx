@@ -92,6 +92,8 @@ const FullSiteView = (): ReactNode => {
 
   const getMenuLinks = (page: IPage) => {
     const isNew = page.status === PageStatus.NEW;
+    const hasJiraTasks = !!page.jira_tasks?.length;
+    const isContentBoardPage = !!page.content_jira_id;
     const allActionsDisabled = page.status === PageStatus.TO_DELETE;
 
     if (!isNew) {
@@ -131,6 +133,23 @@ const FullSiteView = (): ReactNode => {
           onClick: () => {
             setSelectedPage(page);
             toggleRequestRemovalPanel();
+          },
+        },
+      ];
+    }
+
+    if (!hasJiraTasks && !isContentBoardPage) {
+      return [
+        {
+          children: (
+            <>
+              <i className="p-icon--file" /> <span>Submit for content review</span>
+            </>
+          ),
+          onClick: () => {
+            setSelectedPage(page);
+            setSelectedChangeType(ChangeRequestType.NEW_WEBPAGE);
+            setModalOpen(true);
           },
         },
       ];
