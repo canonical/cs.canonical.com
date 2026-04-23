@@ -39,7 +39,7 @@ const HEADERS = [
   { content: "Title", sortKey: "title", style: { width: "23.5%" } },
   { content: "Owner", sortKey: "owner", style: { width: "23.5%" } },
   { content: "Status", sortKey: "status", style: { width: "17%" } },
-  { content: "Actions", sortKey: "action", style: { width: "12%" }, classNames: "u-align-text--center" },
+  { content: "Actions", sortKey: "action", style: { width: "12%" }, className: "u-align-text--center" },
 ];
 
 const FullSiteView = (): ReactNode => {
