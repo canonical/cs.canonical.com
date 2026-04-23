@@ -90,6 +90,13 @@ const FullSiteView = (): ReactNode => {
     [navigate],
   );
 
+  const isMenuDisabled = (page: IPage) => {
+    const isNew = page.status === PageStatus.NEW;
+    const hasJiraTasks = !!page.jira_tasks?.length;
+    const isContentBoardPage = !!page.content_jira_id;
+    return isNew && (hasJiraTasks || isContentBoardPage);
+  };
+
   const getMenuLinks = (page: IPage) => {
     const isNew = page.status === PageStatus.NEW;
     const hasJiraTasks = !!page.jira_tasks?.length;
@@ -203,6 +210,7 @@ const FullSiteView = (): ReactNode => {
               <ContextualMenu
                 links={getMenuLinks(page)}
                 position="left"
+                toggleDisabled={isMenuDisabled(page)}
                 toggleLabel={<Icon name="contextual-menu" />}
                 toggleProps={{ "aria-label": "Toggle menu" }}
               />

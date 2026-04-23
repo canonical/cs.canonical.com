@@ -175,4 +175,36 @@ describe("FullSiteView", () => {
     expect(modal).toHaveAttribute("data-webpage", "new-page");
     expect(modal).toHaveAttribute("data-change-type", "2"); // ChangeRequestType.NEW_WEBPAGE
   });
+
+  it("disables the menu trigger for NEW pages that already have jira tasks", () => {
+    renderWith(
+      makePage({
+        status: PageStatus.NEW,
+        jira_tasks: [
+          {
+            created_at: "",
+            jira_id: "JIRA-1",
+            id: 1,
+            name: "t",
+            status: "open",
+            summary: "s",
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByRole("button", { name: /toggle menu/i })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("disables the menu trigger for NEW pages that have a content_jira_id", () => {
+    renderWith(
+      makePage({
+        status: PageStatus.NEW,
+        jira_tasks: [],
+        content_jira_id: "CB-1",
+      }),
+    );
+
+    expect(screen.getByRole("button", { name: /toggle menu/i })).toHaveAttribute("aria-disabled", "true");
+  });
 });
