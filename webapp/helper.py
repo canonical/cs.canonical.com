@@ -55,8 +55,7 @@ def create_jira_task(app, body):
             summary = f"Copy update {webpage.project.name} - {webpage.name}"
         elif body["request_type"] == RequestType.PAGE_REFRESH.value:
             summary = (
-                f"Page refresh for {webpage.project.name} - "
-                f"{webpage.name}"
+                f"Page refresh for {webpage.project.name} - " f"{webpage.name}"
             )
         elif body["request_type"] == RequestType.NEW_WEBPAGE.value:
             page_type = body.get("page_type", "Case study")

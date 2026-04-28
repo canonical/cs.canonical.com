@@ -148,9 +148,7 @@ const WebpageActions = ({
         </div>
       </Tooltip>
 
-      {copyUpdatePanelVisible && (
-        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={page} />
-      )}
+      {copyUpdatePanelVisible && <RequestCopydocPanel webpage={page} />}
 
       {modalOpen && (
         <RequestTaskModal

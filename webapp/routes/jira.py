@@ -1,6 +1,5 @@
 import re
 from flask import Blueprint, current_app, jsonify, request
-import flask
 from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
@@ -687,8 +686,7 @@ def change_jira_status():
             jsonify(
                 {
                     "error": (
-                        "No 'In Review' transition available "
-                        "for this task"
+                        "No 'In Review' transition available " "for this task"
                     )
                 }
             ),
