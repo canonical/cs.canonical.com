@@ -126,3 +126,7 @@
   white-space: nowrap;
   width: 100%;
 }
+
+.p-panel__content {
+  overflow: auto !important;
+}
