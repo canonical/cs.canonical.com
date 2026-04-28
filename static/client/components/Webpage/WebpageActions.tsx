@@ -7,6 +7,7 @@ import { useQueryClient } from "react-query";
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
+import { IN_DESIGN, IN_REVIEW } from "@/config";
 import { parseError } from "@/helpers/requests";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IJiraTask, IPage } from "@/services/api/types/pages";
@@ -37,6 +38,10 @@ const WebpageActions = ({
   ]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
+  const isPendingContentReview = useMemo(
+    () => !!contentReviewTask && [IN_DESIGN, IN_REVIEW].includes(contentReviewTask.status.toLowerCase()),
+    [contentReviewTask],
+  );
 
   const handleRequestChange = (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => {
     setChangeType(type);
@@ -115,13 +120,10 @@ const WebpageActions = ({
             </>
           )}
 
-          {(requiresContentReviewSubmission ||
-            (page.status === PageStatus.NEW &&
-              contentReviewTask &&
-              ["in design", "in review"].includes(contentReviewTask.status.toLowerCase()))) && (
+          {(requiresContentReviewSubmission || (page.status === PageStatus.NEW && isPendingContentReview)) && (
             <Tooltip
               message={
-                contentReviewTask && ["in design", "in review"].includes(contentReviewTask.status.toLowerCase()) ? (
+                isPendingContentReview ? (
                   <span>
                     The ticket is pending content review. <br />
                     You can follow our progress on Jira or in your requests.
@@ -136,9 +138,7 @@ const WebpageActions = ({
               <ActionButton
                 appearance="positive"
                 className="p-segmented-control__button"
-                disabled={
-                  !!(contentReviewTask && ["in design", "in review"].includes(contentReviewTask.status.toLowerCase()))
-                }
+                disabled={isPendingContentReview}
                 loading={loading}
                 onClick={submitForContentReview}
               >

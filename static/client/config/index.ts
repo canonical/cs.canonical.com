@@ -15,6 +15,13 @@ export const BUG_REPORT = "Bug report";
 export const NEW_FEATURE_REQUEST = "New feature request";
 export const REMOVE_PAGE = "Remove page";
 
+export const IN_REVIEW = "in review";
+export const IN_DESIGN = "in design";
+export const UNTRIAGED = "untriaged";
+export const TRIAGED = "triaged";
+export const DONE = "done";
+export const REJECTED = "rejected";
+
 const config = {
   allProjects: [
     "canonical.com",

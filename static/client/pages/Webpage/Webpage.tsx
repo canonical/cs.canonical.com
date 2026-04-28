@@ -11,6 +11,7 @@ import WebpageActions from "@/components/Webpage/WebpageActions";
 import WebpageDetails from "@/components/Webpage/WebpageDetails";
 import WebpageStats from "@/components/Webpage/WebpageStats";
 import WebpageAssets from "@/components/WebpageAssets";
+import { IN_DESIGN, IN_REVIEW, UNTRIAGED } from "@/config";
 import type { IPage } from "@/services/api/types/pages";
 import { PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
@@ -34,7 +35,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
       const contentReviewTask = getContentReviewTask(page);
 
       if (contentReviewTask) {
-        return contentReviewTask.status.toLowerCase() === "untriaged";
+        return contentReviewTask.status.toLowerCase() === UNTRIAGED;
       }
     }
 
@@ -63,14 +64,11 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
       const contentReviewTask = getContentReviewTask(page);
       if (!contentReviewTask) return chips;
 
-      if (contentReviewTask.status.toLowerCase() === "untriaged") {
+      if (contentReviewTask.status.toLowerCase() === UNTRIAGED) {
         chips.push(
           <Chip appearance="caution" iconName="file-blank" isInline style={{ marginLeft: "8px" }} value="Draft" />,
         );
-      } else if (
-        contentReviewTask.status.toLowerCase() === "in review" ||
-        contentReviewTask.status.toLowerCase() === "in design"
-      ) {
+      } else if ([IN_REVIEW, IN_DESIGN].includes(contentReviewTask.status.toLowerCase())) {
         chips.push(
           <Chip
             appearance="information"
