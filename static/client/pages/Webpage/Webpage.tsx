@@ -11,13 +11,80 @@ import WebpageActions from "@/components/Webpage/WebpageActions";
 import WebpageDetails from "@/components/Webpage/WebpageDetails";
 import WebpageStats from "@/components/Webpage/WebpageStats";
 import WebpageAssets from "@/components/WebpageAssets";
+import type { IPage } from "@/services/api/types/pages";
 import { PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
+
+function getContentReviewTask(page: IPage) {
+  // For a brand new page, the very first jira task is the content review task
+  let task = page.jira_tasks[0];
+  return task;
+}
 
 const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   const toggleProductsPanel = usePanelsStore((state) => state.toggleProductsPanel);
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page.status]);
-  const pageName = useMemo(() => page.name.split("/").reverse()[0], [page.name]);
+  const pageName = useMemo(() => {
+    if (isNew) return `New page: ${page.name.split("/").reverse()[0]}`;
+    return page.title || "No title";
+  }, [isNew, page.name, page.title]);
+
+  const requiresContentReviewSubmission = useMemo(() => {
+    if (page.status === PageStatus.NEW && !page.content_jira_id) {
+      const contentReviewTask = getContentReviewTask(page);
+
+      if (contentReviewTask) {
+        return contentReviewTask.status.toLowerCase() === "untriaged";
+      }
+    }
+
+    return false;
+  }, [page]);
+
+  function getPageChips() {
+    const chips = [] as ReactNode[];
+    if (page.status === PageStatus.TO_DELETE) {
+      chips.push(
+        <Chip
+          appearance="negative"
+          iconName="delete"
+          isInline
+          style={{ marginLeft: "8px" }}
+          value="Scheduled for removal"
+        />,
+      );
+      return chips;
+    }
+
+    const pageTasks = page.jira_tasks || [];
+    if (!pageTasks.length) return chips;
+
+    if (page.status === PageStatus.NEW) {
+      const contentReviewTask = getContentReviewTask(page);
+      if (!contentReviewTask) return chips;
+
+      if (contentReviewTask.status.toLowerCase() === "untriaged") {
+        chips.push(
+          <Chip appearance="caution" iconName="file-blank" isInline style={{ marginLeft: "8px" }} value="Draft" />,
+        );
+      } else if (
+        contentReviewTask.status.toLowerCase() === "in review" ||
+        contentReviewTask.status.toLowerCase() === "in design"
+      ) {
+        chips.push(
+          <Chip
+            appearance="information"
+            iconName="revisions"
+            isInline
+            style={{ marginLeft: "8px" }}
+            value="In review"
+          />,
+        );
+      }
+
+      return chips;
+    }
+  }
 
   return (
     <>
@@ -27,28 +94,18 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
             <Breadcrumbs />
           </div>
           <div className="grid-col">
-            <WebpageActions page={page} />
+            <WebpageActions
+              contentReviewTask={getContentReviewTask(page)}
+              page={page}
+              requiresContentReviewSubmission={requiresContentReviewSubmission}
+            />
           </div>
         </div>
 
-        {isNew ? (
-          <h1 aria-labelledby="page-title" className="u-no-padding--top p-heading--4">
-            New page: {pageName}
-          </h1>
-        ) : (
-          <h1 aria-labelledby="page-title" className="u-no-padding--top p-heading--4">
-            {page.title || "No title"}
-            {page.status === PageStatus.TO_DELETE && (
-              <Chip
-                appearance="negative"
-                iconName="delete"
-                isInline
-                style={{ marginLeft: "8px" }}
-                value="Scheduled for removal"
-              />
-            )}
-          </h1>
-        )}
+        <h1 aria-labelledby="page-title" className="u-no-padding--top p-heading--4">
+          {pageName}
+          {getPageChips()}
+        </h1>
 
         <section className="l-webpage__section">
           <h2 className="p-text--small-caps">Tags</h2>

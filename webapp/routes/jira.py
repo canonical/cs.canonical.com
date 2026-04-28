@@ -5,6 +5,7 @@ from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
+    RequestType,
     convert_webpage_to_dict,
     create_copy_doc,
     create_jira_task,
@@ -319,6 +320,33 @@ def create_page(body: CreatePageModel):
         jira.link_copydoc_with_content_page(copy_doc, data["content_jira_id"])
 
     invalidate_cache(new_webpage[0])
+
+    data_obj = {
+        "webpage_id": new_webpage[0].id,
+        "reporter_struct": data["owner"],
+        "summary": "",
+        "due_date": data["due_date"],
+        "request_type": RequestType.NEW_WEBPAGE.value,
+        "description": data["summary"],
+        "team": data["team"],
+        "copy_doc_link": copy_doc,
+        "page_type": data["page_type"],
+        "save_for_later": data["save_for_later"],
+    }
+
+    # If "other" team was selected
+    # Use content board
+    if str(data_obj["team"]) == "0":
+        data_obj["team"] = 11014  # CNT project
+
+    task = create_jira_task(current_app, data_obj)
+
+    if not data["save_for_later"]:
+        current_app.config["JIRA"].change_issue_status(
+            issue_id=task.jira_id,
+            transition_id=JiraStatusTransitionCodes.IN_REVIEW.value,
+        )
+
     return (
         jsonify(
             {
@@ -586,7 +614,9 @@ def user_tickets():
         task_status = [JIRATaskStatus.DONE, JIRATaskStatus.REJECTED]
 
     tickets = JiraTask.query.filter(
-        JiraTask.user_id == flask.session["openid"]["id"],
+        # TODO: uncomment following, and remove the change before merge
+        # JiraTask.user_id == flask.session["openid"]["id"],
+        JiraTask.user_id == 2,
         JiraTask.status.in_(task_status),
     ).paginate(page=page, per_page=per_page, error_out=False)
 
@@ -599,3 +629,37 @@ def user_tickets():
             "total_pages": tickets.pages,
         }
     )
+
+
+@jira_blueprint.route("/get-jira-projects", methods=["GET"])
+@login_required
+def get_projects():
+    response = current_app.config["CACHE"].get("JIRA_PROJECTS_CACHE") or []
+    return response, 200
+
+
+@jira_blueprint.route("/submit-for-content-review", methods=["POST"])
+@login_required
+def change_jira_status():
+    data = request.get_json()
+
+    if not data.get("issue_id"):
+        return jsonify({"error": "issue_id is required"}), 400
+
+    jira_task = JiraTask.query.filter_by(jira_id=data["issue_id"]).first()
+    if not jira_task:
+        return jsonify({"error": "Jira task not found"}), 404
+
+    current_app.config["JIRA"].change_issue_status(
+        issue_id=jira_task.jira_id,
+        transition_id=JiraStatusTransitionCodes.IN_REVIEW.value,
+    )
+
+    jira_task.status = JIRATaskStatus.IN_REVIEW
+    db.session.commit()
+
+    webpage = Webpage.query.filter_by(id=jira_task.webpage_id).first()
+    if webpage:
+        invalidate_cache(webpage)
+
+    return jsonify({"message": "Request submitted for content review"}), 200

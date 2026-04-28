@@ -66,6 +66,11 @@ class CreatePageModel(BaseModel):
     parent: str
     product_ids: List[int]
     content_jira_id: Optional[str] = None
+    page_type: str
+    team: str
+    summary: Optional[str] = None
+    due_date: str = ""
+    save_for_later: bool = False
 
 
 class ProductModel(BaseModel):

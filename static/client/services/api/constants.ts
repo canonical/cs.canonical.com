@@ -16,6 +16,8 @@ export const ENDPOINTS = {
   requestFeature: "/api/request-feature",
   getTickets: "/api/tickets",
   getWebpageStats: "/api/get-webpage-stats",
+  getJiraProjects: "/api/get-jira-projects",
+  submitForContentReview: "/api/submit-for-content-review",
 };
 
 export const REST_TYPES = {

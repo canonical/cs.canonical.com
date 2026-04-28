@@ -11,7 +11,6 @@ export const VIEW_REQUESTS = "requests";
 export const COPY_UPDATE = "Copy update";
 export const PAGE_REFRESH = "Page refresh";
 export const NEW_WEBPAGE = "New webpage";
-export const NEW_CASE_STUDY = "New case study";
 export const BUG_REPORT = "Bug report";
 export const NEW_FEATURE_REQUEST = "New feature request";
 export const REMOVE_PAGE = "Remove page";
@@ -64,7 +63,7 @@ const config = {
     loadMoreCount: 50,
     scrollThreshold: 200,
   },
-  requestTypes: [COPY_UPDATE, PAGE_REFRESH, NEW_WEBPAGE, NEW_CASE_STUDY, BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE],
+  requestTypes: [COPY_UPDATE, PAGE_REFRESH, NEW_WEBPAGE, BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE],
   copyDocTemplateLink:
     "https://docs.google.com/document/d/1EPA_Ea8ShIvyftAc9oVxZYUIMHfAPFF6S5x6FOvLkwM/edit?tab=t.ly9ghy9ilvf#heading=h.krz2ku7u3755",
   copyDocsFolderLink:

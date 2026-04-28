@@ -1,4 +1,4 @@
-import { type MouseEvent, type ReactNode, useCallback, useMemo, useState } from "react";
+import { type MouseEvent, type ReactNode, memo, useCallback, useMemo, useState } from "react";
 
 import { Icon } from "@canonical/react-components";
 import classNames from "classnames";
@@ -159,4 +159,4 @@ const ComboSelect = <T extends Record<string, any>>({
   );
 };
 
-export default ComboSelect;
+export default memo(ComboSelect) as typeof ComboSelect;

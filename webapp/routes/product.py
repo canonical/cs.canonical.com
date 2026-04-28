@@ -69,7 +69,7 @@ def set_product(body: SetProductsModel):
                 db.session,
                 WebpageProduct,
                 webpage_id=webpage_id,
-                product_id=product["id"],
+                product_id=product.id,
             )
 
         db.session.commit()
@@ -84,7 +84,7 @@ def set_product(body: SetProductsModel):
 
         if isinstance(e.orig, ForeignKeyViolation):
             return (
-                jsonify({"error": f"Tag: {product['name']} does not exist."}),
+                jsonify({"error": f"Tag: {product.name} does not exist."}),
                 400,
             )
         else:
