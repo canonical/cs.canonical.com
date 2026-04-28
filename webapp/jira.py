@@ -375,6 +375,19 @@ class Jira:
             path="project",
         )
 
+    def get_available_transitions(self, issue_id: str):
+        """Get available transitions for a Jira issue.
+
+        Args:
+            issue_id (str): The ID of the Jira issue.
+        Returns:
+            dict: The available transitions for the Jira issue.
+        """
+        return self.__request__(
+            method="GET",
+            path=f"issue/{issue_id}/transitions",
+        )
+
 
 def init_jira(app):
     try:

@@ -319,8 +319,6 @@ def create_page(body: CreatePageModel):
         jira = current_app.config["JIRA"]
         jira.link_copydoc_with_content_page(copy_doc, data["content_jira_id"])
 
-    invalidate_cache(new_webpage[0])
-
     data_obj = {
         "webpage_id": new_webpage[0].id,
         "reporter_struct": data["owner"],
@@ -346,6 +344,10 @@ def create_page(body: CreatePageModel):
             issue_id=task.jira_id,
             transition_id=JiraStatusTransitionCodes.IN_REVIEW.value,
         )
+        task.status = JIRATaskStatus.IN_REVIEW
+        db.session.commit()
+
+    invalidate_cache(new_webpage[0])
 
     return (
         jsonify(
@@ -650,9 +652,52 @@ def change_jira_status():
     if not jira_task:
         return jsonify({"error": "Jira task not found"}), 404
 
+    # The Jira task can be on a different Jira project
+    # Each project has its own distinctive/random tranisiton IDs
+    # Therefore, we must fetch available transition IDs first
+
+    jira = current_app.config["JIRA"]
+    available_transitions = jira.get_available_transitions(
+        issue_id=jira_task.jira_id,
+    )
+
+    if (
+        "response" in available_transitions
+        and available_transitions["response"] == "No content"
+    ):
+        return (
+            jsonify({"error": "No available transitions for this task"}),
+            400,
+        )
+
+    in_review_transition = next(
+        (
+            transition
+            for transition in available_transitions.get("transitions", [])
+            if transition["name"].lower()
+            == JiraStatusTransitionCodes.IN_REVIEW.name.lower().replace(
+                "_", " "
+            )
+        ),
+        None,
+    )
+
+    if not in_review_transition:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "No 'In Review' transition available "
+                        "for this task"
+                    )
+                }
+            ),
+            400,
+        )
+
     current_app.config["JIRA"].change_issue_status(
         issue_id=jira_task.jira_id,
-        transition_id=JiraStatusTransitionCodes.IN_REVIEW.value,
+        transition_id=in_review_transition["id"],
     )
 
     jira_task.status = JIRATaskStatus.IN_REVIEW
