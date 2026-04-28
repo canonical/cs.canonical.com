@@ -21,6 +21,7 @@ export const UNTRIAGED = "untriaged";
 export const TRIAGED = "triaged";
 export const DONE = "done";
 export const REJECTED = "rejected";
+export const BACKLOG = "backlog";
 
 const config = {
   allProjects: [

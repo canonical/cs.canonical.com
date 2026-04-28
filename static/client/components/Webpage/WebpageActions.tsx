@@ -7,7 +7,6 @@ import { useQueryClient } from "react-query";
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
-import { IN_DESIGN, IN_REVIEW } from "@/config";
 import { parseError } from "@/helpers/requests";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IJiraTask, IPage } from "@/services/api/types/pages";
@@ -18,10 +17,12 @@ const WebpageActions = ({
   page,
   requiresContentReviewSubmission,
   contentReviewTask,
+  isPendingContentReview,
 }: {
   page: IPage;
   requiresContentReviewSubmission: boolean;
   contentReviewTask: IJiraTask | null;
+  isPendingContentReview: boolean;
 }): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
@@ -38,10 +39,6 @@ const WebpageActions = ({
   ]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
-  const isPendingContentReview = useMemo(
-    () => !!contentReviewTask && [IN_DESIGN, IN_REVIEW].includes(contentReviewTask.status.toLowerCase()),
-    [contentReviewTask],
-  );
 
   const handleRequestChange = (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => {
     setChangeType(type);

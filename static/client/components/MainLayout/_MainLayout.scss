@@ -1,6 +1,10 @@
 .l-main {
   padding: $spv--small $sph--x-large $sph--x-large;
 
+  [class*="grid-row"] {
+    max-width: 100%;
+  }
+
   .l-breadcrumbs {
     @media (max-width: $breakpoint-large) {
       margin-bottom: 1rem;

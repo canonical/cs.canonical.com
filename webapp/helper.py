@@ -52,15 +52,21 @@ def create_jira_task(app, body):
     summary = body.get("summary")
     if len(summary) == 0:
         if body["request_type"] == RequestType.COPY_UPDATE.value:
-            summary = f"Copy update {webpage.name}"
+            summary = f"Copy update {webpage.project.name} - {webpage.name}"
         elif body["request_type"] == RequestType.PAGE_REFRESH.value:
-            summary = f"Page refresh for {webpage.name}"
+            summary = (
+                f"Page refresh for {webpage.project.name} - "
+                f"{webpage.name}"
+            )
         elif body["request_type"] == RequestType.NEW_WEBPAGE.value:
             page_type = body.get("page_type", "Case study")
             type_label = (
                 "case study" if page_type == "Case study" else "webpage"
             )
-            summary = f"New {type_label} for {webpage.name}"
+            summary = (
+                f"New {type_label} for {webpage.project.name} - "
+                f"{webpage.name}"
+            )
         else:
             summary = ""
 

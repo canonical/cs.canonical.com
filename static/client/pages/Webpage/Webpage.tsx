@@ -11,7 +11,7 @@ import WebpageActions from "@/components/Webpage/WebpageActions";
 import WebpageDetails from "@/components/Webpage/WebpageDetails";
 import WebpageStats from "@/components/Webpage/WebpageStats";
 import WebpageAssets from "@/components/WebpageAssets";
-import { IN_DESIGN, IN_REVIEW, UNTRIAGED } from "@/config";
+import { BACKLOG, IN_DESIGN, IN_REVIEW, UNTRIAGED } from "@/config";
 import type { IPage } from "@/services/api/types/pages";
 import { PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
@@ -30,17 +30,22 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
     return page.title || "No title";
   }, [isNew, page.name, page.title]);
 
+  const contentReviewTask = useMemo(() => getContentReviewTask(page), [page]);
+
+  const isPendingContentReview = useMemo(
+    () => !!contentReviewTask && [IN_DESIGN, IN_REVIEW].includes(contentReviewTask.status.toLowerCase()),
+    [contentReviewTask],
+  );
+
   const requiresContentReviewSubmission = useMemo(() => {
     if (page.status === PageStatus.NEW && !page.content_jira_id) {
-      const contentReviewTask = getContentReviewTask(page);
-
       if (contentReviewTask) {
-        return contentReviewTask.status.toLowerCase() === UNTRIAGED;
+        return [UNTRIAGED, BACKLOG].includes(contentReviewTask.status.toLowerCase());
       }
     }
 
     return false;
-  }, [page]);
+  }, [contentReviewTask, page.content_jira_id, page.status]);
 
   function getPageChips() {
     const chips = [] as ReactNode[];
@@ -93,7 +98,8 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
           </div>
           <div className="grid-col">
             <WebpageActions
-              contentReviewTask={getContentReviewTask(page)}
+              contentReviewTask={contentReviewTask}
+              isPendingContentReview={isPendingContentReview}
               page={page}
               requiresContentReviewSubmission={requiresContentReviewSubmission}
             />
@@ -121,7 +127,21 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
 
         <div className="grid-row--50-50-on-large p-divider">
           <div className="grid-col p-divider__block">
-            <WebpageDetails page={page} project={project} />
+            <WebpageDetails
+              editDetailsDisabled={isPendingContentReview}
+              editDetailsDisabledTooltip={
+                isPendingContentReview ? (
+                  <span>
+                    The ticket is pending content review. <br />
+                    You can follow our progress on Jira or in your requests.
+                  </span>
+                ) : (
+                  ""
+                )
+              }
+              page={page}
+              project={project}
+            />
           </div>
           {!isNew && (
             <div className="grid-col p-divider__block">

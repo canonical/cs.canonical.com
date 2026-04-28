@@ -97,7 +97,7 @@ const Step1Content = React.memo(function Step1Content({
         <strong>Add your page information</strong>
       </p>
       <Select label="1. Choose the site" onChange={onSiteChange} options={SITE_OPTIONS} value={site} />
-      <p className="u-no-margin--bottom u-sv1">2. Select the parent page</p>
+      <p className="u-no-margin--bottom u-sv1">2. Select the bubble</p>
       <PageSearch<IPageOption>
         filterFn={filterFn}
         onClear={handleClear}
@@ -379,7 +379,7 @@ const NewWebpagePanel = () => {
       };
 
       PagesServices.createPage(data)
-        .then((response) => {
+        .then(async (response) => {
           toggleNewWebpagePanel();
           const new_webpage = response.data.webpage;
 
@@ -404,6 +404,10 @@ const NewWebpagePanel = () => {
             } else {
               notify.success("The Content team will review your page.", [], "Your new page request is in review");
             }
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: ["pages"] }),
+              queryClient.invalidateQueries({ queryKey: ["tickets"] }),
+            ]);
           } else {
             throw new Error("Error creating a new webpage.");
           }
