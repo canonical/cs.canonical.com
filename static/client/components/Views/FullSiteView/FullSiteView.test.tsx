@@ -262,5 +262,27 @@ describe("FullSiteView", () => {
       expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
       expect(screen.getByText("canonical.com/mlops")).toBeInTheDocument();
     });
+
+    it("real-page nodes navigate to the webpage on click", async () => {
+      const user = userEvent.setup();
+      renderWith([makePage({ url: "/page-1", ext: ".html", children: [] })]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /canonical\.com\/page-1/ }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/app/webpage/canonical.com/page-1");
+    });
+
+    it(".dir nodes render as plain text, not as a link", async () => {
+      const user = userEvent.setup();
+      renderWith([makePage({ url: "/microk8s", ext: ".dir", children: [] })]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /^canonical\.com\/microk8s$/ }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+    });
   });
 });
