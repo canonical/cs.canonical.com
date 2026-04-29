@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 
-import { MainTable, TablePagination, Icon, ContextualMenu, Spinner } from "@canonical/react-components";
+import {
+  ScrollableTable,
+  MainTable,
+  TablePagination,
+  Icon,
+  ContextualMenu,
+  Spinner,
+} from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
@@ -20,10 +27,10 @@ const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
 };
 
 const HEADERS = [
-  { content: "URL", sortKey: "url", style: { width: "23.6%" } },
-  { content: "Title", sortKey: "title", style: { width: "48.8%" } },
-  { content: "Status", sortKey: "status", style: { width: "17.3%" } },
-  { content: "Actions", style: { width: "10.3%" }, className: "u-align-text--center" },
+  { content: "URL", sortKey: "url" },
+  { content: "Title", sortKey: "title" },
+  { content: "Status", sortKey: "status" },
+  { content: "Actions", className: "u-align-text--center" },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
@@ -75,10 +82,11 @@ const Owned: React.FC = () => {
 
     const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
 
+    // TO UNCOMMENT AFTER REVIEW: Filter pages by the current user's email
     // return allPages.filter((page) => page.owner?.email === user?.email);
 
     return allPages;
-  }, [projects]);
+  }, [projects /* TO UNCOMMENT AFTER REVIEW: , user?.email */]);
 
   const sortedPages = useMemo(() => {
     if (sortConfig.key === "none" || sortConfig.direction === "none") {
@@ -279,15 +287,9 @@ const Owned: React.FC = () => {
 
   useEffect(() => {
     setView(VIEW_OWNED);
-
-    // TO UNCOMMENT AFTER REVIEW: Filter globally by current user's email
-    // setFilter({ owners: [user?.email || ""], reviewers: [], products: [], query: "" });
-
-    // TO REMOVE AFTER REVIEW: Testing mode without global filters
     setFilter({ owners: [], reviewers: [], products: [], query: "" });
-
     return () => setFilter({ owners: [], reviewers: [], products: [], query: "" });
-  }, [setFilter, setView /* TO UNCOMMENT AFTER REVIEW: , user?.email */]);
+  }, [setFilter, setView]);
 
   return (
     <div className="l-owned">
@@ -296,19 +298,22 @@ const Owned: React.FC = () => {
         {isLoading && <Spinner text="Loading pages. Please wait." />}
 
         {!isLoading && (
-          <MainTable
-            emptyStateMsg="No pages found."
-            headers={HEADERS}
-            onUpdateSort={handleUpdateSort}
-            rows={rows}
-            sortFunction={NOOP_SORT}
-            sortable
-          />
+          <ScrollableTable belowIds={["owned-pages-pagination"]} dependencies={[rows]} tableId="owned-pages-table">
+            <MainTable
+              emptyStateMsg="No pages found."
+              headers={HEADERS}
+              id="owned-pages-table"
+              onUpdateSort={handleUpdateSort}
+              rows={rows}
+              sortFunction={NOOP_SORT}
+              sortable
+            />
+          </ScrollableTable>
         )}
       </div>
 
       {!isLoading && (
-        <div className="l-owned__pagination">
+        <div className="l-owned__pagination" id="owned-pages-pagination">
           <hr className="p-rule" />
           <TablePagination
             className="u-no-margin--top"

@@ -1,27 +1,29 @@
 .l-owned {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex: 1; 
-  height: 100%; 
-  min-height: 0;
+  height: 100%; // Lets it fill the view without aggressively breaking out of the page
 
   td {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
 
-  /* Table Container */
-  & > div:first-child {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    padding-bottom: 1rem;
+  table {
+    table-layout: fixed;
+    width: 100%;
+
+    th:nth-child(1), td:nth-child(1) { width: 24%; }
+    th:nth-child(2), td:nth-child(2) { width: 48%; }
+    th:nth-child(3), td:nth-child(3) { width: 16%; }
+    
+    th:nth-child(4), td:nth-child(4) { 
+      width: 12%; 
+      padding-right: 1rem; 
+    }
   }
 
   &__pagination {
     margin-top: auto;
-    flex-shrink: 0;
     padding-bottom: 0;
 
     .pagination {
