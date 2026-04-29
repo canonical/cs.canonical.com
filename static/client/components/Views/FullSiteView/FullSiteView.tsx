@@ -108,7 +108,7 @@ const FullSiteView = (): ReactNode => {
         {
           children: (
             <>
-              <i className="p-icon--file" /> <span>Copy update</span>
+              <Icon name="file" /> <span>Copy update</span>
             </>
           ),
           disabled: allActionsDisabled,
@@ -116,11 +116,12 @@ const FullSiteView = (): ReactNode => {
             setSelectedPage(page);
             toggleCopyUpdatePanel();
           },
+          className: "full-site-view__actions-menu-link",
         },
         {
           children: (
             <>
-              <i className="p-icon--change-version" /> <span>Page refresh</span>
+              <Icon name="change-version" /> <span>Page refresh</span>
             </>
           ),
           disabled: allActionsDisabled,
@@ -129,11 +130,12 @@ const FullSiteView = (): ReactNode => {
             setSelectedChangeType(ChangeRequestType.PAGE_REFRESH);
             setModalOpen(true);
           },
+          className: "full-site-view__actions-menu-link",
         },
         {
           children: (
             <>
-              <i className="p-icon--delete" /> <span>Remove page</span>
+              <Icon name="delete" /> <span>Remove page</span>
             </>
           ),
           disabled: allActionsDisabled,
@@ -141,6 +143,7 @@ const FullSiteView = (): ReactNode => {
             setSelectedPage(page);
             toggleRequestRemovalPanel();
           },
+          className: "full-site-view__actions-menu-link",
         },
       ];
     }
@@ -150,7 +153,7 @@ const FullSiteView = (): ReactNode => {
         {
           children: (
             <>
-              <i className="p-icon--file" /> <span>Submit for content review</span>
+              <Icon name="file" /> <span>Submit for content review</span>
             </>
           ),
           onClick: () => {
@@ -158,6 +161,7 @@ const FullSiteView = (): ReactNode => {
             setSelectedChangeType(ChangeRequestType.NEW_WEBPAGE);
             setModalOpen(true);
           },
+          className: "full-site-view__actions-menu-link",
         },
       ];
     }
@@ -212,7 +216,10 @@ const FullSiteView = (): ReactNode => {
                 position="left"
                 toggleDisabled={isMenuDisabled(page)}
                 toggleLabel={<Icon name="contextual-menu" />}
-                toggleProps={{ "aria-label": "Toggle menu" }}
+                toggleProps={{
+                  "aria-label": `Page actions for ${page.url}`,
+                  className: "u-no-margin p-contextual-menu__toggle",
+                }}
               />
             </div>
           ),
@@ -255,11 +262,15 @@ const FullSiteView = (): ReactNode => {
 
           {isLoading && <Spinner text="Loading projects. Please wait." />}
 
-          {!isLoading && <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />}
+          {!isLoading && (
+            <div className="full-site-view__content-table-wrapper">
+              <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
+            </div>
+          )}
         </div>
 
         {!isLoading && (
-          <div>
+          <div className="full-site-view__content-table-footer">
             <hr className="p-rule" />
             <TablePagination
               className="u-no-margin--top"
