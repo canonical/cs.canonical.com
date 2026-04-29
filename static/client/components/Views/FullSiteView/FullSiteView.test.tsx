@@ -90,7 +90,7 @@ describe("FullSiteView", () => {
 
   it("renders the active project's page rows", () => {
     renderWith(makePage({ url: "/page-1" }));
-    expect(screen.getByRole("button", { name: /\/page-1/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "/page-1" })).toBeInTheDocument();
   });
 
   it("opens the contextual menu for a non-NEW page and shows Copy update, Page refresh, Remove page", async () => {
