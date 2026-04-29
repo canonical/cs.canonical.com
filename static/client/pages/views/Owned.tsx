@@ -9,6 +9,7 @@ import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import { VIEW_OWNED } from "@/config";
 import { useProjects } from "@/services/api/hooks/projects";
 import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
+import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
 import { useViewsStore } from "@/store/views";
 
@@ -43,6 +44,8 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
 
 const Owned: React.FC = () => {
   const navigate = useNavigate();
+  const user = useStore((state) => state.user);
+
   const [setView, setFilter] = useViewsStore((state) => [state.setView, state.setFilter]);
   const filter = useViewsStore((state) => state.filter);
 
@@ -69,7 +72,12 @@ const Owned: React.FC = () => {
 
   const displayPages = useMemo(() => {
     if (!projects) return [];
-    return projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
+
+    const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
+
+    // return allPages.filter((page) => page.owner?.email === user?.email);
+
+    return allPages;
   }, [projects]);
 
   const sortedPages = useMemo(() => {
@@ -271,9 +279,15 @@ const Owned: React.FC = () => {
 
   useEffect(() => {
     setView(VIEW_OWNED);
+
+    // TO UNCOMMENT AFTER REVIEW: Filter globally by current user's email
+    // setFilter({ owners: [user?.email || ""], reviewers: [], products: [], query: "" });
+
+    // TO REMOVE AFTER REVIEW: Testing mode without global filters
     setFilter({ owners: [], reviewers: [], products: [], query: "" });
+
     return () => setFilter({ owners: [], reviewers: [], products: [], query: "" });
-  }, [setFilter, setView]);
+  }, [setFilter, setView /* TO UNCOMMENT AFTER REVIEW: , user?.email */]);
 
   return (
     <div className="l-owned">
