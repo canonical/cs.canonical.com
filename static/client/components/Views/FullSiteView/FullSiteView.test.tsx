@@ -97,7 +97,7 @@ describe("FullSiteView", () => {
     const user = userEvent.setup();
     renderWith(makePage({ status: PageStatus.AVAILABLE }));
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
 
     expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /page refresh/i })).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe("FullSiteView", () => {
     const user = userEvent.setup();
     renderWith(makePage({ name: "page-a", status: PageStatus.AVAILABLE }));
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
     await user.click(screen.getByRole("button", { name: /copy update/i }));
 
     const panel = await screen.findByTestId("copydoc-panel");
@@ -119,7 +119,7 @@ describe("FullSiteView", () => {
     const user = userEvent.setup();
     renderWith(makePage({ name: "page-b", status: PageStatus.AVAILABLE }));
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
     await user.click(screen.getByRole("button", { name: /page refresh/i }));
 
     const modal = await screen.findByTestId("task-modal");
@@ -131,7 +131,7 @@ describe("FullSiteView", () => {
     const user = userEvent.setup();
     renderWith(makePage({ name: "page-c", status: PageStatus.AVAILABLE }));
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
     await user.click(screen.getByRole("button", { name: /remove page/i }));
 
     const panel = screen.getByTestId("removal-panel");
@@ -142,7 +142,7 @@ describe("FullSiteView", () => {
     const user = userEvent.setup();
     renderWith(makePage({ status: PageStatus.TO_DELETE }));
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
 
     expect(screen.getByRole("button", { name: /copy update/i })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: /page refresh/i })).toHaveAttribute("aria-disabled", "true");
@@ -160,7 +160,7 @@ describe("FullSiteView", () => {
       }),
     );
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
 
     expect(screen.getByRole("button", { name: /submit for content review/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /copy update/i })).not.toBeInTheDocument();
@@ -179,7 +179,7 @@ describe("FullSiteView", () => {
       }),
     );
 
-    await user.click(screen.getByRole("button", { name: /toggle menu/i }));
+    await user.click(screen.getByRole("button", { name: /page actions for/i }));
     await user.click(screen.getByRole("button", { name: /submit for content review/i }));
 
     const modal = await screen.findByTestId("task-modal");
@@ -204,7 +204,7 @@ describe("FullSiteView", () => {
       }),
     );
 
-    expect(screen.getByRole("button", { name: /toggle menu/i })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /page actions for/i })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("disables the menu trigger for NEW pages that have a content_jira_id", () => {
@@ -216,6 +216,6 @@ describe("FullSiteView", () => {
       }),
     );
 
-    expect(screen.getByRole("button", { name: /toggle menu/i })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: /page actions for/i })).toHaveAttribute("aria-disabled", "true");
   });
 });
