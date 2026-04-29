@@ -284,5 +284,73 @@ describe("FullSiteView", () => {
       ).not.toBeInTheDocument();
       expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
     });
+
+    it("top-level nodes start collapsed; grandchildren are not in the DOM", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
+    });
+
+    it("clicking the chevron expands a node and reveals its children", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+      const item = screen.getByText("canonical.com/microk8s").closest("li");
+      expect(item).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it("clicking the chevron again collapses the node", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+      await user.click(screen.getByRole("button", { name: /collapse canonical\.com\/microk8s/i }));
+
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
+    });
+
+    it("pressing Enter on the chevron toggles expansion", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }).focus();
+      await user.keyboard("{Enter}");
+
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+    });
   });
 });
