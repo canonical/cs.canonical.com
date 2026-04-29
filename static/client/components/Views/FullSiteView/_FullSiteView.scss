@@ -117,7 +117,8 @@
     border-inline-start: 1px solid var(--vf-color-border-default);
     list-style: none;
     margin: 0;
-    padding-inline-start: $sp-large;
+    padding-inline-start: $sp-x-small * 1.5;
+    margin-left: $sp-x-small * 1.5;
   }
 }
 
@@ -138,7 +139,7 @@
   cursor: pointer;
   display: inline-flex;
   flex-shrink: 0;
-  padding: 0;
+  padding: $sp-x-small;
 
   .p-icon--chevron-down {
     transition: transform 100ms ease;
@@ -152,7 +153,6 @@
 .full-site-view__tree-toggle--spacer {
   display: inline-block;
   flex-shrink: 0;
-  width: 1rem;
 }
 
 .full-site-view__tree-label--dir {

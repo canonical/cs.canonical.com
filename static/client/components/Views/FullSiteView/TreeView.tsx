@@ -32,7 +32,7 @@ const TreeNode = ({ page, expanded, onToggle, onPageSelect }: TreeNodeProps): Re
           <button
             aria-expanded={isExpanded}
             aria-label={`${isExpanded ? "Collapse" : "Expand"} ${displayUrl}`}
-            className="full-site-view__tree-toggle"
+            className="full-site-view__tree-toggle u-no-margin"
             onClick={() => onToggle(key)}
             type="button"
           >
