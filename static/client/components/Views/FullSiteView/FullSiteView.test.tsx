@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { MemoryRouter } from "react-router-dom";
+import type * as ReactRouterDom from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FullSiteView from "./FullSiteView";
@@ -13,7 +14,7 @@ import { useViewsStore } from "@/store/views";
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual = await vi.importActual<typeof ReactRouterDom>("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
