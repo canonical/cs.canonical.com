@@ -279,9 +279,7 @@ describe("FullSiteView", () => {
 
       await user.click(screen.getByRole("tab", { name: /tree view/i }));
 
-      expect(
-        screen.queryByRole("button", { name: /^canonical\.com\/microk8s$/ }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^canonical\.com\/microk8s$/ })).not.toBeInTheDocument();
       expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
     });
 
@@ -315,8 +313,7 @@ describe("FullSiteView", () => {
       await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
 
       expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
-      const item = screen.getByText("canonical.com/microk8s").closest("li");
-      expect(item).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("treeitem", { expanded: true })).toBeInTheDocument();
     });
 
     it("clicking the chevron again collapses the node", async () => {
