@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -351,6 +351,33 @@ describe("FullSiteView", () => {
       await user.keyboard("{Enter}");
 
       expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+    });
+
+    it("switching project unmounts the tree, dropping expansion state", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+
+      // Switch to a project name that does not exist in the mocked projects list,
+      // then back. Each setState changes the `key={activeProject}` on TreeView,
+      // forcing an unmount/remount and dropping internal expansion state.
+      await act(async () => {
+        useViewsStore.setState({ activeProject: "other" });
+      });
+      await act(async () => {
+        useViewsStore.setState({ activeProject: "canonical.com" });
+      });
+
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
     });
   });
 });
