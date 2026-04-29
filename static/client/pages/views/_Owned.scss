@@ -1,13 +1,54 @@
 .l-owned {
-  min-height: 98vh; 
   display: flex;
+  min-height: 98dvh;
   flex-direction: column;
+  justify-content: space-between;
 
-  & > div:first-child {
-    flex: 1;
+  td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
+}
 
-  &__pagination {
-    margin-top: auto;
+.l-owned__project-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: block;
+  padding: $sp-x-small $sp-large $sp-x-small $sp-medium;
+  text-align: left;
+  width: 100%;
+
+  &.is-active {
+    border-left: 3px solid #000;
+    font-weight: 400;
+    background-color: var(--color-x-light);
+    background-color: $color-x-light;
   }
+}
+
+.l-owned__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.l-owned__actions {
+  button {
+    background: none;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 0;
+  }
+}
+
+.l-owned__cell--wrap-anywhere {
+  word-break: break-all;
+}
+
+.l-owned__cell--truncate {
+  max-width: 0;
+  white-space: nowrap;
 }

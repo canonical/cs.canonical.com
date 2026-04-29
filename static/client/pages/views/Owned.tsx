@@ -8,6 +8,10 @@ import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/
 import { useProjects } from "@/services/api/hooks/projects";
 import { useNavigate } from "react-router-dom";
 
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
+import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
+
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
   [PageStatus.AVAILABLE]: { label: "Live", dotClass: "status-succeeded-small" },
   [PageStatus.TO_DELETE]: { label: "To be deleted", dotClass: "status-failed-small" },
@@ -25,12 +29,11 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
   return result;
 }
 
-// Updated headers for MainTable
 const HEADERS = [
-  { content: "URL", sortKey: "url" },
-  { content: "Title", sortKey: "title" },
-  { content: "Status", sortKey: "status" },
-  { content: "Actions" }, // Typically no sortKey for actions
+  { content: "URL", sortKey: "url", style: { width: "23.6%" } },
+  { content: "Title", sortKey: "title", style: { width: "48.8%" } },
+  { content: "Status", sortKey: "status", style: { width: "17.3%" } },
+  { content: "Actions", style: { width: "10.3%" }, className: "u-align-text--center" },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
@@ -39,7 +42,6 @@ const DEFAULT_PAGE_SIZE = 10;
 const Owned: React.FC = () => {
   const navigate = useNavigate();
   const [setView, setFilter] = useViewsStore((state) => [state.setView, state.setFilter]);
-  const user = useStore((state) => state.user);
   const filter = useViewsStore((state) => state.filter);
 
   const { data: projects, isLoading } = useProjects();
@@ -58,31 +60,21 @@ const Owned: React.FC = () => {
     state.toggleRequestRemovalPanel,
   ]);
 
-  // HARDCODED EMAIL FOR TESTING:
-  // Change this to the email address that actually owns pages in your database.
-  const TEST_EMAIL = "test.user@canonical.com";
-
-  // Flatten pages from ALL projects and filter by the test email (instead of user.email)
-  const ownedPages = useMemo(() => {
+  const displayPages = useMemo(() => {
     if (!projects) return [];
 
-    const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
+    return projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
+  }, [projects]);
 
-    // Keep only the pages owned by the target test email
-    return allPages.filter((page) => page.owner?.email === TEST_EMAIL);
-  }, [projects, TEST_EMAIL]);
-
-  // Reset to page 1 when filters or page size change
   useEffect(() => {
     setCurrentPage(1);
     setPageSize(DEFAULT_PAGE_SIZE);
   }, [filter]);
 
-  // Paginate
   const paginatedPages = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return ownedPages.slice(start, start + pageSize);
-  }, [ownedPages, currentPage, pageSize]);
+    return displayPages.slice(start, start + pageSize);
+  }, [displayPages, currentPage, pageSize]);
 
   const onPageSelect = useCallback(
     (page: IPage) => {
@@ -166,7 +158,6 @@ const Owned: React.FC = () => {
     return [];
   };
 
-  // Build MainTable rows from paginated pages
   const rows = paginatedPages.map((page) => {
     const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
     const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
@@ -182,7 +173,7 @@ const Owned: React.FC = () => {
       },
       columns: [
         {
-          className: "full-site-view__cell--wrap-anywhere",
+          className: "l-owned__cell--wrap-anywhere",
           content: (
             <button
               className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
@@ -193,20 +184,20 @@ const Owned: React.FC = () => {
           ),
         },
         {
-          className: "full-site-view__cell--truncate",
+          className: "l-owned__cell--truncate",
           content: <span title={displayedTitle}>{displayedTitle}</span>,
         },
         {
           content: (
-            <span className="full-site-view__status">
+            <span className="l-owned__status">
               <Icon name={status.dotClass} />
-              {status.label}
+              <span className="l-owned-status">{status.label}</span>
             </span>
           ),
         },
         {
           content: (
-            <div className="u-align-text--center full-site-view__actions">
+            <div className="u-align-text--center l-owned__actions">
               <ContextualMenu
                 links={getMenuLinks(page)}
                 position="left"
@@ -228,9 +219,8 @@ const Owned: React.FC = () => {
 
   useEffect(() => {
     setView(VIEW_OWNED);
-    // Be sure to revert TEST_EMAIL back to user.email when you are done testing
     setFilter({
-      owners: [TEST_EMAIL],
+      owners: [],
       reviewers: [],
       products: [],
       query: "",
@@ -243,11 +233,10 @@ const Owned: React.FC = () => {
         query: "",
       });
     };
-  }, [setFilter, setView, TEST_EMAIL]);
+  }, [setFilter, setView]);
 
   return (
     <div className="l-owned">
-      {/* Table Section: Will grow to fill space if .l-owned has flex: 1 and display: flex */}
       <div>
         <h4>Your pages</h4>
         {isLoading && <Spinner text="Loading pages. Please wait." />}
@@ -255,7 +244,6 @@ const Owned: React.FC = () => {
         {!isLoading && <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />}
       </div>
 
-      {/* Pagination Section: Will sit at the bottom if .l-owned__pagination has margin-top: auto */}
       {!isLoading && (
         <div className="l-owned__pagination">
           <hr className="p-rule" />
@@ -269,10 +257,23 @@ const Owned: React.FC = () => {
             onPageSizeChange={onPageSizeChange}
             pageLimits={PAGE_SIZE_OPTIONS}
             pageSize={pageSize}
-            totalItems={ownedPages.length}
+            totalItems={displayPages.length}
           />
         </div>
       )}
+
+      {copyUpdatePanelVisible && selectedPage && (
+        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={selectedPage} />
+      )}
+      {modalOpen && selectedPage && (
+        <RequestTaskModal
+          changeType={selectedChangeType}
+          onClose={() => setModalOpen(false)}
+          onTypeChange={setSelectedChangeType}
+          webpage={selectedPage}
+        />
+      )}
+      <RequestRemovalPanel webpage={selectedPage ?? undefined} />
     </div>
   );
 };
