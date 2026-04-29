@@ -27,7 +27,7 @@ const HEADERS = [
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
 const DEFAULT_PAGE_SIZE = 10;
 
-const NOOP_SORT = () => 0;
+const NOOP_SORT = (): 0 | 1 | -1 => 0;
 
 function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
   const result: IPage[] = [];
