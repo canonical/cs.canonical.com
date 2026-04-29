@@ -10,6 +10,16 @@ import { useProjects } from "@/services/api/hooks/projects";
 import { PageStatus, type IPage, type IPagesResponse } from "@/services/api/types/pages";
 import { useViewsStore } from "@/store/views";
 
+const mockNavigate = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 vi.mock("@/services/api/hooks/projects", () => ({
   useProjects: vi.fn(),
 }));
@@ -45,11 +55,11 @@ const makePage = (overrides: Partial<IPage> = {}): IPage => ({
   ...overrides,
 });
 
-const makeProject = (page: IPage): IPagesResponse["data"] => ({
+const makeProject = (children: IPage | IPage[]): IPagesResponse["data"] => ({
   name: "canonical.com",
   templates: {
     ...makePage({ name: "root", url: "/", ext: ".dir" }),
-    children: [page],
+    children: Array.isArray(children) ? children : [children],
   },
 });
 
@@ -75,6 +85,7 @@ function renderWith(page: IPage) {
 describe("FullSiteView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNavigate.mockReset();
   });
 
   it("renders the active project's page rows", () => {
