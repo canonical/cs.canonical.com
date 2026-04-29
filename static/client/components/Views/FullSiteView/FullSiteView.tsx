@@ -4,6 +4,7 @@ import { ContextualMenu, Icon, MainTable, Spinner, TablePagination } from "@cano
 import { useNavigate } from "react-router-dom";
 
 import ProjectSidebar from "./ProjectSidebar";
+import TreeView from "./TreeView";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
@@ -280,7 +281,9 @@ const FullSiteView = (): ReactNode => {
               <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
             </div>
           )}
-          {!isLoading && viewMode === "tree" && <ul className="full-site-view__tree" role="tree" />}
+          {!isLoading && viewMode === "tree" && (
+            <TreeView key={activeProject} onPageSelect={onPageSelect} pages={projectData?.templates?.children ?? []} />
+          )}
         </div>
 
         {!isLoading && viewMode === "list" && (

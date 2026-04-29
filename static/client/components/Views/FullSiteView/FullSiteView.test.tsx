@@ -64,12 +64,12 @@ const makeProject = (children: IPage | IPage[]): IPagesResponse["data"] => ({
   },
 });
 
-function renderWith(page: IPage) {
+function renderWith(pages: IPage | IPage[]) {
   (useProjects as ReturnType<typeof vi.fn>).mockReturnValue({
-    data: [makeProject(page)],
+    data: [makeProject(pages)],
     isLoading: false,
     isFilterApplied: false,
-    unfilteredProjects: [makeProject(page)],
+    unfilteredProjects: [makeProject(pages)],
   });
   useViewsStore.setState({ activeProject: "canonical.com" });
 
@@ -239,6 +239,28 @@ describe("FullSiteView", () => {
       expect(screen.getByRole("tree")).toBeInTheDocument();
       expect(screen.queryByRole("grid")).not.toBeInTheDocument();
       expect(screen.queryByPlaceholderText(/search by url/i)).not.toBeInTheDocument();
+    });
+
+    it("shows empty-state copy when the project has no pages", async () => {
+      const user = userEvent.setup();
+      renderWith([]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("No pages found.")).toBeInTheDocument();
+    });
+
+    it("renders top-level URL nodes in tree mode", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({ url: "/microk8s", ext: ".dir", children: [] }),
+        makePage({ url: "/mlops", ext: ".dir", children: [] }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+      expect(screen.getByText("canonical.com/mlops")).toBeInTheDocument();
     });
   });
 });
