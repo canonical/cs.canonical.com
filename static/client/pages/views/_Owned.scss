@@ -1,9 +1,13 @@
 .l-owned {
+  min-height: 98vh; 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+
+  & > div:first-child {
+    flex: 1;
+  }
 
   &__pagination {
-    
+    margin-top: auto;
   }
 }

@@ -183,7 +183,7 @@ class Jira:
                 "summary": summary,
                 "issuetype": {"id": issue_type},
                 "labels": labels if (labels and len(labels)) else self.labels,
-                "reporter": {"id": reporter_jira_id},
+                # "reporter": {"id": reporter_jira_id},
                 "parent": parent,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
