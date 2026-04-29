@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { VIEW_OWNED } from "@/config";
-import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
 import { useViewsStore } from "@/store/views";
 import { MainTable, TablePagination, Icon, ContextualMenu, Spinner } from "@canonical/react-components";
@@ -18,6 +17,18 @@ const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
   [PageStatus.NEW]: { label: "In progress", dotClass: "status-waiting-small" },
 };
 
+const HEADERS = [
+  { content: "URL", sortKey: "url", style: { width: "23.6%" } },
+  { content: "Title", sortKey: "title", style: { width: "48.8%" } },
+  { content: "Status", sortKey: "status", style: { width: "17.3%" } },
+  { content: "Actions", style: { width: "10.3%" }, className: "u-align-text--center" },
+];
+
+const PAGE_SIZE_OPTIONS = [10, 20, 30];
+const DEFAULT_PAGE_SIZE = 10;
+
+const NOOP_SORT = () => 0;
+
 function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
   const result: IPage[] = [];
   if (!(skipDirs && page.ext === ".dir")) {
@@ -29,16 +40,6 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
   return result;
 }
 
-const HEADERS = [
-  { content: "URL", sortKey: "url", style: { width: "23.6%" } },
-  { content: "Title", sortKey: "title", style: { width: "48.8%" } },
-  { content: "Status", sortKey: "status", style: { width: "17.3%" } },
-  { content: "Actions", style: { width: "10.3%" }, className: "u-align-text--center" },
-];
-
-const PAGE_SIZE_OPTIONS = [10, 20, 30];
-const DEFAULT_PAGE_SIZE = 10;
-
 const Owned: React.FC = () => {
   const navigate = useNavigate();
   const [setView, setFilter] = useViewsStore((state) => [state.setView, state.setFilter]);
@@ -48,6 +49,11 @@ const Owned: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
+
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: string }>({
+    key: "none",
+    direction: "none",
+  });
 
   const [selectedChangeType, setSelectedChangeType] = useState<
     (typeof ChangeRequestType)[keyof typeof ChangeRequestType]
@@ -62,19 +68,55 @@ const Owned: React.FC = () => {
 
   const displayPages = useMemo(() => {
     if (!projects) return [];
-
     return projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
   }, [projects]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-    setPageSize(DEFAULT_PAGE_SIZE);
-  }, [filter]);
+  const sortedPages = useMemo(() => {
+    if (sortConfig.key === "none" || sortConfig.direction === "none") {
+      return displayPages;
+    }
+
+    return [...displayPages].sort((a, b) => {
+      let aValue = "";
+      let bValue = "";
+
+      switch (sortConfig.key) {
+        case "title":
+          aValue = (a.title || "").toLowerCase();
+          bValue = (b.title || "").toLowerCase();
+          break;
+        case "status":
+          aValue = (STATUS_MAP[a.status]?.label || a.status || "").toLowerCase();
+          bValue = (STATUS_MAP[b.status]?.label || b.status || "").toLowerCase();
+          break;
+        case "url":
+        default:
+          aValue = (a.url || "").toLowerCase();
+          bValue = (b.url || "").toLowerCase();
+          break;
+      }
+
+      const modifier = sortConfig.direction === "ascending" ? -1 : 1;
+      if (aValue < bValue) return modifier;
+      if (aValue > bValue) return -modifier;
+
+      const aUrl = (a.url || "").toLowerCase();
+      const bUrl = (b.url || "").toLowerCase();
+      if (aUrl < bUrl) return -1;
+      if (aUrl > bUrl) return 1;
+
+      return 0;
+    });
+  }, [displayPages, sortConfig]);
 
   const paginatedPages = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return displayPages.slice(start, start + pageSize);
-  }, [displayPages, currentPage, pageSize]);
+    return sortedPages.slice(start, start + pageSize);
+  }, [sortedPages, currentPage, pageSize]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, sortConfig]);
 
   const onPageSelect = useCallback(
     (page: IPage) => {
@@ -83,156 +125,153 @@ const Owned: React.FC = () => {
     [navigate],
   );
 
-  const isMenuDisabled = (page: IPage) => {
-    const isNew = page.status === PageStatus.NEW;
-    const hasJiraTasks = !!page.jira_tasks?.length;
-    const isContentBoardPage = !!page.content_jira_id;
-    return isNew && (hasJiraTasks || isContentBoardPage);
-  };
-
-  const getMenuLinks = (page: IPage) => {
-    const isNew = page.status === PageStatus.NEW;
-    const hasJiraTasks = !!page.jira_tasks?.length;
-    const isContentBoardPage = !!page.content_jira_id;
-    const allActionsDisabled = page.status === PageStatus.TO_DELETE;
-
-    if (!isNew) {
-      return [
-        {
-          children: (
-            <>
-              <i className="p-icon--file" /> <span>Copy update</span>
-            </>
-          ),
-          disabled: allActionsDisabled,
-          onClick: () => {
-            setSelectedPage(page);
-            toggleCopyUpdatePanel();
-          },
-        },
-        {
-          children: (
-            <>
-              <i className="p-icon--change-version" /> <span>Page refresh</span>
-            </>
-          ),
-          disabled: allActionsDisabled,
-          onClick: () => {
-            setSelectedPage(page);
-            setSelectedChangeType(ChangeRequestType.PAGE_REFRESH);
-            setModalOpen(true);
-          },
-        },
-        {
-          children: (
-            <>
-              <i className="p-icon--delete" /> <span>Remove page</span>
-            </>
-          ),
-          disabled: allActionsDisabled,
-          onClick: () => {
-            setSelectedPage(page);
-            toggleRequestRemovalPanel();
-          },
-        },
-      ];
+  const handleUpdateSort = useCallback((sortKey: string | null | undefined) => {
+    if (!sortKey) {
+      setSortConfig({ key: "none", direction: "none" });
+      return;
     }
+    setSortConfig((prevConfig) => ({
+      key: sortKey,
+      direction: prevConfig.key === sortKey && prevConfig.direction === "ascending" ? "descending" : "ascending",
+    }));
+  }, []);
 
-    if (!hasJiraTasks && !isContentBoardPage) {
-      return [
-        {
-          children: (
-            <>
-              <i className="p-icon--file" /> <span>Submit for content review</span>
-            </>
-          ),
-          onClick: () => {
-            setSelectedPage(page);
-            setSelectedChangeType(ChangeRequestType.NEW_WEBPAGE);
-            setModalOpen(true);
-          },
-        },
-      ];
-    }
-
-    return [];
-  };
-
-  const rows = paginatedPages.map((page) => {
-    const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
-    const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
-    const displayedTitle = page.title?.startsWith("{{") ? "-" : page.title || "";
-
-    return {
-      key: `${page.project?.name}${page.url}`,
-      sortData: {
-        url: page.url || "",
-        title: page.title || "",
-        owner: ownerName,
-        status: status.label,
-      },
-      columns: [
-        {
-          className: "l-owned__cell--wrap-anywhere",
-          content: (
-            <button
-              className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
-              onClick={() => onPageSelect(page)}
-            >
-              {page.url || "/"} <i className="p-icon--external-link" />
-            </button>
-          ),
-        },
-        {
-          className: "l-owned__cell--truncate",
-          content: <span title={displayedTitle}>{displayedTitle}</span>,
-        },
-        {
-          content: (
-            <span className="l-owned__status">
-              <Icon name={status.dotClass} />
-              <span className="l-owned-status">{status.label}</span>
-            </span>
-          ),
-        },
-        {
-          content: (
-            <div className="u-align-text--center l-owned__actions">
-              <ContextualMenu
-                links={getMenuLinks(page)}
-                position="left"
-                toggleDisabled={isMenuDisabled(page)}
-                toggleLabel={<Icon name="contextual-menu" />}
-                toggleProps={{ "aria-label": "Toggle menu" }}
-              />
-            </div>
-          ),
-        },
-      ],
-    };
-  });
-
-  const onPageSizeChange = (newPageSize: number) => {
+  const onPageSizeChange = useCallback((newPageSize: number) => {
     setCurrentPage(1);
     setPageSize(newPageSize);
-  };
+  }, []);
+
+  const rows = useMemo(() => {
+    return paginatedPages.map((page) => {
+      const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
+      const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
+      const displayedTitle = page.title?.startsWith("{{") ? "-" : page.title || "";
+
+      const isNew = page.status === PageStatus.NEW;
+      const hasJiraTasks = !!page.jira_tasks?.length;
+      const isContentBoardPage = !!page.content_jira_id;
+      const isMenuDisabled = isNew && (hasJiraTasks || isContentBoardPage);
+      const allActionsDisabled = page.status === PageStatus.TO_DELETE;
+
+      let links: any[] = [];
+      if (!isNew) {
+        links = [
+          {
+            children: (
+              <>
+                <i className="p-icon--file" /> <span>Copy update</span>
+              </>
+            ),
+            disabled: allActionsDisabled,
+            onClick: () => {
+              setSelectedPage(page);
+              toggleCopyUpdatePanel();
+            },
+          },
+          {
+            children: (
+              <>
+                <i className="p-icon--change-version" /> <span>Page refresh</span>
+              </>
+            ),
+            disabled: allActionsDisabled,
+            onClick: () => {
+              setSelectedPage(page);
+              setSelectedChangeType(ChangeRequestType.PAGE_REFRESH);
+              setModalOpen(true);
+            },
+          },
+          {
+            children: (
+              <>
+                <i className="p-icon--delete" /> <span>Remove page</span>
+              </>
+            ),
+            disabled: allActionsDisabled,
+            onClick: () => {
+              setSelectedPage(page);
+              toggleRequestRemovalPanel();
+            },
+          },
+        ];
+      } else if (!hasJiraTasks && !isContentBoardPage) {
+        links = [
+          {
+            children: (
+              <>
+                <i className="p-icon--file" /> <span>Submit for content review</span>
+              </>
+            ),
+            onClick: () => {
+              setSelectedPage(page);
+              setSelectedChangeType(ChangeRequestType.NEW_WEBPAGE);
+              setModalOpen(true);
+            },
+          },
+        ];
+      }
+
+      return {
+        key: `${page.project?.name}${page.url}`,
+        sortData: {
+          url: page.url || "",
+          title: page.title || "",
+          owner: ownerName,
+          status: status.label,
+        },
+        columns: [
+          {
+            className: "l-owned__cell--wrap-anywhere",
+            content: (
+              <button
+                className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
+                onClick={() => onPageSelect(page)}
+              >
+                {page.url || "/"} <i className="p-icon--external-link" />
+              </button>
+            ),
+          },
+          {
+            className: "l-owned__cell--truncate",
+            content: <span title={displayedTitle}>{displayedTitle}</span>,
+          },
+          {
+            content: (
+              <span className="l-owned__status">
+                <Icon name={status.dotClass} />
+                <span className="l-owned-status">{status.label}</span>
+              </span>
+            ),
+          },
+          {
+            content: (
+              <div className="u-align-text--center l-owned__actions">
+                <ContextualMenu
+                  links={links}
+                  position="left"
+                  toggleDisabled={isMenuDisabled}
+                  toggleLabel={<Icon name="contextual-menu" />}
+                  toggleProps={{ "aria-label": "Toggle menu" }}
+                />
+              </div>
+            ),
+          },
+        ],
+      };
+    });
+  }, [
+    paginatedPages,
+    onPageSelect,
+    toggleCopyUpdatePanel,
+    toggleRequestRemovalPanel,
+    setModalOpen,
+    setSelectedChangeType,
+  ]);
 
   useEffect(() => {
     setView(VIEW_OWNED);
-    setFilter({
-      owners: [],
-      reviewers: [],
-      products: [],
-      query: "",
-    });
-    return () => {
-      setFilter({
-        owners: [],
-        reviewers: [],
-        products: [],
-        query: "",
-      });
-    };
+    setFilter({ owners: [], reviewers: [], products: [], query: "" });
+    return () => setFilter({ owners: [], reviewers: [], products: [], query: "" });
   }, [setFilter, setView]);
 
   return (
@@ -241,7 +280,16 @@ const Owned: React.FC = () => {
         <h4>Your pages</h4>
         {isLoading && <Spinner text="Loading pages. Please wait." />}
 
-        {!isLoading && <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />}
+        {!isLoading && (
+          <MainTable
+            emptyStateMsg="No pages found."
+            headers={HEADERS}
+            onUpdateSort={handleUpdateSort}
+            rows={rows}
+            sortFunction={NOOP_SORT}
+            sortable
+          />
+        )}
       </div>
 
       {!isLoading && (

@@ -1,12 +1,26 @@
 .l-owned {
   display: flex;
-  min-height: 98dvh;
+  min-height: 100dvh;
   flex-direction: column;
   justify-content: space-between;
 
   td {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+  }
+
+  & > div:first-child {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-bottom: 1rem;
+  }
+
+  &__pagination {
+    margin-top: auto;
+    flex-shrink: 0;
+    background: #fff;
+    padding-bottom: 1rem;
   }
 }
 
