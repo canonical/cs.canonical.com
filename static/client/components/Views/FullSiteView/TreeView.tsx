@@ -26,7 +26,7 @@ const TreeNode = ({ page, expanded, onToggle, onPageSelect }: TreeNodeProps): Re
   const displayUrl = `${page.project?.name ?? ""}${page.url ?? ""}`;
 
   return (
-    <li aria-expanded={hasChildren ? isExpanded : undefined} role="treeitem">
+    <li aria-expanded={hasChildren ? isExpanded : undefined} aria-selected={false} role="treeitem">
       <div className="full-site-view__tree-row">
         {hasChildren ? (
           <button
