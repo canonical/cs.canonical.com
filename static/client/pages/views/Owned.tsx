@@ -86,7 +86,7 @@ const Owned: React.FC = () => {
     // return allPages.filter((page) => page.owner?.email === user?.email);
 
     return allPages;
-  }, [projects /* TO UNCOMMENT AFTER REVIEW: , user?.email */]);
+  }, [projects]);
 
   const sortedPages = useMemo(() => {
     if (sortConfig.key === "none" || sortConfig.direction === "none") {
