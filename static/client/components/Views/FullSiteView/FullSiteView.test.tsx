@@ -218,4 +218,26 @@ describe("FullSiteView", () => {
 
     expect(screen.getByRole("button", { name: /page actions for/i })).toHaveAttribute("aria-disabled", "true");
   });
+
+  describe("view mode toggle", () => {
+    it("renders List view by default", () => {
+      renderWith(makePage({ url: "/page-1" }));
+      expect(screen.getByRole("tab", { name: /list view/i })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByRole("tab", { name: /tree view/i })).toHaveAttribute("aria-selected", "false");
+      expect(screen.getByRole("grid")).toBeInTheDocument();
+      expect(screen.queryByRole("tree")).not.toBeInTheDocument();
+    });
+
+    it("switches to Tree view, hiding FilterandSearch and MainTable", async () => {
+      const user = userEvent.setup();
+      renderWith(makePage({ url: "/page-1" }));
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByRole("tab", { name: /tree view/i })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByRole("tree")).toBeInTheDocument();
+      expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText(/search by url/i)).not.toBeInTheDocument();
+    });
+  });
 });

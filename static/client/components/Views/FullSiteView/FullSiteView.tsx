@@ -50,6 +50,7 @@ const FullSiteView = (): ReactNode => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
   const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
   const [selectedChangeType, setSelectedChangeType] = useState<
     (typeof ChangeRequestType)[keyof typeof ChangeRequestType]
@@ -249,27 +250,40 @@ const FullSiteView = (): ReactNode => {
 
           <div className="p-segmented-control">
             <div className="p-segmented-control__list" role="tablist">
-              <button aria-selected="true" className="p-segmented-control__button" role="tab" type="button">
+              <button
+                aria-selected={viewMode === "list"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("list")}
+                role="tab"
+                type="button"
+              >
                 List view
               </button>
-              <button aria-selected="false" className="p-segmented-control__button" disabled role="tab" type="button">
+              <button
+                aria-selected={viewMode === "tree"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("tree")}
+                role="tab"
+                type="button"
+              >
                 Tree view
               </button>
             </div>
           </div>
 
-          <FilterandSearch />
+          {viewMode === "list" && <FilterandSearch />}
 
           {isLoading && <Spinner text="Loading projects. Please wait." />}
 
-          {!isLoading && (
+          {!isLoading && viewMode === "list" && (
             <div className="full-site-view__content-table-wrapper">
               <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
             </div>
           )}
+          {!isLoading && viewMode === "tree" && <ul className="full-site-view__tree" role="tree" />}
         </div>
 
-        {!isLoading && (
+        {!isLoading && viewMode === "list" && (
           <div className="full-site-view__content-table-footer">
             <hr className="p-rule" />
             <TablePagination
