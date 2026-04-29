@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { VIEW_OWNED } from "@/config";
-import { usePanelsStore } from "@/store/app";
-import { useViewsStore } from "@/store/views";
+
 import { MainTable, TablePagination, Icon, ContextualMenu, Spinner } from "@canonical/react-components";
-import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
-import { useProjects } from "@/services/api/hooks/projects";
 import { useNavigate } from "react-router-dom";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
+import { VIEW_OWNED } from "@/config";
+import { useProjects } from "@/services/api/hooks/projects";
+import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
+import { usePanelsStore } from "@/store/app";
+import { useViewsStore } from "@/store/views";
 
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
   [PageStatus.AVAILABLE]: { label: "Live", dotClass: "status-succeeded-small" },
