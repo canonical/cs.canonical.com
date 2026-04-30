@@ -85,12 +85,10 @@ const FullSiteView = (): ReactNode => {
     return flatPages.slice(start, start + pageSize);
   }, [flatPages, currentPage, pageSize]);
 
-  const onPageSelect = useCallback(
-    (page: IPage) => {
-      navigate(`/app/webpage/${page.project?.name}${page.url}`);
-    },
-    [navigate],
-  );
+  const onPageSelect = useCallback((page: IPage) => {
+    const url = `/app/webpage/${page.project?.name}${page.url}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, []);
 
   const isMenuDisabled = (page: IPage) => {
     const isNew = page.status === PageStatus.NEW;
