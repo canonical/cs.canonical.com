@@ -8,21 +8,30 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import NavigationSearch from "@/components/Navigation/NavigationSearch";
-import { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
+import config, { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
 import { useViewsStore } from "@/store/views";
 
+type MobileDrillTarget = "top" | "fullSiteView";
+
 const Navigation = (): ReactNode => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, _setIsCollapsed] = useState(true);
+  const [mobileDrilledTo, setMobileDrilledTo] = useState<MobileDrillTarget>("top");
+  const setIsCollapsed = useCallback((next: boolean) => {
+    _setIsCollapsed(next);
+    if (next) setMobileDrilledTo("top");
+  }, []);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
-  const [view, setView, setExpandedProject] = useViewsStore((state) => [
+  const [view, setView, setExpandedProject, activeProject, setActiveProject] = useViewsStore((state) => [
     state.view,
     state.setView,
     state.setExpandedProject,
+    state.activeProject,
+    state.setActiveProject,
   ]);
   const logout = useCallback(() => {
     setUser({} as IUser);
@@ -42,6 +51,19 @@ const Navigation = (): ReactNode => {
       }
     },
     [navigate, setExpandedProject, setView],
+  );
+
+  const onMobileDrillIn = useCallback(() => {
+    setMobileDrilledTo("fullSiteView");
+  }, []);
+
+  const onSelectProject = useCallback(
+    (project: string) => {
+      setActiveProject(project);
+      changeView(VIEW_TABLE);
+      setIsCollapsed(true);
+    },
+    [changeView, setActiveProject, setIsCollapsed],
   );
 
   const isViewActive = useCallback(
@@ -67,7 +89,14 @@ const Navigation = (): ReactNode => {
           </div>
         </div>
       </header>
-      <nav aria-label="main" className={classNames("l-navigation", { "is-collapsed": isCollapsed })} role="navigation">
+      <nav
+        aria-label="main"
+        className={classNames("l-navigation", {
+          "is-collapsed": isCollapsed,
+          "l-navigation--drilled": mobileDrilledTo === "fullSiteView",
+        })}
+        role="navigation"
+      >
         <div className="l-navigation__drawer">
           <div className="p-panel is-paper">
             <div className="p-panel__header is-sticky">
@@ -77,41 +106,106 @@ const Navigation = (): ReactNode => {
               </div>
             </div>
             <div className="p-panel__content">
-              <div className="p-panel__content-search">
-                <hr className="p-rule" />
-                <p className="p-text--small-caps">Search pages</p>
-                <NavigationSearch />
-                <hr className="p-rule u-sv3" />
+              <div className="l-navigation__top-list">
+                <div className="p-panel__content-search">
+                  <hr className="p-rule" />
+                  <p className="p-text--small-caps">Search pages</p>
+                  <NavigationSearch />
+                  <hr className="p-rule u-sv3" />
+                </div>
+                <ul className="u-no-margin u-no-padding">
+                  <li
+                    className={classNames("p-side-navigation__link", { "is-active": isViewActive(VIEW_REQUESTS) })}
+                    onClick={() => changeView(VIEW_REQUESTS)}
+                  >
+                    <span className="u-has-icon">
+                      <i className="p-icon--file" />
+                      Dashboard
+                    </span>
+                  </li>
+                  <li
+                    className={classNames("p-side-navigation__link", { "is-active": isViewActive(VIEW_OWNED) })}
+                    onClick={() => changeView(VIEW_OWNED)}
+                  >
+                    <span className="u-has-icon">
+                      <i className="p-icon--file" />
+                      Your pages
+                    </span>
+                  </li>
+                  <li
+                    className={classNames("p-side-navigation__link", "l-navigation__nav-link--desktop", {
+                      "is-active": isViewActive(VIEW_TABLE),
+                    })}
+                    data-testid="nav-link-full-site-view-desktop"
+                    onClick={() => changeView(VIEW_TABLE)}
+                  >
+                    <span className="u-has-icon">
+                      <i className="p-icon--show" />
+                      Full site view
+                    </span>
+                  </li>
+                  <li
+                    aria-label="Open project list"
+                    className={classNames("p-side-navigation__link", "l-navigation__nav-link--mobile", {
+                      "is-active": isViewActive(VIEW_TABLE),
+                    })}
+                    onClick={onMobileDrillIn}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onMobileDrillIn();
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className="u-has-icon">
+                      <i className="p-icon--show" />
+                      Full site view
+                    </span>
+                    <i aria-hidden="true" className="p-icon--chevron-right l-navigation__drill-chevron" />
+                  </li>
+                </ul>
               </div>
-              <ul className="u-no-margin u-no-padding">
-                <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_REQUESTS) && "is-active"}`}
-                  onClick={() => changeView(VIEW_REQUESTS)}
-                >
-                  <span className="u-has-icon">
-                    <i className="p-icon--file" />
-                    Dashboard
-                  </span>
-                </li>
-                <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
-                  onClick={() => changeView(VIEW_OWNED)}
-                >
-                  <span className="u-has-icon">
-                    <i className="p-icon--file" />
-                    Your pages
-                  </span>
-                </li>
-                <li
-                  className={`p-side-navigation__link ${isViewActive(VIEW_TABLE) && "is-active"}`}
-                  onClick={() => changeView(VIEW_TABLE)}
-                >
-                  <span className="u-has-icon">
-                    <i className="p-icon--show" />
-                    Full site view
-                  </span>
-                </li>
-              </ul>
+              {mobileDrilledTo === "fullSiteView" && (
+                <ul className="l-navigation__drilled-list u-no-margin u-no-padding">
+                  <li
+                    aria-label="Back to main navigation"
+                    className="p-side-navigation__link"
+                    onClick={() => setMobileDrilledTo("top")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setMobileDrilledTo("top");
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className="u-has-icon">
+                      <i className="p-icon--chevron-left" />
+                      Full site view
+                    </span>
+                  </li>
+                  {config.allProjects.map((project) => (
+                    <li
+                      className={classNames("p-side-navigation__link", { "is-active": activeProject === project })}
+                      key={project}
+                      onClick={() => onSelectProject(project)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectProject(project);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span>{project}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
               {user?.name && (
