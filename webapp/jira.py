@@ -185,8 +185,7 @@ class Jira:
                 "summary": summary,
                 "issuetype": {"id": issue_type},
                 "labels": labels if (labels and len(labels)) else self.labels,
-                # TODO: uncomment following before merge
-                # "reporter": {"id": reporter_jira_id},
+                "reporter": {"id": reporter_jira_id},
                 "parent": parent,
                 "project": {"id": str(team)},
             },

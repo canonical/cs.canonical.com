@@ -1,5 +1,6 @@
 import re
 from flask import Blueprint, current_app, jsonify, request
+import flask
 from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
@@ -640,9 +641,7 @@ def user_tickets():
         task_status = [JIRATaskStatus.DONE, JIRATaskStatus.REJECTED]
 
     tickets = JiraTask.query.filter(
-        # TODO: uncomment following, and remove the change before merge
-        # JiraTask.user_id == flask.session["openid"]["id"],
-        JiraTask.user_id == 2,
+        JiraTask.user_id == flask.session["openid"]["id"],
         JiraTask.status.in_(task_status),
     ).paginate(page=page, per_page=per_page, error_out=False)
 
