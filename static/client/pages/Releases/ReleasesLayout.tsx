@@ -52,8 +52,12 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
     isLoading,
   } = useReleaseFormState({
     releases: data.releases,
-    onSubmitSuccess: () => {
-      notify.success("Releases updated successfully.");
+    onSubmitSuccess: ({ pr }) => {
+      notify.success(
+        "This will create a new PR in GitHub or add to an existing one.",
+        [{ label: "View on GitHub", onClick: () => window.open(pr.url, "_blank") }],
+        "Your release updates are submitted",
+      );
     },
     onSubmitError: () => {
       notify.failure("Failed to submit changes. Please try again.", null, null);

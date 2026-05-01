@@ -46,7 +46,7 @@ const ReleasesStatusBar = ({
       <div className="grid-row">
         <div className="l-releases-layout__status-title grid-col-2">
           <h2 className="p-heading--4">{onAddChecksum ? "Checksums" : "Releases"}</h2>
-          <Chip appearance={chipAppearance} className="l-releases-layout__status-chip" value={chipValue} />
+          <Chip appearance={chipAppearance} className="l-releases-layout__status-chip" isReadOnly value={chipValue} />
         </div>
         <div className="l-releases-layout__status-actions grid-col-2 grid-col-start-large-7">
           <Button className="u-no-margin" disabled={!prUrl} hasIcon onClick={() => openExternalLink(prUrl)}>
@@ -56,7 +56,6 @@ const ReleasesStatusBar = ({
             <i className="p-icon--desktop" /> <span>View demo</span>
           </Button>
           <ActionButton
-            appearance="positive"
             className="u-no-margin"
             disabled={dirtyCount === 0}
             loading={isLoading}
