@@ -38,14 +38,14 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
   );
 
   const requiresContentReviewSubmission = useMemo(() => {
-    if (page.status === PageStatus.NEW && !page.content_jira_id) {
+    if (isNew && !page.content_jira_id) {
       if (contentReviewTask) {
         return [UNTRIAGED, BACKLOG].includes(contentReviewTask.status.toLowerCase());
       }
     }
 
     return false;
-  }, [contentReviewTask, page.content_jira_id, page.status]);
+  }, [contentReviewTask, isNew, page.content_jira_id]);
 
   function getPageChips() {
     const chips = [] as ReactNode[];
@@ -65,7 +65,7 @@ const Webpage = ({ page, project }: IWebpageProps): ReactNode => {
     const pageTasks = page.jira_tasks || [];
     if (!pageTasks.length) return chips;
 
-    if (page.status === PageStatus.NEW) {
+    if (isNew) {
       const contentReviewTask = getContentReviewTask(page);
       if (!contentReviewTask) return chips;
 

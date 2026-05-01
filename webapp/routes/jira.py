@@ -339,12 +339,17 @@ def create_page(body: CreatePageModel):
     task = create_jira_task(current_app, data_obj)
 
     if not data["save_for_later"]:
-        current_app.config["JIRA"].change_issue_status(
-            issue_id=task.jira_id,
-            transition_id=JiraStatusTransitionCodes.IN_REVIEW.value,
+        jira = current_app.config["JIRA"]
+        in_review_transition = get_in_review_transition(
+            jira, task.jira_id
         )
-        task.status = JIRATaskStatus.IN_REVIEW
-        db.session.commit()
+        if in_review_transition:
+            jira.change_issue_status(
+                issue_id=task.jira_id,
+                transition_id=in_review_transition["id"],
+            )
+            task.status = JIRATaskStatus.IN_REVIEW
+            db.session.commit()
 
     invalidate_cache(new_webpage[0])
 
@@ -359,6 +364,28 @@ def create_page(body: CreatePageModel):
             }
         ),
         201,
+    )
+
+
+def get_in_review_transition(jira, issue_id):
+    available_transitions = jira.get_available_transitions(issue_id=issue_id)
+
+    if (
+        "response" in available_transitions
+        and available_transitions["response"] == "No content"
+    ):
+        return None
+
+    return next(
+        (
+            transition
+            for transition in available_transitions.get("transitions", [])
+            if transition["name"].lower()
+            == JiraStatusTransitionCodes.IN_REVIEW.name.lower().replace(
+                "_", " "
+            )
+        ),
+        None,
     )
 
 
@@ -656,30 +683,7 @@ def change_jira_status():
     # Therefore, we must fetch available transition IDs first
 
     jira = current_app.config["JIRA"]
-    available_transitions = jira.get_available_transitions(
-        issue_id=jira_task.jira_id,
-    )
-
-    if (
-        "response" in available_transitions
-        and available_transitions["response"] == "No content"
-    ):
-        return (
-            jsonify({"error": "No available transitions for this task"}),
-            400,
-        )
-
-    in_review_transition = next(
-        (
-            transition
-            for transition in available_transitions.get("transitions", [])
-            if transition["name"].lower()
-            == JiraStatusTransitionCodes.IN_REVIEW.name.lower().replace(
-                "_", " "
-            )
-        ),
-        None,
-    )
+    in_review_transition = get_in_review_transition(jira, jira_task.jira_id)
 
     if not in_review_transition:
         return (

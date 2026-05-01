@@ -33,7 +33,6 @@ import { useUsers } from "@/services/api/hooks/users";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
 import type { IJiraProject } from "@/services/api/types/jira";
-import "./_NewWebpagePanel.scss";
 import type { IProduct } from "@/services/api/types/products";
 import type { IUser } from "@/services/api/types/users";
 import { insertPage } from "@/services/tree/pages";
@@ -255,7 +254,6 @@ const Step2Content = React.memo(function Step2Content({
           5. Tag products
         </label>
         <MultiSelectPicker<IProduct>
-          className="u-sv1"
           id="products-select"
           indexKey="id"
           labelKey="name"
@@ -267,7 +265,7 @@ const Step2Content = React.memo(function Step2Content({
           searchKeys={["name", "id"]}
           value={selectedProducts}
         />
-        <p className="p-text--small u-text--muted">These tags will be housed in the content system</p>
+        <p className="p-text--small u-text--muted p-tags-help-text">These tags will be housed in the content system</p>
       </div>
       <Input label="6. Request a preferred delivery date" onChange={onDateChange} type="date" value={date} />
     </>
