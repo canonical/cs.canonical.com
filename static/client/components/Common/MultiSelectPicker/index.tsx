@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, MouseEvent, ReactNode } from "react";
 
 import { Chip, Input, List } from "@canonical/react-components";
@@ -315,4 +315,4 @@ const MultiSelectPicker = <T extends Record<string, any>>({
   );
 };
 
-export default MultiSelectPicker;
+export default memo(MultiSelectPicker) as typeof MultiSelectPicker;

@@ -9,6 +9,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   requestFeaturePanelVisible: false,
   requestRemovalPanelVisible: false,
   editPageDetailsPanelVisible: false,
+  newWebpagePanelVisible: false,
 
   togglePanel: (panelKey: PanelKey) => {
     const currentState = get();
@@ -22,7 +23,7 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
       requestFeaturePanelVisible: false,
       requestRemovalPanelVisible: false,
       editPageDetailsPanelVisible: false,
-
+      newWebpagePanelVisible: false,
       [panelKey]: !isCurrentlyVisible,
     };
 
@@ -35,4 +36,5 @@ export const usePanelsStore = create<IPanelsStore>((set, get) => ({
   toggleRequestFeaturePanel: () => get().togglePanel("requestFeaturePanelVisible"),
   toggleRequestRemovalPanel: () => get().togglePanel("requestRemovalPanelVisible"),
   toggleEditPageDetailsPanel: () => get().togglePanel("editPageDetailsPanelVisible"),
+  toggleNewWebpagePanel: () => get().togglePanel("newWebpagePanelVisible"),
 }));

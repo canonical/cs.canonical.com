@@ -274,6 +274,41 @@ def fetch_webpage_stats() -> None:
         app.logger.info("Finished scheduled task: fetch_webpage_stats")
 
 
+@register_task(delay=10080)  # Run once a week
+def fetch_jira_projects() -> None:
+    """Fetch Jira projects and update the cache."""
+    app = create_app()
+    with app.app_context():
+        app.logger.info("Running scheduled task: fetch_jira_projects")
+        jira = app.config.get("JIRA")
+        if not jira:
+            app.logger.error("JIRA configuration not found")
+            return
+
+        try:
+            projects_cache = [
+                {
+                    "key": 0,
+                    "id": 0,
+                    "name": "Other",
+                }
+            ]
+
+            projects = jira.get_all_projects()
+            for project in projects:
+                projects_cache.append(
+                    {
+                        "id": project["id"],
+                        "key": project["key"],
+                        "name": project["name"],
+                    }
+                )
+            app.config["CACHE"].set("JIRA_PROJECTS_CACHE", projects_cache)
+        except Exception as e:
+            app.logger.error(f"Error fetching Jira projects: {e}")
+        app.logger.info("Finished scheduled task: fetch_jira_projects")
+
+
 def init_scheduled_tasks(app: Flask) -> None:
     @app.before_request
     def start_tasks():
@@ -284,3 +319,4 @@ def init_scheduled_tasks(app: Flask) -> None:
         parse_webpage_assets()
         scheduled_tasks_alert()
         fetch_webpage_stats()
+        fetch_jira_projects()

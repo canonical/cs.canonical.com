@@ -51,12 +51,21 @@ def create_jira_task(app, body):
     # Determine summary message in case it's not provided by a user
     summary = body.get("summary")
     if len(summary) == 0:
-        if body["type"] == RequestType.COPY_UPDATE.value:
-            summary = f"Copy update {webpage.name}"
-        elif body["type"] == RequestType.PAGE_REFRESH.value:
-            summary = f"Page refresh for {webpage.name}"
-        elif body["type"] == RequestType.NEW_WEBPAGE.value:
-            summary = f"New webpage for {webpage.name}"
+        if body["request_type"] == RequestType.COPY_UPDATE.value:
+            summary = f"Copy update {webpage.project.name} - {webpage.name}"
+        elif body["request_type"] == RequestType.PAGE_REFRESH.value:
+            summary = (
+                f"Page refresh for {webpage.project.name} - " f"{webpage.name}"
+            )
+        elif body["request_type"] == RequestType.NEW_WEBPAGE.value:
+            page_type = body.get("page_type", "Case study")
+            type_label = (
+                "case study" if page_type == "Case study" else "webpage"
+            )
+            summary = (
+                f"New {type_label} for {webpage.project.name} - "
+                f"{webpage.name}"
+            )
         else:
             summary = ""
 
@@ -64,9 +73,11 @@ def create_jira_task(app, body):
     issue = jira.create_issue(
         due_date=body["due_date"],
         reporter_id=reporter_id,
-        request_type=body["type"],
+        request_type=body["request_type"],
         description=body["description"],
         summary=summary,
+        team=body.get("team"),
+        copydoc=body.get("copy_doc_link"),
     )
 
     # Create jira task in the database
@@ -77,7 +88,7 @@ def create_jira_task(app, body):
         webpage_id=body["webpage_id"],
         user_id=reporter_id,
         summary=summary,
-        request_type=body["request_type"],
+        request_type=str(body["request_type"]),
     )
 
     return task
