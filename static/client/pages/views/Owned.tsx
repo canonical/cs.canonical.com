@@ -82,11 +82,10 @@ const Owned: React.FC = () => {
 
     const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
 
-    // TO UNCOMMENT AFTER REVIEW: Filter pages by the current user's email
     // return allPages.filter((page) => page.owner?.email === user?.email);
 
     return allPages;
-  }, [projects]);
+  }, [projects, user]);
 
   const sortedPages = useMemo(() => {
     if (sortConfig.key === "none" || sortConfig.direction === "none") {
@@ -244,7 +243,7 @@ const Owned: React.FC = () => {
                 className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
                 onClick={() => onPageSelect(page)}
               >
-                {page.url || "/"} <i className="p-icon--external-link" />
+                {page.url || "/"}
               </button>
             ),
           },
