@@ -25,6 +25,17 @@ export interface IReleasesResponse {
   status: IReleaseStatus;
 }
 
+export interface IUpdateReleasesPR {
+  number: number;
+  url: string;
+  title: string;
+}
+
+export interface IUpdateReleasesResponse {
+  message: string;
+  pr: IUpdateReleasesPR;
+}
+
 export function isTaggedField(value: unknown): value is ITaggedField {
   return (
     typeof value === "object" && value !== null && "has_custom_type" in value && "type" in value && "value" in value

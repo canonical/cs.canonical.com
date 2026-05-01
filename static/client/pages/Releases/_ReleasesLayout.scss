@@ -94,6 +94,10 @@
     display: flex;
     align-items: center;
     gap: 0rem;
+
+    button {
+      margin-left: -1px !important;
+    }
   }
 }
 
@@ -114,6 +118,23 @@
 .l-update-releases {
   &__section {
     margin-bottom: 2rem;
+  }
+
+  &__heading-col {
+    position: sticky;
+    top: 4.5rem;
+    align-self: flex-start;
+    z-index: 1;
+    background: var(--vf-color-background-default);
+  }
+}
+
+.l-update-checksums {
+  margin-left: -50px;
+
+  .l-checksum-table__table {
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 }
 
