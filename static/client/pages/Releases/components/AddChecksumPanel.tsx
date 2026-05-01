@@ -50,7 +50,7 @@ const AddChecksumPanel = ({ categories, editTarget, onSave, onCancel }: IAddChec
   return (
     <SidePanel isOpen={addChecksumPanelVisible} overlay>
       <SidePanel.Sticky>
-        <div className="p-section--shallow">
+        <div>
           <SidePanel.Header>
             <SidePanel.HeaderTitle>{editTarget ? "Edit checksum" : "Add checksum"}</SidePanel.HeaderTitle>
             <SidePanel.HeaderControls>

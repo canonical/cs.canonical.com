@@ -2,12 +2,12 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useQueryClient } from "react-query";
 
-import { deepClone, recurseEqual } from "@/pages/Releases/utils";
+import { deepClone, recurseEqual, sortByVersionDesc } from "@/pages/Releases/utils";
 import { ReleasesServices } from "@/services/api/services/releases";
-import type { IReleasesData, ReleaseFieldValue } from "@/services/api/types/releases";
+import type { IReleasesData, IUpdateReleasesResponse, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isRecord } from "@/services/api/types/releases";
 
-type SubmitSuccessHandler = () => void | Promise<void>;
+type SubmitSuccessHandler = (response: IUpdateReleasesResponse) => void | Promise<void>;
 type SubmitErrorHandler = (error: unknown) => void;
 
 interface IUseReleaseFormStateOptions {
@@ -79,6 +79,7 @@ export const useReleaseFormState = ({
           const checksumGroups = checksums as Record<string, Record<string, string>>;
           if (checksumGroups[checksumCategory]) {
             checksumGroups[checksumCategory][version] = value;
+            checksumGroups[checksumCategory] = sortByVersionDesc(checksumGroups[checksumCategory]);
           }
         }
 
@@ -99,6 +100,7 @@ export const useReleaseFormState = ({
           checksumGroups[category] = {};
         }
         checksumGroups[category][version] = hash;
+        checksumGroups[category] = sortByVersionDesc(checksumGroups[category]);
       }
 
       return updated;
@@ -125,9 +127,9 @@ export const useReleaseFormState = ({
     setIsLoading(true);
     try {
       const timestamp = new Date().toISOString();
-      await ReleasesServices.updateReleases(formData, commitMessage + ` [${timestamp}]`);
+      const result = await ReleasesServices.updateReleases(formData, commitMessage + ` [${timestamp}]`);
       await queryClient.invalidateQueries("releases");
-      await onSubmitSuccess?.();
+      await onSubmitSuccess?.(result.data);
     } catch (error) {
       onSubmitError?.(error);
     } finally {

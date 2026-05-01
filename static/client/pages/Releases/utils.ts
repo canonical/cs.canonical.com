@@ -44,3 +44,18 @@ export const RELEASES_PR_STATUS = {
 export function getReleaseDemoUrl(prNumber: string | null): string | null {
   return prNumber ? `https://ubuntu-com-${prNumber}.demos.haus/` : null;
 }
+
+function compareVersionsDesc(a: string, b: string): number {
+  const aParts = a.split(".").map(Number);
+  const bParts = b.split(".").map(Number);
+  const len = Math.max(aParts.length, bParts.length);
+  for (let i = 0; i < len; i++) {
+    const diff = (bParts[i] ?? 0) - (aParts[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+export function sortByVersionDesc(obj: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.keys(obj).sort(compareVersionsDesc).map((k) => [k, obj[k]]));
+}

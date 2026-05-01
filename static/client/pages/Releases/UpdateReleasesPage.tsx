@@ -24,8 +24,8 @@ const UpdateReleasesPage = (): ReactNode => {
         return (
           <div className="l-update-releases__section grid-row" key={categoryKey}>
             <hr className="p-rule" />
-            <div className="grid-col-1">
-              <p className="l-release-form__section-heading p-text--small-caps">{formatSectionTitle(categoryKey)}</p>
+            <div className="grid-col-1 l-update-releases__heading-col">
+              <p className="l-release-form__section-heading p-text--small-caps">{formatSectionTitle(categoryKey)} Release</p>
             </div>
             <div className="grid-col-4">
               <div className="l-release-form__category">
