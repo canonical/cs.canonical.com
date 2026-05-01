@@ -340,9 +340,7 @@ def create_page(body: CreatePageModel):
 
     if not data["save_for_later"]:
         jira = current_app.config["JIRA"]
-        in_review_transition = get_in_review_transition(
-            jira, task.jira_id
-        )
+        in_review_transition = get_in_review_transition(jira, task.jira_id)
         if in_review_transition:
             jira.change_issue_status(
                 issue_id=task.jira_id,
