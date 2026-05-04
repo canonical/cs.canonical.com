@@ -56,8 +56,7 @@ const FullSiteView = (): ReactNode => {
   >(ChangeRequestType.COPY_UPDATE);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
-    state.copyUpdatePanelVisible,
+  const [toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.toggleCopyUpdatePanel,
     state.toggleRequestRemovalPanel,
   ]);
@@ -287,9 +286,7 @@ const FullSiteView = (): ReactNode => {
           </div>
         )}
       </div>
-      {copyUpdatePanelVisible && selectedPage && (
-        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={selectedPage} />
-      )}
+      {selectedPage && <RequestCopydocPanel webpage={selectedPage} />}
       {modalOpen && selectedPage && (
         <RequestTaskModal
           changeType={selectedChangeType}
