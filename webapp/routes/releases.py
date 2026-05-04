@@ -7,7 +7,7 @@ from ruamel.yaml import YAMLError
 from webapp.github import GithubError
 from webapp.releases_manager import MergeConflictError, ReleasesService
 from webapp.schemas import UpdateReleasesRequest
-from webapp.sso import login_required
+from webapp.sso import SSO_RELEASE_TEAM, login_required, requires_team
 
 releases_blueprint = Blueprint("releases", __name__, url_prefix="/api")
 
@@ -19,6 +19,7 @@ releases_service = ReleasesService()
     methods=["GET"],
 )
 @login_required
+@requires_team(SSO_RELEASE_TEAM)
 def get_releases_yaml():
     try:
         data = releases_service.get_releases_data()
@@ -26,11 +27,14 @@ def get_releases_yaml():
         return Response(
             response=json.dumps(
                 {
-                    "error": "Failed to fetch releases",
-                    "details": str(e),
+                    "type": "about:blank",
+                    "title": "Failed to fetch releases",
+                    "detail": str(e),
+                    "status": 500,
                 }
             ),
             status=500,
+            mimetype="application/json",
         )
 
     response = Response(
@@ -48,6 +52,7 @@ def get_releases_yaml():
 )
 @validate()
 @login_required
+@requires_team(SSO_RELEASE_TEAM)
 def update_releases_yaml(body: UpdateReleasesRequest):
     try:
         result = releases_service.update_releases_workflow(
@@ -55,15 +60,37 @@ def update_releases_yaml(body: UpdateReleasesRequest):
         )
     except (ValueError, YAMLError) as e:
         return (
-            jsonify({"message": "Invalid releases data", "details": str(e)}),
+            jsonify(
+                {
+                    "type": "about:blank",
+                    "title": "Invalid releases data",
+                    "detail": str(e),
+                    "status": 400,
+                }
+            ),
             400,
         )
     except MergeConflictError as e:
-        return jsonify({"message": str(e)}), 409
+        return (
+            jsonify(
+                {
+                    "type": "about:blank",
+                    "title": "Merge conflict",
+                    "detail": str(e),
+                    "status": 409,
+                }
+            ),
+            409,
+        )
     except GithubError as e:
         return (
             jsonify(
-                {"message": "Failed to update releases", "details": str(e)}
+                {
+                    "type": "about:blank",
+                    "title": "Failed to update releases",
+                    "detail": str(e),
+                    "status": 500,
+                }
             ),
             500,
         )
