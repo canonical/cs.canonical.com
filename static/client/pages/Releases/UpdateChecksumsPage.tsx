@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { useOutletContext } from "react-router-dom";
 
@@ -28,16 +28,16 @@ const UpdateChecksumsPage = (): ReactNode => {
     setExpandedCategory((prev) => (prev === category ? null : category));
   };
 
-  const handleOpenAdd = () => {
+  const handleOpenAdd = useCallback(() => {
     setEditTarget(null);
     if (!addChecksumPanelVisible) toggleAddChecksumPanel();
-  };
+  }, [addChecksumPanelVisible, toggleAddChecksumPanel]);
 
   // Register the "Add checksum" handler so the status bar can trigger it
   useEffect(() => {
     registerAddChecksum(handleOpenAdd);
     return () => registerAddChecksum(null);
-  });
+  }, [handleOpenAdd, registerAddChecksum]);
 
   const handleOpenEdit = (category: string, version: string, hash: string) => {
     setEditTarget({ category, version, hash });

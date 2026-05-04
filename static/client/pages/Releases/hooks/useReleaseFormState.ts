@@ -23,7 +23,6 @@ export interface IUseReleaseFormStateResult {
   isLoading: boolean;
   dirtyCount: number;
   handleFieldChange: (categoryKey: string, fieldKey: string, newValue: ReleaseFieldValue) => void;
-  handleChecksumChange: (categoryKey: string, checksumCategory: string, version: string, value: string) => void;
   handleChecksumAdd: (category: string, version: string, hash: string) => void;
   handleChecksumDelete: (category: string, version: string) => void;
   handleSubmit: () => Promise<void>;
@@ -68,26 +67,6 @@ export const useReleaseFormState = ({
       return updated;
     });
   }, []);
-
-  const handleChecksumChange = useCallback(
-    (categoryKey: string, checksumCategory: string, version: string, value: string) => {
-      setFormData((prev) => {
-        const updated = deepClone(prev);
-        const checksums = updated[categoryKey];
-
-        if (isRecord(checksums)) {
-          const checksumGroups = checksums as Record<string, Record<string, string>>;
-          if (checksumGroups[checksumCategory]) {
-            checksumGroups[checksumCategory][version] = value;
-            checksumGroups[checksumCategory] = sortByVersionDesc(checksumGroups[checksumCategory]);
-          }
-        }
-
-        return updated;
-      });
-    },
-    [],
-  );
 
   const handleChecksumAdd = useCallback((category: string, version: string, hash: string) => {
     setFormData((prev) => {
@@ -143,7 +122,6 @@ export const useReleaseFormState = ({
     isLoading,
     dirtyCount,
     handleFieldChange,
-    handleChecksumChange,
     handleChecksumAdd,
     handleChecksumDelete,
     handleSubmit,
