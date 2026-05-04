@@ -1,20 +1,36 @@
 import type { ReactNode } from "react";
 import React, { useMemo, useState } from "react";
 
-import { Button, Tooltip } from "@canonical/react-components";
+import { ActionButton, Button, Tooltip, useToastNotification } from "@canonical/react-components";
+import { useQueryClient } from "react-query";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
-import type { IPage } from "@/services/api/types/pages";
+import { parseError } from "@/helpers/requests";
+import { JiraServices } from "@/services/api/services/jira";
+import type { IJiraTask, IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { usePanelsStore } from "@/store/app";
 
-const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
+const WebpageActions = ({
+  page,
+  requiresContentReviewSubmission,
+  contentReviewTask,
+  isPendingContentReview,
+}: {
+  page: IPage;
+  requiresContentReviewSubmission: boolean;
+  contentReviewTask: IJiraTask | null;
+  isPendingContentReview: boolean;
+}): ReactNode => {
   const [modalOpen, setModalOpen] = useState(false);
   const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
     ChangeRequestType.COPY_UPDATE,
   );
+  const [loading, setLoading] = useState(false);
+  const notify = useToastNotification();
+  const queryClient = useQueryClient();
 
   const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.copyUpdatePanelVisible,
@@ -23,8 +39,6 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
   ]);
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
-  const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
-  const isContentBoardPage = useMemo(() => page.content_jira_id, [page]);
 
   const handleRequestChange = (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => {
     setChangeType(type);
@@ -46,6 +60,23 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
   };
 
   const allActionsDisabled = useMemo(() => page.status === PageStatus.TO_DELETE, [page.status]);
+
+  function submitForContentReview() {
+    if (!contentReviewTask) return;
+    setLoading(true);
+    JiraServices.submitForContentReview(contentReviewTask.jira_id)
+      .then(() => {
+        void queryClient.invalidateQueries("pages");
+        notify.success("The Content team will review your page", [], "Your new page request is in review");
+      })
+      .catch((error) => {
+        const { message, description } = parseError(error);
+        notify.failure(message, null, <p>{description}</p>);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
 
   return (
     <div className="l-webpage__actions p-segmented-control">
@@ -86,24 +117,38 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
             </>
           )}
 
-          {isNew && !hasJiraTasks && !isContentBoardPage && (
-            <Button
-              appearance="positive"
-              className="p-segmented-control__button"
-              hasIcon
-              onClick={() => handleRequestChange(ChangeRequestType.NEW_WEBPAGE)}
+          {(requiresContentReviewSubmission || (page.status === PageStatus.NEW && isPendingContentReview)) && (
+            <Tooltip
+              message={
+                isPendingContentReview ? (
+                  <span>
+                    The ticket is pending content review. <br />
+                    You can follow our progress on Jira or in your requests.
+                  </span>
+                ) : (
+                  ""
+                )
+              }
+              position="btm-center"
+              zIndex={999}
             >
-              <React.Fragment key=".0">
-                <i className="p-icon--file is-dark" /> <span>Submit for content review</span>
-              </React.Fragment>
-            </Button>
+              <ActionButton
+                appearance="positive"
+                className="p-segmented-control__button"
+                disabled={isPendingContentReview}
+                loading={loading}
+                onClick={submitForContentReview}
+              >
+                <React.Fragment key=".0">
+                  <i className="p-icon--file is-dark" /> <span>Submit for content review</span>
+                </React.Fragment>
+              </ActionButton>
+            </Tooltip>
           )}
         </div>
       </Tooltip>
 
-      {copyUpdatePanelVisible && (
-        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={page} />
-      )}
+      {copyUpdatePanelVisible && <RequestCopydocPanel webpage={page} />}
 
       {modalOpen && (
         <RequestTaskModal

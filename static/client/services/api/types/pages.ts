@@ -14,6 +14,7 @@ export interface IJiraTask {
   name: string;
   status: string;
   summary: string;
+  request_type: string;
 }
 
 export interface IPage {
@@ -56,11 +57,18 @@ export interface IPagesResponse {
 
 export interface INewPage {
   name: string;
-  copy_doc_link: string | undefined;
-  owner: IUser;
+  copy_doc_link: string;
+  owner: IUser | null;
   reviewers: IUser[];
   project: string;
   parent: string;
+  due_date: string;
+  product_ids: number[];
+  content_jira_id?: string;
+  page_type?: string;
+  team: number | undefined;
+  summary: string;
+  save_for_later: boolean;
 }
 
 export interface INewPageResponse {
