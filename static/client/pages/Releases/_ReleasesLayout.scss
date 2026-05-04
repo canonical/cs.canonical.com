@@ -127,6 +127,10 @@
     z-index: 1;
     background: var(--vf-color-background-default);
   }
+  &__divider {
+    margin: 0 0 0rem -60px;
+    padding-left: 60px;
+  }
 }
 
 .l-update-checksums {

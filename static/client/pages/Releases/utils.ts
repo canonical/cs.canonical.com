@@ -57,5 +57,9 @@ function compareVersionsDesc(a: string, b: string): number {
 }
 
 export function sortByVersionDesc(obj: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(Object.keys(obj).sort(compareVersionsDesc).map((k) => [k, obj[k]]));
+  return Object.fromEntries(
+    Object.keys(obj)
+      .sort(compareVersionsDesc)
+      .map((k) => [k, obj[k]]),
+  );
 }

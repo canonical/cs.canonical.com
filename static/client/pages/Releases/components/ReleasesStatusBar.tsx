@@ -55,12 +55,7 @@ const ReleasesStatusBar = ({
           <Button className="u-no-margin" disabled={!demoUrl} hasIcon onClick={() => openExternalLink(demoUrl)}>
             <i className="p-icon--desktop" /> <span>View demo</span>
           </Button>
-          <ActionButton
-            className="u-no-margin"
-            disabled={dirtyCount === 0}
-            loading={isLoading}
-            onClick={onSubmit}
-          >
+          <ActionButton className="u-no-margin" disabled={dirtyCount === 0} loading={isLoading} onClick={onSubmit}>
             <i className="p-icon--change-version" />
             {"  "}
             <span>Submit changes</span>

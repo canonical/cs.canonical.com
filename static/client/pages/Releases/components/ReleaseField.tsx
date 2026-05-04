@@ -21,7 +21,8 @@ function formatHelpText(val: ReleaseFieldValue): string | null {
   if (val === null || val === undefined) return null;
   if (typeof val === "string") return val || null;
   if (typeof val === "number") return String(val);
-  if (isTaggedField(val)) return val.value !== null && val.value !== undefined ? String(val.value) : null;
+  if (isTaggedField(val)) return formatHelpText(val.value as string);
+  if (typeof val === "object") return JSON.stringify(val);
   return null;
 }
 
@@ -58,9 +59,6 @@ const ReleaseField = ({
       >
         <div className="l-release-form__field-header">
           <span className="l-release-form__field-label">{formatInputLabel(label)}</span>
-          <span className="p-chip is-dense u-no-margin--bottom">
-            <span className="p-chip__value">{value.type}</span>
-          </span>
         </div>
         <TaggedFieldInput onChange={handleTaggedFieldChange} type={value.type} value={value.value} />
         {helpText && (
