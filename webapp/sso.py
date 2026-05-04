@@ -13,6 +13,7 @@ SSO_LOGIN_URL = "https://login.ubuntu.com"
 # so temporarily need to add multiple subset public teams
 
 SSO_ADMIN_TEAM = "content-system-admins"
+SSO_RELEASE_TEAM = "canonical-release-managers"
 SSO_TEAM = (
     "canonical",
     "canonical-content-people",
@@ -20,6 +21,7 @@ SSO_TEAM = (
     "canonical-webmonkeys",
     SSO_ADMIN_TEAM,
 )
+KNOWN_TEAMS = {*SSO_TEAM, SSO_RELEASE_TEAM}
 DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
     "FLASK_DISABLE_SSO"
 )
@@ -78,14 +80,13 @@ def init_sso(app: flask.Flask):
             )
 
         memberships = response.json().get("entries", [])
-        teams = [team["name"] for team in memberships]
-        if not (set(SSO_TEAM) & set(teams)):
+        all_teams = {team["name"] for team in memberships}
+        if not (set(SSO_TEAM) & all_teams):
             flask.abort(
                 403, description="User is not a member of the required team."
             )
 
-        # check if user is admin
-        role = "admin" if SSO_ADMIN_TEAM in teams else "user"
+        role = "admin" if SSO_ADMIN_TEAM in all_teams else "user"
 
         # update user
         if user and user.role != role:
@@ -97,6 +98,7 @@ def init_sso(app: flask.Flask):
             "email": token["userinfo"]["email"],
             "fullname": token["userinfo"]["name"],
             "role": role,
+            "teams": [t for t in all_teams if t in KNOWN_TEAMS],
         }
 
         return flask.redirect(flask.request.args.get("next") or "/app")
@@ -162,3 +164,35 @@ def is_admin(func):
         )
 
     return is_admin_user
+
+
+def requires_team(team: str):
+    """
+    Decorator factory that restricts access to members of a Launchpad team.
+    Usage: @requires_team("some-launchpad-team")
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if DISABLE_SSO:
+                return func(*args, **kwargs)
+
+            teams = flask.session.get("openid", {}).get("teams", [])
+            if team not in teams:
+                return (
+                    flask.jsonify(
+                        {
+                            "type": "about:blank",
+                            "title": "Access denied",
+                            "detail": f"Membership in '{team}' is required.",
+                            "status": 403,
+                        }
+                    ),
+                    403,
+                )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
