@@ -8,6 +8,8 @@ import FullSiteView from "./FullSiteView";
 
 import { useProjects } from "@/services/api/hooks/projects";
 import { PageStatus, type IPage, type IPagesResponse } from "@/services/api/types/pages";
+import type { IUser } from "@/services/api/types/users";
+import { useStore } from "@/store";
 import { useViewsStore } from "@/store/views";
 
 vi.mock("@/services/api/hooks/projects", () => ({
@@ -53,7 +55,7 @@ const makeProject = (page: IPage): IPagesResponse["data"] => ({
   },
 });
 
-function renderWith(page: IPage) {
+function renderWith(page: IPage, user: Partial<IUser> = { email: "alice@example.com" }) {
   (useProjects as ReturnType<typeof vi.fn>).mockReturnValue({
     data: [makeProject(page)],
     isLoading: false,
@@ -61,6 +63,7 @@ function renderWith(page: IPage) {
     unfilteredProjects: [makeProject(page)],
   });
   useViewsStore.setState({ activeProject: "canonical.com" });
+  useStore.setState({ user: user as IUser });
 
   const queryClient = new QueryClient();
   return render(
@@ -207,5 +210,31 @@ describe("FullSiteView", () => {
     );
 
     expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("disables the menu trigger when the current user is not the page owner", () => {
+    renderWith(makePage({ status: PageStatus.AVAILABLE }), { email: "bob@example.com" });
+
+    expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("disables the menu trigger when the page has no owner", () => {
+    renderWith(
+      makePage({ status: PageStatus.AVAILABLE, owner: null as unknown as IPage["owner"] }),
+      { email: "alice@example.com" },
+    );
+
+    expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("enables the menu trigger for non-owners when the current user is an admin", async () => {
+    const user = userEvent.setup();
+    renderWith(makePage({ status: PageStatus.AVAILABLE }), { email: "bob@example.com", role: "admin" });
+
+    const trigger = screen.getByRole("button", { name: /page actions/i });
+    expect(trigger).not.toHaveAttribute("aria-disabled", "true");
+
+    await user.click(trigger);
+    expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { ContextualMenu, Icon, MainTable, Spinner, TablePagination } from "@canonical/react-components";
+import { ContextualMenu, Icon, MainTable, Spinner, TablePagination, Tooltip } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import ProjectSidebar from "./ProjectSidebar";
@@ -11,6 +11,7 @@ import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import FilterandSearch from "@/components/Views/FilterTableView/FilterandSearch";
 import { useProjects } from "@/services/api/hooks/projects";
 import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
+import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
 import { useViewsStore } from "@/store/views";
 
@@ -45,6 +46,8 @@ const HEADERS = [
 const FullSiteView = (): ReactNode => {
   const navigate = useNavigate();
   const { data: projects, isLoading } = useProjects();
+  const user = useStore((state) => state.user);
+  const isAdmin = user?.role === "admin";
   const activeProject = useViewsStore((state) => state.activeProject);
   const filter = useViewsStore((state) => state.filter);
 
@@ -89,10 +92,13 @@ const FullSiteView = (): ReactNode => {
     [navigate],
   );
 
+  const isOwner = (page: IPage) => !!user?.email && page.owner?.email === user.email;
+
   const isMenuDisabled = (page: IPage) => {
     const isNew = page.status === PageStatus.NEW;
     const hasJiraTasks = !!page.jira_tasks?.length;
     const isContentBoardPage = !!page.content_jira_id;
+    if (!isAdmin && !isOwner(page)) return true;
     return isNew && (hasJiraTasks || isContentBoardPage);
   };
 
@@ -210,16 +216,22 @@ const FullSiteView = (): ReactNode => {
         {
           content: (
             <div className="u-align-text--center full-site-view__actions">
-              <ContextualMenu
-                links={getMenuLinks(page)}
+              <Tooltip
+                message={!isAdmin && !isOwner(page) ? "Only the page owner can perform actions" : undefined}
                 position="left"
-                toggleDisabled={isMenuDisabled(page)}
-                toggleLabel={<Icon name="contextual-menu" />}
-                toggleProps={{
-                  "aria-label": `Page actions for ${page.url}`,
-                  className: "u-no-margin p-contextual-menu__toggle",
-                }}
-              />
+                zIndex={999}
+              >
+                <ContextualMenu
+                  links={getMenuLinks(page)}
+                  position="left"
+                  toggleDisabled={isMenuDisabled(page)}
+                  toggleLabel={<Icon name="contextual-menu" />}
+                  toggleProps={{
+                    "aria-label": `Page actions for ${page.url}`,
+                    className: "u-no-margin p-contextual-menu__toggle",
+                  }}
+                />
+              </Tooltip>
             </div>
           ),
         },
