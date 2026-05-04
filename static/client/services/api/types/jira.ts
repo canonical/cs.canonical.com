@@ -32,3 +32,15 @@ export interface IRequestFeatureResponse {
     };
   };
 }
+
+export interface IJiraProject {
+  id: number;
+  name: string;
+  key: string;
+}
+
+export interface IGetJiraProjectsResponse {
+  data: {
+    projects: IJiraProject[];
+  };
+}

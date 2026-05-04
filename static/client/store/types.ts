@@ -27,6 +27,7 @@ export interface IPanelsStore {
   requestFeaturePanelVisible: boolean;
   requestRemovalPanelVisible: boolean;
   editPageDetailsPanelVisible: boolean;
+  newWebpagePanelVisible: boolean;
 
   togglePanel: (p: PanelKey) => void;
   toggleProductsPanel: () => void;
@@ -35,6 +36,7 @@ export interface IPanelsStore {
   toggleRequestFeaturePanel: () => void;
   toggleRequestRemovalPanel: () => void;
   toggleEditPageDetailsPanel: () => void;
+  toggleNewWebpagePanel: () => void;
 }
 
 export type PanelKey =
@@ -43,4 +45,5 @@ export type PanelKey =
   | "reportBugPanelVisible"
   | "requestFeaturePanelVisible"
   | "requestRemovalPanelVisible"
-  | "editPageDetailsPanelVisible";
+  | "editPageDetailsPanelVisible"
+  | "newWebpagePanelVisible";

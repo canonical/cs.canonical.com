@@ -2,6 +2,7 @@ import { BasicApiClass } from "./BasicApiClass";
 
 import { ENDPOINTS, REST_TYPES } from "@/services/api/constants";
 import type {
+  IJiraProject,
   IReportBugBody,
   IReportBugResponse,
   IRequestFeatureBody,
@@ -23,5 +24,15 @@ export class JiraApiClass extends BasicApiClass {
       `${ENDPOINTS.getTickets}?page=${params.page}&per_page=${params.per_page}&type=${params.type}`,
       REST_TYPES.GET,
     );
+  }
+
+  public getJiraProjects(): Promise<IJiraProject[]> {
+    return this.callApi<{ data: IJiraProject[] }>(ENDPOINTS.getJiraProjects, REST_TYPES.GET).then(
+      (response) => response.data,
+    );
+  }
+
+  public submitForContentReview(issue_id: string): Promise<any> {
+    return this.callApi(ENDPOINTS.submitForContentReview, REST_TYPES.POST, { issue_id });
   }
 }

@@ -1,5 +1,6 @@
 import { api } from "@/services/api";
 import type {
+  IJiraProject,
   IReportBugBody,
   IReportBugResponse,
   IRequestFeatureBody,
@@ -22,6 +23,14 @@ export const getTickets = async (
 ): Promise<IGetTicketsResponse> => {
   const params = { page, per_page, type } as IGetTicketsParams;
   return api.jira.getTickets(params);
+};
+
+export const getJiraProjects = async (): Promise<IJiraProject[]> => {
+  return api.jira.getJiraProjects();
+};
+
+export const submitForContentReview = async (issue_id: string): Promise<any> => {
+  return api.jira.submitForContentReview(issue_id);
 };
 
 export * as JiraServices from "./jira";
