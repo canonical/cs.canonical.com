@@ -30,6 +30,11 @@ export class RestApiClient extends ApiClient {
       timeout: this.timeout,
     });
 
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => Promise.reject(error.response?.data ?? error),
+    );
+
     return instance({
       method,
       url: endpoint,

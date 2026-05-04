@@ -7,6 +7,7 @@ import ReleasesSecondaryNav from "@/components/ReleaseManager/ReleasesSecondaryN
 import ReleasesStatusBar from "@/components/ReleaseManager/ReleasesStatusBar";
 import { useReleaseFormState } from "@/components/ReleaseManager/useReleaseFormState";
 import { useReleases } from "@/services/api/hooks/releases";
+import type { IApiBasicError } from "@/services/api/types/query";
 import type { IReleasesResponse } from "@/services/api/types/releases";
 
 export interface IReleasesOutletContext {
@@ -39,20 +40,32 @@ const ReleasesContent = ({ data }: IReleasesContentProps): ReactNode => {
     addChecksumRef.current?.();
   }, []);
 
-  const { dirtyCount, formData, handleChecksumAdd, handleChecksumDelete, handleFieldChange, handleSubmit, isLoading } =
-    useReleaseFormState({
-      releases: data.releases,
-      onSubmitSuccess: ({ pr }) => {
-        notify.success(
-          "This will create a new PR in GitHub or add to an existing one.",
-          [{ label: "View on GitHub", onClick: () => window.open(pr.url, "_blank") }],
-          "Your release updates are submitted",
-        );
-      },
-      onSubmitError: () => {
-        notify.failure("Failed to submit changes. Please try again.", null, null);
-      },
-    });
+  const {
+    dirtyCount,
+    formData,
+    handleChecksumAdd,
+    handleChecksumDelete,
+    handleFieldChange,
+    handleSubmit,
+    isLoading,
+  } = useReleaseFormState({
+    releases: data.releases,
+    onSubmitSuccess: ({ pr }) => {
+      notify.success(
+        "This will create a new PR in GitHub or add to an existing one.",
+        [{ label: "View on GitHub", onClick: () => window.open(pr.url, "_blank") }],
+        "Your release updates are submitted",
+      );
+    },
+    onSubmitError: (error) => {
+      const apiError = error as IApiBasicError;
+      notify.failure(
+        apiError?.detail ?? "Failed to submit changes. Please try again.",
+        null,
+        apiError?.title ?? null,
+      );
+    },
+  });
 
   const outletContext: IReleasesOutletContext = {
     data,
@@ -108,7 +121,7 @@ const Releases = (): ReactNode => {
         <div className="grid-row">
           <div className="p-notification--negative">
             <div className="p-notification__content">
-              <p className="p-notification__message">Failed to load releases data: {error.detail || error.title}</p>
+              <p className="p-notification__message">{error.detail || error.title}</p>
             </div>
           </div>
         </div>
