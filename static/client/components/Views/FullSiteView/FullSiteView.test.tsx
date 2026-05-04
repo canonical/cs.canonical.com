@@ -188,6 +188,7 @@ describe("FullSiteView", () => {
             name: "t",
             status: "open",
             summary: "s",
+            request_type: "",
           },
         ],
       }),
