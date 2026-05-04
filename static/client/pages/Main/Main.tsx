@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "@/components/MainLayout";
 import FullSiteView from "@/components/Views/FullSiteView";
-import FilterTableView from "@/components/Views/FilterTableView";
 import NewWebpageRedirector from "@/pages/NewWebpage/NewWebpageRedirector";
 import Owned from "@/pages/views/Owned";
 import Requests from "@/pages/views/Requests";
