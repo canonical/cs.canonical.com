@@ -22,6 +22,19 @@ function getStatusClass(status: string) {
   }
 }
 
+function getTaskType(taskType: string) {
+  switch (taskType) {
+    case "0":
+      return "Copy update";
+    case "1":
+      return "Page update";
+    case "2":
+      return "New page";
+    default:
+      return "Unknown";
+  }
+}
+
 const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
   return (
     <table>
@@ -38,7 +51,7 @@ const JiraTasks = ({ tasks, isWebPage }: IJiraTasksProps): ReactNode => {
         {tasks?.map((task) => (
           <tr>
             <td colSpan={3}>{task.summary}</td>
-            <td>Copy update</td>
+            <td>{getTaskType(task.request_type)}</td>
             <td className={getStatusClass(task.status)}>
               {task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase()}
             </td>

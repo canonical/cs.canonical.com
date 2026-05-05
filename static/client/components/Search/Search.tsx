@@ -21,6 +21,7 @@ const Search = <T extends Record<string, any>>({
   titleKey = "title" as keyof T,
   searchKeys,
   hideTitle = false,
+  filterFn,
 }: SearchProps<T>): ReactNode => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -42,16 +43,18 @@ const Search = <T extends Record<string, any>>({
     [labelKey, titleKey, hideTitle],
   );
 
+  const filteredByProject = useMemo(() => (filterFn ? options.filter(filterFn) : options), [options, filterFn]);
+
   const filtered = useMemo(() => {
     if (query.length < 3) return [];
     const lowerQuery = query.toLowerCase();
-    return options.filter((opt) =>
+    return filteredByProject.filter((opt) =>
       keysToSearch.some((key) => {
         const val = opt[key];
         return typeof val === "string" && val.toLowerCase().includes(lowerQuery);
       }),
     );
-  }, [query, options, keysToSearch]);
+  }, [query, filteredByProject, keysToSearch]);
 
   const handleChange = useCallback((inputValue: string) => {
     setQuery(inputValue);

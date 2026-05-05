@@ -3,7 +3,7 @@ import { ContextualMenu, List } from "@canonical/react-components";
 import RequestHistory from "@/components/Dashboard/History";
 import RequestCopydocPanel from "@/components/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
-import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE, COPY_UPDATE } from "@/config";
+import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE, COPY_UPDATE, NEW_WEBPAGE } from "@/config";
 import { usePanelsStore } from "@/store/app";
 
 const Requests: React.FC = () => {
@@ -38,13 +38,19 @@ const Requests: React.FC = () => {
     },
   ];
 
-  const [toggleRequestFeaturePanel, toggleReportBugPanel, toggleRequestRemovalPanel, toggleCopyUpdatePanel] =
-    usePanelsStore((state) => [
-      state.toggleRequestFeaturePanel,
-      state.toggleReportBugPanel,
-      state.toggleRequestRemovalPanel,
-      state.toggleCopyUpdatePanel,
-    ]);
+  const [
+    toggleRequestFeaturePanel,
+    toggleReportBugPanel,
+    toggleRequestRemovalPanel,
+    toggleNewWebpagePanel,
+    toggleCopyUpdatePanel,
+  ] = usePanelsStore((state) => [
+    state.toggleRequestFeaturePanel,
+    state.toggleReportBugPanel,
+    state.toggleRequestRemovalPanel,
+    state.toggleNewWebpagePanel,
+    state.toggleCopyUpdatePanel,
+  ]);
 
   function handleQuickAction(requestType: string) {
     switch (requestType) {
@@ -59,6 +65,9 @@ const Requests: React.FC = () => {
         break;
       case COPY_UPDATE:
         toggleCopyUpdatePanel();
+        break;
+      case NEW_WEBPAGE:
+        toggleNewWebpagePanel();
         break;
     }
   }

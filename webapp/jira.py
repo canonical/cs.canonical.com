@@ -143,6 +143,8 @@ class Jira:
         due_date: datetime = None,
         labels: list[str] = None,
         custom_fields: dict = {},
+        team: int = 10492,  # Default to Web and Design-ENG team,
+        copydoc: str = None,
     ):
         """
         Creates a task or subtask in Jira.
@@ -185,16 +187,16 @@ class Jira:
                 "labels": labels if (labels and len(labels)) else self.labels,
                 # "reporter": {"id": reporter_jira_id},
                 "parent": parent,
-                "project": {"id": "10492"},  # Web and Design-ENG
-                "components": [
-                    {"id": "12655"},  # Sites Tribe
-                ],
+                "project": {"id": str(team)},
             },
             "update": {},
         }
 
         if due_date is not None:
             payload["fields"]["duedate"] = due_date
+
+        if copydoc is not None:
+            payload["fields"]["customfield_11133"] = copydoc
 
         if custom_fields:
             for key, value in custom_fields.items():
@@ -209,6 +211,8 @@ class Jira:
         reporter_id: str,
         due_date: datetime,
         summary: str,
+        team: int = 10492,  # Default to Web and Design-ENG team,
+        copydoc: str = None,
     ):
         """Creates a new issue in Jira.
 
@@ -239,21 +243,13 @@ class Jira:
                 parent=None,
                 reporter_jira_id=reporter_jira_id,
                 due_date=due_date,
+                team=team,
+                copydoc=copydoc,
             )
 
             if not epic:
                 raise Exception("Failed to create epic")
 
-            # Create subtasks for this epic
-            for subtask_name in ["UX", "Visual", "Dev"]:
-                self.create_task(
-                    summary=f"{subtask_name} - {summary}",
-                    issue_type=self.SUBTASK,
-                    description=description,
-                    parent=epic["key"],
-                    reporter_jira_id=reporter_jira_id,
-                    due_date=due_date,
-                )
             return epic
 
         return self.create_task(
@@ -263,6 +259,8 @@ class Jira:
             parent=self.copy_updates_epic,
             reporter_jira_id=reporter_jira_id,
             due_date=due_date,
+            team=team,
+            copydoc=copydoc,
         )
 
     def change_issue_status(self, issue_id: str, transition_id: str) -> bool:
@@ -363,6 +361,30 @@ class Jira:
         return self.__request__(
             method="GET",
             path=f"issue/{jira_id}?fields=assignee",
+        )
+
+    def get_all_projects(self):
+        """Get all projects in Jira.
+
+        Returns:
+            dict: All projects in Jira.
+        """
+        return self.__request__(
+            method="GET",
+            path="project",
+        )
+
+    def get_available_transitions(self, issue_id: str):
+        """Get available transitions for a Jira issue.
+
+        Args:
+            issue_id (str): The ID of the Jira issue.
+        Returns:
+            dict: The available transitions for the Jira issue.
+        """
+        return self.__request__(
+            method="GET",
+            path=f"issue/{issue_id}/transitions",
         )
 
 
