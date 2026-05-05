@@ -3,9 +3,9 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import type { IReleasesOutletContext } from "./Releases";
+
 import AddChecksumPanel, { type IChecksumEditTarget } from "@/components/ReleaseManager/AddChecksumPanel";
 import ChecksumCategoryTable from "@/components/ReleaseManager/ChecksumCategoryTable";
-
 import { isRecord } from "@/services/api/types/releases";
 import { usePanelsStore } from "@/store/app";
 

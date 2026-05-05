@@ -3,6 +3,7 @@ import { type ReactNode, useMemo } from "react";
 import { ActionButton, Button, Chip } from "@canonical/react-components";
 
 import { getReleaseDemoUrl, RELEASES_PR_STATUS } from "./utils";
+
 import type { IReleaseStatus } from "@/services/api/types/releases";
 
 interface IReleasesStatusBarProps {
