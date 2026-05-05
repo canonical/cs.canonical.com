@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { Input } from "@canonical/react-components";
 
-import { validateMonthYear, validateRequiredUrl } from "@/pages/Releases/utils";
+import { validateMonthYear, validateRequiredUrl } from "./utils";
 
 import { isImageValue } from "@/services/api/types/releases";
 

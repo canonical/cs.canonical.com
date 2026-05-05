@@ -3,14 +3,14 @@ import { type ReactNode, useCallback, useRef, useState } from "react";
 import { Spinner, useToastNotification } from "@canonical/react-components";
 import { Outlet } from "react-router-dom";
 
-import ReleasesSecondaryNav from "./components/ReleasesSecondaryNav";
-import ReleasesStatusBar from "./components/ReleasesStatusBar";
-import { useReleaseFormState } from "./hooks/useReleaseFormState";
+import ReleasesSecondaryNav from "@/components/ReleaseManager/ReleasesSecondaryNav";
+import ReleasesStatusBar from "@/components/ReleaseManager/ReleasesStatusBar";
+import { useReleaseFormState } from "@/components/ReleaseManager/useReleaseFormState";
 
 import { useReleases } from "@/services/api/hooks/releases";
 import type { IReleasesResponse } from "@/services/api/types/releases";
 
-export interface IReleasesLayoutOutletContext {
+export interface IReleasesOutletContext {
   data: IReleasesResponse;
   formData: IReleasesResponse["releases"];
   dirtyCount: number;
@@ -22,11 +22,11 @@ export interface IReleasesLayoutOutletContext {
   registerAddChecksum: (cb: (() => void) | null) => void;
 }
 
-interface IReleasesLayoutContentProps {
+interface IReleasesContentProps {
   data: IReleasesResponse;
 }
 
-const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode => {
+const ReleasesContent = ({ data }: IReleasesContentProps): ReactNode => {
   const notify = useToastNotification();
   const addChecksumRef = useRef<(() => void) | null>(null);
   const [hasAddChecksum, setHasAddChecksum] = useState(false);
@@ -55,7 +55,7 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
       },
     });
 
-  const outletContext: IReleasesLayoutOutletContext = {
+  const outletContext: IReleasesOutletContext = {
     data,
     formData,
     dirtyCount,
@@ -90,7 +90,7 @@ const ReleasesLayoutContent = ({ data }: IReleasesLayoutContentProps): ReactNode
   );
 };
 
-const ReleasesLayout = (): ReactNode => {
+const Releases = (): ReactNode => {
   const { data, error, isLoading } = useReleases();
 
   if (isLoading) {
@@ -127,7 +127,7 @@ const ReleasesLayout = (): ReactNode => {
     );
   }
 
-  return <ReleasesLayoutContent data={data} />;
+  return <ReleasesContent data={data} />;
 };
 
-export default ReleasesLayout;
+export default Releases;

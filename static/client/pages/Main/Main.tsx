@@ -4,7 +4,7 @@ import MainLayout from "@/components/MainLayout";
 import FilterTableView from "@/components/Views/FilterTableView";
 import Home from "@/pages/Home/Home";
 import NewWebpage from "@/pages/NewWebpage";
-import ReleasesLayout from "@/pages/Releases";
+import Releases from "@/pages/Releases";
 import UpdateChecksumsPage from "@/pages/Releases/UpdateChecksumsPage";
 import UpdateReleasesPage from "@/pages/Releases/UpdateReleasesPage";
 import Owned from "@/pages/views/Owned";
@@ -39,7 +39,7 @@ const Main = (): React.ReactNode => {
             {getDynamicRoutes()}
           </Route>
           <Route element={<MainLayout showSearch={false} />}>
-            <Route element={<ReleasesLayout />} path="releases">
+            <Route element={<Releases />} path="releases">
               <Route element={<Navigate replace to="update" />} index />
               <Route element={<UpdateReleasesPage />} path="update" />
               <Route element={<UpdateChecksumsPage />} path="checksums" />
