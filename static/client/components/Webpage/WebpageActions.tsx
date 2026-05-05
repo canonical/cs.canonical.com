@@ -101,9 +101,7 @@ const WebpageActions = ({ page }: { page: IPage }): ReactNode => {
         </div>
       </Tooltip>
 
-      {copyUpdatePanelVisible && (
-        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={page} />
-      )}
+      {copyUpdatePanelVisible && <RequestCopydocPanel webpage={page} />}
 
       {modalOpen && (
         <RequestTaskModal

@@ -8,6 +8,7 @@ import {
   ContextualMenu,
   Spinner,
 } from "@canonical/react-components";
+import type { MenuLink } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
@@ -53,8 +54,7 @@ const Owned: React.FC = () => {
   const navigate = useNavigate();
   const user = useStore((state) => state.user);
 
-  const [setView, setFilter] = useViewsStore((state) => [state.setView, state.setFilter]);
-  const filter = useViewsStore((state) => state.filter);
+  const setView = useViewsStore((state) => state.setView);
 
   const { data: projects, isLoading } = useProjects();
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,8 +71,7 @@ const Owned: React.FC = () => {
   >(ChangeRequestType.COPY_UPDATE);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
-    state.copyUpdatePanelVisible,
+  const [toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.toggleCopyUpdatePanel,
     state.toggleRequestRemovalPanel,
   ]);
@@ -132,11 +131,12 @@ const Owned: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, sortConfig]);
+  }, [sortConfig]);
 
   const onPageSelect = useCallback(
     (page: IPage) => {
-      navigate(`/app/webpage/${page.project?.name}${page.url}`);
+      if (!page.project?.name) return;
+      navigate(`/app/webpage/${page.project.name}${page.url}`);
     },
     [navigate],
   );
@@ -160,7 +160,6 @@ const Owned: React.FC = () => {
   const rows = useMemo(() => {
     return paginatedPages.map((page) => {
       const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
-      const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
       const displayedTitle = page.title?.startsWith("{{") ? "-" : page.title || "";
 
       const isNew = page.status === PageStatus.NEW;
@@ -169,7 +168,7 @@ const Owned: React.FC = () => {
       const isMenuDisabled = isNew && (hasJiraTasks || isContentBoardPage);
       const allActionsDisabled = page.status === PageStatus.TO_DELETE;
 
-      let links: any[] = [];
+      let links: MenuLink[] = [];
       if (!isNew) {
         links = [
           {
@@ -232,7 +231,6 @@ const Owned: React.FC = () => {
         sortData: {
           url: page.url || "",
           title: page.title || "",
-          owner: ownerName,
           status: status.label,
         },
         columns: [
@@ -254,7 +252,7 @@ const Owned: React.FC = () => {
           {
             content: (
               <span className="l-owned__status">
-                <Icon name={status.dotClass} />
+                {status.dotClass && <Icon name={status.dotClass} />}
                 <span className="l-owned-status">{status.label}</span>
               </span>
             ),
@@ -286,9 +284,7 @@ const Owned: React.FC = () => {
 
   useEffect(() => {
     setView(VIEW_OWNED);
-    setFilter({ owners: [], reviewers: [], products: [], query: "" });
-    return () => setFilter({ owners: [], reviewers: [], products: [], query: "" });
-  }, [setFilter, setView]);
+  }, [setView]);
 
   return (
     <div className="l-owned">
@@ -329,9 +325,6 @@ const Owned: React.FC = () => {
         </div>
       )}
 
-      {copyUpdatePanelVisible && selectedPage && (
-        <RequestCopydocPanel isOpen={copyUpdatePanelVisible} onClose={toggleCopyUpdatePanel} webpage={selectedPage} />
-      )}
       {modalOpen && selectedPage && (
         <RequestTaskModal
           changeType={selectedChangeType}
@@ -340,6 +333,8 @@ const Owned: React.FC = () => {
           webpage={selectedPage}
         />
       )}
+
+      <RequestCopydocPanel webpage={selectedPage ?? undefined} />
       <RequestRemovalPanel webpage={selectedPage ?? undefined} />
     </div>
   );

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { ContextualMenu, List } from "@canonical/react-components";
 
 import RequestHistory from "@/components/Dashboard/History";
@@ -9,8 +7,6 @@ import config, { BUG_REPORT, NEW_FEATURE_REQUEST, REMOVE_PAGE, COPY_UPDATE } fro
 import { usePanelsStore } from "@/store/app";
 
 const Requests: React.FC = () => {
-  const [isCopydocPanelOpen, setIsCopydocPanelOpen] = useState(false);
-
   const externalLinks = [
     {
       content: (
@@ -42,11 +38,13 @@ const Requests: React.FC = () => {
     },
   ];
 
-  const [toggleRequestFeaturePanel, toggleReportBugPanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
-    state.toggleRequestFeaturePanel,
-    state.toggleReportBugPanel,
-    state.toggleRequestRemovalPanel,
-  ]);
+  const [toggleRequestFeaturePanel, toggleReportBugPanel, toggleRequestRemovalPanel, toggleCopyUpdatePanel] =
+    usePanelsStore((state) => [
+      state.toggleRequestFeaturePanel,
+      state.toggleReportBugPanel,
+      state.toggleRequestRemovalPanel,
+      state.toggleCopyUpdatePanel,
+    ]);
 
   function handleQuickAction(requestType: string) {
     switch (requestType) {
@@ -60,7 +58,7 @@ const Requests: React.FC = () => {
         toggleRequestRemovalPanel();
         break;
       case COPY_UPDATE:
-        setIsCopydocPanelOpen(true);
+        toggleCopyUpdatePanel();
         break;
     }
   }
@@ -89,7 +87,7 @@ const Requests: React.FC = () => {
 
               <RequestRemovalPanel />
 
-              <RequestCopydocPanel isOpen={isCopydocPanelOpen} onClose={() => setIsCopydocPanelOpen(false)} />
+              <RequestCopydocPanel />
             </div>
             <div className="grid-col">
               <div className="p-image-container--3-2">

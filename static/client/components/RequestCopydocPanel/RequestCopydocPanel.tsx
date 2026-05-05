@@ -1,5 +1,4 @@
 import { type ChangeEvent, type FormEvent, useCallback, useMemo, useState, type ReactNode } from "react";
-import React from "react";
 
 import {
   ActionButton,
@@ -25,6 +24,7 @@ import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType } from "@/services/api/types/pages";
 import { useStore } from "@/store";
+import { usePanelsStore } from "@/store/app";
 
 const getBusinessDate = (daysToAdd: number) => {
   const date = new Date();
@@ -40,7 +40,11 @@ const getBusinessDate = (daysToAdd: number) => {
 
 const COPYDOC_URL_REGEX = /^https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+/;
 
-const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel): ReactNode => {
+const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
+  const [panelVisible, togglePanel] = usePanelsStore((state) => [
+    state.copyUpdatePanelVisible,
+    state.toggleCopyUpdatePanel,
+  ]);
   const [descr, setDescr] = useState("");
   const [newCopydocLink, setNewCopydocLink] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -72,13 +76,13 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   };
 
   const handleClose = useCallback(() => {
-    onClose();
+    togglePanel();
     setDescr("");
     setNewCopydocLink("");
     setLinkError(null);
     setSelectedPage(null);
     setConfirmedPage(null);
-  }, [onClose]);
+  }, [togglePanel]);
 
   const handleSuccess = useCallback(async () => {
     handleClose();
@@ -194,7 +198,7 @@ const RequestCopydocPanel = ({ isOpen, onClose, webpage }: IRequestCopydocPanel)
   );
 
   return (
-    <SidePanel className="request-copydoc-panel" isOpen={isOpen} overlay>
+    <SidePanel className="request-copydoc-panel" isOpen={panelVisible} overlay>
       <SidePanel.Sticky>
         <SidePanel.Header>
           <SidePanel.HeaderTitle className="u-no-padding--top">
