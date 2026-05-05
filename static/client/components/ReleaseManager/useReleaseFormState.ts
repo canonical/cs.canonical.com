@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useQueryClient } from "react-query";
 
-import { deepClone, recurseEqual, sortByVersionDesc } from "@/pages/Releases/utils";
+import { deepClone, recurseEqual, sortByVersionDesc } from "./utils";
 import { ReleasesServices } from "@/services/api/services/releases";
 import type { IReleasesData, IUpdateReleasesResponse, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isRecord } from "@/services/api/types/releases";

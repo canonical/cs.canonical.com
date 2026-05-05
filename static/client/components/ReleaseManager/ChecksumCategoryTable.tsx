@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 
 import { Button, Icon } from "@canonical/react-components";
 
-import { formatInputLabel } from "@/pages/Releases/utils";
+import { formatInputLabel } from "./utils";
 
 interface IChecksumCategoryTableProps {
   category: string;

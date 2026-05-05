@@ -1,1 +1,1 @@
-export { default } from "./ReleasesLayout";
+export { default } from "./Releases";
