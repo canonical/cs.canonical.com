@@ -1,11 +1,11 @@
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
 
-import { formatInputLabel, recurseEqual } from "@/pages/Releases/utils";
+import { formatInputLabel, recurseEqual, validateRequiredNumber } from "@/pages/Releases/utils";
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
 
@@ -36,6 +36,30 @@ const ReleaseField = ({
   const isDirty = !recurseEqual(value, originalValue);
   const label = formatInputLabel(fieldKey);
   const helpText = showHelpText ? formatHelpText(originalValue) : null;
+  const [numberDraft, setNumberDraft] = useState<string>(typeof value === "number" ? String(value) : "");
+  const [numberCaution, setNumberCaution] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof value === "number") {
+      setNumberDraft(String(value));
+    }
+  }, [value]);
+
+  const handleNumberChange = useCallback(
+    (rawValue: string) => {
+      setNumberDraft(rawValue);
+
+      const result = validateRequiredNumber(rawValue);
+      if (!result.isValid) {
+        setNumberCaution(result.caution ?? "Enter a valid numeric value.");
+        return;
+      }
+
+      setNumberCaution(null);
+      onChange(result.value ?? Number(rawValue));
+    },
+    [onChange],
+  );
 
   const handleTaggedFieldChange = useCallback(
     (newInnerValue: unknown) => {
@@ -95,10 +119,11 @@ const ReleaseField = ({
         })}
       >
         <Input
+          caution={numberCaution ?? undefined}
           label={formatInputLabel(label)}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={(e) => handleNumberChange(e.target.value)}
           type="number"
-          value={value}
+          value={numberDraft}
         />
         {helpText && (
           <p className="l-release-form__field-help u-no-margin--bottom">

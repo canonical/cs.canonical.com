@@ -63,3 +63,59 @@ export function sortByVersionDesc(obj: Record<string, string>): Record<string, s
       .map((k) => [k, obj[k]]),
   );
 }
+
+export interface IValidationResult<T> {
+  isValid: boolean;
+  value?: T;
+  caution?: string;
+}
+
+function invalid<T>(caution: string): IValidationResult<T> {
+  return { isValid: false, caution };
+}
+
+export function validateRequiredUrl(rawValue: string): IValidationResult<string> {
+  if (!rawValue.trim()) {
+    return invalid("URL is required.");
+  }
+
+  try {
+    const parsed = new URL(rawValue);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return invalid("Enter a valid URL (http:// or https://).");
+    }
+  } catch {
+    return invalid("Enter a valid URL (http:// or https://).");
+  }
+
+  return { isValid: true, value: rawValue };
+}
+
+export function validateMonthYear(rawValue: string): IValidationResult<string> {
+  if (!rawValue.trim()) {
+    return invalid("Date is required.");
+  }
+
+  const normalized = rawValue.trim();
+  const monthYearRegex =
+    /^(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{4}$/i;
+
+  if (!monthYearRegex.test(normalized)) {
+    return invalid("Enter a valid date in the format Month YYYY (e.g. October 2025).");
+  }
+
+  return { isValid: true, value: rawValue };
+}
+
+export function validateRequiredNumber(rawValue: string): IValidationResult<number> {
+  if (!rawValue.trim()) {
+    return invalid("Please enter a number.");
+  }
+
+  const parsed = Number(rawValue);
+  if (Number.isNaN(parsed)) {
+    return invalid("Enter a valid numeric value.");
+  }
+
+  return { isValid: true, value: parsed };
+}
