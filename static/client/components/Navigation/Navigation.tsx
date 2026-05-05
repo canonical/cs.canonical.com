@@ -20,10 +20,12 @@ const Navigation = (): ReactNode => {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnReleasesPage = location.pathname.startsWith("/app/releases");
-  const [isCollapsed, setIsCollapsed] = useState(isOnReleasesPage);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
-    setIsCollapsed(isOnReleasesPage);
+    if (isOnReleasesPage) {
+      setIsCollapsed(true);
+    }
   }, [isOnReleasesPage]);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView, setExpandedProject] = useViewsStore((state) => [
