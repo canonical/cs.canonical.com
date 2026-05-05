@@ -39,13 +39,13 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const NOOP_SORT = (): 0 | 1 | -1 => 0;
 
-function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
+function flattenPages(page: IPage): IPage[] {
   const result: IPage[] = [];
-  if (!(skipDirs && page.ext === ".dir")) {
+  if (page.ext !== ".dir") {
     result.push(page);
   }
   for (const child of page.children || []) {
-    result.push(...flattenPages(child, skipDirs));
+    result.push(...flattenPages(child));
   }
   return result;
 }
@@ -81,9 +81,9 @@ const Owned: React.FC = () => {
 
     const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
 
-    // return allPages.filter((page) => page.owner?.email === user?.email);
+    return allPages
 
-    return allPages;
+    // return allPages.filter((page) => page.owner?.email === user?.email);
   }, [projects, user]);
 
   const sortedPages = useMemo(() => {
@@ -239,6 +239,7 @@ const Owned: React.FC = () => {
             content: (
               <button
                 className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
+                disabled={!page.project?.name}
                 onClick={() => onPageSelect(page)}
               >
                 {page.url || "/"}
@@ -253,7 +254,7 @@ const Owned: React.FC = () => {
             content: (
               <span className="l-owned__status">
                 {status.dotClass && <Icon name={status.dotClass} />}
-                <span className="l-owned-status">{status.label}</span>
+                <span>{status.label}</span>
               </span>
             ),
           },
@@ -273,14 +274,7 @@ const Owned: React.FC = () => {
         ],
       };
     });
-  }, [
-    paginatedPages,
-    onPageSelect,
-    toggleCopyUpdatePanel,
-    toggleRequestRemovalPanel,
-    setModalOpen,
-    setSelectedChangeType,
-  ]);
+  }, [paginatedPages, onPageSelect, toggleCopyUpdatePanel, toggleRequestRemovalPanel]);
 
   useEffect(() => {
     setView(VIEW_OWNED);

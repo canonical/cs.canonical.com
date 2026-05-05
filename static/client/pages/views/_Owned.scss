@@ -3,6 +3,10 @@
   flex-direction: column;
   height: 100%;
 
+  > div:first-child {
+    overflow-x: auto;
+  }
+
   td {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -11,14 +15,15 @@
   table {
     table-layout: fixed;
     width: 100%;
+    min-width: 48rem;
 
     th:nth-child(1), td:nth-child(1) { width: 24%; }
     th:nth-child(2), td:nth-child(2) { width: 48%; }
     th:nth-child(3), td:nth-child(3) { width: 16%; }
-    
-    th:nth-child(4), td:nth-child(4) { 
-      width: 12%; 
-      padding-right: 1rem; 
+
+    th:nth-child(4), td:nth-child(4) {
+      width: 12%;
+      padding-right: 1rem;
     }
   }
 
@@ -28,23 +33,6 @@
 
     .pagination {
       margin-bottom: 0;
-    }
-  }
-
-  &__project-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: block;
-    padding: $sp-x-small $sp-large $sp-x-small $sp-medium;
-    text-align: left;
-    width: 100%;
-
-    &.is-active {
-      border-left: 3px solid #000;
-      font-weight: 400;
-      background-color: var(--color-x-light);
-      background-color: $color-x-light;
     }
   }
 
