@@ -219,10 +219,9 @@ describe("FullSiteView", () => {
   });
 
   it("disables the menu trigger when the page has no owner", () => {
-    renderWith(
-      makePage({ status: PageStatus.AVAILABLE, owner: null as unknown as IPage["owner"] }),
-      { email: "alice@example.com" },
-    );
+    renderWith(makePage({ status: PageStatus.AVAILABLE, owner: null as unknown as IPage["owner"] }), {
+      email: "alice@example.com",
+    });
 
     expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
   });
