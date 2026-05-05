@@ -3,9 +3,9 @@ import { type ReactNode } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import type { IReleasesOutletContext } from "./Releases";
+
 import ReleaseField from "@/components/ReleaseManager/ReleaseField";
 import { formatSectionTitle } from "@/components/ReleaseManager/utils";
-
 import type { ReleaseFieldValue } from "@/services/api/types/releases";
 import { isRecord } from "@/services/api/types/releases";
 

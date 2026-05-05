@@ -4,8 +4,8 @@ import { Input } from "@canonical/react-components";
 import classNames from "classnames";
 
 import TaggedFieldInput from "./TaggedFieldInput";
-
 import { formatInputLabel, recurseEqual, validateRequiredNumber } from "./utils";
+
 import type { ITaggedField, ReleaseFieldValue } from "@/services/api/types/releases";
 import { isTaggedField } from "@/services/api/types/releases";
 

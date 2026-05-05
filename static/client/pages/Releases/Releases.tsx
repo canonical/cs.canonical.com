@@ -6,7 +6,6 @@ import { Outlet } from "react-router-dom";
 import ReleasesSecondaryNav from "@/components/ReleaseManager/ReleasesSecondaryNav";
 import ReleasesStatusBar from "@/components/ReleaseManager/ReleasesStatusBar";
 import { useReleaseFormState } from "@/components/ReleaseManager/useReleaseFormState";
-
 import { useReleases } from "@/services/api/hooks/releases";
 import type { IReleasesResponse } from "@/services/api/types/releases";
 

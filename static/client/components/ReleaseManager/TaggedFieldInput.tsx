@@ -42,21 +42,18 @@ const TaggedFieldInput = ({ value, type, onChange }: ITaggedFieldInputProps): Re
     [value, onChange],
   );
 
-  const handleUrlChange = useCallback(
-    (nextValue: string, onValid: (validValue: string) => void) => {
-      setUrlDraft(nextValue);
-      const result = validateRequiredUrl(nextValue);
+  const handleUrlChange = useCallback((nextValue: string, onValid: (validValue: string) => void) => {
+    setUrlDraft(nextValue);
+    const result = validateRequiredUrl(nextValue);
 
-      if (!result.isValid) {
-        setUrlCaution(result.caution ?? "Enter a valid URL.");
-        return;
-      }
+    if (!result.isValid) {
+      setUrlCaution(result.caution ?? "Enter a valid URL.");
+      return;
+    }
 
-      setUrlCaution(null);
-      onValid(result.value ?? nextValue);
-    },
-    [],
-  );
+    setUrlCaution(null);
+    onValid(result.value ?? nextValue);
+  }, []);
 
   const handleDateChange = useCallback(
     (nextValue: string) => {
