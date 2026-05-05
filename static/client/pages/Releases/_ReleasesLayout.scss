@@ -1,3 +1,7 @@
+// Layout constants
+$releases-page-edge-offset: 60px;
+$checksums-table-offset: 50px;
+
 // Override the default grid max-width so the releases page uses full width
 .grid-row:has(> .l-releases-layout) {
   max-width: 100%;
@@ -68,7 +72,7 @@
 
   &__status-bar {
     display: flex;
-    margin-left: -60px;
+    margin-left: -$releases-page-edge-offset;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 0.5rem 0.5rem;
@@ -128,13 +132,14 @@
     background: var(--vf-color-background-default);
   }
   &__divider {
-    margin: 0 0 0rem -60px;
-    padding-left: 60px;
+    margin: 0;
+    margin-left: -$releases-page-edge-offset;
+    padding-left: $releases-page-edge-offset;
   }
 }
 
 .l-update-checksums {
-  margin-left: -50px;
+  margin-left: -$checksums-table-offset;
 
   .l-checksum-table__table {
     margin-left: 1rem;
