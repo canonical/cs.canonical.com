@@ -13,15 +13,14 @@
 
 .full-site-view__sidebar {
   align-self: flex-start;
-  // TODO: find alt bg color variable
-  background-color: #ebebeb;
+  background-color: var(--vf-color-background-active);
   // background-color: var(--vf-color-background-alt);
   flex-shrink: 0;
   max-height: 100vh;
   overflow-y: auto;
   position: sticky;
   top: 0;
-  width: 220px;
+  width: 13.75rem;
   height: 100%;
 
   .full-site-view__sidebar-title {
@@ -49,8 +48,6 @@
   &.is-active {
     border-left: 3px solid #000;
     font-weight: 400;
-    // TODO: find white bg color variable
-    background-color: var(--color-x-light);
     background-color: $color-x-light;
   }
 }
