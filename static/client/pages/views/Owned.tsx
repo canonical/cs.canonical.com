@@ -71,19 +71,19 @@ const Owned: React.FC = () => {
   >(ChangeRequestType.COPY_UPDATE);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
-    state.toggleCopyUpdatePanel,
-    state.toggleRequestRemovalPanel,
-  ]);
+  const [copyUpdatePanelVisible, requestRemovalPanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] =
+    usePanelsStore((state) => [
+      state.copyUpdatePanelVisible,
+      state.requestRemovalPanelVisible,
+      state.toggleCopyUpdatePanel,
+      state.toggleRequestRemovalPanel,
+    ]);
 
   const displayPages = useMemo(() => {
     if (!projects) return [];
 
     const allPages = projects.flatMap((project) => (project.templates ? flattenPages(project.templates) : []));
-
-    return allPages
-
-    // return allPages.filter((page) => page.owner?.email === user?.email);
+    return allPages.filter((page) => page.owner?.email === user?.email);
   }, [projects, user]);
 
   const sortedPages = useMemo(() => {
@@ -266,7 +266,9 @@ const Owned: React.FC = () => {
                   position="left"
                   toggleDisabled={isMenuDisabled}
                   toggleLabel={<Icon name="contextual-menu" />}
-                  toggleProps={{ "aria-label": "Toggle menu" }}
+                  toggleProps={{
+                    "aria-label": "Toggle menu",
+                  }}
                 />
               </div>
             ),
@@ -328,8 +330,8 @@ const Owned: React.FC = () => {
         />
       )}
 
-      <RequestCopydocPanel webpage={selectedPage ?? undefined} />
-      <RequestRemovalPanel webpage={selectedPage ?? undefined} />
+      {copyUpdatePanelVisible && selectedPage && <RequestCopydocPanel webpage={selectedPage} />}
+      {requestRemovalPanelVisible && selectedPage && <RequestRemovalPanel webpage={selectedPage} />}
     </div>
   );
 };
