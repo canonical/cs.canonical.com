@@ -117,7 +117,6 @@ const Search = <T extends Record<string, any>>({
               {
                 "--search-dropdown-top": `${position.top}px`,
                 "--search-dropdown-left": `${position.left}px`,
-                "--search-dropdown-input-right": `${position.inputRight}px`,
                 "--search-dropdown-width": `${position.width}px`,
               } as CSSProperties
             }
