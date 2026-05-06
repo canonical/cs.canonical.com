@@ -34,6 +34,7 @@ const NavigationSearch = (): ReactNode => {
     <PageSearch<IPageOption>
       className="l-search-box"
       disabled={!pageOptions.length}
+      dropdownClassName="l-search-box-dropdown"
       onClear={handleClear}
       onSelect={handleSelect}
       options={pageOptions}
