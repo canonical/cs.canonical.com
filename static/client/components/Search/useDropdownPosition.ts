@@ -7,7 +7,10 @@ export interface DropdownPosition {
   width: number;
 }
 
-export const useDropdownPosition = (inputRef: RefObject<HTMLElement>, enabled: boolean): DropdownPosition | null => {
+export const useDropdownPosition = (
+  inputRef: RefObject<HTMLElement | null>,
+  enabled: boolean,
+): DropdownPosition | null => {
   const [position, setPosition] = useState<DropdownPosition | null>(null);
 
   const compute = useCallback(() => {

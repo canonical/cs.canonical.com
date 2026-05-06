@@ -1,13 +1,4 @@
-import {
-  type CSSProperties,
-  type MouseEvent,
-  type ReactNode,
-  type RefObject,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type MouseEvent, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import { SearchBox } from "@canonical/react-components";
 import classNames from "classnames";
@@ -69,7 +60,7 @@ const Search = <T extends Record<string, any>>({
   }, [query, filteredByProject, keysToSearch]);
 
   const shouldShowDropdown = isOpen && filtered.length > 0;
-  const position = useDropdownPosition(inputRef as RefObject<HTMLElement>, shouldShowDropdown);
+  const position = useDropdownPosition(inputRef, shouldShowDropdown);
 
   const handleChange = useCallback((inputValue: string) => {
     setQuery(inputValue);

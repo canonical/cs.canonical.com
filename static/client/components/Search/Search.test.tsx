@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import Search from "./Search";
 
@@ -17,6 +17,12 @@ const renderSearch = (overrides: Partial<React.ComponentProps<typeof Search<Opti
   render(<Search<Option> onClear={vi.fn()} onSelect={vi.fn()} options={options} value={null} {...overrides} />);
 
 describe("Search", () => {
+  const originalInnerWidth = window.innerWidth;
+
+  afterEach(() => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
+  });
+
   it("applies dropdownClassName to the dropdown element", () => {
     renderSearch({ dropdownClassName: "c-test-dropdown" });
 
@@ -42,6 +48,7 @@ describe("Search", () => {
   });
 
   it("emits position CSS custom properties as inline style", () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1000 });
     renderSearch();
     const input = screen.getByRole("searchbox") as HTMLInputElement;
     input.getBoundingClientRect = () =>
@@ -56,7 +63,6 @@ describe("Search", () => {
         y: 30,
         toJSON: () => ({}),
       }) as DOMRect;
-    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1000 });
 
     fireEvent.change(input, { target: { value: "alp" } });
 
