@@ -14,6 +14,7 @@ const Search = <T extends Record<string, any>>({
   onClear,
   className,
   disabled,
+  dropdownClassName,
   placeholder = "Search...",
   error,
   indexKey = "id" as keyof T,
@@ -102,7 +103,7 @@ const Search = <T extends Record<string, any>>({
           value={value ? formatDisplay(value) : query}
         />
         {isOpen && filtered.length > 0 && (
-          <ul className="l-search-dropdown">
+          <ul className={classNames("l-search-dropdown", dropdownClassName)}>
             {filtered.map((option, idx) => (
               <li
                 className="l-search-item"
