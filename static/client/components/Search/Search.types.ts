@@ -5,6 +5,7 @@ export interface SearchProps<T extends Record<string, any>> {
   onClear: () => void;
   className?: string;
   disabled?: boolean;
+  dropdownClassName?: string;
   placeholder?: string;
   error?: string;
   indexKey?: keyof T;

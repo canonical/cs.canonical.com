@@ -1,9 +1,11 @@
-import { type MouseEvent, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type MouseEvent, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import { SearchBox } from "@canonical/react-components";
 import classNames from "classnames";
+import { createPortal } from "react-dom";
 
 import type { SearchProps } from "./Search.types";
+import { useDropdownPosition } from "./useDropdownPosition";
 
 import "./_Search.scss";
 
@@ -14,6 +16,7 @@ const Search = <T extends Record<string, any>>({
   onClear,
   className,
   disabled,
+  dropdownClassName,
   placeholder = "Search...",
   error,
   indexKey = "id" as keyof T,
@@ -55,6 +58,9 @@ const Search = <T extends Record<string, any>>({
       }),
     );
   }, [query, filteredByProject, keysToSearch]);
+
+  const shouldShowDropdown = isOpen && filtered.length > 0;
+  const position = useDropdownPosition(inputRef, shouldShowDropdown);
 
   const handleChange = useCallback((inputValue: string) => {
     setQuery(inputValue);
@@ -101,8 +107,20 @@ const Search = <T extends Record<string, any>>({
           ref={inputRef}
           value={value ? formatDisplay(value) : query}
         />
-        {isOpen && filtered.length > 0 && (
-          <ul className="l-search-dropdown">
+      </div>
+      {shouldShowDropdown &&
+        position &&
+        createPortal(
+          <ul
+            className={classNames("l-search-dropdown", dropdownClassName)}
+            style={
+              {
+                "--search-dropdown-top": `${position.top}px`,
+                "--search-dropdown-left": `${position.left}px`,
+                "--search-dropdown-width": `${position.width}px`,
+              } as CSSProperties
+            }
+          >
             {filtered.map((option, idx) => (
               <li
                 className="l-search-item"
@@ -114,9 +132,9 @@ const Search = <T extends Record<string, any>>({
                 {formatDisplay(option)}
               </li>
             ))}
-          </ul>
+          </ul>,
+          document.body,
         )}
-      </div>
       {error && <p className="p-form-validation__message">{error}</p>}
     </div>
   );
