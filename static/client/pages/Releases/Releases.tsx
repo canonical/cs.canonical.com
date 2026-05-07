@@ -40,32 +40,25 @@ const ReleasesContent = ({ data }: IReleasesContentProps): ReactNode => {
     addChecksumRef.current?.();
   }, []);
 
-  const {
-    dirtyCount,
-    formData,
-    handleChecksumAdd,
-    handleChecksumDelete,
-    handleFieldChange,
-    handleSubmit,
-    isLoading,
-  } = useReleaseFormState({
-    releases: data.releases,
-    onSubmitSuccess: ({ pr }) => {
-      notify.success(
-        "This will create a new PR in GitHub or add to an existing one.",
-        [{ label: "View on GitHub", onClick: () => window.open(pr.url, "_blank") }],
-        "Your release updates are submitted",
-      );
-    },
-    onSubmitError: (error) => {
-      const apiError = error as IApiBasicError;
-      notify.failure(
-        apiError?.detail ?? "Failed to submit changes. Please try again.",
-        null,
-        apiError?.title ?? null,
-      );
-    },
-  });
+  const { dirtyCount, formData, handleChecksumAdd, handleChecksumDelete, handleFieldChange, handleSubmit, isLoading } =
+    useReleaseFormState({
+      releases: data.releases,
+      onSubmitSuccess: ({ pr }) => {
+        notify.success(
+          "This will create a new PR in GitHub or add to an existing one.",
+          [{ label: "View on GitHub", onClick: () => window.open(pr.url, "_blank") }],
+          "Your release updates are submitted",
+        );
+      },
+      onSubmitError: (error) => {
+        const apiError = error as IApiBasicError;
+        notify.failure(
+          apiError?.detail ?? "Failed to submit changes. Please try again.",
+          null,
+          apiError?.title ?? null,
+        );
+      },
+    });
 
   const outletContext: IReleasesOutletContext = {
     data,

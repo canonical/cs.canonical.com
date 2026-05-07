@@ -10,6 +10,7 @@ import {
   Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
+
 import config from "@/config";
 import type { IBasicApiError } from "@/services/api/partials/BasicApiClass";
 import { JiraServices } from "@/services/api/services/jira";

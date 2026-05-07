@@ -8,7 +8,7 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import NavigationSearch from "@/components/Navigation/NavigationSearch";
-import config, { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
+import config, { VIEW_OWNED, VIEW_REQUESTS, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -233,15 +233,41 @@ const Navigation = (): ReactNode => {
               )}
             </div>
             <div className="p-panel__views">
+              {user?.isReleaseManager && (
+                <>
+                  <hr className="p-rule" />
+                  <ul className="u-no-margin u-no-padding">
+                    <li
+                      className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
+                      onClick={() => navigate("/app/releases")}
+                    >
+                      <span className="u-has-icon">
+                        <i className="p-icon--repository is-dark" />
+                        Releases
+                      </span>
+                    </li>
+                  </ul>
+                </>
+              )}
               <hr className="p-rule" />
+              <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
               <ul className="u-no-margin u-no-padding">
                 <li
-                  className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
-                  onClick={() => navigate("/app/releases")}
+                  className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_OWNED)}
                 >
                   <span className="u-has-icon">
-                    <i className="p-icon--repository is-dark" />
-                    Releases
+                    <i className="p-icon--user" />
+                    Owned by me
+                  </span>
+                </li>
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_REVIEWED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_REVIEWED)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--show" />
+                    Reviewed by me
                   </span>
                 </li>
               </ul>
