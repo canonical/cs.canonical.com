@@ -11,6 +11,7 @@ import { parseError } from "@/helpers/requests";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IJiraTask, IPage } from "@/services/api/types/pages";
 import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
+import { useStore } from "@/store";
 import { usePanelsStore } from "@/store/app";
 
 const WebpageActions = ({
@@ -31,6 +32,8 @@ const WebpageActions = ({
   const [loading, setLoading] = useState(false);
   const notify = useToastNotification();
   const queryClient = useQueryClient();
+
+  const user = useStore((state) => state.user);
 
   const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.copyUpdatePanelVisible,
@@ -59,7 +62,9 @@ const WebpageActions = ({
     setModalOpen(false);
   };
 
-  const allActionsDisabled = useMemo(() => page.status === PageStatus.TO_DELETE, [page.status]);
+  const isOwner = useMemo(() => !!user?.email && page.owner?.email === user.email, [page.owner?.email, user.email]);
+
+  const isPageSetToDelete = useMemo(() => page.status === PageStatus.TO_DELETE, [page.status]);
 
   function submitForContentReview() {
     if (!contentReviewTask) return;
@@ -78,9 +83,19 @@ const WebpageActions = ({
       });
   }
 
+  const toolTipMessage = useMemo(() => {
+    if (isPageSetToDelete) return "This page is scheduled for removal";
+    if (!isOwner) {
+      return "Only the page owner can perform actions";
+    }
+    return "";
+  }, [isPageSetToDelete, isOwner]);
+
+  const allActionsDisabled = !isOwner || isPageSetToDelete;
+
   return (
     <div className="l-webpage__actions p-segmented-control">
-      <Tooltip message={allActionsDisabled && "This page is scheduled for removal"} zIndex={999}>
+      <Tooltip message={toolTipMessage} zIndex={999}>
         <div aria-label="Juju technology" className="p-segmented-control__list" role="tablist">
           {!isNew && (
             <>
