@@ -1,4 +1,4 @@
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -19,7 +19,14 @@ import { useViewsStore } from "@/store/views";
 const Navigation = (): ReactNode => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isOnReleasesPage = location.pathname.startsWith("/app/releases");
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  useEffect(() => {
+    if (isOnReleasesPage) {
+      setIsCollapsed(true);
+    }
+  }, [isOnReleasesPage]);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView, setExpandedProject] = useViewsStore((state) => [
     state.view,
@@ -120,6 +127,22 @@ const Navigation = (): ReactNode => {
               )}
             </div>
             <div className="p-panel__views">
+              {user?.isReleaseManager && (
+                <>
+                  <hr className="p-rule" />
+                  <ul className="u-no-margin u-no-padding">
+                    <li
+                      className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
+                      onClick={() => navigate("/app/releases")}
+                    >
+                      <span className="u-has-icon">
+                        <i className="p-icon--repository is-dark" />
+                        Releases
+                      </span>
+                    </li>
+                  </ul>
+                </>
+              )}
               <hr className="p-rule" />
               <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
               <ul className="u-no-margin u-no-padding">

@@ -4,6 +4,9 @@ import MainLayout from "@/components/MainLayout";
 import FilterTableView from "@/components/Views/FilterTableView";
 import Home from "@/pages/Home/Home";
 import NewWebpage from "@/pages/NewWebpage";
+import Releases from "@/pages/Releases";
+import UpdateChecksumsPage from "@/pages/Releases/UpdateChecksumsPage";
+import UpdateReleasesPage from "@/pages/Releases/UpdateReleasesPage";
 import Owned from "@/pages/views/Owned";
 import Reviewed from "@/pages/views/Reviewed";
 import { useAuth } from "@/services/api/hooks/auth";
@@ -34,6 +37,13 @@ const Main = (): React.ReactNode => {
             <Route element={<FilterTableView />} path="views/table" />
             <Route element={<NewWebpage />} path="new-webpage" />
             {getDynamicRoutes()}
+          </Route>
+          <Route element={<MainLayout showSearch={false} />}>
+            <Route element={<Releases />} path="releases">
+              <Route element={<Navigate replace to="update" />} index />
+              <Route element={<UpdateReleasesPage />} path="update" />
+              <Route element={<UpdateChecksumsPage />} path="checksums" />
+            </Route>
           </Route>
         </Route>
         <Route element={<Navigate to="/app" />} path="/" />
