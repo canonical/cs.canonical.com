@@ -50,9 +50,9 @@ def get_releases_yaml():
     "/update-releases",
     methods=["POST"],
 )
-@validate()
 @login_required
 @requires_team(SSO_RELEASE_TEAM)
+@validate()
 def update_releases_yaml(body: UpdateReleasesRequest):
     try:
         result = releases_service.update_releases_workflow(
