@@ -6,4 +6,5 @@ export interface IUser {
   department: string;
   team: string;
   role: string;
+  isReleaseManager?: boolean;
 }

@@ -11,7 +11,7 @@ from webapp.models import (
     get_or_create,
 )
 from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
+from webapp.sso import SSO_RELEASE_TEAM, login_required
 
 DISABLE_SSO = os.environ.get("DISABLE_SSO") or os.environ.get(
     "FLASK_DISABLE_SSO"
@@ -103,6 +103,7 @@ def current_user():
     user = User.query.filter_by(email=session["openid"]["email"]).first()
     if not user:
         return jsonify({"error": "Currently logged in user not found"}), 404
+    teams = session.get("openid", {}).get("teams", [])
     return (
         jsonify(
             {
@@ -113,6 +114,7 @@ def current_user():
                 "department": user.department,
                 "jobTitle": user.job_title,
                 "role": user.role,
+                "isReleaseManager": SSO_RELEASE_TEAM in teams,
             }
         ),
         200,
