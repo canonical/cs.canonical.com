@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { ContextualMenu, Icon, MainTable, Spinner, TablePagination, Tooltip } from "@canonical/react-components";
-import { useNavigate } from "react-router-dom";
+import {
+  ContextualMenu,
+  Icon,
+  MainTable,
+  ScrollableTable,
+  Spinner,
+  TablePagination,
+  Tooltip,
+} from "@canonical/react-components";
 
 import ProjectSidebar from "./ProjectSidebar";
+import TreeView from "./TreeView";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
@@ -45,7 +53,6 @@ const HEADERS = [
 ];
 
 const FullSiteView = (): ReactNode => {
-  const navigate = useNavigate();
   const { data: projects, isLoading } = useProjects();
   const user = useStore((state) => state.user);
   const activeProject = useViewsStore((state) => state.activeProject);
@@ -53,6 +60,7 @@ const FullSiteView = (): ReactNode => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
   const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
   const [selectedChangeType, setSelectedChangeType] = useState<
     (typeof ChangeRequestType)[keyof typeof ChangeRequestType]
@@ -85,12 +93,10 @@ const FullSiteView = (): ReactNode => {
     return flatPages.slice(start, start + pageSize);
   }, [flatPages, currentPage, pageSize]);
 
-  const onPageSelect = useCallback(
-    (page: IPage) => {
-      navigate(`/app/webpage/${page.project?.name}${page.url}`);
-    },
-    [navigate],
-  );
+  const onPageSelect = useCallback((page: IPage) => {
+    const url = `/app/webpage/${page.project?.name}${page.url}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, []);
 
   const isMenuDisabled = (page: IPage) => {
     if (!canActOnPage(user, page)) return true;
@@ -262,28 +268,49 @@ const FullSiteView = (): ReactNode => {
 
           <div className="p-segmented-control">
             <div className="p-segmented-control__list" role="tablist">
-              <button aria-selected="true" className="p-segmented-control__button" role="tab" type="button">
+              <button
+                aria-selected={viewMode === "list"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("list")}
+                role="tab"
+                type="button"
+              >
                 List view
               </button>
-              <button aria-selected="false" className="p-segmented-control__button" disabled role="tab" type="button">
+              <button
+                aria-selected={viewMode === "tree"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("tree")}
+                role="tab"
+                type="button"
+              >
                 Tree view
               </button>
             </div>
           </div>
 
-          <FilterandSearch />
+          {viewMode === "list" && <FilterandSearch />}
 
           {isLoading && <Spinner text="Loading projects. Please wait." />}
 
-          {!isLoading && (
+          {!isLoading && viewMode === "list" && (
             <div className="full-site-view__content-table-wrapper">
-              <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
+              <ScrollableTable
+                belowIds={["full-site-view-table-footer"]}
+                dependencies={[rows]}
+                tableId="full-site-view-table"
+              >
+                <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
+              </ScrollableTable>
             </div>
+          )}
+          {!isLoading && viewMode === "tree" && (
+            <TreeView key={activeProject} onPageSelect={onPageSelect} pages={projectData?.templates?.children ?? []} />
           )}
         </div>
 
-        {!isLoading && (
-          <div className="full-site-view__content-table-footer">
+        {!isLoading && viewMode === "list" && (
+          <div className="full-site-view__content-table-footer" id="full-site-view-table-footer">
             <hr className="p-rule" />
             <TablePagination
               className="u-no-margin--top"

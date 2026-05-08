@@ -31,14 +31,14 @@
 
     .p-panel__logo {
       margin: 0;
-  
+
       @media (min-width: $breakpoint-small) {
         display: flex;
         flex: 0 0 auto;
         margin-bottom: 12px;
       }
     }
-    
+
     .l-navigation__controls,
     .l-navigation__controls > span {
       display: flex;
@@ -103,7 +103,7 @@
     overflow: visible !important;
 
     .l-logo__collapsed {
-      display :none;
+      display: none;
     }
 
     .p-panel__content {
@@ -113,5 +113,34 @@
     .p-panel__footer {
       padding-left: 0;
     }
+  }
+}
+
+.l-navigation__drill-chevron {
+  align-self: center;
+  margin-left: auto;
+}
+
+.l-navigation__nav-link--desktop {
+  @media (max-width: $breakpoint-small) {
+    display: none;
+  }
+}
+
+.l-navigation__nav-link--mobile {
+  @media (min-width: $breakpoint-small) {
+    display: none;
+  }
+}
+
+.l-navigation__drilled-list {
+  @media (min-width: $breakpoint-small) {
+    display: none;
+  }
+}
+
+@media (max-width: $breakpoint-small) {
+  .l-navigation--drilled .l-navigation__top-list {
+    display: none;
   }
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -47,20 +47,20 @@ const makePage = (overrides: Partial<IPage> = {}): IPage => ({
   ...overrides,
 });
 
-const makeProject = (page: IPage): IPagesResponse["data"] => ({
+const makeProject = (children: IPage | IPage[]): IPagesResponse["data"] => ({
   name: "canonical.com",
   templates: {
     ...makePage({ name: "root", url: "/", ext: ".dir" }),
-    children: [page],
+    children: Array.isArray(children) ? children : [children],
   },
 });
 
-function renderWith(page: IPage, user: Partial<IUser> = { email: "alice@example.com" }) {
+function renderWith(pages: IPage | IPage[], user: Partial<IUser> = { email: "alice@example.com" }) {
   (useProjects as ReturnType<typeof vi.fn>).mockReturnValue({
-    data: [makeProject(page)],
+    data: [makeProject(pages)],
     isLoading: false,
     isFilterApplied: false,
-    unfilteredProjects: [makeProject(page)],
+    unfilteredProjects: [makeProject(pages)],
   });
   useViewsStore.setState({ activeProject: "canonical.com" });
   useStore.setState({ user: user as IUser });
@@ -179,35 +179,18 @@ describe("FullSiteView", () => {
     expect(modal).toHaveAttribute("data-change-type", "2"); // ChangeRequestType.NEW_WEBPAGE
   });
 
-  it("disables the menu trigger for NEW pages that already have jira tasks", () => {
-    renderWith(
-      makePage({
-        status: PageStatus.NEW,
+  it.each<[string, Partial<IPage>]>([
+    [
+      "jira tasks",
+      {
         jira_tasks: [
-          {
-            created_at: "",
-            jira_id: "JIRA-1",
-            id: 1,
-            name: "t",
-            status: "open",
-            summary: "s",
-            request_type: "",
-          },
+          { created_at: "", jira_id: "JIRA-1", id: 1, name: "t", status: "open", summary: "s", request_type: "" },
         ],
-      }),
-    );
-
-    expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
-  });
-
-  it("disables the menu trigger for NEW pages that have a content_jira_id", () => {
-    renderWith(
-      makePage({
-        status: PageStatus.NEW,
-        jira_tasks: [],
-        content_jira_id: "CB-1",
-      }),
-    );
+      },
+    ],
+    ["a content_jira_id", { jira_tasks: [], content_jira_id: "CB-1" }],
+  ])("disables the menu trigger for NEW pages that already have %s", (_, overrides) => {
+    renderWith(makePage({ status: PageStatus.NEW, ...overrides }));
 
     expect(screen.getByRole("button", { name: /page actions/i })).toHaveAttribute("aria-disabled", "true");
   });
@@ -262,5 +245,165 @@ describe("FullSiteView", () => {
 
     await user.click(trigger);
     expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
+  });
+
+  describe("view mode toggle", () => {
+    it("renders List view by default", () => {
+      renderWith(makePage({ url: "/page-1" }));
+      expect(screen.getByRole("tab", { name: /list view/i })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByRole("tab", { name: /tree view/i })).toHaveAttribute("aria-selected", "false");
+      expect(screen.getByRole("grid")).toBeInTheDocument();
+      expect(screen.queryByRole("tree")).not.toBeInTheDocument();
+    });
+
+    it("switches to Tree view, hiding FilterandSearch and MainTable", async () => {
+      const user = userEvent.setup();
+      renderWith(makePage({ url: "/page-1" }));
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByRole("tab", { name: /tree view/i })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByRole("tree")).toBeInTheDocument();
+      expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText(/search by url/i)).not.toBeInTheDocument();
+    });
+
+    it("shows empty-state copy when the project has no pages", async () => {
+      const user = userEvent.setup();
+      renderWith([]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("No pages found.")).toBeInTheDocument();
+    });
+
+    it("renders top-level URL nodes in tree mode", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({ url: "/microk8s", ext: ".dir", children: [] }),
+        makePage({ url: "/mlops", ext: ".dir", children: [] }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+      expect(screen.getByText("canonical.com/mlops")).toBeInTheDocument();
+    });
+
+    it("real-page nodes open the webpage in a new tab on click", async () => {
+      const user = userEvent.setup();
+      const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
+      renderWith([makePage({ url: "/page-1", ext: ".html", children: [] })]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /canonical\.com\/page-1/ }));
+
+      expect(openSpy).toHaveBeenCalledWith("/app/webpage/canonical.com/page-1", "_blank", "noopener,noreferrer");
+      openSpy.mockRestore();
+    });
+
+    it(".dir nodes render as plain text, not as a link", async () => {
+      const user = userEvent.setup();
+      renderWith([makePage({ url: "/microk8s", ext: ".dir", children: [] })]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.queryByRole("button", { name: /^canonical\.com\/microk8s$/ })).not.toBeInTheDocument();
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+    });
+
+    it("top-level nodes start collapsed; grandchildren are not in the DOM", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+
+      expect(screen.getByText("canonical.com/microk8s")).toBeInTheDocument();
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
+    });
+
+    it("clicking the chevron expands a node and reveals its children", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+      expect(screen.getByRole("treeitem", { expanded: true })).toBeInTheDocument();
+    });
+
+    it("clicking the chevron again collapses the node", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+      await user.click(screen.getByRole("button", { name: /collapse canonical\.com\/microk8s/i }));
+
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
+    });
+
+    it("pressing Enter on the chevron toggles expansion", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }).focus();
+      await user.keyboard("{Enter}");
+
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+    });
+
+    it("switching project unmounts the tree, dropping expansion state", async () => {
+      const user = userEvent.setup();
+      renderWith([
+        makePage({
+          url: "/microk8s",
+          ext: ".dir",
+          children: [makePage({ url: "/microk8s/features", ext: ".html", children: [] })],
+        }),
+      ]);
+
+      await user.click(screen.getByRole("tab", { name: /tree view/i }));
+      await user.click(screen.getByRole("button", { name: /expand canonical\.com\/microk8s/i }));
+      expect(screen.getByText("canonical.com/microk8s/features")).toBeInTheDocument();
+
+      // Switch to a project name that does not exist in the mocked projects list,
+      // then back. Each setState changes the `key={activeProject}` on TreeView,
+      // forcing an unmount/remount and dropping internal expansion state.
+      await act(async () => {
+        useViewsStore.setState({ activeProject: "other" });
+      });
+      await act(async () => {
+        useViewsStore.setState({ activeProject: "canonical.com" });
+      });
+
+      expect(screen.queryByText("canonical.com/microk8s/features")).not.toBeInTheDocument();
+    });
   });
 });
