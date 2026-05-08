@@ -7,6 +7,7 @@ import { useQueryClient } from "react-query";
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
+import { canActOnPage } from "@/helpers/permissions";
 import { parseError } from "@/helpers/requests";
 import { JiraServices } from "@/services/api/services/jira";
 import type { IJiraTask, IPage } from "@/services/api/types/pages";
@@ -62,7 +63,7 @@ const WebpageActions = ({
     setModalOpen(false);
   };
 
-  const isOwner = useMemo(() => !!user?.email && page.owner?.email === user.email, [page.owner?.email, user.email]);
+  const canAct = useMemo(() => canActOnPage(user, page), [user, page]);
 
   const isPageSetToDelete = useMemo(() => page.status === PageStatus.TO_DELETE, [page.status]);
 
@@ -85,13 +86,13 @@ const WebpageActions = ({
 
   const toolTipMessage = useMemo(() => {
     if (isPageSetToDelete) return "This page is scheduled for removal";
-    if (!isOwner) {
-      return "Only the page owner can perform actions";
+    if (!canAct) {
+      return "Only the page owner or contributors can perform actions";
     }
     return "";
-  }, [isPageSetToDelete, isOwner]);
+  }, [isPageSetToDelete, canAct]);
 
-  const allActionsDisabled = !isOwner || isPageSetToDelete;
+  const allActionsDisabled = !canAct || isPageSetToDelete;
 
   return (
     <div className="l-webpage__actions p-segmented-control">
