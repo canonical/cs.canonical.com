@@ -1,4 +1,4 @@
-import { Button } from "@canonical/react-components";
+import { Button, Tooltip } from "@canonical/react-components";
 
 import IconTextWithTooltip from "@/components/Common/IconTextWithTooltip";
 import EditPageDetailsPanel from "@/components/EditPageDetailsPanel";
@@ -9,9 +9,11 @@ import { usePanelsStore } from "@/store/app";
 interface IWebpageDetailsProps {
   page: IPage;
   project: string;
+  editDetailsDisabled?: boolean;
+  editDetailsDisabledTooltip?: string | React.ReactNode;
 }
 
-const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
+const WebpageDetails = ({ page, project, editDetailsDisabled, editDetailsDisabledTooltip }: IWebpageDetailsProps) => {
   const pageExtension = page.ext || ".html";
 
   const toggleEditPageDetailsPanel = usePanelsStore((state) => state.toggleEditPageDetailsPanel);
@@ -31,9 +33,18 @@ const WebpageDetails = ({ page, project }: IWebpageDetailsProps) => {
     <>
       <div className="l-webpage__details-header">
         <h2 className="p-text--small-caps">Page Details</h2>
-        <Button appearance="base" className="u-no-margin" hasIcon onClick={toggleEditPageDetailsPanel} small>
-          <i className="p-icon--edit" />
-        </Button>
+        <Tooltip message={editDetailsDisabledTooltip} position="btm-center" zIndex={999}>
+          <Button
+            appearance="base"
+            className="u-no-margin"
+            disabled={editDetailsDisabled}
+            hasIcon
+            onClick={toggleEditPageDetailsPanel}
+            small
+          >
+            <i className="p-icon--edit" />
+          </Button>
+        </Tooltip>
         <EditPageDetailsPanel page={page} project={project} />
       </div>
       <div className="l-webpage__details">

@@ -27,8 +27,8 @@ export const useViewsStore = create<IViewsStore>()(
           })),
         expandedProject: "",
         setExpandedProject: (s: string) => set({ expandedProject: s }),
-        selectedProject: config.allProjects[0],
-        setSelectedProject: (s: string) => set({ selectedProject: s }),
+        activeProject: config.allProjects[0],
+        setActiveProject: (s: string) => set({ activeProject: s }),
       }),
       {
         name: "viewsStore",

@@ -1,8 +1,15 @@
-.p-filter-and-search-menu .p-contextual-menu__dropdown {
-  min-width: 35rem;
-  margin-top: 0.3rem;
-  background: var(--vf-suru-background);
-  min-height: 20rem !important;
+.p-filter-and-search-menu {
+  .p-contextual-menu__toggle {
+    display: flex;
+    align-items: center;
+  }
+
+  .p-contextual-menu__dropdown {
+    min-width: 35rem;
+    margin-top: 0.3rem;
+    background: var(--vf-suru-background);
+    min-height: 20rem !important;
+  }
 }
 
 .p-filter__body {

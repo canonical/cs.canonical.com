@@ -1,6 +1,7 @@
 import React, { type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
+import classNames from "classnames";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import AppPanels from "@/components/AppPanels";
@@ -18,6 +19,8 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
   const navigate = useNavigate();
   const view = useViewsStore((state) => state.view);
 
+  const isFlushLayout = location.pathname.endsWith("/views/table");
+
   function goPrev() {
     return goBack(location, navigate);
   }
@@ -25,7 +28,7 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
   return (
     <div className="l-application" id="l-application">
       <Navigation />
-      <main className="l-main">
+      <main className={classNames("l-main", { "u-no-padding": isFlushLayout })}>
         <div className="grid-row--50-50 u-no-padding u-no-margin">
           <div className="grid-col">
             {location.pathname.includes("/webpage") && [VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view) && (

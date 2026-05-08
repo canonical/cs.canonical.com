@@ -1,19 +1,32 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { MainTable, Spinner, TablePagination } from "@canonical/react-components";
-import { useNavigate } from "react-router-dom";
+import {
+  ContextualMenu,
+  Icon,
+  MainTable,
+  ScrollableTable,
+  Spinner,
+  TablePagination,
+  Tooltip,
+} from "@canonical/react-components";
 
 import ProjectSidebar from "./ProjectSidebar";
+import TreeView from "./TreeView";
 
+import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
+import RequestRemovalPanel from "@/components/RequestRemovalPanel";
+import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import FilterandSearch from "@/components/Views/FilterTableView/FilterandSearch";
-import { PageStatus, type IPage } from "@/services/api/types/pages";
 import { useProjects } from "@/services/api/hooks/projects";
+import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
+import { useStore } from "@/store";
+import { usePanelsStore } from "@/store/app";
 import { useViewsStore } from "@/store/views";
 
 const STATUS_MAP: Record<string, { label: string; dotClass: string }> = {
-  [PageStatus.AVAILABLE]: { label: "Live", dotClass: "full-site-view__status-dot--live" },
-  [PageStatus.TO_DELETE]: { label: "To be deleted", dotClass: "full-site-view__status-dot--to-be-deleted" },
-  [PageStatus.NEW]: { label: "In progress", dotClass: "full-site-view__status-dot--in-progress" },
+  [PageStatus.AVAILABLE]: { label: "Live", dotClass: "status-succeeded-small" },
+  [PageStatus.TO_DELETE]: { label: "To be deleted", dotClass: "status-failed-small" },
+  [PageStatus.NEW]: { label: "In progress", dotClass: "status-waiting-small" },
 };
 
 function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
@@ -28,22 +41,39 @@ function flattenPages(page: IPage, skipDirs: boolean = true): IPage[] {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
-const DEFAULT_PAGE_SIZE = 30;
+const DEFAULT_PAGE_SIZE = 10;
+
+const HEADERS = [
+  { content: "URL", sortKey: "url", style: { width: "23.5%" } },
+  { content: "Title", sortKey: "title", style: { width: "23.5%" } },
+  { content: "Owner", sortKey: "owner", style: { width: "23.5%" } },
+  { content: "Status", sortKey: "status", style: { width: "17%" } },
+  { content: "Actions", sortKey: "action", style: { width: "12%" }, className: "u-align-text--center" },
+];
 
 const FullSiteView = (): ReactNode => {
-  const navigate = useNavigate();
   const { data: projects, isLoading } = useProjects();
-  const selectedProject = useViewsStore((state) => state.selectedProject);
+  const user = useStore((state) => state.user);
+  const isAdmin = user?.role === "admin";
+  const activeProject = useViewsStore((state) => state.activeProject);
   const filter = useViewsStore((state) => state.filter);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
+  const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
+  const [selectedChangeType, setSelectedChangeType] = useState<
+    (typeof ChangeRequestType)[keyof typeof ChangeRequestType]
+  >(ChangeRequestType.COPY_UPDATE);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const [toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
+    state.toggleCopyUpdatePanel,
+    state.toggleRequestRemovalPanel,
+  ]);
 
   // Find the selected project data
-  const projectData = useMemo(
-    () => projects?.find((p) => p.name === selectedProject),
-    [projects, selectedProject],
-  );
+  const projectData = useMemo(() => projects?.find((p) => p.name === activeProject), [projects, activeProject]);
 
   // Flatten all pages from the selected project
   const flatPages = useMemo(() => {
@@ -54,7 +84,8 @@ const FullSiteView = (): ReactNode => {
   // Reset to page 1 when project, filters, or page size change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedProject, filter, pageSize]);
+    setPageSize(DEFAULT_PAGE_SIZE);
+  }, [activeProject, filter]);
 
   // Paginate
   const paginatedPages = useMemo(() => {
@@ -62,25 +93,98 @@ const FullSiteView = (): ReactNode => {
     return flatPages.slice(start, start + pageSize);
   }, [flatPages, currentPage, pageSize]);
 
-  const onPageSelect = useCallback(
-    (page: IPage) => {
-      navigate(`/app/webpage/${page.project?.name}${page.url}`);
-    },
-    [navigate],
-  );
+  const onPageSelect = useCallback((page: IPage) => {
+    const url = `/app/webpage/${page.project?.name}${page.url}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, []);
 
-  // Build MainTable headers
-  const headers = [
-    { content: "URL", sortKey: "url" },
-    { content: "Title", sortKey: "title" },
-    { content: "Owner", sortKey: "owner" },
-    { content: "Status", sortKey: "status" },
-  ];
+  const isOwner = (page: IPage) => !!user?.email && page.owner?.email === user.email;
+
+  const isMenuDisabled = (page: IPage) => {
+    const isNew = page.status === PageStatus.NEW;
+    const hasJiraTasks = !!page.jira_tasks?.length;
+    const isContentBoardPage = !!page.content_jira_id;
+    if (!isAdmin && !isOwner(page)) return true;
+    return isNew && (hasJiraTasks || isContentBoardPage);
+  };
+
+  const getMenuLinks = (page: IPage) => {
+    const isNew = page.status === PageStatus.NEW;
+    const hasJiraTasks = !!page.jira_tasks?.length;
+    const isContentBoardPage = !!page.content_jira_id;
+    const allActionsDisabled = page.status === PageStatus.TO_DELETE;
+
+    if (!isNew) {
+      return [
+        {
+          children: (
+            <>
+              <Icon name="file" /> <span>Copy update</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            toggleCopyUpdatePanel();
+          },
+          className: "full-site-view__actions-menu-link",
+        },
+        {
+          children: (
+            <>
+              <Icon name="change-version" /> <span>Page refresh</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            setSelectedChangeType(ChangeRequestType.PAGE_REFRESH);
+            setModalOpen(true);
+          },
+          className: "full-site-view__actions-menu-link",
+        },
+        {
+          children: (
+            <>
+              <Icon name="delete" /> <span>Remove page</span>
+            </>
+          ),
+          disabled: allActionsDisabled,
+          onClick: () => {
+            setSelectedPage(page);
+            toggleRequestRemovalPanel();
+          },
+          className: "full-site-view__actions-menu-link",
+        },
+      ];
+    }
+
+    if (!hasJiraTasks && !isContentBoardPage) {
+      return [
+        {
+          children: (
+            <>
+              <Icon name="file" /> <span>Submit for content review</span>
+            </>
+          ),
+          onClick: () => {
+            setSelectedPage(page);
+            setSelectedChangeType(ChangeRequestType.NEW_WEBPAGE);
+            setModalOpen(true);
+          },
+          className: "full-site-view__actions-menu-link",
+        },
+      ];
+    }
+
+    return [];
+  };
 
   // Build MainTable rows from paginated pages
   const rows = paginatedPages.map((page) => {
     const status = STATUS_MAP[page.status] || { label: page.status, dotClass: "" };
     const ownerName = page.owner?.name === "Default" || !page.owner?.email ? "" : page.owner?.name;
+    const displayedTitle = page.title?.startsWith("{{") ? "-" : page.title || "";
 
     return {
       key: `${page.project?.name}${page.url}`,
@@ -92,6 +196,7 @@ const FullSiteView = (): ReactNode => {
       },
       columns: [
         {
+          className: "full-site-view__cell--wrap-anywhere",
           content: (
             <button
               className="p-button--link u-no-margin--bottom u-no-padding u-align-text--left"
@@ -101,14 +206,39 @@ const FullSiteView = (): ReactNode => {
             </button>
           ),
         },
-        { content: page.title || "" },
+        {
+          className: "full-site-view__cell--truncate",
+          content: <span title={displayedTitle}>{displayedTitle}</span>,
+        },
         { content: ownerName },
         {
           content: (
             <span className="full-site-view__status">
-              <span className={`full-site-view__status-dot ${status.dotClass}`} />
+              <Icon name={status.dotClass} />
               {status.label}
             </span>
+          ),
+        },
+        {
+          content: (
+            <div className="u-align-text--center full-site-view__actions">
+              <Tooltip
+                message={!isAdmin && !isOwner(page) ? "Only the page owner can perform actions" : undefined}
+                position="left"
+                zIndex={999}
+              >
+                <ContextualMenu
+                  links={getMenuLinks(page)}
+                  position="left"
+                  toggleDisabled={isMenuDisabled(page)}
+                  toggleLabel={<Icon name="contextual-menu" />}
+                  toggleProps={{
+                    "aria-label": `Page actions for ${page.url}`,
+                    className: "u-no-margin p-contextual-menu__toggle",
+                  }}
+                />
+              </Tooltip>
+            </div>
           ),
         },
       ],
@@ -116,71 +246,95 @@ const FullSiteView = (): ReactNode => {
   });
 
   // Format project name for header (e.g. "canonical.com" -> "Canonical.com")
-  const projectDisplayName = selectedProject
-    ? selectedProject.charAt(0).toUpperCase() + selectedProject.slice(1)
-    : "";
+  const projectDisplayName = activeProject ? activeProject.charAt(0).toUpperCase() + activeProject.slice(1) : "";
+
+  const onPageSizeChange = (pageSize: number) => {
+    setCurrentPage(1);
+    setPageSize(pageSize);
+  };
 
   return (
     <div className="full-site-view">
       <ProjectSidebar />
       <div className="full-site-view__content">
-        <h2>{projectDisplayName} pages</h2>
+        <div>
+          <h2 className="p-heading--4">{projectDisplayName} pages</h2>
 
-        <div className="p-segmented-control">
-          <div className="p-segmented-control__list" role="tablist">
-            <button
-              aria-selected="true"
-              className="p-segmented-control__button"
-              role="tab"
-              type="button"
-            >
-              List view
-            </button>
-            <button
-              aria-selected="false"
-              className="p-segmented-control__button"
-              role="tab"
-              type="button"
-              disabled
-            >
-              Tree view
-            </button>
+          <div className="u-sv2">
+            <hr className="p-rule" />
           </div>
+
+          <div className="p-segmented-control">
+            <div className="p-segmented-control__list" role="tablist">
+              <button
+                aria-selected={viewMode === "list"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("list")}
+                role="tab"
+                type="button"
+              >
+                List view
+              </button>
+              <button
+                aria-selected={viewMode === "tree"}
+                className="p-segmented-control__button"
+                onClick={() => setViewMode("tree")}
+                role="tab"
+                type="button"
+              >
+                Tree view
+              </button>
+            </div>
+          </div>
+
+          {viewMode === "list" && <FilterandSearch />}
+
+          {isLoading && <Spinner text="Loading projects. Please wait." />}
+
+          {!isLoading && viewMode === "list" && (
+            <div className="full-site-view__content-table-wrapper">
+              <ScrollableTable
+                belowIds={["full-site-view-table-footer"]}
+                dependencies={[rows]}
+                tableId="full-site-view-table"
+              >
+                <MainTable emptyStateMsg="No pages found." headers={HEADERS} rows={rows} sortable />
+              </ScrollableTable>
+            </div>
+          )}
+          {!isLoading && viewMode === "tree" && (
+            <TreeView key={activeProject} onPageSelect={onPageSelect} pages={projectData?.templates?.children ?? []} />
+          )}
         </div>
 
-        <FilterandSearch />
-        <hr className="p-rule" />
-
-        {isLoading && <Spinner text="Loading projects. Please wait." />}
-
-        {!isLoading && (
-          <>
-            <MainTable
-              emptyStateMsg="No pages found."
-              headers={headers}
-              rows={rows}
-              sortable
+        {!isLoading && viewMode === "list" && (
+          <div className="full-site-view__content-table-footer" id="full-site-view-table-footer">
+            <hr className="p-rule" />
+            <TablePagination
+              className="u-no-margin--top"
+              currentPage={currentPage}
+              data={paginatedPages}
+              externallyControlled
+              itemName="page"
+              onPageChange={setCurrentPage}
+              onPageSizeChange={onPageSizeChange}
+              pageLimits={PAGE_SIZE_OPTIONS}
+              pageSize={pageSize}
+              totalItems={flatPages.length}
             />
-            {flatPages.length > pageSize && (
-              <TablePagination
-                currentPage={currentPage}
-                data={paginatedPages}
-                externallyControlled
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-                pageLimits={PAGE_SIZE_OPTIONS}
-                pageSize={pageSize}
-                totalItems={flatPages.length}
-              />
-            )}
-            {flatPages.length > 0 && (
-              <p className="u-text--muted">
-                Showing {paginatedPages.length} out of {flatPages.length} pages
-              </p>
-            )}
-          </>
+          </div>
         )}
       </div>
+      {selectedPage && <RequestCopydocPanel webpage={selectedPage} />}
+      {modalOpen && selectedPage && (
+        <RequestTaskModal
+          changeType={selectedChangeType}
+          onClose={() => setModalOpen(false)}
+          onTypeChange={setSelectedChangeType}
+          webpage={selectedPage}
+        />
+      )}
+      <RequestRemovalPanel webpage={selectedPage ?? undefined} />
     </div>
   );
 };

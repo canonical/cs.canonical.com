@@ -5,11 +5,11 @@ import classNames from "classnames";
 
 const NavigationCollapseToggle = ({
   isCollapsed,
-  setIsCollapsed,
+  onToggle,
   className,
 }: {
   isCollapsed: boolean;
-  setIsCollapsed: (isCollapsed: boolean) => void;
+  onToggle: () => void;
   className?: string;
 }): ReactNode => {
   return (
@@ -23,7 +23,7 @@ const NavigationCollapseToggle = ({
         aria-label={`${!isCollapsed ? "collapse" : "expand"} main navigation`}
         className={classNames("is-dense has-icon l-navigation-collapse-toggle", className)}
         onClick={(e) => {
-          setIsCollapsed(!isCollapsed);
+          onToggle();
           // Make sure the button does not have focus
           // .l-navigation remains open with :focus-within
           e.stopPropagation();
