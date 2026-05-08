@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
 
-import { ActionButton, Button, Icon, SidePanel, Tooltip } from "@canonical/react-components";
+import { ActionButton, Button, Icon, SidePanel, Tooltip, useToastNotification } from "@canonical/react-components";
 import { useNavigate } from "react-router-dom";
 
 import type { IRequestRemovalPanelProps } from "./RequestRemovalPanel.types";
 
 import RemovalForm from "@/components/RemovalForm/RemovalForm";
 import PageSearch from "@/components/Search";
+import { canActOnPage } from "@/helpers/permissions";
 import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 import { usePages } from "@/services/api/hooks/pages";
 import { PageStatus } from "@/services/api/types/pages";
@@ -20,6 +21,8 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
     state.toggleRequestRemovalPanel,
   ]);
 
+  const user = useStore((state) => state.user);
+  const notify = useToastNotification();
   const selectedProject = useStore((state) => state.selectedProject);
   const setSelectedProject = useStore((state) => state.setSelectedProject);
 
@@ -112,7 +115,22 @@ const RequestRemovalPanel = ({ webpage }: IRequestRemovalPanelProps) => {
               Remove page
             </ActionButton>
           ) : (
-            <Button appearance="positive" disabled={!selectedPage} onClick={() => setConfirmedPage(selectedPage)}>
+            <Button
+              appearance="positive"
+              disabled={!selectedPage}
+              onClick={() => {
+                if (!selectedPage) return;
+                if (!canActOnPage(user, selectedPage.page)) {
+                  notify.failure(
+                    "You don't have permission to perform this action on the selected page",
+                    null,
+                    <p>Only the page owner, contributors, or an admin can request changes.</p>,
+                  );
+                  return;
+                }
+                setConfirmedPage(selectedPage);
+              }}
+            >
               Next
             </Button>
           )}
