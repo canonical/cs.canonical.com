@@ -18,6 +18,7 @@ import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 
 import PageSearch from "@/components/Search";
 import config from "@/config";
+import { canActOnPage } from "@/helpers/permissions";
 import { parseError } from "@/helpers/requests";
 import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 import { usePages } from "@/services/api/hooks/pages";
@@ -299,7 +300,22 @@ const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
               Submit
             </ActionButton>
           ) : (
-            <Button appearance="positive" disabled={!selectedPage} onClick={() => setConfirmedPage(selectedPage)}>
+            <Button
+              appearance="positive"
+              disabled={!selectedPage}
+              onClick={() => {
+                if (!selectedPage) return;
+                if (!canActOnPage(user, selectedPage.page)) {
+                  notify.failure(
+                    "You don't have permission to perform this action on the selected page",
+                    null,
+                    <p>Only the page owner, contributors, or an admin can request changes.</p>,
+                  );
+                  return;
+                }
+                setConfirmedPage(selectedPage);
+              }}
+            >
               Next
             </Button>
           )}
