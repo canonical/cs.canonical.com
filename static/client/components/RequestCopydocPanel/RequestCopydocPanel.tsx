@@ -86,6 +86,19 @@ const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
     setConfirmedPage(null);
   }, [togglePanel]);
 
+  const handleNext = useCallback(() => {
+    if (!selectedPage) return;
+    if (!canActOnPage(user, selectedPage.page)) {
+      notify.failure(
+        "You don't have permission to perform this action on the selected page",
+        null,
+        <p>Only the page owner, contributors, or an admin can perform actions</p>,
+      );
+      return;
+    }
+    setConfirmedPage(selectedPage);
+  }, [notify, selectedPage, user]);
+
   const handleSuccess = useCallback(async () => {
     handleClose();
 
@@ -300,22 +313,7 @@ const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
               Submit
             </ActionButton>
           ) : (
-            <Button
-              appearance="positive"
-              disabled={!selectedPage}
-              onClick={() => {
-                if (!selectedPage) return;
-                if (!canActOnPage(user, selectedPage.page)) {
-                  notify.failure(
-                    "You don't have permission to perform this action on the selected page",
-                    null,
-                    <p>Only the page owner, contributors, or an admin can request changes.</p>,
-                  );
-                  return;
-                }
-                setConfirmedPage(selectedPage);
-              }}
-            >
+            <Button appearance="positive" disabled={!selectedPage} onClick={handleNext}>
               Next
             </Button>
           )}

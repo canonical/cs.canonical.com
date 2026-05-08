@@ -216,7 +216,9 @@ const FullSiteView = (): ReactNode => {
             <div className="u-align-text--center full-site-view__actions">
               <Tooltip
                 message={
-                  !canActOnPage(user, page) ? "Only the page owner or contributors can perform actions" : undefined
+                  !canActOnPage(user, page)
+                    ? "Only the page owner, contributors, or an admin can perform actions"
+                    : undefined
                 }
                 position="left"
                 zIndex={999}

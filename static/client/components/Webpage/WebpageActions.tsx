@@ -87,7 +87,7 @@ const WebpageActions = ({
   const toolTipMessage = useMemo(() => {
     if (isPageSetToDelete) return "This page is scheduled for removal";
     if (!canAct) {
-      return "Only the page owner or contributors can perform actions";
+      return "Only the page owner, contributors, or an admin can perform actions";
     }
     return "";
   }, [isPageSetToDelete, canAct]);
