@@ -220,6 +220,33 @@ describe("FullSiteView", () => {
     expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
   });
 
+  it("enables the menu trigger for a reviewer of the page", async () => {
+    const user = userEvent.setup();
+    renderWith(
+      makePage({
+        status: PageStatus.AVAILABLE,
+        reviewers: [
+          {
+            id: 99,
+            name: "Reviewer",
+            email: "reviewer@example.com",
+            jobTitle: "",
+            department: "",
+            team: "",
+            role: "",
+          },
+        ],
+      }),
+      { email: "reviewer@example.com" },
+    );
+
+    const trigger = screen.getByRole("button", { name: /page actions/i });
+    expect(trigger).not.toHaveAttribute("aria-disabled", "true");
+
+    await user.click(trigger);
+    expect(screen.getByRole("button", { name: /copy update/i })).toBeInTheDocument();
+  });
+
   describe("view mode toggle", () => {
     it("renders List view by default", () => {
       renderWith(makePage({ url: "/page-1" }));

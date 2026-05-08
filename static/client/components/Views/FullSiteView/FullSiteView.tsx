@@ -17,6 +17,7 @@ import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydoc
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import FilterandSearch from "@/components/Views/FilterTableView/FilterandSearch";
+import { canActOnPage } from "@/helpers/permissions";
 import { useProjects } from "@/services/api/hooks/projects";
 import { ChangeRequestType, PageStatus, type IPage } from "@/services/api/types/pages";
 import { useStore } from "@/store";
@@ -54,7 +55,6 @@ const HEADERS = [
 const FullSiteView = (): ReactNode => {
   const { data: projects, isLoading } = useProjects();
   const user = useStore((state) => state.user);
-  const isAdmin = user?.role === "admin";
   const activeProject = useViewsStore((state) => state.activeProject);
   const filter = useViewsStore((state) => state.filter);
 
@@ -98,13 +98,11 @@ const FullSiteView = (): ReactNode => {
     window.open(url, "_blank", "noopener,noreferrer");
   }, []);
 
-  const isOwner = (page: IPage) => !!user?.email && page.owner?.email === user.email;
-
   const isMenuDisabled = (page: IPage) => {
+    if (!canActOnPage(user, page)) return true;
     const isNew = page.status === PageStatus.NEW;
     const hasJiraTasks = !!page.jira_tasks?.length;
     const isContentBoardPage = !!page.content_jira_id;
-    if (!isAdmin && !isOwner(page)) return true;
     return isNew && (hasJiraTasks || isContentBoardPage);
   };
 
@@ -223,7 +221,11 @@ const FullSiteView = (): ReactNode => {
           content: (
             <div className="u-align-text--center full-site-view__actions">
               <Tooltip
-                message={!isAdmin && !isOwner(page) ? "Only the page owner can perform actions" : undefined}
+                message={
+                  !canActOnPage(user, page)
+                    ? "Only the page owner, contributors, or an admin can perform actions"
+                    : undefined
+                }
                 position="left"
                 zIndex={999}
               >

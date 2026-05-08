@@ -1,5 +1,4 @@
 import { type ChangeEvent, type FormEvent, useCallback, useMemo, useState, type ReactNode } from "react";
-import React from "react";
 
 import {
   ActionButton,
@@ -18,6 +17,7 @@ import type { IRequestCopydocPanel } from "./RequestCopydocPanel.types";
 
 import PageSearch from "@/components/Search";
 import config from "@/config";
+import { canActOnPage } from "@/helpers/permissions";
 import { parseError } from "@/helpers/requests";
 import { type IPageOption, usePageOptions } from "@/helpers/usePageOptions";
 import { usePages } from "@/services/api/hooks/pages";
@@ -84,6 +84,19 @@ const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
     setSelectedPage(null);
     setConfirmedPage(null);
   }, [togglePanel]);
+
+  const handleNext = useCallback(() => {
+    if (!selectedPage) return;
+    if (!canActOnPage(user, selectedPage.page)) {
+      notify.failure(
+        "You don't have permission to perform this action on the selected page",
+        null,
+        <p>Only the page owner, contributors, or an admin can perform actions</p>,
+      );
+      return;
+    }
+    setConfirmedPage(selectedPage);
+  }, [notify, selectedPage, user]);
 
   const handleSuccess = useCallback(async () => {
     handleClose();
@@ -299,7 +312,7 @@ const RequestCopydocPanel = ({ webpage }: IRequestCopydocPanel): ReactNode => {
               Submit
             </ActionButton>
           ) : (
-            <Button appearance="positive" disabled={!selectedPage} onClick={() => setConfirmedPage(selectedPage)}>
+            <Button appearance="positive" disabled={!selectedPage} onClick={handleNext}>
               Next
             </Button>
           )}
