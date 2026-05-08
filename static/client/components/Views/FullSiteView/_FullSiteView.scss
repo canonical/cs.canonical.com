@@ -29,9 +29,7 @@
   }
 
   @media (max-width: $breakpoint-small) {
-    max-height: fit-content;
-    width: 100%;
-    position: relative;
+    display: none;
   }
 }
 
