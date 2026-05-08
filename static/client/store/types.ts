@@ -16,6 +16,8 @@ export interface IViewsStore {
   setFilter: (s: Partial<IViewFilter>) => void;
   expandedProject: string;
   setExpandedProject: (s: IViewsStore["expandedProject"]) => void;
+  activeProject: string;
+  setActiveProject: (s: string) => void;
 }
 
 export interface IPanelsStore {

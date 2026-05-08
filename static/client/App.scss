@@ -17,6 +17,7 @@
 @include vf-p-tooltips;
 @include vf-p-chip;
 @include vf-p-search-and-filter;
+@include vf-p-segmented-control;
 
 // Icons
 @include vf-p-icons;
@@ -67,6 +68,7 @@
 @import "./components/EditProductPanel/EditProductPanel";
 @import "./components/Common/ComboSelect/ComboSelect";
 @import "./components/Common/MultiSelectPicker/MultiSelectPicker";
+@import "./components/Views/FullSiteView/FullSiteView";
 @import "./components/NewWebpagePanel/NewWebpagePanel";
 
 @mixin vf-icon-logout($color) {
