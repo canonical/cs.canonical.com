@@ -1,6 +1,7 @@
 export const ENDPOINTS = {
   getPagesTree: (domain: string, noCache?: boolean) => `/api/get-tree/${domain}/${noCache ? "/True" : ""}`,
   getUsers: (inputStr: string) => `/api/get-users/${inputStr}`,
+  getTeams: "/api/get-teams",
   setOwner: "/api/set-owner",
   setReviewers: "/api/set-reviewers",
   createNewPage: "/api/create-page",

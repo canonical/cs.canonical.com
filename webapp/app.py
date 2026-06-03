@@ -6,6 +6,7 @@ from webapp import create_app
 from webapp.celery import init_celery
 from webapp.routes.jira import jira_blueprint
 from webapp.routes.product import product_blueprint
+from webapp.routes.teams import teams_blueprint
 from webapp.routes.tree import tree_blueprint
 from webapp.routes.user import user_blueprint
 from webapp.routes.webpage import webpage_blueprint
@@ -25,6 +26,7 @@ init_scheduled_tasks(app)
 # Server-side routes
 app.register_blueprint(tree_blueprint)
 app.register_blueprint(user_blueprint)
+app.register_blueprint(teams_blueprint)
 app.register_blueprint(jira_blueprint)
 app.register_blueprint(product_blueprint)
 app.register_blueprint(webpage_blueprint)

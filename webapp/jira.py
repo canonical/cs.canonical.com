@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 
-from flask import request
+from flask import current_app, request
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -101,6 +101,12 @@ class Jira:
         # Try to get the user from the database
         if jira_reporter_id := request.headers.get("X-JIRA-REPORTER-ID"):
             return jira_reporter_id
+
+        if not user_id:
+            jira_reporter_id = current_app.config.get("JIRA_REPORTER_ID")
+            if jira_reporter_id:
+                return jira_reporter_id
+            raise ValueError("No reporter available: JIRA_REPORTER_ID not configured")
 
         user = db.session.query(User).filter_by(id=user_id).first()
         if not user:

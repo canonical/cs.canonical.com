@@ -49,18 +49,29 @@ def request_changes(body: ChangesRequestModel):
     # Make a request to JIRA to create a task
     try:
         params = body.model_dump()
-        task = create_jira_task(current_app, params)
 
-        # clean the cache for a new Jira task to appear in the tree
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
 
+        # For PAGE_REFRESH, resolve the effective copy_doc_link — the frontend
+        # only sends it when the page has no existing link, so fall back to the
+        # stored value so it always appears on the Jira ticket.
+        if params["type"] == RequestType.PAGE_REFRESH.value and not params.get("copy_doc_link"):
+            params["copy_doc_link"] = webpage.copy_doc_link if webpage else None
+
+        if params["type"] == RequestType.PAGE_REFRESH.value:
+            if str(params.get("team")) == "0":
+                params["team"] = 11014  # CNT project
+
+        task = create_jira_task(current_app, params)
+
         # if a new copy_doc_link is supplied, add it to the page
-        if params.get("copy_doc_link") and not webpage.copy_doc_link:
+        if params.get("copy_doc_link") and webpage and not webpage.copy_doc_link:
             webpage.copy_doc_link = params["copy_doc_link"]
             db.session.commit()
 
         invalidate_cache(webpage)
     except Exception as e:
+        current_app.logger.exception("Error in request_changes: %s", e)
         return jsonify(str(e)), 500
 
     return (

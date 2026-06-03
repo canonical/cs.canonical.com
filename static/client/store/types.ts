@@ -21,6 +21,7 @@ export interface IViewsStore {
 export interface IPanelsStore {
   productsPanelVisible: boolean;
   copyUpdatePanelVisible: boolean;
+  pageRefreshPanelVisible: boolean;
   reportBugPanelVisible: boolean;
   requestFeaturePanelVisible: boolean;
   requestRemovalPanelVisible: boolean;
@@ -30,6 +31,7 @@ export interface IPanelsStore {
   togglePanel: (p: PanelKey) => void;
   toggleProductsPanel: () => void;
   toggleCopyUpdatePanel: () => void;
+  togglePageRefreshPanel: () => void;
   toggleReportBugPanel: () => void;
   toggleRequestFeaturePanel: () => void;
   toggleRequestRemovalPanel: () => void;
@@ -40,6 +42,7 @@ export interface IPanelsStore {
 export type PanelKey =
   | "productsPanelVisible"
   | "copyUpdatePanelVisible"
+  | "pageRefreshPanelVisible"
   | "reportBugPanelVisible"
   | "requestFeaturePanelVisible"
   | "requestRemovalPanelVisible"

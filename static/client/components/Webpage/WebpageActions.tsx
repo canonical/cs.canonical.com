@@ -5,6 +5,7 @@ import { ActionButton, Button, Tooltip, useToastNotification } from "@canonical/
 import { useQueryClient } from "react-query";
 
 import RequestCopydocPanel from "@/components/RequestCopydocPanel/RequestCopydocPanel";
+import RequestPageRefreshPanel from "@/components/RequestPageRefreshPanel";
 import RequestRemovalPanel from "@/components/RequestRemovalPanel";
 import RequestTaskModal from "@/components/RequestTaskModal/RequestTaskModal";
 import { parseError } from "@/helpers/requests";
@@ -32,9 +33,11 @@ const WebpageActions = ({
   const notify = useToastNotification();
   const queryClient = useQueryClient();
 
-  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
+  const [copyUpdatePanelVisible, toggleCopyUpdatePanel, pageRefreshPanelVisible, togglePageRefreshPanel, toggleRequestRemovalPanel] = usePanelsStore((state) => [
     state.copyUpdatePanelVisible,
     state.toggleCopyUpdatePanel,
+    state.pageRefreshPanelVisible,
+    state.togglePageRefreshPanel,
     state.toggleRequestRemovalPanel,
   ]);
 
@@ -47,6 +50,8 @@ const WebpageActions = ({
         toggleCopyUpdatePanel();
         break;
       case ChangeRequestType.PAGE_REFRESH:
+        togglePageRefreshPanel();
+        break;
       case ChangeRequestType.NEW_WEBPAGE:
         setModalOpen(true);
         break;
@@ -149,6 +154,10 @@ const WebpageActions = ({
       </Tooltip>
 
       {copyUpdatePanelVisible && <RequestCopydocPanel webpage={page} />}
+
+      {pageRefreshPanelVisible && (
+        <RequestPageRefreshPanel isOpen={pageRefreshPanelVisible} onClose={togglePageRefreshPanel} webpage={page} />
+      )}
 
       {modalOpen && (
         <RequestTaskModal

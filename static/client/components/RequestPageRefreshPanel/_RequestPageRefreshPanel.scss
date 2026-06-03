@@ -1,0 +1,27 @@
+.request-page-refresh-panel {
+  .p-panel__content {
+    overflow: visible;
+  }
+
+  .p-search-and-filter {
+    margin-bottom: $spv--medium;
+  }
+
+  .p-panel__title {
+    padding-bottom: $spv--small;
+
+    .p-icon--information {
+      width: $spv--large;
+      height: $spv--large;
+    }
+  }
+
+  .p-panel__header-text {
+    margin-right: $spv--small;
+  }
+
+  @media (min-width: $breakpoint-large) {
+    max-width: 30rem !important;
+    width: 30rem;
+  }
+}

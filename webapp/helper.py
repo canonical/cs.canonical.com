@@ -14,6 +14,8 @@ class RequestType(Enum):
 
 
 def get_or_create_user_id(user, return_obj=False):
+    if not user:
+        return None
     # If user does not exist, create a new user in the "users" table
     user_email = user.get("email")
     user_exists = User.query.filter_by(email=user_email).first()
@@ -257,6 +259,35 @@ def get_tree_struct(session, webpages):
         return tree
 
     return None
+
+
+def get_teams_from_directory():
+    query = """
+        query {
+            employees {
+                product
+            }
+        }
+    """
+    token = current_app.config["DIRECTORY_API_TOKEN"]
+    headers = {"Authorization": "token " + token}
+
+    try:
+        response = requests.post(
+            "https://api.directory.canonical.com/graphql/",
+            json={"query": query},
+            headers=headers,
+            verify=False,
+            timeout=5,
+        )
+    except Exception as e:
+        response = Response()
+        response.code = "service unavailable"
+        response.error_type = "service unavailable"
+        response.status_code = 503
+        response._content = str(e)
+
+    return response
 
 
 def get_user_from_directory_by_key(key, value):
