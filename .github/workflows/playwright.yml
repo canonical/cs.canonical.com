@@ -111,8 +111,8 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          JIRA_CLIENT_ID: ${{ secrets.JIRA_CLIENT_ID }}
+          JIRA_CLIENT_SECRET: ${{ secrets.JIRA_CLIENT_SECRET }}
           JIRA_URL: https://warthogs.atlassian.net
           JIRA_LABELS: somelabel
           JIRA_COPY_UPDATES_EPIC: WD-12643
@@ -130,8 +130,8 @@ jobs:
           -e DATABASE_URL="$DATABASE_URL" \
           -e GOOGLE_PRIVATE_KEY="$GOOGLE_PRIVATE_KEY" \
           -e GOOGLE_PRIVATE_KEY_ID="$GOOGLE_PRIVATE_KEY_ID" \
-          -e JIRA_EMAIL="$JIRA_EMAIL" \
-          -e JIRA_TOKEN="$JIRA_TOKEN" \
+          -e JIRA_CLIENT_ID="$JIRA_CLIENT_ID" \
+          -e JIRA_CLIENT_SECRET="$JIRA_CLIENT_SECRET" \
           -e JIRA_URL="$JIRA_URL" \
           -e JIRA_LABELS="$JIRA_LABELS" \
           -e JIRA_COPY_UPDATES_EPIC="$JIRA_COPY_UPDATES_EPIC" \

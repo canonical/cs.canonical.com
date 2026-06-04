@@ -32,8 +32,8 @@ SQLALCHEMY_DATABASE_URI = get_flask_env(
     "POSTGRESQL_DB_CONNECT_STRING",
     get_flask_env("DATABASE_URL", "sqlite:///project.db"),
 )
-JIRA_EMAIL = get_flask_env("JIRA_EMAIL")
-JIRA_TOKEN = get_flask_env("JIRA_TOKEN")
+JIRA_CLIENT_ID = get_flask_env("JIRA_CLIENT_ID")
+JIRA_CLIENT_SECRET = get_flask_env("JIRA_CLIENT_SECRET")
 JIRA_URL = get_flask_env("JIRA_URL")
 JIRA_LABELS = get_flask_env("JIRA_LABELS")
 JIRA_COPY_UPDATES_EPIC = get_flask_env("JIRA_COPY_UPDATES_EPIC")
