@@ -34,17 +34,17 @@ config:
       type: string
       description: "Comma-separated list of JIRA labels to apply to new JIRA issues"
       default: "sites_BAU"
-    jira-email:
-      type: string
-      description: "Email address to use for JIRA API authentication"
-      default: ""
     jira-reporter-id:
       type: string
       description: "JIRA test reporter ID for creating issues during playwright tests"
       default: ""
-    jira-token:
+    jira-client-id:
       type: string
-      description: "JIRA API token"
+      description: "JIRA API client ID for authentication"
+      default: ""
+    jira-client-secret:
+      type: string
+      description: "JIRA API client secret for authentication"
       default: ""
     jira-url:
       type: string
