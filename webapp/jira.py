@@ -36,7 +36,7 @@ class Jira:
         url: str,
         client_id: str,
         client_secret: str,
-        labels: str,
+        labels: list[str],
         copy_updates_epic: str,
         sites_maintenance_epic: str,
         redis_url: str = None,
@@ -111,7 +111,10 @@ class Jira:
         """
         # Check Redis first
         if self._redis:
-            cached = self._redis.get(self.REDIS_CLOUD_ID_KEY)
+            try:
+                cached = self._redis.get(self.REDIS_CLOUD_ID_KEY)
+            except redis.exceptions.RedisError:
+                cached = None
             if cached:
                 return cached.decode()
 
@@ -150,7 +153,10 @@ class Jira:
         """
         if not self._redis:
             return None
-        cached = self._redis.get(self.REDIS_TOKEN_KEY)
+        try:
+            cached = self._redis.get(self.REDIS_TOKEN_KEY)
+        except redis.exceptions.RedisError:
+            return None
         if not cached:
             return None
         data = json.loads(cached)
@@ -170,9 +176,12 @@ class Jira:
             return
         ttl = token_data["expires_at"] - int(time.time())
         if ttl > 0:
-            self._redis.setex(
-                self.REDIS_TOKEN_KEY, ttl, json.dumps(token_data)
-            )
+            try:
+                self._redis.setex(
+                    self.REDIS_TOKEN_KEY, ttl, json.dumps(token_data)
+                )
+            except redis.exceptions.RedisError:
+                return
 
     def get_jira_client(self):
         """Get an authenticated requests session for the Jira API.
@@ -247,16 +256,19 @@ class Jira:
             "grant_type": "client_credentials",
             "client_id": self.client_id,
             "client_secret": self.client_secret,
+            "audience": "api.atlassian.com",
         }
 
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-        # Request a brand new access token using your M2M credentials
-        response = requests.post(token_url, data=data, headers=headers)
+        response = requests.post(
+            token_url,
+            json=data,
+            headers={"Content-Type": "application/json"},
+        )
 
         if response.status_code != 200:
             raise JiraError(
                 "Authentication failed. Unable to obtain access token."
+                f"Status: {response.status_code}, Response: {response.text}"
             )
 
         response_data = response.json()
