@@ -39,7 +39,7 @@ class Jira:
         labels: list[str],
         copy_updates_epic: str,
         sites_maintenance_epic: str,
-        redis_url: str = None,
+        redis_url: str | None = None,
     ):
         """
         Initialize the Jira object.
@@ -183,6 +183,20 @@ class Jira:
             except redis.exceptions.RedisError:
                 return
 
+    def _build_session(self):
+        """Build a requests.Session with the current bearer token set."""
+        session = requests.Session()
+        session.headers.update(
+            {"Authorization": f"Bearer {self._access_token}"}
+        )
+        return session
+
+    def _token_is_valid(self, buffer_seconds: int = 300) -> bool:
+        """Return True if the in-memory token exists and is not near expiry."""
+        return bool(self._access_token) and int(time.time()) < (
+            self._expires_at - buffer_seconds
+        )
+
     def get_jira_client(self):
         """Get an authenticated requests session for the Jira API.
 
@@ -194,52 +208,29 @@ class Jira:
         Returns:
             requests.Session: A session with the Authorization header set.
         """
-        current_time = int(time.time())
-        buffer_seconds = 300  # 5-minute proactive buffer
-
         # Fast path: use local in-memory cache
-        if self._access_token and current_time < (
-            self._expires_at - buffer_seconds
-        ):
-            session = requests.Session()
-            session.headers.update(
-                {"Authorization": f"Bearer {self._access_token}"}
-            )
-            return session
+        if self._token_is_valid():
+            return self._build_session()
 
         with self._token_lock:
             # Double-check after acquiring the lock
-            current_time = int(time.time())
-            if self._access_token and current_time < (
-                self._expires_at - buffer_seconds
-            ):
-                session = requests.Session()
-                session.headers.update(
-                    {"Authorization": f"Bearer {self._access_token}"}
-                )
-                return session
+            if self._token_is_valid():
+                return self._build_session()
 
-            # Try Redis shared cache
+            # Try Redis shared cache, else fetch a brand new token
             token_data = self._get_cached_token()
-            if token_data:
-                self._access_token = token_data["access_token"]
-                self._expires_at = token_data["expires_at"]
-            else:
-                # Fetch a brand new token
+            if not token_data:
                 token_data = self.fetch_new_access_token()
-                self._access_token = token_data["access_token"]
-                self._expires_at = token_data["expires_at"]
                 self._store_token(token_data)
+
+            self._access_token = token_data["access_token"]
+            self._expires_at = token_data["expires_at"]
 
             # Resolve cloud ID (cached in Redis indefinitely)
             if not self._cloud_id:
                 self._cloud_id = self._resolve_cloud_id(self._access_token)
 
-        session = requests.Session()
-        session.headers.update(
-            {"Authorization": f"Bearer {self._access_token}"}
-        )
-        return session
+        return self._build_session()
 
     def fetch_new_access_token(self):
         """Fetch a new access token from Atlassian using client credentials.
