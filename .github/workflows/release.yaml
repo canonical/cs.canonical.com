@@ -11,24 +11,10 @@ env:
   ROCKCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS: true
 
 jobs:
-  generate-app-token:
-    name: Generate GitHub App Token
-    runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.github-app-token.outputs.token }}
-    steps:
-      - name: Generate GitHub App Token
-        id: github-app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.GIT_APP_ID }}
-          private-key: ${{ secrets.GIT_APP_PRIVATE_KEY }}
-          permission-contents: write
   prepare-version:
     # TODO: reject action if the push is from content system bot
     name: Determine and prepare next version
     runs-on: ubuntu-latest
-    needs: [generate-app-token]
     permissions:
       contents: write
     outputs:
@@ -42,7 +28,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
@@ -50,7 +35,7 @@ jobs:
           dry_run: true
           branch: ${{ env.TARGET_BRANCH }}
         env:
-          GITHUB_TOKEN: ${{ needs.generate-app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Display next version
         if: steps.semantic.outputs.new_release_published == 'true'
@@ -141,6 +126,9 @@ jobs:
   publish-image:
     runs-on: ubuntu-latest
     needs: [prepare-version, pack-rock]
+    permissions:
+      contents: read
+      packages: write
     if: needs.prepare-version.outputs.new_release_published == 'true'
     outputs:
       image_url: ${{ steps.set_image_url.outputs.image_url }}
@@ -164,21 +152,31 @@ jobs:
   release:
     name: Rollout Release
     runs-on: ubuntu-latest
-    needs: [prepare-version, pack-rock, publish-image, pack-charm, generate-app-token]
+    needs: [prepare-version, pack-rock, publish-image, pack-charm]
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+      contents: read
     if: needs.prepare-version.outputs.new_release_published == 'true'
     env:
       CHARM_BUILD_NAME: cs-canonical-com-${{ needs.prepare-version.outputs.new_release_git_tag }}.charm
       ROCK_BUILD_NAME: cs-canonical-com-${{ needs.prepare-version.outputs.new_release_git_tag }}.rock
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.GIT_APP_ID }}
+          private-key: ${{ secrets.GIT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.repository }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ needs.generate-app-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Download Charm artifact
         uses: actions/download-artifact@v4
@@ -196,7 +194,7 @@ jobs:
         with:
           branch: ${{ env.TARGET_BRANCH }}
         env:
-          GITHUB_TOKEN: ${{ needs.generate-app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Update versions across all files
         id: update-versions
@@ -215,7 +213,7 @@ jobs:
       - name: Commit and push version updates
         if: steps.update-versions.outputs.files_updated == 'true'
         env:
-          GITHUB_TOKEN: ${{ needs.generate-app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           RELEASE_BOT_LOGIN: "cs-canonical-com-ci-release[bot]"
           RELEASE_BOT_ID: "245156291"
         run: |
