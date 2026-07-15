@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import threading
+import time
 from datetime import datetime
 
 from flask import request
+import redis
 import requests
-from requests.auth import HTTPBasicAuth
 
 from webapp.helper import RequestType
 from webapp.models import User, db
@@ -24,32 +26,44 @@ class Jira:
     SUBTASK = "10013"
     BUG = "10015"
 
+    REDIS_TOKEN_KEY = "JIRA_OAUTH_TOKEN"
+    REDIS_CLOUD_ID_KEY = "JIRA_CLOUD_ID"
+
+    _token_lock = threading.Lock()
+
     def __init__(
         self,
         url: str,
-        email: str,
-        token: str,
-        labels: str,
+        client_id: str,
+        client_secret: str,
+        labels: list[str],
         copy_updates_epic: str,
         sites_maintenance_epic: str,
+        redis_url: str | None = None,
     ):
         """
         Initialize the Jira object.
 
         Args:
             url (str): The URL of the Jira instance.
-            email (str): The email address of the user.
-            token (str): The API token of the user.
+            client_id (str): The client ID of the Jira application.
+            client_secret (str): The client secret of the Jira application.
             labels (str): The labels to be applied to the created issues.
             copy_updates_epic (str): The key of the epic to copy updates to.
             sites_maintenance_epic (str): The key of the epic for sites
                 maintenance.
+            redis_url (str): Redis connection URL for shared token caching.
         """
         self.url = url
-        self.auth = HTTPBasicAuth(email, token)
         self.labels = labels
+        self.client_id = client_id
+        self.client_secret = client_secret
         self.copy_updates_epic = copy_updates_epic
         self.sites_maintenance_epic = sites_maintenance_epic
+        self._redis = redis.from_url(redis_url) if redis_url else None
+        self._cloud_id = None
+        self._access_token = None
+        self._expires_at = 0
         self._connect()
 
     def __request__(
@@ -57,12 +71,14 @@ class Jira:
     ):
         if data:
             data = json.dumps(data)
-        response = requests.request(
+        session = self.get_jira_client()
+        base = "https://api.atlassian.com/ex/jira"
+        url = f"{base}/{self._cloud_id}/rest/api/3/{path}"
+        response = session.request(
             method,
-            f"{self.url}/rest/api/3/{path}",
+            url,
             data=data,
             headers=self.headers,
-            auth=self.auth,
             params=params,
         )
 
@@ -82,11 +98,175 @@ class Jira:
 
     def _connect(self):
         """
-        Test the connection to the Jira API.
+        Connect to Jira API and obtain access token, then resolve the cloud ID.
         """
-        meta = self.__request__(method="GET", path="issue/createmeta")
-        if not meta["projects"]:
-            raise JiraError("Authentication failed.")
+        self.get_jira_client()
+
+    def _resolve_cloud_id(self, access_token: str) -> str:
+        """
+        Resolve the Atlassian cloud ID for the configured Jira site.
+
+        OAuth 2.0 tokens require API calls to go through
+        https://api.atlassian.com/ex/jira/{cloudId}/rest/api/3/...
+        """
+        # Check Redis first
+        if self._redis:
+            try:
+                cached = self._redis.get(self.REDIS_CLOUD_ID_KEY)
+            except redis.exceptions.RedisError:
+                cached = None
+            if cached:
+                return cached.decode()
+
+        response = requests.get(
+            "https://api.atlassian.com/oauth/token/accessible-resources",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        if response.status_code != 200:
+            raise JiraError(
+                "Failed to fetch accessible resources. "
+                f"Status: {response.status_code}, Response: {response.text}"
+            )
+
+        resources = response.json()
+        # Match the configured JIRA_URL to find the correct cloud ID
+        for resource in resources:
+            if resource["url"].rstrip("/") == self.url.rstrip("/"):
+                cloud_id = resource["id"]
+                # Cloud ID doesn't change - cache indefinitely
+                if self._redis:
+                    self._redis.set(self.REDIS_CLOUD_ID_KEY, cloud_id)
+                return cloud_id
+
+        raise JiraError(
+            f"Could not find cloud ID for Jira site: {self.url}. "
+            f"Accessible sites: {[r['url'] for r in resources]}"
+        )
+
+    def _get_cached_token(self):
+        """Try to load a valid token from Redis.
+
+        Returns:
+            dict: Token data with 'access_token' and 'expires_at' keys,
+                or None if no valid cached token exists.
+        """
+        if not self._redis:
+            return None
+        try:
+            cached = self._redis.get(self.REDIS_TOKEN_KEY)
+        except redis.exceptions.RedisError:
+            return None
+        if not cached:
+            return None
+        data = json.loads(cached)
+        # Ensure it's not within the expiry buffer
+        if int(time.time()) < (data["expires_at"] - 300):
+            return data
+        return None
+
+    def _store_token(self, token_data: dict):
+        """Store token in Redis with a TTL matching its lifetime.
+
+        Args:
+            token_data (dict): Token data containing 'access_token'
+                and 'expires_at' keys.
+        """
+        if not self._redis:
+            return
+        ttl = token_data["expires_at"] - int(time.time())
+        if ttl > 0:
+            try:
+                self._redis.setex(
+                    self.REDIS_TOKEN_KEY, ttl, json.dumps(token_data)
+                )
+            except redis.exceptions.RedisError:
+                return
+
+    def _build_session(self):
+        """Build a requests.Session with the current bearer token set."""
+        session = requests.Session()
+        session.headers.update(
+            {"Authorization": f"Bearer {self._access_token}"}
+        )
+        return session
+
+    def _token_is_valid(self, buffer_seconds: int = 300) -> bool:
+        """Return True if the in-memory token exists and is not near expiry."""
+        return bool(self._access_token) and int(time.time()) < (
+            self._expires_at - buffer_seconds
+        )
+
+    def get_jira_client(self):
+        """Get an authenticated requests session for the Jira API.
+
+        Resolves a valid access token using a three-tier strategy:
+        1. Local in-memory cache (fast path, no I/O).
+        2. Redis shared cache (avoids redundant OAuth calls across workers).
+        3. Fresh OAuth token fetch (last resort).
+
+        Returns:
+            requests.Session: A session with the Authorization header set.
+        """
+        # Fast path: use local in-memory cache
+        if self._token_is_valid():
+            return self._build_session()
+
+        with self._token_lock:
+            # Double-check after acquiring the lock
+            if self._token_is_valid():
+                return self._build_session()
+
+            # Try Redis shared cache, else fetch a brand new token
+            token_data = self._get_cached_token()
+            if not token_data:
+                token_data = self.fetch_new_access_token()
+                self._store_token(token_data)
+
+            self._access_token = token_data["access_token"]
+            self._expires_at = token_data["expires_at"]
+
+            # Resolve cloud ID (cached in Redis indefinitely)
+            if not self._cloud_id:
+                self._cloud_id = self._resolve_cloud_id(self._access_token)
+
+        return self._build_session()
+
+    def fetch_new_access_token(self):
+        """Fetch a new access token from Atlassian using client credentials.
+
+        Returns:
+            dict: Token data with 'access_token' and 'expires_at' keys.
+
+        Raises:
+            JiraError: If the token request fails.
+        """
+        token_url = "https://auth.atlassian.com/oauth/token"
+
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "audience": "api.atlassian.com",
+        }
+
+        response = requests.post(
+            token_url,
+            json=data,
+            headers={"Content-Type": "application/json"},
+        )
+
+        if response.status_code != 200:
+            raise JiraError(
+                "Authentication failed. Unable to obtain access token."
+                f"Status: {response.status_code}, Response: {response.text}"
+            )
+
+        response_data = response.json()
+        return {
+            "access_token": response_data["access_token"],
+            "expires_at": int(time.time()) + response_data["expires_in"],
+        }
 
     def get_reporter_jira_id(self, user_id):
         """
@@ -392,11 +572,12 @@ def init_jira(app):
     try:
         app.config["JIRA"] = Jira(
             url=app.config["JIRA_URL"],
-            email=app.config["JIRA_EMAIL"],
-            token=app.config["JIRA_TOKEN"],
+            client_id=app.config["JIRA_CLIENT_ID"],
+            client_secret=app.config["JIRA_CLIENT_SECRET"],
             labels=app.config["JIRA_LABELS"].split(","),
             copy_updates_epic=app.config["JIRA_COPY_UPDATES_EPIC"],
             sites_maintenance_epic=app.config.get("SITES_MAINTENANCE_EPIC"),
+            redis_url=app.config.get("REDIS_DB_CONNECT_STRING"),
         )
     except Exception as error:
         app.logger.info(f"Unable to initialize jira: {error}")

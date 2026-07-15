@@ -38,7 +38,7 @@ def notify_bau(body: NotifyBAUModel):
         if response.status_code != 200:
             abort(404, description="User not found")
         user_data = response.json().get("data", {}).get("employees", [])[0]
-        user = get_or_create_user_id(user_data, return_object=True)
+        user = get_or_create_user_id(user_data, return_obj=True)
 
         if not user.mattermost:
             user.mattermost = user_data.get("mattermost")
