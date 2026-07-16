@@ -64,7 +64,7 @@
     "jsdom": "21.1.2",
     "npm-package-json-lint": "8.0.0",
     "pinst": "3.0.0",
-    "postcss": "8.5.6",
+    "postcss": "8.5.10",
     "postcss-cli": "10.1.0",
     "prettier": "3.4.2",
     "sass": "1.83.4",
