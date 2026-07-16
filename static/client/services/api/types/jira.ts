@@ -1,9 +1,8 @@
 export interface IReportBugBody {
-  due_date: string;
   reporter_struct: object;
   description: string;
   summary: string;
-  website: string;
+  url: string;
 }
 
 export interface IReportBugResponse {
@@ -31,5 +30,17 @@ export interface IRequestFeatureResponse {
       self: string;
       id: string;
     };
+  };
+}
+
+export interface IJiraProject {
+  id: number;
+  name: string;
+  key: string;
+}
+
+export interface IGetJiraProjectsResponse {
+  data: {
+    projects: IJiraProject[];
   };
 }

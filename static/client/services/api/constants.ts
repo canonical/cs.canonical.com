@@ -10,9 +10,14 @@ export const ENDPOINTS = {
   getProducts: "/api/get-products",
   setProducts: "/api/set-product",
   crudProduct: "/api/product",
+  updatePageDetails: "/api/update-page-details",
   getWebpageAssets: "/api/get-webpage-assets",
   reportBug: "/api/report-bug",
   requestFeature: "/api/request-feature",
+  getTickets: "/api/tickets",
+  getWebpageStats: "/api/get-webpage-stats",
+  getJiraProjects: "/api/get-jira-projects",
+  submitForContentReview: "/api/submit-for-content-review",
 };
 
 export const REST_TYPES = {

@@ -14,6 +14,7 @@ export interface IJiraTask {
   name: string;
   status: string;
   summary: string;
+  request_type: string;
 }
 
 export interface IPage {
@@ -38,6 +39,13 @@ export interface IPage {
   };
   ext?: string;
   content_jira_id?: string;
+  figma_link?: string;
+}
+
+export interface IRequestChangesResponse {
+  data: {
+    jira_task_id: string;
+  };
 }
 
 export interface IPagesResponse {
@@ -49,11 +57,18 @@ export interface IPagesResponse {
 
 export interface INewPage {
   name: string;
-  copy_doc_link: string | undefined;
-  owner: IUser;
+  copy_doc_link: string;
+  owner: IUser | null;
   reviewers: IUser[];
   project: string;
   parent: string;
+  due_date: string;
+  product_ids: number[];
+  content_jira_id?: string;
+  page_type?: string;
+  team: number | undefined;
+  summary: string;
+  save_for_later: boolean;
 }
 
 export interface INewPageResponse {
@@ -77,6 +92,7 @@ export interface IRequestChanges {
   summary?: string;
   description: string;
   request_type: string;
+  copy_doc_link?: string;
 }
 
 export interface IRequestRemoval {
@@ -88,7 +104,26 @@ export interface IRequestRemoval {
   request_type: string;
 }
 
+export interface IUpdatePageDetails {
+  webpage_id: number;
+  owner?: IUser;
+  reviewers?: IUser[];
+  copy_doc_link?: string;
+  figma_link?: string;
+}
+
 export interface ISetProducts {
   webpage_id: number;
-  product_ids: number[];
+  products: IProduct[];
+}
+
+export interface IPageStats {
+  data: {
+    last_updated: string;
+    readability_score: string;
+    accessibility_score: number | string;
+    link_count: number | string;
+    prohibited_words: string[] | string;
+    copy_errors: number | string;
+  };
 }

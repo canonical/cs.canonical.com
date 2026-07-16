@@ -22,6 +22,7 @@ from webapp.settings import BASE_DIR
 from webapp.site_repository import SiteRepository
 from webapp.tasks import register_task
 from sqlalchemy.orm import joinedload
+import gspread
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ TASK_DELAY = int(os.getenv("TASK_DELAY", "30"))
 UPDATE_STATUS_DELAY = int(os.getenv("UPDATE_STATUS_DELAY", "5"))
 # Default delay between runs for parsing webpage assets
 PARSE_ASSETS_DELAY = int(os.getenv("PARSE_ASSETS_DELAY", "1440"))
+# Default delay between runs for parsing webpage stats
+FETCH_STATS_DELAY = int(os.getenv("FETCH_STATS_DELAY", "2880"))
 
 
 @register_task(delay=TASK_DELAY)
@@ -235,6 +238,77 @@ def parse_webpage_assets() -> None:
         app.logger.info("Finished scheduled task: parse_webpage_assets")
 
 
+@register_task(delay=FETCH_STATS_DELAY)
+def fetch_webpage_stats() -> None:
+    """Fetch webpage stats and update the database."""
+    app = create_app()
+    sites_data = Path(BASE_DIR) / "data/sites.yaml"
+    with open(sites_data, "r") as f:
+        sites = yaml.safe_load(f).get("sites", [])
+
+    with app.app_context():
+        app.logger.info("Running scheduled task: fetch_webpage_stats")
+        try:
+            gc = gspread.service_account_from_dict(
+                app.config["GOOGLE_CREDENTIALS"]
+            )
+            spreadsheet = gc.open_by_url(app.config["PAGE_STATS_DOC"])
+
+            worksheets = spreadsheet.worksheets()
+            data = {}
+            for worksheet in worksheets:
+                sheet_title = worksheet.title
+                if sheet_title in sites:
+                    data[sheet_title] = worksheet.get_all_records()
+
+            index_data = {}
+            for project, rows in data.items():
+                index_data[project] = {
+                    row["URL"]: row
+                    for row in rows
+                    if "URL" in row and row["URL"]
+                }
+            app.config["CACHE"].set("PAGE_STATS_CACHE", index_data)
+        except Exception as e:
+            app.logger.error(f"Error fetching webpage stats: {e}")
+        app.logger.info("Finished scheduled task: fetch_webpage_stats")
+
+
+@register_task(delay=10080)  # Run once a week
+def fetch_jira_projects() -> None:
+    """Fetch Jira projects and update the cache."""
+    app = create_app()
+    with app.app_context():
+        app.logger.info("Running scheduled task: fetch_jira_projects")
+        jira = app.config.get("JIRA")
+        if not jira:
+            app.logger.error("JIRA configuration not found")
+            return
+
+        try:
+            projects_cache = [
+                {
+                    "key": 0,
+                    "id": 0,
+                    "name": "Other",
+                }
+            ]
+
+            projects = jira.get_all_projects()
+            for project in projects:
+                projects_cache.append(
+                    {
+                        "id": project["id"],
+                        "key": project["key"],
+                        "name": project["name"],
+                    }
+                )
+            app.config["CACHE"].set("JIRA_PROJECTS_CACHE", projects_cache)
+        except Exception as e:
+            app.logger.error(f"Error fetching Jira projects: {e}")
+        app.logger.info("Finished scheduled task: fetch_jira_projects")
+
+
 def init_scheduled_tasks(app: Flask) -> None:
     @app.before_request
     def start_tasks():
@@ -244,3 +318,5 @@ def init_scheduled_tasks(app: Flask) -> None:
         load_site_trees()
         parse_webpage_assets()
         scheduled_tasks_alert()
+        fetch_webpage_stats()
+        fetch_jira_projects()

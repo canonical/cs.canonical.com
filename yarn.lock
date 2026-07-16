@@ -1095,13 +1095,13 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@canonical/react-components@3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@canonical/react-components/-/react-components-3.5.0.tgz#6a1fa5fd85bb916f6e38dee66e215d62323d3df5"
-  integrity sha512-Z8v3t+u4RFFm+BqHec6G2ZL1YnCW351pIlQNuvG334UcOl/e58r4jaWUBHJJ6IWiBnIXnbjKMslyNTdEh6uASw==
+"@canonical/react-components@3.12.1":
+  version "3.12.1"
+  resolved "https://registry.yarnpkg.com/@canonical/react-components/-/react-components-3.12.1.tgz#b81219ec75c8907ee0005ab2d05d3a53556687f8"
+  integrity sha512-fZhOi2NHFHpOyG90oQ0wZBPJuW8cfXBdW3RCIPTZWyxXYxEQH4SSXJTgfOpz2q396Q+cRP1eps2YvEz4Crp3eQ==
   dependencies:
     "@types/jest" "29.5.14"
-    "@types/node" "20.17.19"
+    "@types/node" "20.19.30"
     "@types/react" "19.0.10"
     "@types/react-dom" "19.0.4"
     "@types/react-table" "7.7.20"
@@ -2072,12 +2072,12 @@
   dependencies:
     undici-types "~7.10.0"
 
-"@types/node@20.17.19":
-  version "20.17.19"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.17.19.tgz#0f2869555719bef266ca6e1827fcdca903c1a697"
-  integrity sha512-LEwC7o1ifqg/6r2gn9Dns0f1rhK+fPFDoMiceTJ6kWmVk6bgXBI/9IOWfVan4WiAavK9pIVWdX0/e3J+eEUh5A==
+"@types/node@20.19.30":
+  version "20.19.30"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.30.tgz#84fa87498ade5cd2b6ba8f8eec01d3b138ca60d0"
+  integrity sha512-WJtwWJu7UdlvzEAUm484QNg5eAoq5QR08KDNx7g45Usrs2NtOPiX8ugDqmKdXkyL03rBqU5dYNYVQetEpBHq2g==
   dependencies:
-    undici-types "~6.19.2"
+    undici-types "~6.21.0"
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.4"
@@ -7374,10 +7374,10 @@ unbox-primitive@^1.1.0:
     has-symbols "^1.1.0"
     which-boxed-primitive "^1.1.1"
 
-undici-types@~6.19.2:
-  version "6.19.8"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.19.8.tgz#35111c9d1437ab83a7cdc0abae2f26d88eda0a02"
-  integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
+undici-types@~6.21.0:
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
+  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
 undici-types@~7.10.0:
   version "7.10.0"
@@ -7536,10 +7536,10 @@ validate-npm-package-name@^5.0.1:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
-vanilla-framework@4.30.0:
-  version "4.30.0"
-  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.30.0.tgz#165195e32cbfee1506eccb6d550bf1241304a971"
-  integrity sha512-76bFHDNcmRboRD01RcM0CEDcU+gDd8rCMJe2SFF9MJcVeRG/5nla5nBBgT+30dc/ASQOrs3Fiz5kmAT/AQlhFw==
+vanilla-framework@4.41.0:
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.41.0.tgz#bc981035c536bd6cca5b6f3ded2abad679231499"
+  integrity sha512-UMCb+1+kfSoMFmXwwfjR/oyliojQ6pjOsBYwSRN6HgNtL14KhQc0VECYnv4YlkNTAJqQLR7VFwq95aXJrSrJSw==
 
 verbalize@^0.1.2:
   version "0.1.2"

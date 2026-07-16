@@ -38,7 +38,11 @@ jobs:
           tags: websites-content-system:latest
           outputs: type=docker,dest=app-image.tar
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # mode=min keeps only the final image layers in the cache (instead of
+          # every intermediate layer) and ignore-error=true prevents a transient
+          # GitHub Actions cache failure ("failed to reserve cache", usually the
+          # 10 GB per-repo cache limit being hit) from failing the whole build.
+          cache-to: type=gha,mode=min,ignore-error=true
 
       - name: Upload application image artifact
         # The artifact is downloaded and loaded by the test jobs

@@ -1,9 +1,11 @@
 import re
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, request
+import flask
 from flask_pydantic import validate
 
 from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
+    RequestType,
     convert_webpage_to_dict,
     create_copy_doc,
     create_jira_task,
@@ -51,6 +53,12 @@ def request_changes(body: ChangesRequestModel):
 
         # clean the cache for a new Jira task to appear in the tree
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
+
+        # if a new copy_doc_link is supplied, add it to the page
+        if params.get("copy_doc_link") and not webpage.copy_doc_link:
+            webpage.copy_doc_link = params["copy_doc_link"]
+            db.session.commit()
+
         invalidate_cache(webpage)
     except Exception as e:
         return jsonify(str(e)), 500
@@ -311,7 +319,39 @@ def create_page(body: CreatePageModel):
         jira = current_app.config["JIRA"]
         jira.link_copydoc_with_content_page(copy_doc, data["content_jira_id"])
 
+    data_obj = {
+        "webpage_id": new_webpage[0].id,
+        "reporter_struct": data["owner"],
+        "summary": "",
+        "due_date": data["due_date"],
+        "request_type": RequestType.NEW_WEBPAGE.value,
+        "description": data["summary"],
+        "team": data["team"],
+        "copy_doc_link": copy_doc,
+        "page_type": data["page_type"],
+        "save_for_later": data["save_for_later"],
+    }
+
+    # If "other" team was selected
+    # Use content board
+    if str(data_obj["team"]) == "0":
+        data_obj["team"] = 11014  # CNT project
+
+    task = create_jira_task(current_app, data_obj)
+
+    if not data["save_for_later"]:
+        jira = current_app.config["JIRA"]
+        in_review_transition = get_in_review_transition(jira, task.jira_id)
+        if in_review_transition:
+            jira.change_issue_status(
+                issue_id=task.jira_id,
+                transition_id=in_review_transition["id"],
+            )
+            task.status = JIRATaskStatus.IN_REVIEW
+            db.session.commit()
+
     invalidate_cache(new_webpage[0])
+
     return (
         jsonify(
             {
@@ -323,6 +363,28 @@ def create_page(body: CreatePageModel):
             }
         ),
         201,
+    )
+
+
+def get_in_review_transition(jira, issue_id):
+    available_transitions = jira.get_available_transitions(issue_id=issue_id)
+
+    if (
+        "response" in available_transitions
+        and available_transitions["response"] == "No content"
+    ):
+        return None
+
+    return next(
+        (
+            transition
+            for transition in available_transitions.get("transitions", [])
+            if transition["name"].lower()
+            == JiraStatusTransitionCodes.IN_REVIEW.name.lower().replace(
+                "_", " "
+            )
+        ),
+        None,
     )
 
 
@@ -476,11 +538,10 @@ def report_bug(body: ReportBugModel):
         user_id = get_or_create_user_id(body.reporter_struct)
         reporter_jira_id = jira.get_reporter_jira_id(user_id)
         issue = jira.create_task(
-            due_date=body.due_date,
             reporter_jira_id=reporter_jira_id,
             issue_type=jira.BUG,
             description=body.description,
-            summary=f"{body.website} - {body.summary}",
+            summary=f"{body.url} - {body.summary}",
             parent=jira.sites_maintenance_epic,
             labels=current_app.config["SITES_MAINTENANCE_LABELS"].split(","),
         )
@@ -555,3 +616,94 @@ def request_feature(body: RequestFeatureModel):
             ),
             400,
         )
+
+
+@jira_blueprint.route("/tickets", methods=["GET"])
+@login_required
+def user_tickets():
+    page = request.values.get("page", type=int, default=1)
+    per_page = request.values.get("per_page", type=int, default=10)
+    type = request.values.get("type", type=str, default="active")
+
+    task_status = []
+    if type not in ["active", "resolved"]:
+        type = "active"
+    if type == "active":
+        task_status = [
+            JIRATaskStatus.IN_PROGRESS,
+            JIRATaskStatus.BLOCKED,
+            JIRATaskStatus.TO_BE_DEPLOYED,
+            JIRATaskStatus.TRIAGED,
+            JIRATaskStatus.UNTRIAGED,
+            JIRATaskStatus.IN_REVIEW,
+        ]
+    elif type == "resolved":
+        task_status = [JIRATaskStatus.DONE, JIRATaskStatus.REJECTED]
+
+    tickets = JiraTask.query.filter(
+        JiraTask.user_id == flask.session["openid"]["id"],
+        JiraTask.status.in_(task_status),
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify(
+        {
+            "tickets": [ticket.to_dict() for ticket in tickets.items],
+            "page": page,
+            "page_size": per_page,
+            "total": tickets.total,
+            "total_pages": tickets.pages,
+        }
+    )
+
+
+@jira_blueprint.route("/get-jira-projects", methods=["GET"])
+@login_required
+def get_projects():
+    response = current_app.config["CACHE"].get("JIRA_PROJECTS_CACHE") or []
+    return response, 200
+
+
+@jira_blueprint.route("/submit-for-content-review", methods=["POST"])
+@login_required
+def change_jira_status():
+    data = request.get_json()
+
+    if not data.get("issue_id"):
+        return jsonify({"error": "issue_id is required"}), 400
+
+    jira_task = JiraTask.query.filter_by(jira_id=data["issue_id"]).first()
+    if not jira_task:
+        return jsonify({"error": "Jira task not found"}), 404
+
+    # The Jira task can be on a different Jira project
+    # Each project has its own distinctive/random tranisiton IDs
+    # Therefore, we must fetch available transition IDs first
+
+    jira = current_app.config["JIRA"]
+    in_review_transition = get_in_review_transition(jira, jira_task.jira_id)
+
+    if not in_review_transition:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "No 'In Review' transition available " "for this task"
+                    )
+                }
+            ),
+            400,
+        )
+
+    current_app.config["JIRA"].change_issue_status(
+        issue_id=jira_task.jira_id,
+        transition_id=in_review_transition["id"],
+    )
+
+    jira_task.status = JIRATaskStatus.IN_REVIEW
+    db.session.commit()
+
+    webpage = Webpage.query.filter_by(id=jira_task.webpage_id).first()
+    if webpage:
+        invalidate_cache(webpage)
+
+    return jsonify({"message": "Request submitted for content review"}), 200

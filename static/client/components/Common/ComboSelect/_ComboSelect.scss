@@ -1,0 +1,71 @@
+.p-combo-select {
+  position: relative;
+
+  .p-combo-select__input-wrapper {
+    position: relative;
+    cursor: pointer;
+
+    .p-form__control {
+      padding-right: 2rem;
+    }
+
+    .p-combo-select__chevron {
+      appearance: none;
+      background: none;
+      border: none;
+      color: var(--vf-color-text-muted);
+      cursor: pointer;
+      padding: 0;
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .p-combo-select__dropdown {
+    background-color: var(--vf-color-background-default);
+    border: 1px solid var(--vf-color-border-default);
+    box-shadow:
+      0 1px 1px 0 rgba(0, 0, 0, 0.15),
+      0 2px 2px -1px rgba(0, 0, 0, 0.15),
+      0 0 3px 0 rgba(0, 0, 0, 0.2);
+    left: 0;
+    list-style-type: none;
+    margin: 0;
+    max-height: 20rem;
+    overflow-y: auto;
+    padding: 0;
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    z-index: 10;
+
+    .p-combo-select__item {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: 0.5rem 1rem;
+      white-space: nowrap;
+
+      &:hover {
+        background-color: var(--vf-color-background-neutral-default);
+      }
+
+      &.is-selected {
+        background-color: var(--vf-color-background-alt);
+      }
+
+      .p-combo-select__item-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}

@@ -4,9 +4,12 @@ import type {
   INewPage,
   INewPageResponse,
   IPagesResponse,
+  IPageStats,
   IRequestChanges,
+  IRequestChangesResponse,
   IRequestRemoval,
   ISetProducts,
+  IUpdatePageDetails,
 } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
@@ -26,12 +29,16 @@ export const createPage = async (page: INewPage): Promise<INewPageResponse> => {
   return api.pages.createPage(page);
 };
 
-export const requestChanges = async (body: IRequestChanges): Promise<void> => {
+export const requestChanges = async (body: IRequestChanges): Promise<IRequestChangesResponse | void> => {
   return api.pages.requestChanges(body);
 };
 
-export const requestRemoval = async (body: IRequestRemoval): Promise<void> => {
+export const requestRemoval = async (body: IRequestRemoval) => {
   return api.pages.requestRemoval(body);
+};
+
+export const updatePageDetails = async (body: IUpdatePageDetails): Promise<void> => {
+  return api.pages.updatePageDetails(body);
 };
 
 export const setProducts = async (body: ISetProducts) => {
@@ -40,6 +47,10 @@ export const setProducts = async (body: ISetProducts) => {
 
 export const getWebpageAssets = async (body: IGetWebpageAssets): Promise<IAssetsResponse> => {
   return api.pages.getWebpageAssets(body);
+};
+
+export const getWebpageStats = async (pageUrl: string, projectName: string): Promise<IPageStats> => {
+  return api.pages.getWebpageStats(pageUrl, projectName);
 };
 
 export * as PagesServices from "./pages";

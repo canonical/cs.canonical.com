@@ -56,7 +56,7 @@ const Breadcrumbs = () => {
         <React.Fragment key={`bc-${index}`}>
           {index < breadcrumbs.length - 1 ? (
             isValidPage(bc.link) ? (
-              <a className="p-text--small-caps" href={bc.link} onClick={(e) => goToPage(e, bc.link)}>
+              <a href={bc.link} onClick={(e) => goToPage(e, bc.link)}>
                 {bc.name}
               </a>
             ) : (

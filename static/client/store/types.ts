@@ -16,17 +16,34 @@ export interface IViewsStore {
   setFilter: (s: Partial<IViewFilter>) => void;
   expandedProject: string;
   setExpandedProject: (s: IViewsStore["expandedProject"]) => void;
+  activeProject: string;
+  setActiveProject: (s: string) => void;
 }
 
 export interface IPanelsStore {
   productsPanelVisible: boolean;
+  copyUpdatePanelVisible: boolean;
   reportBugPanelVisible: boolean;
   requestFeaturePanelVisible: boolean;
+  requestRemovalPanelVisible: boolean;
+  editPageDetailsPanelVisible: boolean;
+  newWebpagePanelVisible: boolean;
 
   togglePanel: (p: PanelKey) => void;
   toggleProductsPanel: () => void;
+  toggleCopyUpdatePanel: () => void;
   toggleReportBugPanel: () => void;
   toggleRequestFeaturePanel: () => void;
+  toggleRequestRemovalPanel: () => void;
+  toggleEditPageDetailsPanel: () => void;
+  toggleNewWebpagePanel: () => void;
 }
 
-export type PanelKey = "productsPanelVisible" | "reportBugPanelVisible" | "requestFeaturePanelVisible";
+export type PanelKey =
+  | "productsPanelVisible"
+  | "copyUpdatePanelVisible"
+  | "reportBugPanelVisible"
+  | "requestFeaturePanelVisible"
+  | "requestRemovalPanelVisible"
+  | "editPageDetailsPanelVisible"
+  | "newWebpagePanelVisible";

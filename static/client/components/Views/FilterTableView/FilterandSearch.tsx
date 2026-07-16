@@ -83,7 +83,7 @@ const FilterandSearch = (): ReactNode => {
 
   return (
     <>
-      <div className="grid-row--50-50">
+      <div className="grid-row--50-50-on-large">
         <div className="grid-col">
           <SearchBox
             externallyControlled={true}
@@ -96,9 +96,11 @@ const FilterandSearch = (): ReactNode => {
         </div>
         <div className="grid-col">
           <ContextualMenu
+            className="p-filter-and-search-menu"
             closeOnEsc={true}
             closeOnOutsideClick={true}
             hasToggleIcon
+            toggleAppearance="base"
             toggleLabel={
               <>
                 {" "}
@@ -108,7 +110,6 @@ const FilterandSearch = (): ReactNode => {
                 ) : (
                   ""
                 )}
-                <span style={{ paddingRight: "10rem" }}></span>
               </>
             }
             visible={false}

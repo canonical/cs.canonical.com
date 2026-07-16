@@ -27,6 +27,7 @@ class ChangesRequestModel(BaseModel):
     description: str
     summary: str = ""
     request_type: str = ""
+    copy_doc_link: Optional[str] = None
 
 
 class RemoveWebpageModel(BaseModel):
@@ -65,11 +66,21 @@ class CreatePageModel(BaseModel):
     parent: str
     product_ids: List[int]
     content_jira_id: Optional[str] = None
+    page_type: str
+    team: str
+    summary: Optional[str] = None
+    due_date: str = ""
+    save_for_later: bool = False
+
+
+class ProductModel(BaseModel):
+    id: int
+    name: str
 
 
 class SetProductsModel(BaseModel):
     webpage_id: int
-    product_ids: List[int]
+    products: List[ProductModel]
 
 
 class AddProductModel(BaseModel):
@@ -96,11 +107,10 @@ class GetWebpageAssetsModel(BaseModel):
 
 
 class ReportBugModel(BaseModel):
-    due_date: str = ""
     reporter_struct: object = {}
     description: str = ""
     summary: str = ""
-    website: str = ""
+    url: str = ""
 
 
 class RequestFeatureModel(BaseModel):
@@ -109,6 +119,14 @@ class RequestFeatureModel(BaseModel):
     description: str = ""
     summary: str = ""
     objective: str = ""
+
+
+class UpdatePageDetailsModel(BaseModel):
+    webpage_id: int
+    owner: Optional[UserModel] = None
+    reviewers: Optional[List[UserModel]] = None
+    copy_doc_link: Optional[str] = None
+    figma_link: Optional[str] = None
 
 
 class NotifyBAUModel(BaseModel):

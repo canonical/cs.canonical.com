@@ -1,11 +1,19 @@
-.p-contextual-menu__dropdown {
-  min-width: 35rem;
-  margin-top: 0.3rem;
-  background: var(--vf-suru-background);
-  min-height: 20rem !important;
+.p-filter-and-search-menu {
+  .p-contextual-menu__toggle {
+    display: flex;
+    align-items: center;
+  }
+
+  .p-contextual-menu__dropdown {
+    min-width: 35rem;
+    margin-top: 0.3rem;
+    background: var(--vf-suru-background);
+    min-height: 20rem !important;
+    z-index: 103;
+  }
 }
 
-.p-filter__body{
+.p-filter__body {
   .p-divider {
     grid-gap: 0;
 
@@ -14,7 +22,7 @@
     }
   }
 
-  & .p-divider__block:not(:first-of-type){
+  & .p-divider__block:not(:first-of-type) {
     padding-left: 0.8rem;
   }
 }
@@ -50,7 +58,6 @@
 .filter-search {
   margin: 0.5rem;
 }
-
 
 .p-filter-panel__footer {
   display: flex;

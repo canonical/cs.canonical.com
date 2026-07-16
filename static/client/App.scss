@@ -5,6 +5,8 @@
 @include vanilla;
 @include vf-base;
 
+@include vf-p-divider;
+
 // Patterns
 @include vf-p-grid;
 @include vf-p-headings;
@@ -15,6 +17,7 @@
 @include vf-p-tooltips;
 @include vf-p-chip;
 @include vf-p-search-and-filter;
+@include vf-p-segmented-control;
 
 // Icons
 @include vf-p-icons;
@@ -25,6 +28,18 @@
 @include vf-p-icon-switcher-environments;
 @include vf-p-icon-filter;
 @include vf-p-icon-repository;
+@include vf-p-icon-file;
+@include vf-p-icon-home;
+@include vf-p-icon-profile;
+@include vf-p-icon-change-version;
+@include vf-p-icon-task-outstanding;
+@include vf-p-icon-toggle-side-nav;
+@include vf-p-icon-status-failed-small;
+@include vf-p-icon-status-succeeded-small;
+@include vf-p-icon-status-waiting-small;
+@include vf-p-icon-contextual-menu;
+@include vf-p-icon-file-blank;
+@include vf-p-icon-revisions;
 
 // Utilities
 @include vf-u-align;
@@ -47,7 +62,14 @@
 @import "./components/Navigation/NavigationElement/NavigationElement";
 @import "./components/Search/Search";
 @import "./pages/Webpage/Webpage";
-@import "./pages/NewWebpage/NewWebpage";
+@import "./pages/views/Owned";
+@import "./components/RequestRemovalPanel/RequestRemovalPanel";
+@import "./components/RequestCopydocPanel/RequestCopydocPanel";
+@import "./components/EditProductPanel/EditProductPanel";
+@import "./components/Common/ComboSelect/ComboSelect";
+@import "./components/Common/MultiSelectPicker/MultiSelectPicker";
+@import "./components/Views/FullSiteView/FullSiteView";
+@import "./components/NewWebpagePanel/NewWebpagePanel";
 
 @mixin vf-icon-logout($color) {
   background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 13 13' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{vf-url-friendly-color($color)}' fill-rule='nonzero' d='M1.32973 12.4804C0.965955 12.4804 0.653389 12.3507 0.392033 12.0912C0.130678 11.8317 0 11.5213 0 11.1602V1.32972C0 0.965938 0.130678 0.653372 0.392033 0.392017C0.653389 0.130672 0.965955 0 1.32973 0H6.24567V1.32972H1.32973V11.1602H6.24567V12.4804H1.32973ZM9.44857 9.50075L8.49638 8.5674L10.1587 6.90508H4.46668V5.58478H10.1254L8.46305 3.92247L9.41523 2.98912L12.6783 6.2616L9.44857 9.50075Z'/%3E%3C/svg%3E");
@@ -55,7 +77,7 @@
 
 .p-icon--logout {
   @extend %icon;
-  @include vf-icon-logout(#ffffff);
+  @include vf-icon-logout(#000000);
 }
 
 // allow SearchAndFilter component increase height when there are several options selected (in Reviewers)
@@ -90,6 +112,30 @@
   top: 100%;
 }
 
-.bug-report-card {
+.report-card {
   border-color: var(--vf-color-border-low-contrast);
+}
+
+.p-tabs__list {
+  overflow-y: hidden;
+
+  .p-tabs__link {
+    border: none;
+  }
+}
+
+.p-contextual-menu__link {
+  border: 0;
+  clear: both;
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.p-panel__content {
+  overflow: auto !important;
 }

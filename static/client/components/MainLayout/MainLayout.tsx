@@ -1,11 +1,12 @@
 import React, { type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
+import classNames from "classnames";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import AppPanels from "@/components/AppPanels";
 import Navigation from "@/components/Navigation";
-import Search from "@/components/Search";
-import { VIEW_TREE } from "@/config";
+import { VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE } from "@/config";
 import { goBack } from "@/helpers/views";
 import { useViewsStore } from "@/store/views";
 
@@ -18,6 +19,8 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
   const navigate = useNavigate();
   const view = useViewsStore((state) => state.view);
 
+  const isFlushLayout = location.pathname.endsWith("/views/table");
+
   function goPrev() {
     return goBack(location, navigate);
   }
@@ -25,10 +28,10 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
   return (
     <div className="l-application" id="l-application">
       <Navigation />
-      <main className="l-main">
-        <div className="grid-row--50-50">
+      <main className={classNames("l-main", { "u-no-padding": isFlushLayout })}>
+        <div className="grid-row--50-50 u-no-padding u-no-margin">
           <div className="grid-col">
-            {location.pathname.includes("/webpage") && view !== VIEW_TREE && (
+            {location.pathname.includes("/webpage") && [VIEW_OWNED, VIEW_REVIEWED, VIEW_TABLE].includes(view) && (
               <Button hasIcon onClick={goPrev}>
                 <React.Fragment key=".0">
                   <i className="p-icon--chevron-left" /> <span>Back</span>
@@ -36,16 +39,13 @@ const MainLayout = ({ children }: IMainLayoutProps): ReactNode => {
               </Button>
             )}
           </div>
-          <div className="grid-col">
-            <Search />
-          </div>
         </div>
-        <hr />
-        <div className="grid-row">
+        <div className="grid-row u-no-padding u-no-margin">
           {children}
           <Outlet />
         </div>
       </main>
+      <AppPanels />
     </div>
   );
 };
