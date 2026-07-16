@@ -106,6 +106,10 @@ config:
       type: string
       description: "OIDC provider for authentication"
       default: "oidc_provider_url"
+    page-stats-doc:
+      type: string
+      description: "Google Sheets URL for page stats"
+      default: ""
 
 requires:
   postgresql:
