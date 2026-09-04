@@ -314,8 +314,7 @@ def has_page(node):
         return True
 
     return any(
-        child["ext"] == ".dir"
-        or not is_contact_page(Path(child["file_path"]))
+        child["ext"] == ".dir" or not is_contact_page(Path(child["file_path"]))
         for child in node["children"]
     )
 
