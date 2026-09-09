@@ -297,6 +297,28 @@ def update_tags(tags, new_tags):
     return tags
 
 
+def is_contact_page(path):
+    """Return True if the file is a contact form e.g contact-us.html"""
+    return path.stem == "contact" or path.stem.startswith("contact-")
+
+
+def has_page(node):
+    """
+    Return True if the directory node holds a valid page of its own (an index
+    page), or is a parent of a directory or page that does.
+
+    Contact forms do not qualify a directory on their own, as they are not
+    sections of the site, so a directory that only holds one is dropped.
+    """
+    if node["ext"] in (".html", ".md"):
+        return True
+
+    return any(
+        child["ext"] == ".dir" or not is_contact_page(Path(child["file_path"]))
+        for child in node["children"]
+    )
+
+
 def create_node():
     """Return a fresh copy of a node from a template"""
     return {
@@ -377,7 +399,7 @@ def scan_directory(path_name, base=None):
         # If the child is a directory, scan it
         if child.is_dir():
             child_node = scan_directory(str(child), base=base)
-            if child_node.get("title") or child_node.get("children"):
+            if has_page(child_node):
                 node["children"].append(child_node)
 
     return node

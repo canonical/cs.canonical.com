@@ -9,6 +9,9 @@ line-length = 79
 exclude = ["charm"]
 
 [tool.ruff.lint]
+# Pin the rule set explicitly, Ruff >= 0.14 widened its implicit defaults.
+select = ["E4", "E7", "E9", "F"]
+
 # Add the `line-too-long` rule to the enforced rule set. By default, Ruff omits rules that
 # overlap with the use of a formatter, like Black, but we can override this behavior by
 # explicitly adding the rule.
