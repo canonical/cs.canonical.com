@@ -11,7 +11,6 @@ import {
   Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
-import { useNavigate } from "react-router-dom";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 

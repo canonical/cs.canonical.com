@@ -26,8 +26,7 @@ class MergeConflictError(GithubError):
 
 
 RELEASES_REPO = "canonical/ubuntu.com"
-# RELEASES_FILE_PATH = "releases.yaml"
-RELEASES_FILE_PATH = "_TEST_releases.yaml"  # Temporary for testing
+RELEASES_FILE_PATH = "releases.yaml"
 RELEASES_BRANCH_NAME = "_releases_branch"
 BASE_BRANCH_NAME = "main"
 
@@ -224,8 +223,9 @@ class ReleasesGitHubClient(ReleasesGitHubAPI):
         if branch_exists:
             ref = RELEASES_BRANCH_NAME
             if not pr:
-                # TODO: Create a PR for the orphaned branch
-                # https://warthogs.atlassian.net/browse/WD-32397
+                # Orphaned branch: no PR yet. This is a read-only fetch so
+                # we don't create one here; update_releases_workflow()
+                # creates the PR automatically on the next submitted update.
                 logger.warning(
                     "Release branch %s exists but has no open PR",
                     RELEASES_BRANCH_NAME,

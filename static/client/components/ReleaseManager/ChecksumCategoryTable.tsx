@@ -28,7 +28,7 @@ const ChecksumCategoryTable = ({
 
   return (
     <li className="p-accordion__group">
-      <div className="p-accordion__heading" role="heading">
+      <div aria-level={3} className="p-accordion__heading" role="heading">
         <button
           aria-controls={panelId}
           aria-expanded={isExpanded}

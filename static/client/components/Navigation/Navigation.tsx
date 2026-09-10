@@ -238,12 +238,15 @@ const Navigation = (): ReactNode => {
                   <hr className="p-rule" />
                   <ul className="u-no-margin u-no-padding">
                     <li
-                      className={`p-side-navigation__link ${location.pathname.startsWith("/app/releases") ? "is-active" : ""}`}
+                      className={classNames("p-side-navigation__link", {
+                        "is-active": isOnReleasesPage,
+                      })}
+                      data-testid="nav-link-release-management"
                       onClick={() => navigate("/app/releases")}
                     >
                       <span className="u-has-icon">
-                        <i className="p-icon--repository is-dark" />
-                        Releases
+                        <i className="p-icon--desktop" />
+                        Release management
                       </span>
                     </li>
                   </ul>
