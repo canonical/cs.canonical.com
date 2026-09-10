@@ -11,7 +11,6 @@ import {
   Tooltip,
   useToastNotification,
 } from "@canonical/react-components";
-import type { AxiosError } from "axios";
 
 import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
@@ -81,9 +80,9 @@ const RequestTaskModal = ({ changeType, onTypeChange, onClose, webpage }: IReque
   );
 
   const onSubmitError = useCallback(
-    (error: AxiosError<IBasicApiError>) => {
-      if (error?.response?.data) {
-        notify.failure(error.response.data?.error, null, <p>{error.response.data?.description}</p>);
+    (error: IBasicApiError) => {
+      if (error?.error) {
+        notify.failure(error.error, null, <p>{error.description}</p>);
       }
     },
     [notify],

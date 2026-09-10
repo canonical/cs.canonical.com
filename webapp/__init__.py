@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 
 import flask
@@ -23,10 +24,12 @@ def create_app():
         static_folder="../static",
     )
     app.config.from_pyfile(filename="settings.py")
+    app.json.sort_keys = False
 
     # Allow CORS in development mode
     if os.getenv("FLASK_DEBUG"):
         CORS(app, origins=["*"])
+        logging.getLogger().setLevel(logging.DEBUG)
     else:
         CORS(app, origins=["login.ubuntu.com"])
 

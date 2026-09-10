@@ -1,0 +1,195 @@
+// Layout constants
+$releases-page-edge-offset: 60px;
+$checksums-table-offset: 50px;
+
+// Override the default grid max-width so the releases page uses full width
+.grid-row:has(> .l-releases-layout) {
+  max-width: 100%;
+
+  .grid-row {
+    max-width: 100%;
+  }
+}
+
+.l-releases-layout {
+  display: flex;
+  min-height: 100%;
+  margin: -20px;
+
+  &__sidebar {
+    width: 85%;
+    height: 100%;
+    flex-shrink: 0;
+    background: var(--vf-color-background-default, #fff);
+    padding: 1rem 0 0.5rem;
+    background-color: #EBEBEB;
+    color: var(--vf-color-text-default);
+
+    hr {
+      margin: 1rem 0rem 1rem 0rem;
+    }
+  }
+
+  &__sidebar-title {
+    padding: 0.25rem 1rem 0.75rem;
+    margin: 0;
+  }
+
+  &__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__nav-link {
+    display: block;
+    padding: 0.4rem 1rem;
+    color: var(--vf-color-text-default);
+    text-decoration: none;
+    font-size: 0.875rem;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      background: var(--vf-color-background-neutral-hover);
+      text-decoration: none;
+    }
+
+    &.is-active {
+      border-left-color: var(--vf-color-brand);
+      background: var(--vf-color-background-default);
+
+    }
+
+    &:visited {
+      color: var(--vf-color-text-default);
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__status-bar {
+    display: flex;
+    margin-left: -$releases-page-edge-offset;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0.5rem 0.5rem;
+    gap: 0rem;
+    position: sticky;
+    top: -20px;
+    z-index: 10;
+    background: var(--vf-color-background-default, #fff);
+    box-shadow: 0 4px 6px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  &__status-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__status-chip {
+    margin-bottom: 0.6rem;
+  }
+
+  &__status-actions {
+    display: flex;
+    align-items: center;
+    gap: 0rem;
+
+    button {
+      margin-left: -1px !important;
+    }
+  }
+}
+
+// Release form field help text (current value)
+.l-release-form {
+  &__field-help {
+    font-size: 0.8125rem;
+    color: var(--vf-color-text-muted, #666);
+    margin-top: 0.15rem;
+
+    span {
+      font-weight: 400;
+    }
+  }
+}
+
+// Update releases page
+.l-update-releases {
+  &__section {
+    margin-bottom: 2rem;
+  }
+
+  &__heading-col {
+    position: sticky;
+    top: 4.5rem;
+    align-self: flex-start;
+    z-index: 1;
+    background: var(--vf-color-background-default);
+  }
+  &__divider {
+    margin: 0;
+    margin-left: -$releases-page-edge-offset;
+    padding-left: $releases-page-edge-offset;
+  }
+}
+
+.l-update-checksums {
+  margin-left: -$checksums-table-offset;
+
+  .l-checksum-table__table {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}
+
+// Checksum accordion table
+.l-checksum-table {
+  &__table {
+    width: 100%;
+    margin-bottom: 0;
+    table-layout: fixed;
+  }
+
+  &__col--version {
+    width: 8rem;
+    white-space: nowrap;
+  }
+
+  &__col--image {
+    width: auto;
+    overflow: hidden;
+  }
+
+  &__col--action {
+    width: 6rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  &__hash {
+    font-family: "Ubuntu Mono", monospace;
+    font-size: 0.8125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Add checksum side panel
+.l-add-checksum-panel {
+  &__steps {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin: 0;
+
+    li {
+      margin-bottom: 0.5rem;
+      padding-left: 0.25rem;
+    }
+  }
+}

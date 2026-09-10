@@ -3,6 +3,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import FullSiteView from "@/components/Views/FullSiteView";
 import NewWebpageRedirector from "@/pages/NewWebpage/NewWebpageRedirector";
+import Releases from "@/pages/Releases";
+import UpdateChecksumsPage from "@/pages/Releases/UpdateChecksumsPage";
+import UpdateReleasesPage from "@/pages/Releases/UpdateReleasesPage";
 import Owned from "@/pages/views/Owned";
 import Requests from "@/pages/views/Requests";
 import Reviewed from "@/pages/views/Reviewed";
@@ -34,6 +37,13 @@ const Main = (): React.ReactNode => {
             <Route element={<FullSiteView />} path="views/table" />
             <Route element={<NewWebpageRedirector />} path="new-webpage" />
             {getDynamicRoutes()}
+          </Route>
+          <Route element={<MainLayout showSearch={false} />}>
+            <Route element={<Releases />} path="releases">
+              <Route element={<Navigate replace to="update" />} index />
+              <Route element={<UpdateReleasesPage />} path="update" />
+              <Route element={<UpdateChecksumsPage />} path="checksums" />
+            </Route>
           </Route>
         </Route>
         <Route element={<Navigate to="/app" />} path="/" />

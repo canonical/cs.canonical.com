@@ -18,6 +18,8 @@ export const ENDPOINTS = {
   getWebpageStats: "/api/get-webpage-stats",
   getJiraProjects: "/api/get-jira-projects",
   submitForContentReview: "/api/submit-for-content-review",
+  getReleases: "/api/get-releases",
+  updateReleases: "/api/update-releases",
 };
 
 export const REST_TYPES = {

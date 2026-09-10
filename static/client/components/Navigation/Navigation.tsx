@@ -1,4 +1,4 @@
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
@@ -8,7 +8,7 @@ import NavigationBanner from "./NavigationBanner";
 
 import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapseToggle";
 import NavigationSearch from "@/components/Navigation/NavigationSearch";
-import config, { VIEW_OWNED, VIEW_REQUESTS, VIEW_TABLE, VIEW_TREE } from "@/config";
+import config, { VIEW_OWNED, VIEW_REQUESTS, VIEW_REVIEWED, VIEW_TABLE, VIEW_TREE } from "@/config";
 import type { IUser } from "@/services/api/types/users";
 import type { TView } from "@/services/api/types/views";
 import { useStore } from "@/store";
@@ -46,6 +46,14 @@ const Navigation = (): ReactNode => {
   const drillBack = useCallback(() => {
     setNavState((prev) => ({ ...prev, mobileDrilledTo: "top" }));
   }, []);
+
+  const isOnReleasesPage = location.pathname.startsWith("/app/releases");
+
+  useEffect(() => {
+    if (isOnReleasesPage) {
+      collapse();
+    }
+  }, [isOnReleasesPage, collapse]);
   const [user, setUser] = useStore((state) => [state.user, state.setUser]);
   const [view, setView, setExpandedProject, activeProject, setActiveProject] = useViewsStore((state) => [
     state.view,
@@ -161,6 +169,20 @@ const Navigation = (): ReactNode => {
                       Full site view
                     </span>
                   </li>
+                  {user?.isReleaseManager && (
+                    <li
+                      className={classNames("p-side-navigation__link", {
+                        "is-active": isOnReleasesPage,
+                      })}
+                      data-testid="nav-link-release-management"
+                      onClick={() => navigate("/app/releases")}
+                    >
+                      <span className="u-has-icon">
+                        <i className="p-icon--desktop" />
+                        Release management
+                      </span>
+                    </li>
+                  )}
                   <li
                     aria-label="Open project list"
                     className={classNames("p-side-navigation__link", "l-navigation__nav-link--mobile", {
@@ -223,6 +245,30 @@ const Navigation = (): ReactNode => {
                   ))}
                 </ul>
               )}
+            </div>
+            <div className="p-panel__views">
+              <hr className="p-rule" />
+              <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
+              <ul className="u-no-margin u-no-padding">
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_OWNED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_OWNED)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--user" />
+                    Owned by me
+                  </span>
+                </li>
+                <li
+                  className={`p-side-navigation__link ${isViewActive(VIEW_REVIEWED) && "is-active"}`}
+                  onClick={() => changeView(VIEW_REVIEWED)}
+                >
+                  <span className="u-has-icon">
+                    <i className="p-icon--show" />
+                    Reviewed by me
+                  </span>
+                </li>
+              </ul>
             </div>
             <div className="p-panel__footer p-side-navigation--icons">
               {user?.name && (
