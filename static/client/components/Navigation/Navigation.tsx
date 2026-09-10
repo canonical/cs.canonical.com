@@ -169,6 +169,20 @@ const Navigation = (): ReactNode => {
                       Full site view
                     </span>
                   </li>
+                  {user?.isReleaseManager && (
+                    <li
+                      className={classNames("p-side-navigation__link", {
+                        "is-active": isOnReleasesPage,
+                      })}
+                      data-testid="nav-link-release-management"
+                      onClick={() => navigate("/app/releases")}
+                    >
+                      <span className="u-has-icon">
+                        <i className="p-icon--desktop" />
+                        Release management
+                      </span>
+                    </li>
+                  )}
                   <li
                     aria-label="Open project list"
                     className={classNames("p-side-navigation__link", "l-navigation__nav-link--mobile", {
@@ -233,25 +247,6 @@ const Navigation = (): ReactNode => {
               )}
             </div>
             <div className="p-panel__views">
-              {user?.isReleaseManager && (
-                <>
-                  <hr className="p-rule" />
-                  <ul className="u-no-margin u-no-padding">
-                    <li
-                      className={classNames("p-side-navigation__link", {
-                        "is-active": isOnReleasesPage,
-                      })}
-                      data-testid="nav-link-release-management"
-                      onClick={() => navigate("/app/releases")}
-                    >
-                      <span className="u-has-icon">
-                        <i className="p-icon--desktop" />
-                        Release management
-                      </span>
-                    </li>
-                  </ul>
-                </>
-              )}
               <hr className="p-rule" />
               <p className="p-muted-heading u-text--muted l-sidebar-section-title">Quick views</p>
               <ul className="u-no-margin u-no-padding">
