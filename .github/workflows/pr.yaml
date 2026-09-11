@@ -5,8 +5,16 @@ on:
     types: ["opened", "edited", "synchronize"]
 
 jobs:
+  copilot:
+    name: Skip semantic checks for Copilot PRs
+    if: github.event.pull_request.user.login == 'Copilot'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Skipping PR title and commit message semantic checks for Copilot-authored pull requests."
+
   main:
     name: Validate PR title
+    if: github.event.pull_request.user.login != 'Copilot'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -17,6 +25,7 @@ jobs:
 
   commitlint:
     name: Validate commit messages
+    if: github.event.pull_request.user.login != 'Copilot'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
