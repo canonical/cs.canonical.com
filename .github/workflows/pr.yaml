@@ -9,6 +9,7 @@ jobs:
     name: Skip semantic checks for Copilot PRs
     if: github.event.pull_request.user.login == 'Copilot'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - run: echo "Skipping PR title and commit message semantic checks for Copilot-authored pull requests."
 
