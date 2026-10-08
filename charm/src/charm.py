@@ -12,7 +12,7 @@ import paas_charm.flask
 
 logger = logging.getLogger(__name__)
 
-VERSION = "1.11.0"
+VERSION = "1.12.0"
 
 
 class CsCanonicalComCharm(paas_charm.flask.Charm):
