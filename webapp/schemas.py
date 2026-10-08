@@ -133,6 +133,11 @@ class NotifyBAUModel(BaseModel):
     jira_task_id: str
 
 
+class NotifyBauerModel(BaseModel):
+    jira_task_id: str
+    bauer_issue_url: str
+
+
 class UpdateReleasesRequest(BaseModel):
     releases: dict
     commit_message: str = "Update releases.yaml"
