@@ -8,7 +8,7 @@ from typing import TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from webapp.helper import (
     convert_webpage_to_dict,
@@ -16,9 +16,13 @@ from webapp.helper import (
     get_tree_struct,
 )
 from webapp.models import (
+    JiraTask,
     Project,
+    Reviewer,
     User,
     Webpage,
+    WebpageAsset,
+    WebpageProduct,
     WebpageStatus,
     db,
     get_or_create,
@@ -332,6 +336,73 @@ class SiteRepository:
                     webpage_dict["id"],
                 )
 
+    def __collect_node_names__(self, node: dict, names: set) -> set:
+        """Collect the name of every node in the scanned tree."""
+        names.add(node["name"])
+        for child in node.get("children") or []:
+            self.__collect_node_names__(child, names)
+        return names
+
+    def __delete_removed_webpages__(
+        self,
+        db: SQLAlchemy,
+        project_id: int,
+        scanned_names: set,
+    ):
+        """Delete webpages that no longer exist in the repository.
+
+        This covers pages deleted upstream directly, as well as pages marked
+        TO_DELETE whose removal request has landed. Pages with the NEW status
+        only exist in this tool until their PR is merged, so they are never
+        reconciled away.
+        """
+        # Guard against wiping a project because of a partial clone or scan
+        if len(scanned_names) <= 1:
+            return
+
+        webpages = (
+            db.session.execute(
+                select(Webpage).where(Webpage.project_id == project_id),
+            )
+            .scalars()
+            .all()
+        )
+
+        stale_ids = {
+            webpage.id
+            for webpage in webpages
+            if webpage.name not in scanned_names
+            and webpage.status != WebpageStatus.NEW
+        }
+        if not stale_ids:
+            return
+
+        # Re-attach surviving children to their closest remaining ancestor, so
+        # they don't fall out of the tree that is rebuilt from parent_id links
+        parents = {webpage.id: webpage.parent_id for webpage in webpages}
+        for webpage in webpages:
+            if webpage.id in stale_ids or webpage.parent_id not in stale_ids:
+                continue
+            ancestor = webpage.parent_id
+            while ancestor in stale_ids:
+                ancestor = parents.get(ancestor)
+            webpage.parent_id = ancestor
+        db.session.flush()
+
+        stale_id_list = list(stale_ids)
+        for model in (Reviewer, JiraTask, WebpageProduct, WebpageAsset):
+            db.session.execute(
+                delete(model).where(model.webpage_id.in_(stale_id_list)),
+            )
+        db.session.execute(
+            delete(Webpage).where(Webpage.id.in_(stale_id_list)),
+        )
+
+        self.logger.info(
+            f"Removed {len(stale_id_list)} webpages no longer present in "
+            f"{self.repository_uri}",
+        )
+
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """Create webpages for each node in the tree."""
         # Get the default project and owner for new webpages
@@ -358,6 +429,12 @@ class SiteRepository:
             project,
             owner,
             webpage_dict["id"],
+        )
+
+        self.__delete_removed_webpages__(
+            db,
+            project.id,
+            self.__collect_node_names__(tree, set()),
         )
 
         db.session.commit()
