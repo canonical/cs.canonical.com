@@ -48,7 +48,7 @@ tasks:
   test:
     desc: "Run tests"
     cmds:
-      - docker compose run --rm --no-deps --entrypoint "" web yarn test
+      - docker compose run --rm --no-deps --entrypoint "" web yarn test-python
 
   test-e2e:
     desc: "Run playwright e2e tests. This requires the web server to be running, so make sure to run `task` first."
